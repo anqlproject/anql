@@ -1,0 +1,76 @@
+.math-exp-node {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+  color: var(--text-primary);
+  background-color: transparent;
+  padding: 4px 8px 24px 8px;
+  margin: 4px 0;
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s ease;
+  min-height: 1.5em; /* Assure une hauteur minimale même si vide */
+  outline: none;
+  border: 1px solid transparent;
+  word-break: break-all;
+}
+
+/* Afficher la bordure quand on est dans le noeud */
+.math-exp-node.math-focused {
+  border: 1px solid var(--text-secondary);
+}
+
+/* Placeholder (seulement si vide) */
+.math-exp-node.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-secondary);
+  opacity: 0.3;
+  pointer-events: none;
+  position: absolute;
+  font-size: var(--text-sm);
+  font-style: italic;
+  top: 6px;
+  left: 8px;
+  z-index: var(--z-below);
+}
+
+/* Pour que le curseur puisse aller au-delà du placeholder si besoin */
+.math-exp-node:empty::before,
+.math-exp-node > br:first-child:last-child::before {
+  display: inline-block;
+}
+
+/* Affichage du résultat à côté */
+.math-exp-node[data-result]::after {
+  content: "↳ " attr(data-result);
+  color: var(--text-secondary);
+  position: absolute;
+  left: 8px;
+  bottom: 4px;
+  font-size: var(--text-sm);
+  white-space: normal;
+  word-break: break-all;
+  max-width: calc(100% - 16px);
+  text-align: left;
+  pointer-events: none;
+  user-select: none;
+  z-index: var(--z-base);
+}
+
+.math-exp-node.has-error[data-error]::after {
+  content: "↳ " attr(data-error);
+  color: var(--destructive);
+  position: absolute;
+  left: 8px;
+  bottom: 4px;
+  font-size: var(--text-xs);
+  white-space: normal;
+  word-break: break-all;
+  max-width: calc(100% - 16px);
+  text-align: left;
+  pointer-events: none;
+  user-select: none;
+  z-index: var(--z-base);
+}

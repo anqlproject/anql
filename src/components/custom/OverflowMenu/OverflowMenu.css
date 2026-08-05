@@ -1,0 +1,83 @@
+/* Styles spécifiques pour OverflowMenu en plus des styles standards du menu (via modal-content et menu-container) */
+.overflow-menu-content {
+  display: flex;
+  flex-direction: column;
+  max-height: 400px; /* Taille maximale fixe pour déclencher le défilement */
+}
+
+.overflow-menu-search {
+  padding: 8px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  flex-shrink: 0;
+}
+
+.overflow-menu-search input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  font-size: var(--text-sm);
+  outline: none;
+  background-color: var(--surface-color);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  color: var(--text-primary);
+}
+
+.overflow-menu-search input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-container);
+  background-color: var(--surface-color);
+}
+
+.overflow-menu-list {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+
+/* Personnalisation de la barre de défilement */
+.overflow-menu-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-menu-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-menu-list::-webkit-scrollbar-thumb {
+  background-color: rgba(203, 213, 225, 0.8);
+  border-radius: 10px;
+}
+
+.overflow-menu-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.8);
+}
+
+.overflow-menu-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.overflow-menu-search-item {
+  position: sticky;
+  top: -8px;
+  z-index: var(--z-dropdown);
+  background-color: var(--surface-color);
+  box-shadow: 0 -8px 0 var(--surface-color);
+  border-radius: 8px 8px 4px 4px;
+}
+
+.overflow-menu-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  outline: none;
+  background-color: var(--action-hover);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  box-sizing: border-box;
+}

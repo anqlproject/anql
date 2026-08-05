@@ -1,0 +1,17 @@
+.documentMenu {
+  position: absolute;
+  top: 2px;
+  z-index: var(--z-modal);
+  user-select: none;
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.documentMenu:hover,
+.documentMenu--open {
+  background-color: var(--action-hover);
+}

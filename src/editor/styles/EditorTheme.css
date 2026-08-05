@@ -1,0 +1,311 @@
+.anql_ltr {
+  text-align: left;
+}
+.anql_rtl {
+  text-align: right;
+}
+.anql_paragraph {
+  margin: 0;
+  position: relative;
+}
+.anql_quote {
+  margin: 0;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--text-secondary);
+  border-left-color: var(--border-color);
+  border-left-width: 4px;
+  border-left-style: solid;
+  padding-left: 16px;
+}
+.anql_h1 {
+  font-size: var(--text-3xl);
+  color: var(--text-primary);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  margin-top: 1.4rem;
+  margin-bottom: 1rem;
+}
+.anql_h2 {
+  font-size: var(--text-xl);
+  color: var(--text-primary);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-normal);
+  margin: 0;
+  margin-top: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+.anql_h3 {
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-normal);
+  margin: 0;
+  margin-top: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.anql_indent {
+  --lexical-indent-base-value: 40px;
+}
+.anql_textBold {
+  font-weight: bold;
+  color: var(--text-primary);
+}
+.anql_paragraph mark {
+  background-color: unset;
+}
+.anql_textHighlight {
+  background: rgba(255, 212, 0, 0.14);
+  border-bottom: 2px solid rgba(255, 212, 0, 0.3);
+}
+.anql_textItalic {
+  font-style: italic;
+}
+.anql_textUnderline {
+  text-decoration: underline;
+}
+
+.anql_textStrikethrough {
+  text-decoration: line-through;
+}
+
+.anql_textUnderlineStrikethrough {
+  text-decoration: underline line-through;
+}
+
+.anql_tabNode {
+  position: relative;
+  text-decoration: none;
+}
+
+.anql_tabNode.anql_textUnderline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.15em;
+  border-bottom: 0.1em solid currentColor;
+}
+
+.anql_tabNode.anql_textStrikethrough::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.69em;
+  border-top: 0.1em solid currentColor;
+}
+
+.anql_tabNode.anql_textUnderlineStrikethrough::before,
+.anql_tabNode.anql_textUnderlineStrikethrough::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.anql_tabNode.anql_textUnderlineStrikethrough::before {
+  top: 0.69em;
+  border-top: 0.1em solid currentColor;
+}
+
+.anql_tabNode.anql_textUnderlineStrikethrough::after {
+  bottom: 0.05em;
+  border-bottom: 0.1em solid currentColor;
+}
+
+.anql_textSubscript {
+  font-size: 0.8em;
+  vertical-align: sub !important;
+}
+.anql_textSuperscript {
+  font-size: 0.8em;
+  vertical-align: super;
+}
+.anql_textCode {
+  background-color: var(--surface-color);
+  color: #569cd6;
+  padding: 0.1em 0.3em;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  border-radius: 3px;
+}
+.anql_textLowercase {
+  text-transform: lowercase;
+}
+.anql_textUppercase {
+  text-transform: uppercase;
+}
+.anql_textCapitalize {
+  text-transform: capitalize;
+}
+.anql_hashtag {
+  background-color: var(--primary-container);
+  border-bottom: 1px solid var(--primary-color);
+}
+.anql_link {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+.anql_link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.anql_blockCursor {
+  display: block;
+  pointer-events: none;
+  position: absolute;
+}
+.anql_blockCursor:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -2px;
+  width: 20px;
+  border-top: 1px solid var(--text-primary);
+  animation: CursorBlink 1.1s steps(2, start) infinite;
+}
+@keyframes CursorBlink {
+  to {
+    visibility: hidden;
+  }
+}
+.anql_code {
+  background-color: var(--surface-color);
+  font-family: var(--font-mono);
+  display: block;
+  padding: 45px 8px 8px 52px;
+  line-height: var(--leading-relaxed);
+  font-size: var(--text-sm);
+  margin: 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  position: relative;
+  tab-size: 2;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+.anql_code:before {
+  content: attr(data-gutter);
+  position: absolute;
+  background-color: var(--surface-color);
+  left: 0;
+  top: 0;
+  border-right: 1px solid var(--border-color);
+  padding: 45px 8px 8px 8px;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  text-align: right;
+  min-width: 25px;
+}
+.anql_characterLimit {
+  display: inline;
+  background-color: #ffbbbb !important;
+}
+
+
+.anql_tokenComment {
+  color: slategray;
+}
+.anql_tokenDeleted {
+  border-image: linear-gradient(to right, #ffcecb 50%, #ffebe9 50%) fill 0/0/0
+    100vw;
+}
+.anql_tokenInserted {
+  border-image: linear-gradient(to right, #aceebb 50%, #dafbe1 50%) fill 0/0/0
+    100vw;
+}
+.anql_tokenUnchanged {
+  border-image: linear-gradient(to right, #ddd 50%, #f0f2f5 50%) fill 0/0/0
+    100vw;
+}
+.anql_tokenPunctuation {
+  color: #999;
+}
+.anql_tokenProperty {
+  color: #905;
+}
+.anql_tokenSelector {
+  color: #690;
+}
+.anql_tokenOperator {
+  color: #9a6e3a;
+}
+.anql_tokenAttr {
+  color: #07a;
+}
+.anql_tokenVariable {
+  color: #e90;
+}
+.anql_tokenFunction {
+  color: #dd4a68;
+}
+.anql_mark {
+  background: rgba(255, 212, 0, 0.14);
+  border-bottom: 2px solid rgba(255, 212, 0, 0.3);
+  padding-bottom: 2px;
+}
+.anql_markOverlap {
+  background: rgba(255, 212, 0, 0.3);
+  border-bottom: 2px solid rgba(255, 212, 0, 0.7);
+}
+.anql_mark.selected {
+  background: rgba(255, 212, 0, 0.5);
+  border-bottom: 2px solid rgba(255, 212, 0, 1);
+}
+.anql_markOverlap.selected {
+  background: rgba(255, 212, 0, 0.7);
+  border-bottom: 2px solid rgba(255, 212, 0, 0.7);
+}
+.anql_embedBlock {
+  user-select: none;
+}
+
+/* NOTE: when we select entire embed  (block)*/
+.anql_embedBlockFocus:not(:focus-within) {
+  outline: 2px solid var(--primary-color);
+}
+
+.anql_layoutContainer {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+}
+.anql_layoutItem {
+  border: 1px dashed var(--border-color);
+  padding: 8px 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+.anql_autocomplete {
+  color: var(--text-disabled);
+}
+.anql_hr {
+  padding: 2px 2px;
+  border: none;
+  margin: 1em 0;
+  cursor: pointer;
+}
+.anql_hr:after {
+  content: '';
+  display: block;
+  height: 2px;
+  background-color: var(--border-color);
+  line-height: 2px;
+}
+.anql_hr.anql_hrSelected {
+  outline: 2px solid var(--primary-color);
+  user-select: none;
+}
+
+.anql_specialText {
+  background-color: yellow;
+  font-weight: bold;
+}

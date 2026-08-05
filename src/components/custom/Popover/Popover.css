@@ -1,0 +1,5 @@
+.custom-popover-container {
+  z-index: var(--z-popover);
+  outline: none; /* Prevent focus outline when dismiss adds focus management */
+  background: var(--surface-color);
+}

@@ -1,0 +1,356 @@
+
+.sidebar {
+  background-color: var(--surface-color);
+  color: var(--text-secondary);
+  z-index: var(--z-content);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-top-right-radius: 4px;
+}
+
+.sidebar.no-transition {
+  transition: none !important;
+}
+
+.sidebar [data-slot="sidebar-content"] {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.sidebar [data-slot="sidebar-content"]::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar [data-slot="sidebar-content"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar [data-slot="sidebar-content"]::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+
+.sidebar [data-slot="sidebar-footer"] {
+  border-top: 1px solid var(--border-color);
+  padding: 8px 8px 8px 8px;
+}
+
+.sidebar [data-slot="sidebar-header"] {
+  padding: 8px 8px 4px 8px;
+}
+
+/* ── Menu buttons ──────────────────────────── */
+
+.sidebar [data-slot="sidebar-menu-button"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm) !important;
+  font-weight: var(--font-medium) !important;
+  letter-spacing: var(--tracking-tight) !important;
+  line-height: var(--leading-snug);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  margin-bottom: 2px;
+}
+
+.sidebar [data-slot="sidebar-menu-button"]:hover {
+  background-color: var(--action-hover);
+}
+
+.sidebar button[data-slot="sidebar-menu-button"].active span,
+.sidebar button[data-slot="sidebar-menu-button"][data-active="true"] span {
+  font-weight: var(--font-semibold) !important;
+}
+
+.sidebar button[data-slot="sidebar-menu-button"].active svg,
+.sidebar button[data-slot="sidebar-menu-button"][data-active="true"] svg {
+  opacity: 1 !important;
+}
+
+.sidebar [data-slot="sidebar-menu-button"] svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.sidebar [data-slot="sidebar-menu-button"]:hover svg {
+  opacity: 0.9;
+}
+
+/* ── Search count badge ───────────────────── */
+
+.search-count-badge {
+  margin-left: 6px;
+  background-color: rgba(34, 197, 94, 0.2);
+  color: rgb(34, 197, 94);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  padding: 2px 6px;
+  border-radius: 9999px;
+}
+
+/* ── Separator ─────────────────────────────── */
+
+.sidebar [data-slot="sidebar-separator"] {
+  border-color: var(--border-color);
+  margin: 6px 0;
+  opacity: 0.6;
+}
+
+/* ── Resize handle ─────────────────────────── */
+
+.sidebar-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: col-resize;
+  z-index: var(--z-dropdown);
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: var(--primary-color);
+  opacity: 0;
+}
+
+.sidebar-resize-handle:hover {
+  background-color: var(--primary-color);
+  opacity: 0.4;
+}
+
+/* ── Sidebar trigger button ────────────────── */
+
+.sidebar-trigger {
+  position: absolute;
+  top: 2px;
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-trigger:hover {
+  background-color: var(--action-hover);
+  border-color: var(--primary-color);
+}
+
+/* ============================================
+   LEFT PANEL CONTENT (Recent documents area)
+   ============================================ */
+
+.left-panel-content {
+  padding: 0 4px;
+  margin-top: 0;
+  background-color: transparent;
+}
+
+.left-panel-content input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  font-weight: var(--font-medium);
+  box-sizing: border-box;
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.left-panel-content input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-container);
+}
+
+/* ============================================
+   HISTORY / RECENT DOCUMENTS
+   ============================================ */
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0 40px 0;
+  background-color: transparent;
+}
+
+/* Section label (e.g. "Recents") */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 12px 12px 12px;
+  margin: 8px 8px 8px 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.history-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Clear all button */
+.clear-history-btn {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.clear-history-btn:hover {
+  opacity: 1;
+  background-color: var(--action-hover);
+  color: #ef4444;
+}
+
+/* Item list */
+.history-items {
+  list-style: none;
+  padding: 0 8px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  opacity: 0.9;
+}
+
+.history-item:hover {
+  background-color: var(--action-hover);
+  opacity: 1;
+}
+
+.history-item.active {
+  background-color: var(--action-active);
+  opacity: 1;
+}
+
+.history-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.history-item.active .history-item-name {
+  font-weight: var(--font-semibold);
+}
+
+/* Remove (×) button — visible on hover with better transition */
+.history-item-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.12s ease, background-color 0.12s ease;
+}
+
+.history-item:hover .history-item-close {
+  opacity: 0.7;
+}
+
+.history-item-close:hover {
+  opacity: 1;
+  background-color: var(--action-hover);
+  color: var(--destructive);
+}
+
+.history-empty {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+/* ============================================
+   LEFT SIDEBAR TRIGGER (collapsed state)
+   ============================================ */
+
+.left-sidebar-wrapper {
+  position: absolute;
+  height: auto;
+  left: 0;
+  z-index: var(--z-dropdown);
+}
+
+.left-sidebar-trigger {
+  left: 0;
+  background-color: var(--primary-color);
+  opacity: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.left-sidebar-trigger.visible {
+  opacity: 0.4;
+}
+
+.left-sidebar-trigger-open {
+  position: inherit;
+  background-color: var(--primary-color);
+  opacity: 0.4;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: var(--z-content);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.left-sidebar-trigger-open:hover {
+  opacity: 0.4;
+}

@@ -1,0 +1,274 @@
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes slideInTop {
+  from { 
+    opacity: 0;
+    transform: translate(-50%, -20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes slideInBottom {
+  from { 
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.overlay-dialog {
+  animation: fadeIn 0.15s ease-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-overlay);
+}
+
+.modal-overlay-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content-dialog {
+  background: var(--surface-color);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1.5rem;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Pour les très petits dialogs */
+.modal-sm {
+  width: 80%;
+  max-width: 400px;
+}
+
+.modal-md {
+  width: 85%;
+  max-width: 800px;
+}
+
+.modal-lg {
+  width: 90%;
+  max-width: 1000px;
+}
+
+.modal-xl {
+  width: 95%;
+  max-width: 1200px;
+}
+
+/* Position variants */
+.modal-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: slideIn 0.2s ease-out;
+}
+
+.modal-top {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  animation: slideInTop 0.2s ease-out;
+}
+
+.modal-bottom {
+  position: fixed;
+  bottom: 10%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  animation: slideInBottom 0.2s ease-out;
+}
+
+/* Header responsive */
+.dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.dialog-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dialog-close:hover {
+  background-color: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.dialog-close:active {
+  transform: scale(0.95);
+}
+
+/* Description responsive */
+.dialog-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Content responsive */
+.dialog-content {
+  margin-bottom: 1.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  width: 100%;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.dialog-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.dialog-button.cancel {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.dialog-button.cancel:hover {
+  background-color: var(--action-hover);
+}
+
+.dialog-button.primary {
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+}
+
+.dialog-button.primary:hover {
+  opacity: 0.9;
+}
+
+.dialog-button.danger {
+  color: var(--destructive);
+  border: 1px solid var(--destructive);
+}
+
+.dialog-button.danger:hover {
+  background-color: var(--destructive-container);
+}
+
+.dialog-button:active {
+  transform: scale(0.98);
+}
+
+.dialog-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .modal-sm,
+  .modal-md,
+  .modal-lg,
+  .modal-xl {
+    width: 90%;
+    max-width: none;
+    margin: 0 10px;
+  }
+  
+  .dialog-header {
+    padding: 16px 20px 12px;
+  }
+  
+  .dialog-content {
+    padding: 0 20px 20px;
+  }
+  
+  .dialog-footer {
+    padding: 12px 20px 20px;
+    flex-direction: column;
+  }
+  
+  .dialog-button {
+    width: 100%;
+  }
+}

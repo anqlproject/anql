@@ -1,0 +1,251 @@
+/* ============================================
+   HOME PAGE
+   ============================================ */
+
+@keyframes hp-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.home-container {
+  background-color: var(--bg-color);
+  height: 100%;
+  width: 100%;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 40px 32px 0;
+  animation: hp-fade-in 0.25s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* ── Header ─────────────────────────────────── */
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.home-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.home-headerActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Selection button */
+.home-selectionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  padding: 0 !important;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.home-selectionButton:hover {
+  background-color: var(--action-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+.home-selectionButton.active {
+  background-color: var(--action-hover) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+}
+
+.home-selectionIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Delete button */
+.home-deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px !important;
+  height: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.12s ease;
+}
+
+.home-deleteButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.home-deleteIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* View toggle + sort buttons */
+.home-viewButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  padding: 0 !important;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.home-viewButton:hover {
+  background-color: var(--action-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+.home-viewIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Documents list ──────────────────────────── */
+.home-documents-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 2rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.home-documents-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.home-documents-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.home-documents-container::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+
+/* Grid mode */
+.home-documents-container.grid-view {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  align-content: start;
+}
+
+@media (min-width: 1024px) {
+  .home-documents-container.grid-view {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* List mode */
+.home-documents-container.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Selection mode */
+.home-documents-container.selection-mode {
+  user-select: none;
+}
+
+/* ── Empty state ─────────────────────────────── */
+.home-emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  gap: 12px;
+  animation: hp-fade-in 0.3s ease-out forwards;
+  position: relative;
+}
+
+.home-emptyStateContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: absolute;
+  bottom: 62.5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.home-emptyStateIcon {
+  width: 36px;
+  height: 36px;
+  color: var(--text-secondary);
+  opacity: 0.25;
+}
+
+.home-emptyStateTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.home-emptyStateDescription {
+  font-size: 13px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin: 0;
+}
+
+.home-createDocumentButton {
+  margin-top: 8px;
+  padding: 10px 20px !important;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px !important;
+  background: var(--gradient-primary) !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.15s ease;
+}
+
+.home-createDocumentButton:hover {
+  background: var(--gradient-primary-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Legacy list-item classes — kept for compat */
+.home-document-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.home-document-list-item:hover {
+  background-color: var(--action-hover);
+}

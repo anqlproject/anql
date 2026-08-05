@@ -1,0 +1,66 @@
+.bg-task-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-toast);
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  background: var(--color-surface, #1e1e2e);
+  border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  overflow: hidden;
+
+  /* Apparition douce */
+  animation: bg-task-slidein 0.2s ease-out;
+}
+
+@keyframes bg-task-slidein {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Barre de progression indéfinie (shimmer) */
+.bg-task-bar__progress {
+  flex-shrink: 0;
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent, #7c6afb) 0%,
+    var(--color-accent-light, #a78bfa) 50%,
+    var(--color-accent, #7c6afb) 100%
+  );
+  background-size: 200% 100%;
+  animation: bg-task-shimmer 1.4s linear infinite;
+}
+
+@keyframes bg-task-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Label */
+.bg-task-bar__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.5));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.02em;
+}
+
+.bg-task-bar__count {
+  color: var(--color-accent, #7c6afb);
+  font-weight: 600;
+}

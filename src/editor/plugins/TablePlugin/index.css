@@ -1,0 +1,43 @@
+.table-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.table-wrapper table {
+  border-spacing: 0;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  margin: 0;
+  padding: 0.5rem;
+}
+
+/* Redimensionnement */
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 5px;
+  background: rgba(0, 0, 0, 0.1);
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.table-wrapper th:hover .resizer {
+  opacity: 1;
+}
+
+.resizer.isResizing {
+  background: var(--primary-color);
+  opacity: 1;
+}
+
+/* Pour le Drag and Drop */
+.table-wrapper th {
+  user-select: none;
+}

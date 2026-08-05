@@ -1,0 +1,82 @@
+.list-item {
+  position: relative;
+  /* this interfer on selection margin: 0 0 8px 0;*/
+  padding: 0;
+  padding-left: 28px;
+  min-height: 24px;
+  line-height: 24px;
+  list-style-type: none;
+}
+
+/* Indentation levels for lists */
+.list-item[data-indent="1"] {
+  padding-left: 48px;
+}
+
+.list-item[data-indent="2"] {
+  padding-left: 68px;
+}
+
+.list-item[data-indent="3"] {
+  padding-left: 88px;
+}
+
+.list-item[data-indent="4"] {
+  padding-left: 108px;
+}
+
+.list-item[data-indent="5"] {
+  padding-left: 128px;
+}
+
+.list-number::before {
+  content: attr(data-list-number) ". ";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  text-align: right;
+  color: inherit;
+}
+
+.list-bullet::before {
+  content: '•';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  font-size: 1.2em;
+  color: inherit;
+}
+
+.list-check::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: transparent;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
+}
+
+.list-check:hover::before {
+  border-color: var(--text-secondary);
+}
+
+.list-check.list-checked::before {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: 12px 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.list-check.list-checked {
+  text-decoration: line-through;
+  opacity: 0.6;
+}

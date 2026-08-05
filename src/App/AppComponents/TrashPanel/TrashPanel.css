@@ -1,0 +1,329 @@
+/* ============================================
+   TRASH PANEL — dark modal, list-style
+   ============================================ */
+
+/* Overlay wrapper */
+.trash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  animation: trash-fade-in 0.15s ease;
+}
+
+@keyframes trash-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Backdrop */
+.trash-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* Modal panel */
+.trash-overlay-content {
+  position: relative;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 32px 64px -16px rgba(0, 0, 0, 0.5);
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+  animation: trash-slide-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes trash-slide-in {
+  from { transform: translateY(8px) scale(0.98); opacity: 0; }
+  to   { transform: translateY(0) scale(1);      opacity: 1; }
+}
+
+/* ── Header ──────────────────────────────────── */
+.trash-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.close-button:hover {
+  background-color: var(--action-hover);
+  color: var(--text-primary);
+}
+
+/* ── Trash items list ────────────────────────── */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 0;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.grid::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+
+/* Each trash card = a horizontal list row */
+.card.trashCard {
+  border: none !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  transition: background-color 0.12s ease;
+  cursor: default;
+}
+
+.card.trashCard:last-child {
+  border-bottom: none !important;
+}
+
+.card.trashCard:hover {
+  background-color: var(--action-hover) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Card header (left — icon + title + dates) */
+.cardHeader {
+  padding: 12px 0 !important;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardIcon {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.trashIcon {
+  color: #ef4444 !important;
+  opacity: 0.7;
+}
+
+.cardDescription {
+  margin-top: 3px !important;
+}
+
+.trashInfo {
+  display: flex;
+  gap: 12px;
+}
+
+.fileDate,
+.originalDate {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+/* Card actions (right — Restore / Delete buttons) */
+.cardContent {
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.cardActions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Icon-only action buttons */
+.trash-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  opacity: 0;
+}
+
+/* Show on row hover */
+.card.trashCard:hover .trash-action-btn {
+  opacity: 1;
+}
+
+.trash-action-btn:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed;
+}
+
+/* Restore — green on hover */
+.trash-restore-btn:hover:not(:disabled) {
+  background-color: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+/* Delete — red on hover */
+.trash-delete-btn:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+/* Empty trash — labeled button in header */
+.trash-empty-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.trash-empty-all-btn:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.trash-empty-all-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Empty state ─────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  padding: 3rem 2rem;
+  gap: 12px;
+}
+
+.emptyStateContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.emptyStateIcon {
+  width: 40px;
+  height: 40px;
+  color: var(--text-secondary);
+  opacity: 0.3;
+}
+
+.emptyStateTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.emptyStateDescription {
+  font-size: 13px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* ── Legacy / unused kept for compat ──────────── */
+.trash-container {
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+  width: 100%;
+  background-color: var(--bg-color);
+}
+
+.timestamp {
+  font-size: 12px;
+  color: var(--text-secondary);
+}

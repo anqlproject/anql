@@ -1,0 +1,51 @@
+.draggable-block-menu {
+  border-radius: 4px;
+  padding: 2px 1px;
+  cursor: grab;
+  opacity: 0;
+  position: absolute;
+  left: auto;
+  top: 0;
+  will-change: transform, opacity;
+  display: flex;
+  gap: 2px;
+  transition:
+    transform 140ms ease-in-out,
+    opacity 160ms ease-in-out;
+}
+
+.draggable-block-menu .icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.3;
+  cursor: grabbing;
+}
+
+.draggable-block-menu .drag-handle {
+  width: 18px;
+  height: 18px;
+  opacity: 0.3;
+  cursor: grabbing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.draggable-block-menu .drag-handle:hover {
+  opacity: 0.8;
+}
+
+.draggable-block-target-line {
+  pointer-events: none;
+  background: var(--primary-color);
+  height: 4px;
+  position: absolute;
+  left: auto;
+  top: 0;
+  opacity: 0;
+  will-change: transform;
+}

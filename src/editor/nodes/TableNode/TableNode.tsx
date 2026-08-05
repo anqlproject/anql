@@ -1,0 +1,278 @@
+import { DecoratorBlockNode, SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode';
+import type { EditorConfig } from 'lexical';
+import { DOMConversionMap, DOMConversionOutput, DOMExportOutput, ElementFormatType, LexicalEditor, LexicalNode, NodeKey, Spread } from 'lexical';
+import React from 'react';
+
+import { TableComponent } from './TableComponent';
+import { searchInTableData, TableSearchMatch } from './useTableSearch';
+
+function escapeHTML(str: string) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag as keyof typeof escapeMap] || tag)
+  );
+}
+
+const escapeMap = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  "'": '&#39;',
+  '"': '&quot;'
+};
+
+export interface TableColumn {
+  header: string;
+  accessorKey: string;
+  meta?: { type: string };
+  id?: string;
+  size?: number;
+}
+
+export interface TableRowData {
+  [key: string]: string | number | boolean | null | undefined;
+  _rowId?: string;
+}
+
+export type SerializedTableNode = Spread<
+  {
+    data: TableRowData[];
+    columns: TableColumn[];
+  },
+  SerializedDecoratorBlockNode
+>;
+
+function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
+  const table = domNode as HTMLTableElement;
+  const columns: TableColumn[] = [];
+  const data: TableRowData[] = [];
+
+  // Parse Headers
+  const thead = table.tHead;
+  const headerCells = thead ? Array.from(thead.rows[0]?.cells || []) : [];
+  const firstRow = table.rows[0];
+
+  if (headerCells.length === 0 && firstRow) {
+    const cells = Array.from(firstRow.cells);
+    cells.forEach((cell, i) => {
+      columns.push({
+        header: cell.textContent || `Col ${i + 1}`,
+        accessorKey: `col_${i}`,
+        meta: { type: 'text' }
+      });
+    });
+  } else {
+    headerCells.forEach((cell, i) => {
+      columns.push({
+        header: cell.textContent || `Col ${i + 1}`,
+        accessorKey: `col_${i}`,
+        meta: { type: 'text' }
+      });
+    });
+  }
+
+  // Parse Body Rows
+  const rows = Array.from(table.rows);
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.parentElement?.tagName === 'THEAD') continue;
+    // Skip the first row if we used it as header and there is no thead
+    if (!thead && i === 0 && rows.length > 1) continue;
+
+    const cells = Array.from(row.cells);
+    const rowData: TableRowData = {};
+
+    columns.forEach((col, colIndex) => {
+      const cell = cells[colIndex];
+      rowData[col.accessorKey] = cell ? cell.textContent : '';
+    });
+
+    data.push(rowData);
+  }
+
+  // Fallback if no columns
+  if (columns.length === 0) {
+    let maxCols = 0;
+    rows.forEach(r => maxCols = Math.max(maxCols, r.cells.length));
+    for (let i = 0; i < maxCols; i++) {
+      columns.push({
+        header: `Col ${i + 1}`,
+        accessorKey: `col_${i}`,
+        meta: { type: 'text' }
+      });
+    }
+  }
+
+  const tableNode = $createTableNode(data, columns);
+  return {
+    node: tableNode,
+    after: () => []
+  };
+}
+
+export class TableNode extends DecoratorBlockNode {
+  __data: TableRowData[];
+  __columns: TableColumn[];
+
+  static getType(): string {
+    return 'table';
+  }
+
+  static clone(node: TableNode): TableNode {
+    return new TableNode(node.__data, node.__columns, node.__format, node.__key);
+  }
+
+  afterCloneFrom(prevNode: this): void {
+    super.afterCloneFrom(prevNode);
+    this.__data = prevNode.__data;
+    this.__columns = prevNode.__columns;
+  }
+
+  constructor(data: TableRowData[], columns: TableColumn[], format?: ElementFormatType, key?: NodeKey) {
+    super(format, key);
+    this.__data = data || [];
+    this.__columns = columns || [];
+  }
+
+  exportJSON(): SerializedTableNode {
+    return {
+      ...super.exportJSON(),
+      data: this.__data,
+      columns: this.__columns,
+    };
+  }
+
+  static importJSON(serializedNode: SerializedTableNode): TableNode {
+    return $createTableNode(serializedNode.data, serializedNode.columns).updateFromJSON(
+      serializedNode,
+    );
+  }
+
+  updateData(newData: TableRowData[]): void {
+    const writable = this.getWritable();
+    writable.__data = newData.map(row => row._rowId ? row : { ...row, _rowId: `row-${crypto.randomUUID()}` });
+  }
+
+  updateColumns(newColumns: TableColumn[]): void {
+    const writable = this.getWritable();
+    writable.__columns = newColumns;
+  }
+
+  getSearchMatches(query: string): TableSearchMatch[] {
+    return searchInTableData(this.__data, this.__columns, query);
+  }
+
+  getTextContent(): string {
+    // Return all text content from the table (headers + cells)
+    const texts: string[] = [];
+
+    // Add headers
+    this.__columns.forEach((col) => {
+      texts.push(col.header || '');
+    });
+
+    // Add cell data
+    this.__data.forEach((row) => {
+      this.__columns.forEach((col) => {
+        const columnId = col.accessorKey || col.id;
+        if (columnId) {
+          const value = row[columnId];
+          if (value !== null && value !== undefined) {
+            texts.push(String(value));
+          }
+        }
+      });
+    });
+
+    return texts.join(' ');
+  }
+
+  exportDOM(): DOMExportOutput {
+    const tableHtml = `
+      <table class="table" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.875rem;">
+        <colgroup>
+          ${this.__columns
+        .map(
+          (col) =>
+            `<col style="width: ${col.size || 150}px;" />`,
+        )
+        .join("")}
+        </colgroup>
+        <thead class="table-thead">
+          <tr>
+            ${this.__columns
+        .map(
+          (col) =>
+            `<th style="border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; background-color: var(--surface-color); color: var(--text-secondary); font-weight: 500; height: 32px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHTML(col.header || "")}">${escapeHTML(col.header || "")}</th>`,
+        )
+        .join("")}
+          </tr>
+        </thead>
+        <tbody class="table-tbody">
+          ${this.__data
+        .map((rowData) => {
+          return `<tr>${this.__columns
+            .map((col) => {
+              const cellContent =
+                col.accessorKey && rowData[col.accessorKey]
+                  ? String(rowData[col.accessorKey])
+                  : "";
+              const cellStyle = "border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; color: var(--text-primary); height: 36px; white-space: pre-wrap; overflow-wrap: break-word;";
+
+              return `<td style="${cellStyle}">${escapeHTML(cellContent)}</td>`;
+            })
+            .join("")}</tr>`;
+        })
+        .join("")}
+        </tbody>
+      </table>
+    `;
+    const element = document.createElement('div');
+    element.innerHTML = tableHtml;
+    return { element: element.firstElementChild as HTMLElement };
+  }
+
+  static importDOM(): DOMConversionMap | null {
+    return {
+      table: () => {
+        // Only convert if it has our custom attribute, or if you want it to catch all tables you can remove the check.
+        // We'll catch all tables to allow pasting from Excel/Word as Tables!
+        return {
+          conversion: convertTableElement,
+          priority: 2, // High priority to override standard table plugin
+        };
+      },
+    };
+  }
+
+  decorate(_editor: LexicalEditor, config: EditorConfig): React.JSX.Element {
+    const embedBlockTheme = config.theme.embedBlock || {};
+    const className = {
+      base: embedBlockTheme.base || '',
+      focus: embedBlockTheme.focus || '',
+    };
+    return (
+      <TableComponent
+        nodeKey={this.getKey()}
+        data={this.__data}
+        columns={this.__columns}
+        format={this.__format}
+        className={className}
+      />
+    );
+  }
+}
+
+export function $createTableNode(data: TableRowData[], columns: TableColumn[]): TableNode {
+  const dataWithIds = data.map(row => row._rowId ? row : { ...row, _rowId: `row-${crypto.randomUUID()}` });
+  return new TableNode(dataWithIds, columns);
+}
+
+export function $isTableNode(node: LexicalNode | null | undefined): node is TableNode {
+  return node instanceof TableNode;
+}

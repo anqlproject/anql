@@ -1,0 +1,36 @@
+[package]
+name = "ANQL"
+version = "0.1.0"
+description = "ANQL App"
+authors = ["An Solo"]
+edition = "2024"
+
+[build-dependencies]
+tauri-build = { version = "2.6.2", features = [] }
+
+[dependencies]
+tauri = { version = "2.11.2", features = ["macos-private-api"] }
+
+tauri-plugin-shell = "2.3.5"
+tauri-plugin-fs = "2.5.1"
+tauri-plugin-os = "2.0.0"
+
+rfd = "0.15.4"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1"
+sqlx = { version = "0.8.6", features = [ "sqlite", "runtime-tokio", "migrate" ] }
+tokio = { version = "1.38.0", features = ["sync", "rt-multi-thread", "macros"] }
+anyhow = "1.0"
+zip = "0.6"
+uuid = { version = "1.8", features = ["v4"] }
+sha2 = "0.10"
+tauri-plugin-dialog = "2"
+tauri-plugin-clipboard-manager = "2.3.2"
+tauri-plugin-clipboard-x = "2.0.2"
+base64 = "0.22"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+debug = false

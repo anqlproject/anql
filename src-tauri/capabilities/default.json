@@ -1,0 +1,46 @@
+{
+  "identifier": "default",
+  "description": "Permissions par défaut pour l'application",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text",
+    "clipboard-manager:allow-write-html",
+    "clipboard-x:default",
+    "shell:allow-open",
+    "core:default",
+    "shell:default",
+    "fs:default",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-start-dragging",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-destroy",
+    "dialog:default",
+    "fs:allow-write-text-file",
+    "fs:allow-read-text-file",
+    "fs:allow-write-file",
+    "fs:allow-read-file",
+    "fs:allow-mkdir",
+    "fs:allow-read-dir",
+    "os:allow-platform",
+    "os:allow-version",
+    "os:allow-arch",
+    "os:allow-family",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "$DOCUMENT/**"
+        },
+        {
+          "path": "$APPDATA/**"
+        },
+        {
+          "path": "**"
+        }
+      ]
+    }
+  ]
+}

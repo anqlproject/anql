@@ -1,0 +1,215 @@
+/* ── Panel principal ─────────────────────────────────────────── */
+.pdf-panel {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60vw;
+  height: 100vh;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.pdf-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--panel-color);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.pdf-panel-title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.pdf-panel-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s, background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.pdf-panel-close-btn:hover {
+  opacity: 1;
+  background-color: var(--action-hover);
+}
+
+/* ── Barre de recherche / toolbar ────────────────────────────── */
+.pdf-viewer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background-color: var(--panel-color);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.pdf-viewer-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 8px;
+  flex: 1;
+  min-width: 120px;
+  max-width: 280px;
+}
+
+.pdf-viewer-search-icon {
+  color: var(--text-disabled);
+  flex-shrink: 0;
+}
+
+.pdf-viewer-search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: var(--text-sm);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.pdf-viewer-search-input::placeholder {
+  color: var(--text-disabled);
+}
+
+/* ── Contrôles droite (nav + zoom) ───────────────────────────── */
+.pdf-viewer-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pdf-viewer-match-count {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.pdf-viewer-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.pdf-viewer-nav-btn:hover:not(:disabled) {
+  background-color: var(--action-hover);
+}
+
+.pdf-viewer-nav-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.pdf-viewer-divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border-color);
+  margin: 0 4px;
+}
+
+.pdf-viewer-zoom-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pdf-viewer-zoom-btn {
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  transition: background-color 0.15s;
+}
+
+.pdf-viewer-zoom-btn:hover {
+  background-color: var(--action-hover);
+}
+
+.pdf-viewer-zoom-label {
+  font-size: var(--text-xs);
+  min-width: 36px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* ── Zone de rendu du PDF ────────────────────────────────────── */
+.pdf-viewer-canvas {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #374151;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+}
+
+.pdf-viewer-page-wrapper {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  background-color: white;
+}
+
+/* ── États de chargement / erreur ────────────────────────────── */
+.pdf-viewer-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: var(--text-sm);
+}
+
+.pdf-viewer-error {
+  padding: 20px;
+  text-align: center;
+  color: var(--destructive);
+  font-size: var(--text-sm);
+}
+
+/* ── Overlay backdrop (click hors panel pour fermer) ─────────── */
+.pdf-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: transparent;
+}

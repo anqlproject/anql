@@ -1,0 +1,14 @@
+.titlebar {
+  background: transparent;
+  user-select: none;
+  position: static;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: var(--z-base);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

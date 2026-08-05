@@ -1,0 +1,18 @@
+.left-container {
+  background-color: var(--surface-color);
+  overflow-y: auto;
+}
+
+.main-container {
+  width: 100vw;
+  background-color: var(--bg-color);
+  margin-left: auto;
+  margin-right: auto;
+  white-space: nowrap;
+  overflow-y: hidden;
+}
+
+.main-container.floating-sidebar {
+  position: fixed;
+}
+

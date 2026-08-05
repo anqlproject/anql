@@ -1,0 +1,108 @@
+.component-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-toast);
+}
+
+.component-dialog-container {
+  background-color: var(--panel-color);
+  color: var(--text-primary);
+  padding: 24px;
+  border-radius: 8px;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.component-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.component-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.component-dialog-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, var(--text-primary));
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.component-dialog-close:hover {
+  opacity: 1;
+  background-color: var(--action-hover);
+}
+
+.component-dialog-content {
+  margin-bottom: 20px;
+}
+
+.component-dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.component-dialog-button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.component-dialog-button.cancel {
+  border: 1px solid var(--border-color);
+  background-color: var(--panel-color);
+  color: var(--text-primary);
+}
+
+.component-dialog-button.cancel:hover {
+  background-color: var(--action-hover);
+}
+
+.component-dialog-button.cancel.urgent {
+  color: var(--destructive);
+  border: 1px solid var(--destructive);
+}
+
+.component-dialog-button.cancel.urgent:hover {
+  background-color: var(--destructive-container);
+}
+
+.component-dialog-button.confirm {
+  border: 1px solid var(--border-color);
+  background-color: var(--primary-color);
+  color: var(--primary-white);
+}
+
+.component-dialog-button.confirm:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.component-dialog-button.confirm:disabled {
+  background-color: var(--text-disabled);
+  color: var(--surface-color);
+  cursor: not-allowed;
+}

@@ -1,0 +1,24 @@
+.table-highlight-container {
+  pointer-events: none;
+}
+
+.table-highlight-border {
+  pointer-events: none;
+  border: 1px solid #3b82f6;
+  transition:
+    top 0.12s ease-out,
+    left 0.12s ease-out,
+    width 0.12s ease-out,
+    height 0.12s ease-out,
+    opacity 0.15s ease-out;
+}
+
+.table-highlight-border--row {
+  border-radius: 4px;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.table-highlight-border--column {
+  border-radius: 0;
+  background-color: rgba(59, 130, 246, 0.05);
+}

@@ -1,0 +1,33 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ *
+ */
+
+.dateTimePill {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0px 4px 0px 4px;
+}
+.dateTimePill.selected {
+  outline: 2px solid var(--primary-color);
+}
+.dateTimePill:hover {
+  background: var(--action-hover);
+}
+.dateTimePicker {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 0px 6px 0px 10px;
+}
+/* https://daypicker.dev/docs/styling#css-variables */
+.rdp-root {
+  --rdp-accent-color: var(--primary-color);
+  --rdp-accent-background-color: var(--bg-color);
+}

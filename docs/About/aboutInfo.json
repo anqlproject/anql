@@ -1,0 +1,15 @@
+{
+  "title": "ANQL",
+  "subtitle": "The intuitive workspace where ideas become actions.",
+  "version": "0.1.0",
+  "description": "",
+  "features": [
+    "Rich text editing",
+    "Dynamic calculations",
+    "Offline first",
+    "Code & syntax highlighting",
+    "Smart links and references",
+    "Unit conversion",
+    "And more..."
+  ]
+}

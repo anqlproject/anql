@@ -1,0 +1,103 @@
+{
+  "tabs": [
+    {
+      "id": "home",
+      "title": "Home",
+      "content": [
+        {
+          "id": "welcome",
+          "title": "Welcome to ANQL",
+          "description": "ANQL is a powerful visual document editor that allows you to create and organize your ideas intuitively.",
+          "image": "docs/Help/Assets/homepage.png"
+        }
+      ]
+    },
+    {
+      "id": "create-node",
+      "title": "Create Node",
+      "content": [
+        {
+          "id": "autocomplete",
+          "title": "Node creation on autocomplete",
+          "description": [
+            "Type the node name directly then press TAB to confirm.",
+            "",
+            "Available node types:",
+            "- Code: Insert code blocks with syntax highlighting",
+            "- Line: Add horizontal separators",
+            "- Image: Insert images from URLs or files",
+            "- Table: Create structured tables",
+            "- Heading 1: Main section headings",
+            "- Heading 2: Subsection headings", 
+            "- Heading 3: Minor headings",
+            "- Number List: Ordered numbered lists",
+            "- Bullet List: Unordered bullet lists",
+            "- Check List: Todo/task lists with checkboxes",
+            "- Quote: Block quotes for citations",
+            "- Math: Mathematical operation and conversion",
+            "- Help: Access to this documentation"
+          ],
+          "image": "docs/Help/Assets/autocomplete creating.png"
+        },
+        {
+          "id": "node-menu",
+          "title": "Node Creation by using menu",
+          "description": [
+            "Create a new node to start building your document.",
+            "",
+            "Click on the creation button to access the menu.",
+            "Choose from the available options."
+          ],
+          "image": [
+            "docs/Help/Assets/create node button.png",
+            "docs/Help/Assets/create node menu.png"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "node-options",
+      "title": "Node Options",
+      "content": [
+        {
+          "id": "node-menu-button",
+          "title": "Node Menu",
+          "description": [
+            "Each node has its own options menu to modify its properties and content.",
+            "",
+            "Access the menu by clicking on the node handle or using keyboard shortcuts.",
+            "The menu provides various actions for manipulating and transforming nodes."
+          ],
+          "image": [
+            "docs/Help/Assets/node menu button.png",
+            "docs/Help/Assets/node menu.png"]
+        },
+        {
+          "id": "transform-menu",
+          "title": "Transform Node Type",
+          "description": [
+            "You can transform nodes into other node types.",
+            "",
+            "Transformation Rules:",
+            " Only certain node types can be transformed",
+            " Transformable types: paragraph, heading, quote, code, list, listitem",
+            " Non-transformable types: image, table, math, line",
+            " All selected nodes must be transformable for the menu to appear",
+            "",
+            "Available transformations:",
+            "- Normal: Convert to paragraph (Ctrl+Alt+0 / Mac: ⌘⌥0)",
+            "- Heading 1: Convert to main heading (Ctrl+Alt+1 / Mac: ⌘⌥1)",
+            "- Heading 2: Convert to sub heading (Ctrl+Alt+2 / Mac: ⌘⌥2)",
+            "- Heading 3: Convert to minor heading (Ctrl+Alt+3 / Mac: ⌘⌥3)",
+            "- Number List: Convert to numbered list (Ctrl+Shift+7 / Mac: ⌘⇧7)",
+            "- Bullet List: Convert to bullet list (Ctrl+Shift+8 / Mac: ⌘⇧8)",
+            "- Check List: Convert to todo list (Ctrl+Shift+9 / Mac: ⌘⇧9)",
+            "- Quote: Convert to block quote (Ctrl+Shift+. / Mac: ⌘⇧.)",
+            "- Code: Convert to code block (Ctrl+Alt+C / Mac: ⌘⌥C)"
+          ],
+          "image": "docs/Help/Assets/transform.png"
+        }
+      ]
+    }
+  ]
+}

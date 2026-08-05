@@ -1,0 +1,65 @@
+:root {
+  /*  font families */
+  --font-sans: sans-serif;
+  --font-mono: monospace;
+
+  /*  font size */
+  /* Major apps use 14px or 15px as base.                        */
+  /* All rem values will be relative to this value.              */
+  --font-size-root: 15px;
+
+  /*  Type Scale */
+  /* Method: Modular Scale × 1.25 (Major Third)                  */
+  --text-2xs:  0.643rem;   /* ~9px  — ultra-compact badges      */
+  --text-xs:   0.75rem;    /* ~10.5px — labels, meta info        */
+  --text-sm:   0.9rem;   /* ~12px  — secondary text, hints     */
+  --text-base: 1rem;       /* 14px   — body text (base)          */
+  --text-md:   1.071rem;   /* ~15px  — rich body text            */
+  --text-lg:   1.143rem;   /* 16px   — light subtitles           */
+  --text-xl:   1.286rem;   /* 18px   — section titles            */
+  --text-2xl:  1.571rem;   /* 22px   — page titles               */
+  --text-3xl:  2rem;       /* 28px   — large titles              */
+  --text-4xl:  3rem;       /* 42px   — document titles           */
+
+  /* Line Heights */
+  /* tight (1.25)   : titles and headings                        */
+  /* snug (1.375)   : subtitles                                  */
+  /* normal (1.5)   : body text optimal                          */
+  /* relaxed (1.625): long paragraphs, articles                  */
+  --leading-tight:   1.25;
+  --leading-snug:    1.375;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.625;
+
+  /* Font Weights */
+  /* light (300)  : secondary text, metadata (use sparingly)    */
+  /* normal (400) : body text, paragraphs                       */
+  /* medium (500) : subtitles, important labels                 */
+  /* semibold (600): section titles, interactive elements       */
+  /* bold (700)   : main titles, headings                        */
+  --font-light:    300;
+  --font-normal:   400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+
+  /* Letter Spacing /
+  /* tight (-0.02em)  : large text (titles > 24px)               */
+  /* normal (0)       : standard body text                       */
+  /* wide (0.02em)    : small text (12-14px), uppercase          */
+  /* wider (0.05em)   : buttons, uppercase labels               */
+  /* widest (0.1em)   : very compact elements, badges           */
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-wider:   0.05em;
+  --tracking-widest:  0.1em;
+
+  /* ─── Icon Sizes ──────────────────────────────────────────── */
+  --icon-size-sm: 14px;
+  --icon-size-md: 16px;
+  --icon-size-lg: 20px;
+
+  /* ─── Icon Invert ────────────────────────────────────────── */
+  --icon-invert: 1;
+}

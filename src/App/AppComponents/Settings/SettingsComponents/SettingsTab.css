@@ -1,0 +1,17 @@
+/* SettingsTab — section title + card wrapper */
+
+.settings-section-title {
+  font-size: var(--text-medium);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 18px 0;
+  letter-spacing: var(--tracking-tight);
+}
+
+.settings-tab-content {
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+}

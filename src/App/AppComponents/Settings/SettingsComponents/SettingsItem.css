@@ -1,0 +1,194 @@
+/* SettingsItem — one settings row */
+
+.settings-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 12px 10px;
+  margin: 0 -6px;
+  border-radius: 8px;
+  border-bottom: 1px solid transparent;
+  transition: background-color 0.15s ease;
+}
+
+.settings-field:hover {
+  background-color: var(--action-hover);
+}
+
+
+.settings-field-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-field-label {
+  display: block;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  margin-bottom: 3px;
+  letter-spacing: var(--tracking-normal);
+}
+
+.settings-field-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin: 0;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-normal);
+}
+
+.settings-field-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.settings-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  white-space: nowrap;
+  background-color: var(--panel-color);
+  color: var(--text-primary);
+}
+
+.settings-action-button:hover {
+  border-color: var(--text-secondary);
+}
+
+/* Input fields */
+.settings-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  letter-spacing: var(--tracking-normal);
+}
+
+.settings-input:hover:not(:disabled) {
+  border-color: var(--text-secondary);
+}
+
+.settings-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-container), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom dropdown style for select elements */
+select.settings-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M7 9l3 3 3-3' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+select.settings-input option {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+}
+
+/* Hide spin buttons for numeric inputs */
+.settings-input[type="number"]::-webkit-outer-spin-button,
+.settings-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Input group for database picker */
+.settings-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.settings-input-group .settings-input {
+  flex: 1;
+}
+
+.settings-group-btn {
+  height: 32px;
+  font-size: var(--text-sm);
+  border-radius: 6px;
+  padding: 0 12px;
+  white-space: nowrap;
+  border: 1px solid var(--border-color);
+  background-color: var(--panel-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-group-btn:hover {
+  border-color: var(--text-secondary);
+  background-color: var(--action-hover);
+}
+
+/* Toggle / checkbox switch style */
+.settings-checkbox {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--border-color);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.settings-checkbox:hover:not(:disabled) {
+  border-color: var(--text-secondary);
+}
+
+.settings-checkbox::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.settings-checkbox:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.settings-checkbox:checked::after {
+  transform: translateX(14px);
+}
+
+.settings-checkbox:focus-visible {
+  box-shadow: 0 0 0 2px var(--primary-container);
+}
