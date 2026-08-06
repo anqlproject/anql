@@ -8,6 +8,7 @@
 import "./index.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { DraggableBlockPlugin_EXPERIMENTAL } from '@lexical/react/LexicalDraggableBlockPlugin';
 import { GripVertical } from "lucide-react";
 import type { JSX } from "react";
 import { useRef, useState } from "react";
@@ -17,7 +18,6 @@ import CreateNode from "@/App/AppComponents/CreateNode/CreateNode";
 import { NodeHighlight } from "@/App/AppComponents/NodeHighlight/NodeHighlight";
 import { MenuPosition } from "@/components/custom/Menu/Menu";
 
-import { DraggableBlockPlugin_EXPERIMENTAL } from './LexicalDraggableBlockPlugin';
 import NodeMenu from "./NodeMenu";
 
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = "draggable-block-menu";
