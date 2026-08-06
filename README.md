@@ -7,12 +7,12 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue"/>
-  <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange"/>
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue" onclick="return false;" style="pointer-events: none;"/>
+  <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange" onclick="return false;" style="pointer-events: none;"/>
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> | <a href="#node-types">Node Types</a> | <a href="#tech-stack">Tech Stack</a> | <a href="#development">Development</a>
+  <a href="#overview">Overview</a> | <a href="#gallery">Gallery</a> | <a href="#features">Features</a> | <a href="#tech-stack">Tech Stack</a> | <a href="#development">Development</a>
 </p>
 
 <br />
@@ -73,6 +73,7 @@ Currently, ANQL is tested and optimized for macOS only. Windows and Linux suppor
 - **Tauri** - Cross-platform desktop application framework
 - **SQLite** - Local database storage
 - **Lexical** - Rich text editing engine
+- **React** - UI framework
 
 ## Development
 
