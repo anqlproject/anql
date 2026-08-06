@@ -1,3 +1,5 @@
+import './PdfComponent.css';
+
 import type {JSX} from 'react';
 import {useCallback, useState} from 'react';
 
@@ -24,23 +26,6 @@ export default function PdfComponent({
     <>
       <span
         className="pdf-inline-node"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '4px 8px',
-          backgroundColor: '#f3f4f6',
-          borderRadius: '4px',
-          border: '1px solid #d1d5db',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: '500',
-          color: '#374151',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none',
-        }}
         onClick={handleClick}
         title={`Open PDF: ${name || url}`}
       >

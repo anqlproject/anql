@@ -304,7 +304,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
           isDropdownOpenRef.current = false;
         }
       } else {
-        // Clic à l'intérieur de la toolbar
+        // Click inside the toolbar
         if (!isInsideDropdown && isDropdownOpenRef.current) {
           // Si le dropdown est ouvert et on clique sur un bouton de la toolbar
           // On ferme le dropdown, mais pas la toolbar

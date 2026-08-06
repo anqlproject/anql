@@ -42,9 +42,8 @@
   display: inline-block;
 }
 
-/* Affichage du résultat à côté */
 .math-exp-node[data-result]::after {
-  content: "↳ " attr(data-result);
+  content: "-> " attr(data-result);
   color: var(--text-secondary);
   position: absolute;
   left: 8px;

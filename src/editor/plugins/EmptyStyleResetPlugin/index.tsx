@@ -35,7 +35,7 @@ export default function EmptyStyleResetPlugin(): JSX.Element | null {
               const format = prevNode.__format;
               if (format && format !== 0) {
                 formatIsDeleted = true;
-                //console.log('🎨 Node stylisé supprimé - key:', nodeKey, 'format:', format);
+                //console.log('🎨 Styled node removed - key:', nodeKey, 'format:', format);
               }
             }
           });

@@ -1,6 +1,6 @@
 {
   "identifier": "default",
-  "description": "Permissions par défaut pour l'application",
+  "description": "Default permissions for the application",
   "windows": [
     "main"
   ],

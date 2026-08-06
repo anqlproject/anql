@@ -127,8 +127,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     async (result: SearchResult) => {
       const document = await getDocumentById(result.document_id);
       if (document) {
-        // Ouvrir l'éditeur et focus sur le noeud directement.
-        // Le scroll et le surlignage sont gérés côté FileHooks.
+        // Open editor and focus on the node directly.
+        // Scroll and highlighting are handled on the FileHooks side.
         await openEditorWUFocusOnNode(document, result.node_id);
       }
       onClose();

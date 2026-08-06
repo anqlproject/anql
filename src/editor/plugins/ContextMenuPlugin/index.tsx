@@ -51,15 +51,15 @@ export default function ContextMenuPlugin() {
   const [selectionRects, setSelectionRects] = useState<DOMRect[]>([]);
 
   /**
-   * Force la sélection de Lexical sur un point de l'écran X, Y
-   * @param {LexicalEditor} editor - L'instance de ton éditeur Lexical
-   * @param {number} x - Position horizontale (clientX)
-   * @param {number} y - Position verticale (clientY)
+   * Force Lexical selection at a screen point X, Y
+   * @param {LexicalEditor} editor - Your Lexical editor instance
+   * @param {number} x - Horizontal position (clientX)
+   * @param {number} y - Vertical position (clientY)
    */
   function selectTextAtPoint(x: number, y: number) {
     let range: Range | null = null;
 
-    // 1. Récupérer le Range DOM natif sous les coordonnées X et Y
+    // 1. Get the native DOM Range at coordinates X and Y
     if (document.caretRangeFromPoint) {
       // Chrome, Edge, Safari
       range = document.caretRangeFromPoint(x, y);
@@ -73,21 +73,21 @@ export default function ContextMenuPlugin() {
       }
     }
 
-    // Si le navigateur a trouvé du texte à cet endroit
+    // If the browser found text at this location
     if (range) {
       const domNode = range.startContainer;
       const offset = range.startOffset;
 
-      // 2. Ouvrir le cycle d'écriture de Lexical pour appliquer la sélection
+      // 2. Open Lexical write cycle to apply selection
       editor.update(() => {
-        // Trouver le nœud Lexical correspondant au nœud DOM touché
+        // Find the Lexical node corresponding to the touched DOM node
         const lexicalNode = $getNearestNodeFromDOMNode(domNode);
 
         if (lexicalNode !== null) {
-          // Créer une nouvelle sélection de type Range (Curseur ou Surlignage)
+          // Create a new Range selection (Cursor or Highlight)
           const selection = $createRangeSelection();
 
-          // On place l'ancrage (point de départ et d'arrivée) sur le bon index du nœud
+          // Place the anchor (start and end point) at the correct node index
           if ($isElementNode(lexicalNode)) {
             selection.anchor.set(lexicalNode.getKey(), offset, "element");
             selection.focus.set(lexicalNode.getKey(), offset, "element");
@@ -124,8 +124,8 @@ export default function ContextMenuPlugin() {
         }
       });
 
-      // 3. Forcer le navigateur à afficher visuellement le curseur clignotant
-      // (Parfois nécessaire pour forcer le focus visuel en dehors de l'arbre Lexical)
+      // 3. Force the browser to visually display the blinking cursor
+      // (Sometimes necessary to force visual focus outside the Lexical tree)
       const windowSelection = window.getSelection();
       if (windowSelection) {
         windowSelection.removeAllRanges();

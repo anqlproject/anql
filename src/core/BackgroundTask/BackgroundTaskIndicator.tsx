@@ -5,9 +5,9 @@ import React from 'react';
 import { useBackgroundTaskRunner } from '@/core/BackgroundTask/BackgroundTaskRunner';
 
 /**
- * Barre de charge globale affichée en bas de l'écran
- * quand des tâches tournent en fond (sauvegarde, copie, etc.)
- * S'auto-détruit quand il n'y a plus rien en cours.
+ * Global progress bar displayed at the bottom of the screen
+ * when tasks are running in background (save, copy, etc.)
+ * Self-destructs when there is nothing left in progress.
  */
 export function BackgroundTaskIndicator(): React.JSX.Element | null {
   const { isPending, tasks } = useBackgroundTaskRunner();

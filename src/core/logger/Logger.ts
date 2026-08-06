@@ -71,14 +71,14 @@ class Logger {
   }
 
   private async persistLog(entry: LogEntry, critical = false) {
-    // Ne pas persister si error logging est désactivé (sauf pour les logs critiques)
+    // Do not persist if error logging is disabled (except for critical logs)
     if (!this.errorLoggingEnabled && !critical) {
       return;
     }
-    // En dev, on écrit quand même les logs pour tester
+    // In dev, we still write logs for testing
     logStorage.addLogEntry(entry);
     
-    // Pour les logs critiques (ERROR), flush immédiat
+    // For critical logs (ERROR), immediate flush
     if (critical) {
       await logStorage.flush();
     }
@@ -113,7 +113,7 @@ class Logger {
       this.logToConsole(LogLevel.ERROR, message, context, error, entry.stackTrace);
     }
     
-    // ERROR logs sont critiques: flush immédiat pour éviter perte en cas de crash
+    // ERROR logs are critical: immediate flush to avoid loss in case of crash
     this.persistLog(entry, true);
   }
 

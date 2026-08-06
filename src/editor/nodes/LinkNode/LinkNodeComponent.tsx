@@ -88,14 +88,14 @@ export default function LinkNodeComponent({
             // Check if this is a table node and if the rowId exists in its data
             if (content.data && Array.isArray(content.data)) {
               const rowExists = content.data.some((row: any) => row._rowId === rowId);
-              setTargetName(rowExists ? "Ligne" : "Ligne supprimée");
+              setTargetName(rowExists ? "Row" : "Row deleted");
               setIsValid(rowExists);
             } else {
-              setTargetName("Ligne");
+              setTargetName("Row");
               setIsValid(false);
             }
           } else {
-            setTargetName("Table introuvable");
+            setTargetName("Table not found");
             setIsValid(false);
           }
         } catch {
@@ -169,7 +169,7 @@ export default function LinkNodeComponent({
               } else {
                 // Row doesn't exist - scroll to table and show error toast
                 openEditorWUFocusOnNode(doc, blocId);
-                showToast("Ligne introuvable : cette ligne a été supprimée", "error", 4000);
+                showToast("Row not found: this row has been deleted", "error", 4000);
               }
             } else {
               console.error("Document not found:", blocId);

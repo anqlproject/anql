@@ -107,7 +107,7 @@ export default function Editor(): JSX.Element {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // 1. Déclenche l'ouverture uniquement quand focusHighlight est actif
+  // 1. Trigger opening only when focusHighlight is active
   useEffect(() => {
     if (focusHighlight) {
       editor.blur();
@@ -117,7 +117,7 @@ export default function Editor(): JSX.Element {
     }
   }, [focusHighlight]);
 
-  // 2. Bloque le scroll quand l'encadré est ouvert
+  // 2. Block scroll when the box is open
   useEffect(() => {
     const container = editorContainerRef.current;
     if (!isOpen || !container) return;
@@ -144,7 +144,7 @@ export default function Editor(): JSX.Element {
     };
   }, [isOpen, editorContainerRef]);
 
-  // 3. Ferme l'encadré au clic n'importe où
+  // 3. Close the box when clicking anywhere
   useEffect(() => {
     if (!isOpen) return;
 

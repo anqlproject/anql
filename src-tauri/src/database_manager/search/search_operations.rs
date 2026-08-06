@@ -136,12 +136,12 @@ impl SearchOperations {
                 document_id: row.get("document_id"),
             };
 
-            // Calculer un score de similarité basé sur le rank et la pertinence
+            // Calculate a similarity score based on rank and relevance
             let rank: f64 = row.get("rank");
             let text_length: i64 = row.get("text_length");
             let match_count: i64 = row.get("match_count");
 
-            // Score ajusté : plus le rank est élevé, meilleure est la correspondance
+            // Adjusted score: the higher the rank, the better the match
             let similarity_score = (rank * 0.7) + ((match_count as f64 / text_length as f64) * 0.3);
 
             fuzzy_results.push((result, similarity_score));
@@ -190,7 +190,7 @@ impl SearchOperations {
         Ok(results_with_snippets)
     }
 
-    // Recherche par similarité Levenshtein (approche simplifiée avec SQL)
+    // Levenshtein similarity search (simplified approach with SQL)
     pub async fn similarity_search_nodes(
         &self,
         query: &str,

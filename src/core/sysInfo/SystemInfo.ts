@@ -8,7 +8,7 @@ export interface SystemInfo {
 }
 
 /**
- * Récupère les informations système en utilisant le plugin Tauri OS
+ * Get system information using the Tauri OS plugin
  */
 export async function getSystemInfo(): Promise<SystemInfo> {
   try {
@@ -26,34 +26,34 @@ export async function getSystemInfo(): Promise<SystemInfo> {
       family: familyInfo
     };
   } catch (error) {
-    console.error('Erreur lors de la récupération des informations système:', error);
+    console.error('Error retrieving system information:', error);
     throw error;
   }
 }
 
 /**
- * Récupère le système d'exploitation (platform)
+ * Get the operating system (platform)
  */
 export async function getPlatform(): Promise<string> {
   return await platform();
 }
 
 /**
- * Récupère la version du système d'exploitation
+ * Get the operating system version
  */
 export async function getOSVersion(): Promise<string> {
   return await version();
 }
 
 /**
- * Récupère l'architecture du processeur
+ * Get the processor architecture
  */
 export async function getArch(): Promise<string> {
   return await arch();
 }
 
 /**
- * Récupère la famille du système d'exploitation
+ * Get the operating system family
  */
 export async function getFamily(): Promise<string> {
   return await family();

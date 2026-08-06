@@ -23,11 +23,11 @@ class LogStorage {
   }
 
   constructor() {
-    // Flush périodique toutes les 30 secondes (au lieu de 5 secondes)
+    // Periodic flush every 30 seconds (instead of 5 seconds)
     setInterval(() => {
       this.flush();
     }, FLUSH_INTERVAL_MS);
-    // Flush au déchargement de la page
+    // Flush on page unload
     if (typeof window !== 'undefined') {
       window.addEventListener('beforeunload', () => this.flush());
     }

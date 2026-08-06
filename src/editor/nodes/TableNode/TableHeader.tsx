@@ -81,7 +81,7 @@ export default function DraggableHeader({
           {...attributes}
           {...listeners}
           className={`table-col-handle ${isDragging ? "is-dragging" : ""}`}
-          title="Glisser pour déplacer · Cliquer pour le menu"
+          title="Drag to move · Click for menu"
           onPointerDown={(e) => {
             pointerOrigin.current = { x: e.clientX, y: e.clientY };
             listeners?.onPointerDown?.(e);

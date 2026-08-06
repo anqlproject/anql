@@ -16,13 +16,13 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
-    // Ajoutez ces options pour une meilleure compatibilité
+    // Add these options for better compatibility
     server: {
       deps: {
         inline: ['@testing-library/user-event']
       }
     },
-    // Désactive le cache si nécessaire
+    // Disable cache if necessary
     cache: false
   },
   resolve: {

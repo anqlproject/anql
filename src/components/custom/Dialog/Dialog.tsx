@@ -119,7 +119,7 @@ export function Dialog({
           className={`modal-content-dialog modal-${size} modal-${position}`}
           style={{
             opacity: modalContentDimensions.width > 0 ? 1 : 0,
-            transition: "opacity 0.3s ease-in-out", // Ajout d'une animation pour l'opacité
+            transition: "opacity 0.3s ease-in-out", // Add animation for opacity
           }}
           onClick={(e) => e.stopPropagation()}
         >

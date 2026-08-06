@@ -5,7 +5,7 @@ export interface SearchResult {
     document_id: string;
 }
 
-// Fonction pour vérifier et recréer les indexs avant la recherche
+// Function to verify and recreate indexes before search
 const ensureIndexes = async (): Promise<void> => {
     try {
         await invoke('verify_and_recreate_indexes');

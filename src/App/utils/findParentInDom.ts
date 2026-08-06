@@ -6,12 +6,12 @@ interface AncestorRefResult {
 }
 
 /**
- * Remonte le DOM pour vérifier si l'élément cliqué fait partie de l'élément ciblé par la Ref.
+ * Climb the DOM to check if the clicked element is part of the element targeted by the Ref.
  * example : 
       const targetParent = findAncestorWithRef(target, editorRef, 10);
- * * @param startElement L'élément de départ (ex: event.target)
- * @param targetRef La Ref React de l'élément que l'on cherche (ex: editorRef ou menuRef)
- * @param maxDepth La sécurité pour éviter de remonter trop haut (10 par défaut)
+ * * @param startElement The starting element (ex: event.target)
+ * @param targetRef The React Ref of the element we are looking for (ex: editorRef or menuRef)
+ * @param maxDepth Safety to avoid climbing too high (10 by default)
  */
 export function findAncestorWithRef(
   startElement: HTMLElement | null,
@@ -21,22 +21,22 @@ export function findAncestorWithRef(
   let current = startElement;
   let currentLevel = 0;
   
-  // On récupère l'élément réel pointé par la Ref React
+  // Get the actual element pointed to by the React Ref
   const targetElement = targetRef.current;
 
-  // Si la ref n'est pas encore montée dans le DOM, on s'arrête tout de suite
+  // If the ref is not yet mounted in the DOM, we stop immediately
   if (!targetElement) return null;
 
   while (current !== null && currentLevel < maxDepth) {
-    // Comparaison physique directe entre l'élément actuel et la Ref
+    // Direct physical comparison between the current element and the Ref
     if (current === targetElement) {
       return {
         element: current,
-        level: currentLevel // 0 si on a cliqué pile sur la Ref, 1 si c'est le parent direct, etc.
+        level: currentLevel // 0 if we clicked exactly on the Ref, 1 if it's the direct parent, etc.
       };
     }
 
-    // On remonte d'un étage
+    // Go up one level
     current = current.parentElement;
     currentLevel++;
   }

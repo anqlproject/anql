@@ -11,12 +11,12 @@ interface BackgroundTaskStore {
   isPending: boolean;
 
   /**
-   * Soumet une tâche async au runner.
-   * La tâche est lancée immédiatement en fond et s'auto-détruit à la fin.
-   * @param task   Fonction async à exécuter (isolée, contexte capturé à l'appel)
-   * @param label  Label affiché dans la barre de charge (ex: "Saving document...")
-   * @param onDone Callback optionnel appelé quand la tâche se termine (succès ou erreur)
-   * @returns L'identifiant unique de la tâche
+   * Submit an async task to the runner.
+   * The task is launched immediately in background and self-destructs when finished.
+   * @param task   Async function to execute (isolated, context captured at call)
+   * @param label  Label displayed in the progress bar (ex: "Saving document...")
+   * @param onDone Optional callback called when the task finishes (success or error)
+   * @returns The unique identifier of the task
    */
   run: (task: () => Promise<void>, label: string, onDone?: (error?: unknown) => void) => string;
 
@@ -42,7 +42,7 @@ export const useBackgroundTaskRunner = create<BackgroundTaskStore>((set) => ({
 
     let taskError: unknown = undefined;
 
-    // Lancer la tâche en fond — complètement isolée
+    // Launch the task in background — completely isolated
     task()
       .catch((error) => {
         console.error(`[BackgroundTaskRunner] Task "${label}" failed:`, error);
@@ -51,7 +51,7 @@ export const useBackgroundTaskRunner = create<BackgroundTaskStore>((set) => ({
       .finally(() => {
         onDone?.(taskError);
 
-        // Supprimer la tâche terminée (auto-destruction)
+        // Remove the completed task (auto-destruction)
         set((state) => {
           const remaining = state.tasks.filter((t) => t.id !== id);
           return {

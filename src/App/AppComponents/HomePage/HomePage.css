@@ -85,12 +85,15 @@
   height: 30px;
   font-size: 13px;
   font-weight: 500;
+  background-color: var(--destructive) !important;
+  color: white !important;
+  border: none !important;
   transition: all 0.12s ease;
 }
 
 .home-deleteButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  background-color: #dc2626 !important;
 }
 
 .home-deleteIcon {

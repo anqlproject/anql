@@ -81,8 +81,8 @@ export function DraggableRow({
             {...attributes}
             {...listeners}
             className="table-row-handle"
-            title="Glisser pour déplacer · Cliquer pour le menu"
-            aria-label="Options de ligne"
+            title="Drag to move · Click for menu"
+            aria-label="Row options"
             onPointerDown={(e) => {
               pointerOrigin.current = { x: e.clientX, y: e.clientY };
               listeners?.onPointerDown?.(e);

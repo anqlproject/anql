@@ -36,7 +36,6 @@ body {
 }
 
 
-/* Utility Classes */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

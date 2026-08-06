@@ -28,7 +28,7 @@
   }
 }
 
-/* Barre de progression indéfinie (shimmer) */
+/* Indefinite progress bar (shimmer) */
 .bg-task-bar__progress {
   flex-shrink: 0;
   width: 80px;

@@ -39,7 +39,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('app-theme', theme);
   }, [theme]);
 
-  // Optionnel: écouter les changements du système si le thème est sur "system"
+  // Optional: listen to system changes if theme is "system"
   useEffect(() => {
     if (theme !== 'system') return;
     

@@ -65,17 +65,16 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
 
         if (!databasePath) throw new Error("Database path not found");
 
-        // Configurer le répertoire des logs en utilisant APP_PATH.LOG_DIR
+        // Configure the log directory using APP_PATH.LOG_DIR
         const logDir = isAbsolute ? APP_PATH.LOG_DIR : await getFileFromDocument(APP_PATH.LOG_DIR);
         if (logDir) {
           logStorage.setLogDirectory(logDir);
-          // Nettoyer les logs s'ils sont trop gros
           await logStorage.cleanupIfTooLarge();
         }
 
-        // Initialiser le logger avec le setting de confidentialité
         logger.setErrorLoggingEnabled(config.privacy?.enableErrorLogging !== false);
 
+        // Initialize logger with privacy setting
         await initDatabase(databasePath);
         cleanupOldPendingDeletions(24 * 60 * 60).catch(console.error);
 

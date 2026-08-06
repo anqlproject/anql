@@ -1,6 +1,21 @@
-# ANQL
+<p align="center">
+  <img src="app-icon.png" alt="ANQL Icon" height="60" />
+</p>
 
-The intuitive workspace where ideas become actions.
+<p align="center">
+  The intuitive workspace where ideas become actions.
+</p>
+
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue"/>
+  <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange"/>
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> | <a href="#node-types">Node Types</a> | <a href="#tech-stack">Tech Stack</a> | <a href="#development">Development</a>
+</p>
+
+<br />
 
 ## Overview
 
@@ -8,13 +23,25 @@ ANQL is a visual workspace designed for productive work. Ideal for professionals
 
 ![Overview](assets/overview.png)
 
+## Gallery
+
+<p align="center">
+  <img src="assets/overview 1.png" alt="ANQL Overview 1" width="45%" />
+  <img src="assets/overview 2.png" alt="ANQL Overview 2" width="45%" />
+</p>
+
+<p align="center">
+  <img src="assets/overview 3.png" alt="ANQL Overview 3" width="45%" />
+</p>
+
 ## Features
 
 - **Rich text editing** - Create and format text with intuitive controls, perfect for note-taking.
-- **Data management** - Structure and organize data through tables, mathematical .operations, smart links between documents, local database storage, and organizations
+- **Data management** - Structure and organize data through tables, mathematical operations, smart links between documents, local database storage, and organizations
 - **Offline first** - Work without internet connectivity.
 - **Dynamic calculations** - Perform mathematical operations and conversions perfect for engineering work and scientific calculations.
 - **Unit conversion** - Convert between different units seamlessly.
+- **Light & Dark mode** - Switch between light and dark themes for comfortable viewing in any environment.
 
 ## Node Types
 
@@ -41,15 +68,15 @@ ANQL supports multiple node types for different content needs, with the flexibil
 
 Currently, ANQL is tested and optimized for macOS only. Windows and Linux support will be available soon.
 
-## Development Status
-
-ANQL is currently in active development and may be unstable at times. New features and improvements are being added regularly. Feel free to reach out for feedback, bug reports, or feature suggestions.
-
 ## Tech Stack
 
 - **Tauri** - Cross-platform desktop application framework
 - **SQLite** - Local database storage
 - **Lexical** - Rich text editing engine
+
+## Development
+
+ANQL is currently in active development and may be unstable at times. New features and improvements are being added regularly. Feel free to reach out for feedback, bug reports, or feature suggestions.
 
 ## Version
 

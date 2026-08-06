@@ -252,7 +252,7 @@ export function PdfViewer({ url, name, onClose }: PdfViewerProps): JSX.Element {
       {/* Backdrop transparent — click pour fermer */}
       <div className="pdf-panel-backdrop" onClick={onClose} />
 
-      {/* Panel latéral */}
+      {/* Side panel */}
       <div className="pdf-panel">
         {/* Header compact */}
         <div className="pdf-panel-header">

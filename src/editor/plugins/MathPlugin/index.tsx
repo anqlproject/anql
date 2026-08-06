@@ -10,7 +10,7 @@ import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/Math
 
 export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
-// Plugin pour mettre à jour le DOM avec les résultats depuis MathVariablesContext
+// Plugin to update the DOM with results from MathVariablesContext
 function MathResultDisplayPlugin() {
   const [editor] = useLexicalComposerContext();
   const { results } = useMathVariables();
@@ -181,7 +181,7 @@ export default function MathPlugin() {
               $setBlocksType(selection, () => $createMathExpNode());
             }
           });
-          return true; // Commande gérée
+          return true; // Command handled
         },
         COMMAND_PRIORITY_EDITOR,
       )

@@ -190,7 +190,7 @@
   background-color: white;
 }
 
-/* ── États de chargement / erreur ────────────────────────────── */
+/* ── Load state / error ────────────────────────────── */
 .pdf-viewer-loading {
   display: flex;
   align-items: center;

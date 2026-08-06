@@ -1,8 +1,8 @@
-/* Styles spécifiques pour OverflowMenu en plus des styles standards du menu (via modal-content et menu-container) */
+/* Specific styles for OverflowMenu in addition to standard menu styles (via modal-content and menu-container) */
 .overflow-menu-content {
   display: flex;
   flex-direction: column;
-  max-height: 400px; /* Taille maximale fixe pour déclencher le défilement */
+  max-height: 400px; /* Fixed maximum size to trigger scrolling */
 }
 
 .overflow-menu-search {
@@ -36,7 +36,7 @@
   flex: 1;
 }
 
-/* Personnalisation de la barre de défilement */
+/* Scrollbar customization */
 .overflow-menu-list::-webkit-scrollbar {
   width: 6px;
 }
