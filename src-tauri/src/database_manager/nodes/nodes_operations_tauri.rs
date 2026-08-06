@@ -192,3 +192,43 @@ pub async fn compute_hashes_batch(contents: Vec<String>) -> Result<Vec<String>, 
 
     Ok(hashes)
 }
+
+#[tauri::command]
+pub async fn get_node_metadata(
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<Option<String>, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.nodes_operations
+        .get_node_metadata(id)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn set_node_metadata(
+    state: State<'_, AppState>,
+    id: String,
+    metadata: String,
+) -> Result<bool, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.nodes_operations
+        .set_node_metadata(id, metadata)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn remove_node_metadata(
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<bool, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.nodes_operations
+        .remove_node_metadata(id)
+        .await
+        .map_err(|e| e.to_string())
+}

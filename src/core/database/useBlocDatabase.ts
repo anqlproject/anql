@@ -16,6 +16,7 @@ export interface NodeJson {
     full_text: string,
     document_id: string,
     node_type: string,
+    metadata?: string | null,
     created_at: number,
     updated_at: number,
     checksum?: string
@@ -290,6 +291,36 @@ export const computeHashesBatch = async (contents: string[]): Promise<string[]> 
     return hashes;
   } catch (error) {
     console.error('Failed to compute hashes:', error);
+    throw error;
+  }
+}
+
+export const getNodeMetadata = async (id: string): Promise<string | null> => {
+  try {
+    const metadata = await invoke('get_node_metadata', { id }) as string | null;
+    return metadata;
+  } catch (error) {
+    console.error('Failed to get node metadata:', error);
+    throw error;
+  }
+}
+
+export const setNodeMetadata = async (id: string, metadata: string): Promise<boolean> => {
+  try {
+    const success = await invoke('set_node_metadata', { id, metadata }) as boolean;
+    return success;
+  } catch (error) {
+    console.error('Failed to set node metadata:', error);
+    throw error;
+  }
+}
+
+export const removeNodeMetadata = async (id: string): Promise<boolean> => {
+  try {
+    const success = await invoke('remove_node_metadata', { id }) as boolean;
+    return success;
+  } catch (error) {
+    console.error('Failed to remove node metadata:', error);
     throw error;
   }
 }

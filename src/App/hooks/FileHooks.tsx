@@ -15,6 +15,7 @@ import {
 import {
   DocumentsJson,
   newDocument,
+  parseDocumentMetadata,
 } from "@/core/database/useDocumentDatabase";
 import { addRecentDocument } from "@/core/database/useRecentDocumentsDatabase";
 import { DATABASE_PATH } from "@/core/global/defaultSettings";
@@ -193,6 +194,10 @@ export function useFile() {
       setCurrentDocument(document);
       navigateTo("editor", document);
       loadEditorState(editorState);
+
+      // Apply readMode from document metadata
+      const meta = parseDocumentMetadata(document.metadata);
+      editor.setEditable(!meta.readMode);
 
       editor.read(() => {
         buildDynamicStateMap();

@@ -14,9 +14,11 @@ export interface DocumentsJson {
   path: string,
   workspace_id: string,
   title: string,
+  metadata?: string | null,
   created_at: number,
   updated_at: number,
 }
+
 
 export const updateDynamically = () => {
   emitDatabaseChange();
@@ -128,3 +130,99 @@ export const getDocumentById = async (documentId: string): Promise<DocumentsJson
     return null;
   }
 }
+
+export const getDocumentMetadata = async (id: string): Promise<string | null> => {
+  try {
+    const metadata = await invoke('get_document_metadata', { id }) as string | null;
+    return metadata;
+  } catch (error) {
+    console.error('Failed to get document metadata:', error);
+    throw error;
+  }
+}
+
+export const setDocumentMetadata = async (id: string, metadata: string): Promise<boolean> => {
+  try {
+    const success = await invoke('set_document_metadata', { id, metadata }) as boolean;
+    return success;
+  } catch (error) {
+    console.error('Failed to set document metadata:', error);
+    throw error;
+  }
+}
+
+export const removeDocumentMetadata = async (id: string): Promise<boolean> => {
+  try {
+    const success = await invoke('remove_document_metadata', { id }) as boolean;
+    return success;
+  } catch (error) {
+    console.error('Failed to remove document metadata:', error);
+    throw error;
+  }
+}
+
+
+
+export interface DocumentMetadata {
+  readMode?: boolean;
+}
+
+/** Type-safe key references — use instead of raw strings.
+ *  e.g. DocumentMetadataKey.readMode instead of 'readMode' */
+export const DocumentMetadataKey = {
+  readMode: 'readMode',
+} as const satisfies { [K in keyof Required<DocumentMetadata>]: K };
+
+export const DEFAULT_DOCUMENT_METADATA: DocumentMetadata = {
+  readMode: false,
+};
+
+/** Parse the raw metadata JSON string into a typed DocumentMetadata object (no DB call). */
+export const parseDocumentMetadata = (raw: string | null | undefined): DocumentMetadata => {
+  if (!raw) return { ...DEFAULT_DOCUMENT_METADATA };
+  try {
+    return { ...DEFAULT_DOCUMENT_METADATA, ...JSON.parse(raw) };
+  } catch {
+    return { ...DEFAULT_DOCUMENT_METADATA };
+  }
+};
+
+
+/** Read a single field from the document's metadata JSON stored in the DB. */
+export const getDocumentMetadataField = async <K extends keyof DocumentMetadata>(
+  id: string,
+  key: K
+): Promise<DocumentMetadata[K]> => {
+  const raw = await invoke('get_document_metadata', { id }) as string | null;
+  const meta: DocumentMetadata = raw
+    ? { ...DEFAULT_DOCUMENT_METADATA, ...JSON.parse(raw) }
+    : { ...DEFAULT_DOCUMENT_METADATA };
+  return meta[key];
+};
+
+/** Inject or update a single field in the document's metadata JSON, then persist it. */
+export const updateDocumentMetadataField = async <K extends keyof DocumentMetadata>(
+  id: string,
+  key: K,
+  value: DocumentMetadata[K]
+): Promise<boolean> => {
+  const raw = await invoke('get_document_metadata', { id }) as string | null;
+  const meta: DocumentMetadata = raw
+    ? { ...DEFAULT_DOCUMENT_METADATA, ...JSON.parse(raw) }
+    : { ...DEFAULT_DOCUMENT_METADATA };
+  meta[key] = value;
+  return invoke('set_document_metadata', { id, metadata: JSON.stringify(meta) }) as Promise<boolean>;
+};
+
+/** Remove a single field from the document's metadata JSON, then persist it. */
+export const removeDocumentMetadataField = async <K extends keyof DocumentMetadata>(
+  id: string,
+  key: K
+): Promise<boolean> => {
+  const raw = await invoke('get_document_metadata', { id }) as string | null;
+  const meta: DocumentMetadata = raw
+    ? { ...DEFAULT_DOCUMENT_METADATA, ...JSON.parse(raw) }
+    : { ...DEFAULT_DOCUMENT_METADATA };
+  delete meta[key];
+  return invoke('set_document_metadata', { id, metadata: JSON.stringify(meta) }) as Promise<boolean>;
+};

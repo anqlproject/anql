@@ -26,13 +26,16 @@ import { MenuX } from "@/components/custom/Menu/MenuX";
 import { newNode } from "@/core/database/useBlocDatabase";
 import {
   DocumentsJson,
+  DocumentMetadataKey,
   newDocument,
+  updateDocumentMetadataField,
   updateDocumentPath,
 } from "@/core/database/useDocumentDatabase";
 import { addRecentDocument } from "@/core/database/useRecentDocumentsDatabase";
 import { ICON_SIZES, TOAST_DURATION } from "@/core/global/defaultValues";
 import { MoveToTrash } from "@/core/TrashSystem/TrashSystem";
 import { useNavigationStore } from "@/GlobalState/navigationStore";
+import { logger } from "@/core/logger";
 
 export const DocumentMenu = () => {
   const { t } = useTranslation();
@@ -118,9 +121,17 @@ export const DocumentMenu = () => {
         />
       ),
       title: t("DOCUMENT_MENU.readModeToggle") as string,
-      onClick: () => {
+      onClick: async () => {
         const newEditableState = !editor.isEditable();
         editor.setEditable(newEditableState);
+        const docId = currentDocumentRef.current?.id;
+        if (docId) {
+          try {
+            await updateDocumentMetadataField(docId, DocumentMetadataKey.readMode, !newEditableState);
+          } catch (err) {
+            logger.warn('Failed to persist readMode metadata:', err);
+          }
+        }
       },
     },
     {
@@ -257,11 +268,11 @@ export const DocumentMenu = () => {
         editor.getEditorState().read(() => {
           const editorState = editor.getEditorState();
           const jsonState = editorState.toJSON();
-          
+
           const root = $getRoot();
           const childrenKeys = root.getChildrenKeys();
           const dynamicState = useGlobalStore.getState().dynamicState;
-          
+
           if (jsonState.root && Array.isArray(jsonState.root.children)) {
             jsonState.root.children.forEach((childJson: any, index: number) => {
               const key = childrenKeys[index];

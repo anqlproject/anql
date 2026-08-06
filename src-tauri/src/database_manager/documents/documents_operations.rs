@@ -13,14 +13,15 @@ impl DocumentsOperations {
 
     pub async fn new_document(&self, document: &DocumentsJson) -> Result<String> {
         let id = sqlx::query(
-            "INSERT INTO documents (id, path, workspace_id, title, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?) 
+            "INSERT INTO documents (id, path, workspace_id, title, metadata, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?) 
             RETURNING id",
         )
         .bind(&document.id)
         .bind(&document.path)
         .bind(&document.workspace_id)
         .bind(&document.title)
+        .bind(&document.metadata)
         .bind(&document.created_at)
         .bind(&document.updated_at)
         .fetch_one(&self.pool)
@@ -174,7 +175,7 @@ impl DocumentsOperations {
     // use to get all documents in a specific path
     pub async fn get_documents_by_path(&self, path: String) -> Result<Vec<DocumentsJson>> {
         let documents = sqlx::query_as::<_, DocumentsJson>(
-            "SELECT id, path, workspace_id, title, created_at, updated_at 
+            "SELECT id, path, workspace_id, title, metadata, created_at, updated_at 
             FROM documents 
             WHERE path = ? ",
         )
@@ -190,7 +191,7 @@ impl DocumentsOperations {
         workspace_id: String,
     ) -> Result<Vec<DocumentsJson>> {
         let documents = sqlx::query_as::<_, DocumentsJson>(
-            "SELECT id, path, workspace_id, title, created_at, updated_at 
+            "SELECT id, path, workspace_id, title, metadata, created_at, updated_at 
             FROM documents 
             WHERE workspace_id = ? ",
         )
@@ -203,7 +204,7 @@ impl DocumentsOperations {
 
     pub async fn get_document_by_id(&self, document_id: String) -> Result<DocumentsJson> {
         let documents = sqlx::query_as::<_, DocumentsJson>(
-            "SELECT id, path, workspace_id, title, created_at, updated_at 
+            "SELECT id, path, workspace_id, title, metadata, created_at, updated_at 
             FROM documents 
             WHERE id = ? ",
         )
@@ -212,5 +213,44 @@ impl DocumentsOperations {
         .await?;
 
         Ok(documents)
+    }
+
+    /// Get the raw metadata JSON string for a document.
+    pub async fn get_document_metadata(&self, id: String) -> Result<Option<String>> {
+        let metadata = sqlx::query_scalar(
+            "SELECT metadata FROM documents WHERE id = ?",
+        )
+        .bind(&id)
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(metadata)
+    }
+
+    /// Set (overwrite) the metadata JSON string for a document.
+    pub async fn set_document_metadata(&self, id: String, metadata: String) -> Result<bool> {
+        let rows_affected = sqlx::query(
+            "UPDATE documents SET metadata = ? WHERE id = ?",
+        )
+        .bind(&metadata)
+        .bind(&id)
+        .execute(&self.pool)
+        .await?
+        .rows_affected();
+
+        Ok(rows_affected > 0)
+    }
+
+    /// Remove (set to NULL) the metadata for a document.
+    pub async fn remove_document_metadata(&self, id: String) -> Result<bool> {
+        let rows_affected = sqlx::query(
+            "UPDATE documents SET metadata = NULL WHERE id = ?",
+        )
+        .bind(&id)
+        .execute(&self.pool)
+        .await?
+        .rows_affected();
+
+        Ok(rows_affected > 0)
     }
 }

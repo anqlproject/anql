@@ -17,6 +17,7 @@ pub struct DocumentsJson {
     pub path: String,
     pub workspace_id: String,
     pub title: String,
+    pub metadata: Option<String>,
     pub created_at: i64,
     pub updated_at: i64,
 }
@@ -29,6 +30,7 @@ pub struct NodeJson {
     pub full_text: String,
     pub document_id: String,
     pub node_type: String,
+    pub metadata: Option<String>,
     pub created_at: i64,
     pub updated_at: i64,
     pub checksum: Option<String>,

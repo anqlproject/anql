@@ -136,3 +136,43 @@ pub async fn get_document_by_id(
         .await
         .map_err(|e| e.to_string())
 }
+
+#[tauri::command]
+pub async fn get_document_metadata(
+    state: tauri::State<'_, AppState>,
+    id: String,
+) -> Result<Option<String>, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.documents_operations
+        .get_document_metadata(id)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn set_document_metadata(
+    state: tauri::State<'_, AppState>,
+    id: String,
+    metadata: String,
+) -> Result<bool, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.documents_operations
+        .set_document_metadata(id, metadata)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn remove_document_metadata(
+    state: tauri::State<'_, AppState>,
+    id: String,
+) -> Result<bool, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.documents_operations
+        .remove_document_metadata(id)
+        .await
+        .map_err(|e| e.to_string())
+}

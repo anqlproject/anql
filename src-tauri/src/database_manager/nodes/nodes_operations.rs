@@ -27,14 +27,15 @@ impl NodesOperations {
         let checksum = format!("{:x}", hasher.finalize());
 
         let id = sqlx::query(
-            "INSERT INTO nodes (id, position, content,full_text ,checksum, document_id, node_type, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
+            "INSERT INTO nodes (id, position, content, full_text, checksum, metadata, document_id, node_type, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
             RETURNING id")
             .bind(&node_json.id)
             .bind(&node_json.position)
             .bind(&node_json.content)
             .bind(&node_json.full_text)
             .bind(checksum)
+            .bind(&node_json.metadata)
             .bind(&node_json.document_id)
             .bind(&node_json.node_type)
             .bind(&node_json.created_at)
@@ -257,7 +258,7 @@ impl NodesOperations {
 
     pub async fn get_node_by_id(&self, id: String) -> Result<NodeJson> {
         let node = sqlx::query_as::<_, NodeJson>(
-            "SELECT id, position, content, full_text, checksum, document_id, node_type, created_at, updated_at
+            "SELECT id, position, content, full_text, checksum, metadata, document_id, node_type, created_at, updated_at
             FROM nodes 
             WHERE id = ?",
         )
@@ -271,7 +272,7 @@ impl NodesOperations {
     // get all nodes in a specific document
     pub async fn get_nodes_by_document_id(&self, document_id: String) -> Result<Vec<NodeJson>> {
         let nodes = sqlx::query_as::<_, NodeJson>(
-            "SELECT id, position, content, full_text, checksum, document_id, node_type, created_at, updated_at
+            "SELECT id, position, content, full_text, checksum, metadata, document_id, node_type, created_at, updated_at
             FROM nodes 
             WHERE document_id = ?
             ORDER BY position",
@@ -307,7 +308,7 @@ impl NodesOperations {
 
     pub async fn get_nodes_by_node_type(&self, node_type: String) -> Result<Vec<NodeJson>> {
         let nodes = sqlx::query_as::<_, NodeJson>(
-            "SELECT id, position, content, full_text, checksum, document_id, node_type, created_at, updated_at
+            "SELECT id, position, content, full_text, checksum, metadata, document_id, node_type, created_at, updated_at
             FROM nodes 
             WHERE node_type = ?
             ORDER BY position",
@@ -317,5 +318,44 @@ impl NodesOperations {
         .await?;
 
         Ok(nodes)
+    }
+
+    /// Get the raw metadata JSON string for a node.
+    pub async fn get_node_metadata(&self, id: String) -> Result<Option<String>> {
+        let metadata = sqlx::query_scalar(
+            "SELECT metadata FROM nodes WHERE id = ?",
+        )
+        .bind(&id)
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(metadata)
+    }
+
+    /// Set (overwrite) the metadata JSON string for a node.
+    pub async fn set_node_metadata(&self, id: String, metadata: String) -> Result<bool> {
+        let rows_affected = sqlx::query(
+            "UPDATE nodes SET metadata = ? WHERE id = ?",
+        )
+        .bind(&metadata)
+        .bind(&id)
+        .execute(&self.pool)
+        .await?
+        .rows_affected();
+
+        Ok(rows_affected > 0)
+    }
+
+    /// Remove (set to NULL) the metadata for a node.
+    pub async fn remove_node_metadata(&self, id: String) -> Result<bool> {
+        let rows_affected = sqlx::query(
+            "UPDATE nodes SET metadata = NULL WHERE id = ?",
+        )
+        .bind(&id)
+        .execute(&self.pool)
+        .await?
+        .rows_affected();
+
+        Ok(rows_affected > 0)
     }
 }
