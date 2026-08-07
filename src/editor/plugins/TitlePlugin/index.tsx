@@ -1,6 +1,7 @@
 import "./index.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import { mergeRegister } from "@lexical/utils";
 import {
   $createParagraphNode,
@@ -10,7 +11,7 @@ import {
   COMMAND_PRIORITY_LOW,
   KEY_ARROW_UP_COMMAND,
 } from "lexical";
-import React, { useCallback,useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useShallow } from 'zustand/react/shallow';
 
 import { useGlobalStore } from "@/App/store/useGlobalStore";
@@ -19,6 +20,7 @@ import { updateDocumentTitle } from "@/core/database/useDocumentDatabase";
 const TitlePlugin = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [editor] = useLexicalComposerContext();
+  const isEditable = useLexicalEditable();
   const { setModified,
     modified,
     documentIsModified,
@@ -70,13 +72,13 @@ const TitlePlugin = () => {
         const root = $getRoot();
         const firstNode = root.getFirstChild();
         const paragraphNode = $createParagraphNode();
-        
+
         if (firstNode) {
           firstNode.replace(paragraphNode);
         } else {
           root.append(paragraphNode);
         }
-        
+
         // Set selection to the paragraph node
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
@@ -229,7 +231,7 @@ const TitlePlugin = () => {
     <h1
       ref={titleRef}
       className={`title-plugin`}
-      contentEditable
+      contentEditable={isEditable}
       suppressContentEditableWarning
       spellCheck={config.editor.spellCheck}
       onKeyDown={handleKeyDown}

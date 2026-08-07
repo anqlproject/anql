@@ -25,17 +25,17 @@ import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { MenuX } from "@/components/custom/Menu/MenuX";
 import { newNode } from "@/core/database/useBlocDatabase";
 import {
-  DocumentsJson,
   DocumentMetadataKey,
+  DocumentsJson,
   newDocument,
   updateDocumentMetadataField,
   updateDocumentPath,
 } from "@/core/database/useDocumentDatabase";
 import { addRecentDocument } from "@/core/database/useRecentDocumentsDatabase";
 import { ICON_SIZES, TOAST_DURATION } from "@/core/global/defaultValues";
+import { logger } from "@/core/logger";
 import { MoveToTrash } from "@/core/TrashSystem/TrashSystem";
 import { useNavigationStore } from "@/GlobalState/navigationStore";
-import { logger } from "@/core/logger";
 
 export const DocumentMenu = () => {
   const { t } = useTranslation();
@@ -82,8 +82,10 @@ export const DocumentMenu = () => {
       icon: <SearchIcon size={ICON_SIZE} />,
       title: t("DOCUMENT_MENU.searchInDocument") as string,
       onClick: () => {
-        setIsMenuOpen(false);
         openLocalSearch();
+        setTimeout(() => {
+          setIsMenuOpen(false);
+        }, 100);
       },
       shortcut: isMac ? "⌘F" : "Ctrl+F",
     },
@@ -321,6 +323,20 @@ export const DocumentMenu = () => {
                 style={{ position: "relative" }}
               >
                 <MenuIcon size={ICON_SIZES.lg} />
+                {!isEditable && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-2px",
+                      right: "-2px",
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#22c55e",
+                      borderRadius: "50%",
+                      border: "1px solid white",
+                    }}
+                  />
+                )}
               </button>
             }
           />

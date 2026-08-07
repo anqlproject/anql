@@ -1,5 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import * as Popover from "@radix-ui/react-popover";
 import { Header, Table } from "@tanstack/react-table";
 import { GripHorizontal } from "lucide-react";
@@ -29,6 +30,7 @@ export default function DraggableHeader({
   onMenuOpenChange,
   columnRef,
 }: DraggableHeaderProps) {
+  const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
 
   const {
@@ -77,24 +79,26 @@ export default function DraggableHeader({
       data-column-index={columnIndex}
     >
       <Popover.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
-        <div
-          {...attributes}
-          {...listeners}
-          className={`table-col-handle ${isDragging ? "is-dragging" : ""}`}
-          title="Drag to move · Click for menu"
-          onPointerDown={(e) => {
-            pointerOrigin.current = { x: e.clientX, y: e.clientY };
-            listeners?.onPointerDown?.(e);
-          }}
-          onPointerUp={(e) => {
-            openMenuIfClick(e.clientX, e.clientY);
-          }}
-          onPointerCancel={() => {
-            pointerOrigin.current = null;
-          }}
-        >
-          <GripHorizontal className="table-handle-icon" />
-        </div>
+        {isEditable && (
+          <div
+            {...attributes}
+            {...listeners}
+            className={`table-col-handle ${isDragging ? "is-dragging" : ""}`}
+            title="Drag to move · Click for menu"
+            onPointerDown={(e) => {
+              pointerOrigin.current = { x: e.clientX, y: e.clientY };
+              listeners?.onPointerDown?.(e);
+            }}
+            onPointerUp={(e) => {
+              openMenuIfClick(e.clientX, e.clientY);
+            }}
+            onPointerCancel={() => {
+              pointerOrigin.current = null;
+            }}
+          >
+            <GripHorizontal className="table-handle-icon" />
+          </div>
+        )}
         <Popover.Anchor className="table-col-handle-anchor" />
         <Popover.Portal>
           <ColumnMenu

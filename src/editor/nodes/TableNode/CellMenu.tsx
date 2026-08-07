@@ -1,3 +1,4 @@
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from '@radix-ui/react-popover';
 import { ClipboardCopy, ClipboardPaste, ClipboardX } from "lucide-react";
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,7 @@ interface CellMenuProps {
 
 export function CellMenu({ isOpen, onClose, position, activeInput }: CellMenuProps) {
   const { t } = useTranslation();
+  const isEditable = useLexicalEditable();
   const { isMac } = useGlobalStore(useShallow((state) => ({ isMac: state.isMac, dynamicState: state.dynamicState })));
 
   const handleCopy = () => {
@@ -150,32 +152,36 @@ export function CellMenu({ isOpen, onClose, position, activeInput }: CellMenuPro
             <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>{isMac ? "⌘C" : "Ctrl+C"}</span>
           </button>
           
-          <button 
-            onPointerDown={(e) => e.preventDefault()}
-            onClick={handleCut} 
-            className="table-menu-item" 
-            disabled={!activeInput || activeInput.selectionStart === activeInput.selectionEnd}
-            style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ClipboardX className="w-4 h-4" />
-              <span>{t('CONTEXT_MENU.cut')}</span>
-            </div>
-            <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>{isMac ? "⌘X" : "Ctrl+X"}</span>
-          </button>
+          {isEditable && (
+            <>
+              <button 
+                onPointerDown={(e) => e.preventDefault()}
+                onClick={handleCut} 
+                className="table-menu-item" 
+                disabled={!activeInput || activeInput.selectionStart === activeInput.selectionEnd}
+                style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ClipboardX className="w-4 h-4" />
+                  <span>{t('CONTEXT_MENU.cut')}</span>
+                </div>
+                <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>{isMac ? "⌘X" : "Ctrl+X"}</span>
+              </button>
 
-          <button
-            onPointerDown={(e) => e.preventDefault()}
-            onClick={handlePaste}
-            className="table-menu-item"
-            style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ClipboardPaste className="w-4 h-4" />
-              <span>{t('CONTEXT_MENU.paste')}</span>
-            </div>
-            <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>{isMac ? "⌘V" : "Ctrl+V"}</span>
-          </button>
+              <button
+                onPointerDown={(e) => e.preventDefault()}
+                onClick={handlePaste}
+                className="table-menu-item"
+                style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ClipboardPaste className="w-4 h-4" />
+                  <span>{t('CONTEXT_MENU.paste')}</span>
+                </div>
+                <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>{isMac ? "⌘V" : "Ctrl+V"}</span>
+              </button>
+            </>
+          )}
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

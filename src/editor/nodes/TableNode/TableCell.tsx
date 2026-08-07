@@ -1,3 +1,4 @@
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from "@radix-ui/react-popover";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -124,6 +125,7 @@ function handleCellKeyDown(
 
 export default function EditableCell({ getValue, row: { index }, column: { id, columnDef }, table }: EditableCellProps) {
     const { t } = useTranslation();
+    const isEditable = useLexicalEditable();
     const initialValue = getValue();
     const [value, setValue] = useState(initialValue);
     const [searchQuery, setSearchQuery] = useState('');
@@ -232,6 +234,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                     onMouseDown={(e) => e.stopPropagation()}
                     onKeyDown={(e) => handleCellKeyDown(e, table, index, id)}
                     className="table-checkbox"
+                    disabled={!isEditable}
                 />
             </div>
         );
@@ -246,6 +249,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                             type="button"
                             className="table-date-btn"
                             onMouseDown={(e) => e.stopPropagation()}
+                            disabled={!isEditable}
                         >
                             <CalendarIcon className="table-date-icon" />
                             <span className="truncate">{value && typeof value === 'string' ? format(new Date(value), 'PP') : <span className="table-date-text-empty">{t('TABLE.chooseDate')}</span>}</span>
@@ -295,6 +299,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                     className="table-input"
                     placeholder={isFocused ? String(t('TABLE.placeholderNumber')) : ''}
                     style={shouldShowHighlightOverlay ? { color: 'transparent', caretColor: 'var(--text-primary)' } : undefined}
+                    disabled={!isEditable}
                 />
             </div>
         );
@@ -325,6 +330,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                 className="table-input"
                 placeholder={isFocused ? String(t('TABLE.placeholderText')) : ''}
                 style={shouldShowHighlightOverlay ? { color: 'transparent', caretColor: 'var(--text-primary)' } : undefined}
+                disabled={!isEditable}
             />
         </div>
     );

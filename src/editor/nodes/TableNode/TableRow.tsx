@@ -1,5 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import * as Popover from "@radix-ui/react-popover";
 import { flexRender, Table } from "@tanstack/react-table";
 import { CSSProperties, useRef } from "react";
@@ -31,6 +32,7 @@ export function DraggableRow({
   isDropTarget,
   suppressMenuClick,
 }: DraggableRowProps) {
+  const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
 
   const {
@@ -76,37 +78,39 @@ export function DraggableRow({
     >
       <Popover.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <div className="table-gutter">
-          <button
-            type="button"
-            {...attributes}
-            {...listeners}
-            className="table-row-handle"
-            title="Drag to move · Click for menu"
-            aria-label="Row options"
-            onPointerDown={(e) => {
-              pointerOrigin.current = { x: e.clientX, y: e.clientY };
-              listeners?.onPointerDown?.(e);
-            }}
-            onPointerUp={(e) => {
-              openMenuIfClick(e.clientX, e.clientY);
-            }}
-            onPointerCancel={() => {
-              pointerOrigin.current = null;
-            }}
-          >
-            <svg
-              viewBox="0 0 10 10"
-              className="table-handle-dots"
-              aria-hidden="true"
+          {isEditable && (
+            <button
+              type="button"
+              {...attributes}
+              {...listeners}
+              className="table-row-handle"
+              title="Drag to move · Click for menu"
+              aria-label="Row options"
+              onPointerDown={(e) => {
+                pointerOrigin.current = { x: e.clientX, y: e.clientY };
+                listeners?.onPointerDown?.(e);
+              }}
+              onPointerUp={(e) => {
+                openMenuIfClick(e.clientX, e.clientY);
+              }}
+              onPointerCancel={() => {
+                pointerOrigin.current = null;
+              }}
             >
-              <circle cx="2" cy="2" r="1" fill="currentColor" />
-              <circle cx="2" cy="5" r="1" fill="currentColor" />
-              <circle cx="2" cy="8" r="1" fill="currentColor" />
-              <circle cx="6" cy="2" r="1" fill="currentColor" />
-              <circle cx="6" cy="5" r="1" fill="currentColor" />
-              <circle cx="6" cy="8" r="1" fill="currentColor" />
-            </svg>
-          </button>
+              <svg
+                viewBox="0 0 10 10"
+                className="table-handle-dots"
+                aria-hidden="true"
+              >
+                <circle cx="2" cy="2" r="1" fill="currentColor" />
+                <circle cx="2" cy="5" r="1" fill="currentColor" />
+                <circle cx="2" cy="8" r="1" fill="currentColor" />
+                <circle cx="6" cy="2" r="1" fill="currentColor" />
+                <circle cx="6" cy="5" r="1" fill="currentColor" />
+                <circle cx="6" cy="8" r="1" fill="currentColor" />
+              </svg>
+            </button>
+          )}
         </div>
         <Popover.Anchor className="table-row-handle-anchor" />
         <Popover.Portal>
