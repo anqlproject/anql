@@ -29,7 +29,7 @@ import { BREAKPOINTS } from "@/core/global/defaultValues";
 import { useSharedHistoryContext } from "@/editor/context/SharedHistoryContext";
 import AddNewPlugin from "@/editor/plugins/AddNew";
 import AutoLinkPlugin from "@/editor/plugins/AutoLinkPlugin";
-import { ChangePlugin } from "@/editor/plugins/ChangePlugin";
+import { AutosavePlugin } from "@/editor/plugins/AutosavePlugin";
 import CodeActionMenuPlugin from "@/editor/plugins/CodeActionMenuPlugin";
 import CodeHighlightShikiPlugin from "@/editor/plugins/CodeHighlightShikiPlugin";
 import ContextMenuPlugin from "@/editor/plugins/ContextMenuPlugin";
@@ -173,7 +173,7 @@ export default function Editor(): JSX.Element {
   return (
     <>
       <div className="editor-shell" ref={editorShellRef}>
-        <ChangePlugin />
+        <AutosavePlugin />
         <EmptyStyleResetPlugin />
         <RestoreFormatMemoryPlugin />
         <ShortcutsPlugin

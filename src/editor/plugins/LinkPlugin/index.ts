@@ -96,7 +96,7 @@ export default function LinkPlugin(): null {
           $insertNodes([linkNode]);
 
           // Wrap LinkNode in a ParagraphNode if it's at root level
-          // This ensures ChangePlugin2 treats the ParagraphNode as a bloc
+          // This ensures AutosavePlugin treats the ParagraphNode as a bloc
           // and the LinkNode is stored in its JSON content
           if ($isRootOrShadowRoot(linkNode.getParentOrThrow())) {
             $wrapNodeInElement(linkNode, $createParagraphNode).selectEnd();

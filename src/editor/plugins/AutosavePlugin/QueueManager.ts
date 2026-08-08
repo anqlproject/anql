@@ -117,7 +117,7 @@ export class QueueManager {
     try {
       await this._processQueue(snapshot);
     } catch (err) {
-      logger.error("[ChangePlugin2] Flush error – re-queuing failed entries", err as Error);
+      logger.error("[AutosavePlugin] Flush error – re-queuing failed entries", err as Error);
       // Re-add failed entries (don't lose data)
       snapshot.forEach((value, key) => {
         if (!this.queue.has(key)) {
@@ -151,7 +151,7 @@ export class QueueManager {
             break;
         }
       } catch (err) {
-        logger.error(`[ChangePlugin2] Error processing ${entry.type} for key ${entry.key}`, err as Error);
+        logger.error(`[AutosavePlugin] Error processing ${entry.type} for key ${entry.key}`, err as Error);
         // Re-queue the individual failed entry
         const dedupeKey = `${entry.type}_${entry.key}`;
         if (!this.queue.has(dedupeKey)) {
@@ -177,7 +177,7 @@ export class QueueManager {
     };
 
     const res = await newNode(nodeItem);
-    logger.debug("[ChangePlugin2] ADD bloc", { key: entry.key, id: entry.id });
+    logger.debug("[AutosavePlugin] ADD bloc", { key: entry.key, id: entry.id });
 
     // Track assets that come with the new bloc
     const assetIds = extractAssetIds(entry.contentStr);
@@ -190,7 +190,7 @@ export class QueueManager {
     }
 
     if (!res || res.length === 0) {
-      logger.error("[ChangePlugin2] ADD bloc failed", undefined, { id: entry.id });
+      logger.error("[AutosavePlugin] ADD bloc failed", undefined, { id: entry.id });
     }
   }
 
@@ -201,7 +201,7 @@ export class QueueManager {
     // Fetch node to extract assets before deletion
     const prevNode = await getNodeById(entry.id);
     if (!prevNode) {
-      logger.debug("[ChangePlugin2] DELETE skipped - node not found in database", { id: entry.id });
+      logger.debug("[AutosavePlugin] DELETE skipped - node not found in database", { id: entry.id });
       return;
     }
 
@@ -214,14 +214,14 @@ export class QueueManager {
           )
         ).catch(console.error);
       } catch (err) {
-        logger.error("[ChangePlugin2] Failed to track assets for deletion", err as Error);
+        logger.error("[AutosavePlugin] Failed to track assets for deletion", err as Error);
       }
     }
 
     const res = await deleteNode(entry.id);
-    logger.debug("[ChangePlugin2] DELETE bloc", { id: entry.id });
+    logger.debug("[AutosavePlugin] DELETE bloc", { id: entry.id });
     if (!res) {
-      logger.error("[ChangePlugin2] DELETE failed", undefined, { id: entry.id });
+      logger.error("[AutosavePlugin] DELETE failed", undefined, { id: entry.id });
     }
   }
 
@@ -234,14 +234,14 @@ export class QueueManager {
       entry.contentStr,
       Date.now()
     );
-    logger.debug("[ChangePlugin2] MOVE bloc", { key: entry.key, newPosition: entry.position });
+    logger.debug("[AutosavePlugin] MOVE bloc", { key: entry.key, newPosition: entry.position });
     if (typeof res === "string") {
       const state = this.deps.dynamicState.current.get(entry.key);
       if (state) state.checksum = res;
     } else if (res === null) {
-      logger.debug("[ChangePlugin2] MOVE no change", { id: entry.id });
+      logger.debug("[AutosavePlugin] MOVE no change", { id: entry.id });
     } else {
-      logger.error("[ChangePlugin2] MOVE failed", undefined, { id: entry.id });
+      logger.error("[AutosavePlugin] MOVE failed", undefined, { id: entry.id });
     }
   }
 
@@ -267,7 +267,7 @@ export class QueueManager {
           addedAssets.map((id) => removePendingAssetDeletion(id, docId))
         ).catch(console.error);
       } catch (err) {
-        logger.error("[ChangePlugin2] Failed to track asset changes for update", err as Error);
+        logger.error("[AutosavePlugin] Failed to track asset changes for update", err as Error);
       }
     }
 
@@ -277,14 +277,14 @@ export class QueueManager {
       entry.textContent || "",
       Date.now()
     );
-    logger.debug("[ChangePlugin2] UPDATE bloc", { key: entry.key });
+    logger.debug("[AutosavePlugin] UPDATE bloc", { key: entry.key });
     if (typeof res === "string") {
       const state = this.deps.dynamicState.current.get(entry.key);
       if (state) state.checksum = res;
     } else if (res === null) {
-      logger.debug("[ChangePlugin2] UPDATE no change", { id: entry.id });
+      logger.debug("[AutosavePlugin] UPDATE no change", { id: entry.id });
     } else {
-      logger.error("[ChangePlugin2] UPDATE failed", undefined, { id: entry.id });
+      logger.error("[AutosavePlugin] UPDATE failed", undefined, { id: entry.id });
     }
   }
 
@@ -302,7 +302,7 @@ export class QueueManager {
       await Promise.all(assetIds.map((id) => deleteAsset(id)));
       await clearPendingAssetDeletions(documentId).catch(console.error);
     } catch (err) {
-      logger.error("[ChangePlugin2] Failed to cleanup pending assets", err as Error);
+      logger.error("[AutosavePlugin] Failed to cleanup pending assets", err as Error);
     }
   }
 

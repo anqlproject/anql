@@ -33,7 +33,7 @@ export function getContent(
     serializedNode = getFullNodeJSON(node);
   });
   if (!serializedNode) {
-    logger.error("[ChangePlugin2] getContent: exportJSON failed", undefined, { nodeKey: node.__key });
+    logger.error("[AutosavePlugin] getContent: exportJSON failed", undefined, { nodeKey: node.__key });
   }
   return serializedNode;
 }

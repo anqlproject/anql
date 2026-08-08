@@ -1,5 +1,5 @@
 /**
- * ChangePlugin2
+ * AutosavePlugin
  *
  * Strategy: registerMutationListener (not registerUpdateListener)
  *
@@ -21,8 +21,7 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-  //$getNodeByKey,
-  //$getRoot,
+  $getNodeByKey,
   BLUR_COMMAND,
   COMMAND_PRIORITY_LOW,
   LexicalNode,
@@ -51,7 +50,7 @@ import {
   SiblingSnapshot,
 } from "./utils";
 
-export function ChangePlugin(): null {
+export function AutosavePlugin(): null {
   const [editor] = useLexicalComposerContext();
 
   // ── Store ──────────────────────────────────────────────────────────────────
@@ -189,6 +188,7 @@ export function ChangePlugin(): null {
                 const content = getContent(node, editorState);
                 if (!content) return;
 
+                // use these solutions temporarily instead Lexical Node state
                 setIdState(content, id);
                 setPositionState(content, position);
                 setNodeTypeState(content, node.__type);
@@ -213,7 +213,7 @@ export function ChangePlugin(): null {
                 });
 
                 safeSetModified({ key: nodeKey, type: QUEUE_ACTIONS.ADD, id });
-                logger.debug("[ChangePlugin2] ADD", { nodeKey, id });
+                logger.debug("[AutosavePlugin] ADD", { nodeKey, id });
               });
             }
 
@@ -225,7 +225,7 @@ export function ChangePlugin(): null {
 
                 const state = dynamicState.current.get(nodeKey);
                 if (!state?.id) {
-                  logger.error("[ChangePlugin2] No state for deleted node", undefined, { nodeKey });
+                  logger.error("[AutosavePlugin] No state for deleted node", undefined, { nodeKey });
                   return;
                 }
 
@@ -238,7 +238,7 @@ export function ChangePlugin(): null {
                 safeSetModified({ key: nodeKey, type: QUEUE_ACTIONS.DELETE, id: state.id });
                 dynamicState.current.delete(nodeKey);
                 siblingSnapshotRef.current.delete(nodeKey);
-                logger.debug("[ChangePlugin2] DELETE", { nodeKey, id: state.id });
+                logger.debug("[AutosavePlugin] DELETE", { nodeKey, id: state.id });
               });
             }
 
@@ -255,12 +255,12 @@ export function ChangePlugin(): null {
                 try {
                   rootNode = getParentFromDeep(mutatedNode);
                 } catch (error) {
-                  logger.error("[ChangePlugin2] Error in getParentFromDeep", error as Error, { nodeKey });
+                  logger.error("[AutosavePlugin] Error in getParentFromDeep", error as Error, { nodeKey });
                   return;
                 }
 
                 if (!rootNode) {
-                  logger.warn("[ChangePlugin2] Could not find root ancestor for node", { nodeKey });
+                  logger.warn("[AutosavePlugin] Could not find root ancestor for node", { nodeKey });
                   return;
                 }
 
@@ -295,6 +295,8 @@ export function ChangePlugin(): null {
                     const content = getContent(rootNode, editorState);
                     if (!content) return;
 
+
+                    // use these solutions temporarily instead Lexical Node state
                     setPositionState(content, newPosition);
                     setIdState(content, state.id);
                     setNodeTypeState(content, state.node_type || rootNode.__type);
@@ -308,7 +310,7 @@ export function ChangePlugin(): null {
                     });
 
                     safeSetModified({ key: rootKey, type: QUEUE_ACTIONS.MOVE, id: state.id });
-                    logger.debug("[ChangePlugin2] MOVE", { rootKey, newPosition });
+                    logger.debug("[AutosavePlugin] MOVE", { rootKey, newPosition });
                     return; // MOVE and UPDATE are mutually exclusive
                   }
                 }
@@ -318,6 +320,10 @@ export function ChangePlugin(): null {
                 if (!content) return;
 
                 const position = state.position || generateIndex(rootNode, dynamicState);
+                const node = $getNodeByKey(rootKey);
+                console.log(node?.__state?.unknownState);
+                
+                // use these solutions temporarily instead Lexical Node state
                 setPositionState(content, position);
                 setIdState(content, state.id);
                 setNodeTypeState(content, state.node_type || rootNode.__type);
