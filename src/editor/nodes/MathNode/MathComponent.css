@@ -53,7 +53,8 @@
   word-break: break-all;
   max-width: calc(100% - 16px);
   text-align: left;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   user-select: none;
   z-index: var(--z-base);
 }
@@ -69,7 +70,8 @@
   word-break: break-all;
   max-width: calc(100% - 16px);
   text-align: left;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   user-select: none;
   z-index: var(--z-base);
 }

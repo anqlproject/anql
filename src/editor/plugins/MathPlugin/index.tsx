@@ -1,10 +1,11 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $setBlocksType } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
-import { $getRoot, $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand, LexicalNode } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, CLICK_COMMAND, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_LOW, createCommand, LexicalNode } from 'lexical';
 import { evaluate } from 'mathjs';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
+import { Dialog } from '@/components/custom/Dialog/Dialog';
 import { useMathVariables } from '@/editor/context/MathVariablesContext';
 import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
 
@@ -14,6 +15,37 @@ export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 function MathResultDisplayPlugin() {
   const [editor] = useLexicalComposerContext();
   const { results } = useMathVariables();
+  const [errorDialog, setErrorDialog] = useState<string | null>(null);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      CLICK_COMMAND,
+      (payload: MouseEvent) => {
+        const target = payload.target as HTMLElement;
+        const mathNode = target.closest('.math-exp-node');
+        if (mathNode) {
+          const rect = mathNode.getBoundingClientRect();
+          if (payload.clientY > rect.bottom - 30) {
+            if (mathNode.classList.contains('has-error')) {
+              const fullError = mathNode.getAttribute('data-full-error');
+              if (fullError) {
+                setErrorDialog(fullError);
+                return true;
+              }
+            } else {
+              const fullResult = mathNode.getAttribute('data-full-result');
+              if (fullResult && fullResult.length > 50) {
+                setErrorDialog(fullResult);
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      },
+      COMMAND_PRIORITY_LOW
+    );
+  }, [editor]);
 
   useEffect(() => {
     editor.getEditorState().read(() => {
@@ -44,13 +76,17 @@ function MathResultDisplayPlugin() {
             if (result.error) {
               dom.classList.add('has-error');
               dom.classList.remove('is-empty');
-              dom.setAttribute('data-error', result.error);
+              const shortError = result.error.length > 30 ? result.error.substring(0, 30) + '...' : result.error;
+              dom.setAttribute('data-error', shortError);
+              dom.setAttribute('data-full-error', result.error);
               dom.removeAttribute('data-result');
               dom.removeAttribute('data-placeholder');
             } else if (result.result) {
               dom.classList.remove('has-error');
               dom.classList.remove('is-empty');
-              dom.setAttribute('data-result', result.result);
+              const shortResult = result.result.length > 50 ? result.result.substring(0, 50) + '...' : result.result;
+              dom.setAttribute('data-result', shortResult);
+              dom.setAttribute('data-full-result', result.result);
               dom.removeAttribute('data-error');
               dom.removeAttribute('data-placeholder');
             } else {
@@ -72,7 +108,20 @@ function MathResultDisplayPlugin() {
     });
   }, [editor, results]);
 
-  return null;
+  return (
+    <Dialog
+      isOpen={!!errorDialog}
+      onClose={() => setErrorDialog(null)}
+      title="Détails"
+      mode="info"
+      size="md"
+      description={
+        <div style={{ maxHeight: '60vh', overflowY: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'var(--font-mono)' }}>
+          {errorDialog}
+        </div>
+      }
+    />
+  );
 }
 
 export default function MathPlugin() {
