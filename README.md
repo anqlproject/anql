@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="app-icon.png" alt="ANQL Icon" height="60" />
+  <img src="assets/logo_1024.png" alt="ANQL Icon" height="60" />
 </p>
 
 <p align="center">
@@ -43,7 +43,7 @@ ANQL is a visual workspace designed for productive work. Ideal for professionals
 - **Unit conversion** - Convert between different units seamlessly.
 - **Light & Dark mode** - Switch between light and dark themes for comfortable viewing in any environment.
 
-## Node Types
+### Node Types
 
 ANQL supports multiple node types for different content needs, with the flexibility to transform between them:
 
@@ -64,9 +64,23 @@ ANQL supports multiple node types for different content needs, with the flexibil
 
 **Smart Transformations**: Seamlessly convert any node type to another - turn text into headings, lists into checklists, or paragraphs into quotes. Adapt your content structure instantly without losing your work.
 
+## Development
+
+ANQL is currently in active development and may be unstable at times. New features and improvements are being added regularly. Feel free to reach out for feedback, bug reports, or feature suggestions.
+
+**Upcoming Focus**: We are placing special emphasis on enhancing the Math node to support advanced calculations, statistical analysis, plotting, and graph generation - all while maintaining the seamless note-taking experience that makes ANQL a productive workspace.
+
 ## Platform Support
 
 Currently, ANQL is tested and optimized for macOS only. Windows and Linux support will be available soon.
+
+## Download
+
+Download the macOS binary: [GitHub releases](https://github.com/anqlproject/anql/releases/tag/0.1.0)
+
+## Community
+
+Join our [Discord server](https://discord.gg/z5Jgg9m83) for discussions, report issues, or request new features.
 
 ## Tech Stack
 
@@ -74,10 +88,6 @@ Currently, ANQL is tested and optimized for macOS only. Windows and Linux suppor
 - **SQLite** - Local database storage
 - **Lexical** - Rich text editing engine
 - **React** - UI framework
-
-## Development
-
-ANQL is currently in active development and may be unstable at times. New features and improvements are being added regularly. Feel free to reach out for feedback, bug reports, or feature suggestions.
 
 ## Version
 
