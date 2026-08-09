@@ -26,6 +26,7 @@ import {
   getPositionState,
 } from "@/editor/DocumentState/DocumentStateManager";
 import { AppNodeTypes } from "@/editor/nodes/nodelist";
+import { navigatingEditors } from "@/editor/plugins/AutosavePlugin";
 import { useNavigationStore } from "@/GlobalState/navigationStore";
 
 export function useFile() {
@@ -216,15 +217,20 @@ export function useFile() {
       }
       // ────────────────────────────────────────────────────────────────
 
-      loadEditorState(editorState);
+      navigatingEditors.add(editor);
+      try {
+        loadEditorState(editorState);
 
-      // Apply readMode from document metadata
-      const meta = parseDocumentMetadata(document.metadata);
-      editor.setEditable(!meta.readMode);
+        // Apply readMode from document metadata
+        const meta = parseDocumentMetadata(document.metadata);
+        editor.setEditable(!meta.readMode);
 
-      editor.read(() => {
-        buildDynamicStateMap();
-      });
+        editor.read(() => {
+          buildDynamicStateMap();
+        });
+      } finally {
+        navigatingEditors.delete(editor);
+      }
       setModified(emptyChanges);
 
       // Force focus to editor content, not title
@@ -275,11 +281,17 @@ export function useFile() {
 
     setCurrentDocument(newDocumentItem);
     navigateTo("editor", newDocumentItem);
-    loadEditorState(ees);
+    
+    navigatingEditors.add(editor);
+    try {
+      loadEditorState(ees);
 
-    editor.read(() => {
-      buildDynamicStateMap();
-    });
+      editor.read(() => {
+        buildDynamicStateMap();
+      });
+    } finally {
+      navigatingEditors.delete(editor);
+    }
 
     // Force focus to editor content, not title
     setTimeout(() => {

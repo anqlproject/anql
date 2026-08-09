@@ -49,6 +49,16 @@ import {
   SiblingSnapshot,
 } from "./utils";
 
+/**
+ * Module-level WeakSet used to mark editors that are currently loading
+ * a new document. AutosavePlugin ignores all mutations on such editors
+ * to prevent false DELETE/CREATE events during document switching.
+ *
+ * FileHooks.tsx wraps loadEditorState with:
+ *   navigatingEditors.add(editor) / navigatingEditors.delete(editor)
+ */
+export const navigatingEditors = new WeakSet<any>();
+
 export function AutosavePlugin(): null {
   const [editor] = useLexicalComposerContext();
 
@@ -164,6 +174,14 @@ export function AutosavePlugin(): null {
           // Use ref to avoid stale closure issues
           if (useGlobalStore.getState().currentDocument?.id !== currentDocumentIdRef.current) {
             return; // exit
+          }
+
+          // Ignore all mutations triggered during document loading (loadEditorState).
+          // When opening a document, Lexical destroys old nodes and creates new ones —
+          // these are initialization events, not user actions. Without this guard,
+          // AutosavePlugin would see those destroyed nodes as user deletions.
+          if (navigatingEditors.has(editor)) {
+            return;
           }
 
           const editorState = editor.getEditorState();

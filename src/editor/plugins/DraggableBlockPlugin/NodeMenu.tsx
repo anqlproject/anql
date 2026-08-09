@@ -466,13 +466,13 @@ export default function NodeMenu({
           const topLevelNodes = getSelectedTopLevelNodes();
           if (topLevelNodes.length === 0) return;
 
-          topLevelNodes.forEach((node) => {
-            node.remove();
-          });
-
           const nextNode =
             topLevelNodes[topLevelNodes.length - 1].getNextSibling();
           const prevNode = topLevelNodes[0].getPreviousSibling();
+
+          topLevelNodes.forEach((node) => {
+            node.remove();
+          });
 
           if (nextNode) {
             nextNode.selectEnd();
