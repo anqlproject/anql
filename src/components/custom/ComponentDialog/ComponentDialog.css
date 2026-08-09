@@ -83,12 +83,14 @@
 }
 
 .component-dialog-button.cancel.urgent {
-  color: var(--destructive);
+  background-color: var(--destructive);
+  color: white;
   border: 1px solid var(--destructive);
 }
 
 .component-dialog-button.cancel.urgent:hover {
-  background-color: var(--destructive-container);
+  background-color: var(--destructive-hover);
+  border-color: var(--destructive-hover);
 }
 
 .component-dialog-button.confirm {

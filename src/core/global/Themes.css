@@ -20,6 +20,7 @@
   --action-active: #D2E3FC;
 
   --destructive: #ef4444;
+  --destructive-hover: #dc2626;
   --destructive-container: rgba(239, 68, 68, 0.08);
 
   --gradient-primary: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
@@ -48,6 +49,7 @@
   --action-active: #4A525A;
 
   --destructive: #ef4444;
+  --destructive-hover: #dc2626;
   --destructive-container: rgba(239, 68, 68, 0.15);
 
   --gradient-primary: linear-gradient(135deg, #059669 0%, #0891b2 100%);

@@ -1,10 +1,10 @@
 
 @keyframes blockPulse {
   0%, 100% {
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3), 0 4px 12px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.3), 0 4px 12px rgba(26, 115, 232, 0.2);
   }
   50% {
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.6), 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.6), 0 6px 20px rgba(26, 115, 232, 0.4);
   }
 }
 
@@ -171,23 +171,26 @@
 
 /* Danger variant */
 .menu-item.danger .menu-item-icon {
-  color: #ef4444;
+  color: var(--destructive);
+}
+
+.menu-item.danger .menu-item-title {
+  color: var(--destructive);
 }
 
 .menu-item.danger.focused:not(.disabled),
 .menu-item.danger[data-highlighted]:not([data-disabled]) {
-  background-color: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.2);
+  background-color: var(--destructive);
 }
 
 .menu-item.danger.focused:not(.disabled) .menu-item-icon,
 .menu-item.danger[data-highlighted]:not([data-disabled]) .menu-item-icon {
-  color: #dc2626;
+  color: var(--primary-white);
 }
 
 .menu-item.danger.focused:not(.disabled) .menu-item-title,
 .menu-item.danger[data-highlighted]:not([data-disabled]) .menu-item-title {
-  color: #991b1b;
+  color: var(--primary-white);
 }
 
 /* Submenu arrow */
