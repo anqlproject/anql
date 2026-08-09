@@ -98,6 +98,202 @@
           "image": "docs/Help/Assets/transform.png"
         }
       ]
+    },
+    {
+      "id": "math-expressions",
+      "title": "Mathematical Expressions",
+      "content": [
+        {
+          "id": "math-intro",
+          "title": "Introduction to Math Nodes",
+          "description": [
+            "Math nodes allow you to perform mathematical calculations and define variables within your document.",
+            "",
+            "The math functionality is powered by mathjs, a powerful mathematics library that supports a wide range of operations.",
+            "",
+            "Results are calculated in real-time as you type and displayed below the expression."
+          ]
+        },
+        {
+          "id": "basic-operations",
+          "title": "Basic Arithmetic Operations",
+          "description": [
+            "You can perform standard arithmetic operations:",
+            "",
+            "- Addition: 2 + 3",
+            "- Subtraction: 10 - 4",
+            "- Multiplication: 6 * 7",
+            "- Division: 15 / 3",
+            "- Power: 2 ^ 3",
+            "- Modulo: 17 % 5",
+            "",
+            "Complex expressions are also supported:",
+            "- (5 + 3) * 2",
+            "- 10 / (2 + 3)",
+            "- 2 ^ (3 + 1)"
+          ]
+        },
+        {
+          "id": "variables",
+          "title": "Variable Assignment and Usage",
+          "description": [
+            "Define variables using the assignment syntax and use them in subsequent expressions:",
+            "",
+            "Syntax: variable_name = expression",
+            "",
+            "Examples:",
+            "- x = 10",
+            "- y = 5",
+            "- z = x + y  (result: 15)",
+            "- area = x * y  (result: 50)",
+            "",
+            "Variable naming rules:",
+            "- Must start with a letter or underscore",
+            "- Can contain letters, numbers, and underscores",
+            "- Case-sensitive (x and X are different variables)"
+          ]
+        },
+        {
+          "id": "advanced-functions",
+          "title": "Advanced Mathematical Functions",
+          "description": [
+            "Mathjs provides many built-in functions:",
+            "",
+            "Trigonometric functions:",
+            "- sin(0.5)",
+            "- cos(1)",
+            "- tan(0.25)",
+            "",
+            "Other functions:",
+            "- sqrt(16)  (square root)",
+            "- abs(-5)  (absolute value)",
+            "- log(100)  (logarithm)",
+            "- exp(2)  (exponential)",
+            "- floor(3.7)  (round down)",
+            "- ceil(3.2)  (round up)",
+            "- round(3.5)  (round to nearest)"
+          ]
+        },
+        {
+          "id": "constants",
+          "title": "Mathematical Constants",
+          "description": [
+            "Use built-in mathematical constants:",
+            "",
+            "- pi  (π ≈ 3.14159)",
+            "- e  (Euler's number ≈ 2.71828)",
+            "",
+            "Examples:",
+            "- 2 * pi",
+            "- e ^ 2",
+            "- sin(pi/2)"
+          ]
+        },
+        {
+          "id": "symbolic-computation",
+          "title": "Symbolic Computation (Advanced)",
+          "description": [
+            "Mathjs supports symbolic computation for algebraic operations:",
+            "",
+            "Simplify expressions:",
+            "- simplify('3 + 2 / 4')  → '7 / 2'",
+            "- simplify('2x + 3x')  → '5 * x'",
+            "- simplify('x^2 + x + 3 + x^2')  → '2 * x ^ 2 + x + 3'",
+            "",
+            "Calculate derivatives:",
+            "- derivative('x^2', 'x')  → '2 * x'",
+            "- derivative('sin(2x)', 'x')  → '2 * cos(2 * x)'",
+            "- derivative('2x^2 + 3x + 4', 'x')  → '4 * x + 3'",
+            "",
+            "Note: These advanced symbolic functions are available in mathjs but may require specific implementation in your current setup."
+          ]
+        },
+        {
+          "id": "matrix-operations",
+          "title": "Matrix and Vector Operations",
+          "description": [
+            "Mathjs supports matrix and vector operations:",
+            "",
+            "Matrix creation:",
+            "- matrix([1, 2, 3])",
+            "- matrix([[1, 2], [3, 4]])",
+            "",
+            "Matrix operations:",
+            "- matrix addition: A + B",
+            "- matrix multiplication: A * B",
+            "- matrix transpose: transpose(A)",
+            "- matrix determinant: det(A)",
+            "- matrix inverse: inv(A)",
+            "",
+            "Vector operations:",
+            "- dot product: dot(a, b)",
+            "- cross product: cross(a, b)",
+            "- norm: norm(v)"
+          ]
+        },
+        {
+          "id": "additional-functions",
+          "title": "Additional Mathematical Functions",
+          "description": [
+            "Mathjs provides many more functions:",
+            "",
+            "Statistics:",
+            "- mean([1, 2, 3, 4, 5])",
+            "- median([1, 2, 3, 4, 5])",
+            "- std([1, 2, 3, 4, 5])",
+            "- variance([1, 2, 3, 4, 5])",
+            "",
+            "Complex numbers:",
+            "- complex(2, 3)",
+            "- re(complex(2, 3))",
+            "- im(complex(2, 3))",
+            "",
+            "Units:",
+            "- unit('5 cm')",
+            "- unit('2 kg').to('g')",
+            "- unit('10 m/s') * unit('5 s')"
+          ]
+        },
+        {
+          "id": "error-handling",
+          "title": "Error Handling",
+          "description": [
+            "Math nodes provide visual feedback for errors:",
+            "",
+            "Common errors:",
+            "- Division by zero: 5 / 0",
+            "- Invalid syntax: 2 + * 3",
+            "- Undefined variables: unknown_var + 5",
+            "- Invalid values: sqrt(-1)",
+            "",
+            "Error display:",
+            "- Errors appear in red at the bottom of the math node",
+            "- Click on the error message to see full details",
+            "- Results are automatically hidden when errors occur"
+          ]
+        },
+        {
+          "id": "math-examples",
+          "title": "Practical Examples",
+          "description": [
+            "Example 1: Simple calculations",
+            "price = 100",
+            "tax = 0.2",
+            "total = price * (1 + tax)  (result: 120)",
+            "",
+            "Example 2: Geometry calculations",
+            "radius = 5",
+            "area = pi * radius ^ 2  (result: 78.5398)",
+            "circumference = 2 * pi * radius  (result: 31.4159)",
+            "",
+            "Example 3: Financial calculations",
+            "principal = 1000",
+            "rate = 0.05",
+            "years = 3",
+            "amount = principal * (1 + rate) ^ years  (result: 1157.625)"
+          ]
+        }
+      ]
     }
   ]
 }
