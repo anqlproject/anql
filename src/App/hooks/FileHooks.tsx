@@ -1,6 +1,7 @@
+import { isCodeLanguageLoaded, loadCodeLanguage } from "@lexical/code-shiki";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { invoke } from "@tauri-apps/api/core";
-import { $createParagraphNode, $createTextNode, $getNodeByKey, $getSelection, $isNodeSelection, CLEAR_HISTORY_COMMAND } from "lexical";
+import { $createParagraphNode, $createTextNode, $getNodeByKey, $getRoot, $getSelection, $isNodeSelection, CLEAR_HISTORY_COMMAND } from "lexical";
 import { useCallback } from "react";
 import { useShallow } from 'zustand/react/shallow';
 
@@ -73,9 +74,9 @@ export function useFile() {
   const loadEditorState = (editorState: unknown) => {
     editor.update(() => {
       try {
-        const cleanState = JSON.parse(JSON.stringify(editorState));
-
         // Block node that was not defined
+        // Work directly on the object — avoid an expensive JSON deep-clone.
+        // sanitizeNode only mutates when an unknown type is found (rare).
         const sanitizeNode = (node: { children?: unknown[]; type?: string; $?: { id?: string } }) => {
           if (node.children && Array.isArray(node.children)) {
             node.children = node.children.filter((child: unknown) => {
@@ -95,11 +96,13 @@ export function useFile() {
           }
         };
 
-        if (cleanState.root) {
-          sanitizeNode(cleanState.root);
+        const stateObj = editorState as any;
+        if (stateObj?.root) {
+          sanitizeNode(stateObj.root);
         }
 
-        const parsedState = editor.parseEditorState(JSON.stringify(cleanState));
+        // Single serialization pass
+        const parsedState = editor.parseEditorState(JSON.stringify(stateObj));
         editor.setEditorState(parsedState);
       } catch (error) {
         console.error("Failed to parse editor state:", error);
@@ -113,21 +116,20 @@ export function useFile() {
     const editorState = editor.getEditorState();
     const newMap = new Map<string, NodeStateType>();
 
-    editorState._nodeMap.forEach((node, key) => {
-      if (node) {
-        const tempNode = node.getParent();
-        let parentNode;
-        if (tempNode?.getKey() === "root") {
-          parentNode = node;
-        }
-        if (parentNode) {
-          const content = parentNode.exportJSON();
-          newMap.set(key, {
-            id: getIdState(content) || "",
-            position: getPositionState(content) || "",
-            node_type: getNodeTypeState(content) || ""
-          });
-        }
+    // ✅ Iterate only direct children of root instead of the full _nodeMap.
+    // The _nodeMap contains ALL Lexical nodes including every CodeHighlightNode
+    // (one per token), which can be thousands for a 500-line code block.
+    // $getRoot().getChildren() returns only the top-level blocs (O(N_blocs)).
+    editorState.read(() => {
+      const rootChildren = $getRoot().getChildren();
+      for (const node of rootChildren) {
+        const key = node.__key;
+        const content = node.exportJSON();
+        newMap.set(key, {
+          id: getIdState(content) || "",
+          position: getPositionState(content) || "",
+          node_type: getNodeTypeState(content) || ""
+        });
       }
     });
 
@@ -193,6 +195,27 @@ export function useFile() {
 
       setCurrentDocument(document);
       navigateTo("editor", document);
+
+      // ── Pre-load Shiki grammars ──────────────────────────────────────
+      // $codeNodeTransform sets inFlight=true and defers tokenization when
+      // the grammar isn't ready yet. That triggers a second transform pass
+      // AFTER the promise resolves, forcing a full re-tokenization of every
+      // line in the code block inside the same render frame → visible lag.
+      // By awaiting loadCodeLanguage here (before setEditorState), the
+      // grammar is already in Shiki's cache when the transform runs.
+      const codeNodes = editorState.root.children.filter(
+        (n: any) => n.type === "code" && n.language
+      );
+      const uniqueLangs = [...new Set(codeNodes.map((n: any) => n.language as string))];
+      const loadPromises = uniqueLangs
+        .filter(lang => !isCodeLanguageLoaded(lang))
+        .map(lang => loadCodeLanguage(lang))
+        .filter(Boolean) as Promise<void>[];
+      if (loadPromises.length > 0) {
+        await Promise.all(loadPromises);
+      }
+      // ────────────────────────────────────────────────────────────────
+
       loadEditorState(editorState);
 
       // Apply readMode from document metadata

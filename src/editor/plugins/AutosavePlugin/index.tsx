@@ -21,7 +21,6 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-  $getNodeByKey,
   BLUR_COMMAND,
   COMMAND_PRIORITY_LOW,
   LexicalNode,
@@ -320,9 +319,6 @@ export function AutosavePlugin(): null {
                 if (!content) return;
 
                 const position = state.position || generateIndex(rootNode, dynamicState);
-                const node = $getNodeByKey(rootKey);
-                console.log(node?.__state?.unknownState);
-                
                 // use these solutions temporarily instead Lexical Node state
                 setPositionState(content, position);
                 setIdState(content, state.id);
