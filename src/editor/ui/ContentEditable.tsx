@@ -57,7 +57,10 @@ export default function LexicalContentEditable({
         }
 
         const textContent = firstChild.getTextContent();
-        setShowPlaceholder(textContent.length === 0);
+        const paragraphChildren = firstChild.getChildren();
+        const hasChildren = paragraphChildren.length > 0;
+
+        setShowPlaceholder(textContent.length === 0 && !hasChildren);
       });
     };
 
@@ -75,17 +78,20 @@ export default function LexicalContentEditable({
         <div
           style={{
             position: 'absolute',
-            top: '0',
-            left: '0',
-            right: '0',
-            bottom: '0',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             pointerEvents: 'none',
             color: 'var(--text-secondary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '14px',
-            opacity: '0.6',
+            fontSize: '16px',
+            fontWeight: '400',
+            lineHeight: '1.5',
+            letterSpacing: '0.01em',
+            opacity: '0.5',
+            textAlign: 'center',
+            maxWidth: '80%',
+            userSelect: 'none',
+            fontStyle: 'italic',
           }}
         >
           {t('EDITOR.placeholder') as string}
