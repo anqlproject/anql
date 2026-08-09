@@ -47,7 +47,14 @@
       "math": "Maths",
       "equation": "Equation",
       "linkUrlPlaceholder": "Copy link from web, node, document, table",
-      "linkNamePlaceholder": "Link name"
+      "linkNamePlaceholder": "Link name",
+      "linkTooltip": "Right click to edit"
+    },
+    "LINK_DIALOG": {
+      "title": "Open link",
+      "description": "Do you really want to open this link?",
+      "cancel": "Cancel",
+      "open": "Open"
     },
     "STYLE": {
       "bold": "Bold",

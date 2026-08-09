@@ -218,7 +218,7 @@
 
 .dialog-button.primary {
   background-color: var(--primary-color);
-  color: var(--surface-color);
+  color: var(--primary-white);
 }
 
 .dialog-button.primary:hover {

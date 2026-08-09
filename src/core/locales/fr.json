@@ -47,7 +47,14 @@
       "math": "Mathématiques",
       "equation": "Équation",
       "linkUrlPlaceholder": "Copier le lien depuis web, node, document, tableau",
-      "linkNamePlaceholder": "Nom du lien"
+      "linkNamePlaceholder": "Nom du lien",
+      "linkTooltip": "Clic droit pour éditer"
+    },
+    "LINK_DIALOG": {
+      "title": "Ouvrir le lien",
+      "description": "Voulez-vous vraiment ouvrir ce lien ?",
+      "cancel": "Annuler",
+      "open": "Ouvrir"
     },
     "STYLE": {
       "bold": "Gras",

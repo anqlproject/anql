@@ -1,6 +1,7 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getSelection, $isNodeSelection, $isRangeSelection } from "lexical";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useFile } from "@/App/hooks/FileHooks";
 import { useGlobalToast } from "@/App/hooks/useGlobalToast";
@@ -34,6 +35,7 @@ export default function LinkNodeComponent({
   const { showToast } = useGlobalToast();
   const [editor] = useLexicalComposerContext();
   const [isSelected, setIsSelected] = useState(false);
+  const { t } = useTranslation();
 
   // NOTE:  color the link when it is selected
   useEffect(() => {
@@ -229,7 +231,7 @@ export default function LinkNodeComponent({
           verticalAlign: "baseline",
           lineHeight: "1",
         }}
-        title={linkType === "external" ? url : `${linkType}: ${targetId}`}
+        title={`${linkType === "external" ? url : `${linkType}: ${targetId}`} - ${t('INLINES.linkTooltip')}`}
       >
         {getDisplayText()}
       </a>
@@ -245,10 +247,10 @@ export default function LinkNodeComponent({
         <Dialog
           isOpen={showConfirmation}
           onClose={handleCancelOpen}
-          title="Ouvrir le lien"
+          title={t('LINK_DIALOG.title')}
           description={
             <div>
-              Voulez-vous vraiment ouvrir ce lien ?
+              {t('LINK_DIALOG.description')}
               <br /><br />
               <div style={{ wordBreak: 'break-all', opacity: 0.8, fontSize: '0.9em' }}>
                 {pendingUrl}
@@ -257,11 +259,11 @@ export default function LinkNodeComponent({
           }
           mode="request"
           leftButton={{
-            text: "Annuler",
+            text: t('LINK_DIALOG.cancel'),
             onClick: handleCancelOpen
           }}
           rightButton={{
-            text: "Ouvrir",
+            text: t('LINK_DIALOG.open'),
             onClick: handleConfirmOpen
           }}
         />
