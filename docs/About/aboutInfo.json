@@ -1,15 +1,14 @@
 {
   "title": "ANQL",
-  "subtitle": "The intuitive workspace where ideas become actions.",
+  "subtitle": "A visual workspace designed for productive work. Ideal for professionals, and anyone who needs to organize and work efficiently.",
   "version": "0.1.0",
-  "description": "",
   "features": [
     "Rich text editing",
-    "Dynamic calculations",
+    "Data management",
     "Offline first",
-    "Code & syntax highlighting",
-    "Smart links and references",
+    "Dynamic calculations",
     "Unit conversion",
+    "Light & Dark mode",
     "And more..."
   ]
 }

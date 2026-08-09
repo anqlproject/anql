@@ -62,7 +62,8 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
               <p style={{ 
                 fontSize: '16px', 
                 color: 'var(--text-secondary, #666)',
-                margin: 0 
+                margin: 0,
+                marginTop: '48px'
               }}>
                 {aboutInfo.subtitle}
               </p>
