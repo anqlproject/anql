@@ -182,7 +182,7 @@
   display: block;
   padding: 45px 8px 8px 52px;
   line-height: var(--leading-relaxed);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   margin: 0;
   margin-top: 8px;
   margin-bottom: 8px;
@@ -191,6 +191,8 @@
   tab-size: 2;
   border: 1px solid var(--border-color);
   border-radius: 4px;
+  white-space: pre;
+  word-break: normal;
 }
 .anql_code:before {
   content: attr(data-gutter);
@@ -198,6 +200,7 @@
   background-color: var(--surface-color);
   left: 0;
   top: 0;
+  min-height: 100%;
   border-right: 1px solid var(--border-color);
   padding: 45px 8px 8px 8px;
   color: var(--text-secondary);
