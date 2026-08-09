@@ -1,9 +1,5 @@
 <p align="center">
-  <img src="assets/logo_1024.png" alt="ANQL Icon" height="60" />
-</p>
-
-<p align="center">
-  The intuitive workspace where ideas become actions.
+  <img src="assets/logo_1024.png" alt="ANQL Icon" height="120" />
 </p>
 
 <p align="center">
@@ -12,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="#overview">Overview</a> | <a href="#gallery">Gallery</a> | <a href="#features">Features</a> | <a href="#tech-stack">Tech Stack</a> | <a href="#development">Development</a>
+  <a href="#overview">Overview</a> | <a href="#features">Features</a> | <a href="#development">Development</a> | <a href="#platform-support">Platform Support</a> | <a href="#community">Community</a>
 </p>
 
 <br />
@@ -23,7 +19,7 @@ ANQL is a visual workspace designed for productive work. Ideal for professionals
 
 ![Overview](assets/overview.png)
 
-## Gallery
+### Gallery
 
 <p align="center">
   <img src="assets/overview 1.png" alt="ANQL Overview 1" width="45%" />
@@ -70,25 +66,19 @@ ANQL is currently in active development and may be unstable at times. New featur
 
 **Upcoming Focus**: We are placing special emphasis on enhancing the Math node to support advanced calculations, statistical analysis, plotting, and graph generation - all while maintaining the seamless note-taking experience that makes ANQL a productive workspace.
 
-## Platform Support
-
-Currently, ANQL is tested and optimized for macOS only. Windows and Linux support will be available soon.
-
-## Download
-
-Download the macOS binary: [GitHub releases](https://github.com/anqlproject/anql/releases/tag/0.1.0)
-
-## Community
-
-Join our [Discord server](https://discord.gg/z5Jgg9m83) for discussions, report issues, or request new features.
-
-## Tech Stack
+### Tech Stack
 
 - **Tauri** - Cross-platform desktop application framework
 - **SQLite** - Local database storage
 - **Lexical** - Rich text editing engine
 - **React** - UI framework
 
-## Version
+## Platform Support
 
-Current version: 0.1.0
+Currently, ANQL is tested and optimized for macOS only. Windows and Linux support will be available soon.
+
+Download the macOS binary: [GitHub releases](https://github.com/anqlproject/anql/releases/tag/0.1.0)
+
+## Community
+
+Join our [Discord server](https://discord.gg/z5Jgg9m83) for discussions, report issues, or request new features.
