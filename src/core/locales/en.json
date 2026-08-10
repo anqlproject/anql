@@ -293,6 +293,10 @@
       "switchToDarkMode": "Switch to dark mode",
       "getHelp": "Get help",
       "about": "About"
+    },
+    "HELP_PANEL": {
+      "title": "Help Documentation",
+      "sidebarTitle": "Help"
     }
   }
 }

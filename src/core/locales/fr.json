@@ -293,6 +293,10 @@
       "switchToDarkMode": "Passer au mode sombre",
       "getHelp": "Obtenir de l'aide",
       "about": "À propos"
+    },
+    "HELP_PANEL": {
+      "title": "Documentation d'aide",
+      "sidebarTitle": "Aide"
     }
   }
 }

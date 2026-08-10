@@ -247,7 +247,7 @@ export default function LinkNodeComponent({
         <Dialog
           isOpen={showConfirmation}
           onClose={handleCancelOpen}
-          title={t('LINK_DIALOG.title')}
+          title={t('LINK_DIALOG.title') as string}
           description={
             <div>
               {t('LINK_DIALOG.description')}
