@@ -22,12 +22,7 @@ import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 import { INSERT_DATETIME_COMMAND } from "@/editor/plugins/DateTimePlugin";
 import { InsertEquationDialog } from "@/editor/plugins/EquationsPlugin";
 
-import {
-  handleCopy,
-  handleCut,
-  handlePaste,
-  lastActiveInput,
-} from "./contextMenuActions";
+import { handleCopy, handleCut, handlePaste } from "./contextMenuActions";
 
 export function ContextMenuItems(
   setIsMenuOpen: (isMenuOpen: boolean) => void,
@@ -46,19 +41,17 @@ export function ContextMenuItems(
   // Check if there's a selection
   let isInsideCodeNode = false;
   let isInsideMathNode = false;
-  if (lastActiveInput) {
-    editor.getEditorState().read(() => {
-      const selection = $getSelection();
-      if (selection && $isRangeSelection(selection)) {
-        const anchorNode = selection.anchor.getNode();
-        isInsideCodeNode =
-          $isCodeNode(anchorNode) || anchorNode.getParents().some($isCodeNode);
-        isInsideMathNode =
-          $isMathExpNode(anchorNode) ||
-          anchorNode.getParents().some($isMathExpNode);
-      }
-    });
-  }
+  editor.getEditorState().read(() => {
+    const selection = $getSelection();
+    if (selection && $isRangeSelection(selection)) {
+      const anchorNode = selection.anchor.getNode();
+      isInsideCodeNode =
+        $isCodeNode(anchorNode) || anchorNode.getParents().some($isCodeNode);
+      isInsideMathNode =
+        $isMathExpNode(anchorNode) ||
+        anchorNode.getParents().some($isMathExpNode);
+    }
+  });
 
   // Register undo/redo state listeners
   useEffect(() => {
