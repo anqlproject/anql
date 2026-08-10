@@ -129,6 +129,7 @@
       "cleanup": "Nettoyer",
       "clear": "Effacer",
       "exitTitle": "Quitter l'application",
+      "exitDescription": "Êtes-vous sûr de vouloir quitter ?",
       "deleteTitle": "Suppression permanente",
       "emptyTrashTitle": "Vider la corbeille",
       "unauthorizedTablesTitle": "Tables non autorisées détectées",
@@ -257,6 +258,7 @@
       "delete": "Supprimer",
       "addRowAbove": "Ajouter ligne en haut",
       "addRowBelow": "Ajouter ligne en bas",
+      "copyLink": "Copier le lien",
       "placeholderText": "Saisir du texte...",
       "placeholderNumber": "Nombre...",
       "chooseDate": "Choisir..."

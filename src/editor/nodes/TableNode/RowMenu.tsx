@@ -50,6 +50,14 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       <button
         type="button"
         onPointerDown={(e) => e.preventDefault()}
+        onClick={() => table.options.meta?.addRowBelow?.(rowIndex)}
+        className="table-menu-item"
+      >
+        <Plus className="w-4 h-4" /> {t('TABLE.addRowBelow')}
+      </button>
+      <button
+        type="button"
+        onPointerDown={(e) => e.preventDefault()}
         onClick={async () => {
           const rowId = table.getRowModel().rows[rowIndex]?.original._rowId;
           const nodeKey = table.options.meta?.nodeKey;
@@ -76,15 +84,7 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
         }}
         className="table-menu-item"
       >
-        <Link2 className="w-4 h-4" /> {t('TABLE.copyLink', 'Copier le lien')}
-      </button>
-      <button
-        type="button"
-        onPointerDown={(e) => e.preventDefault()}
-        onClick={() => table.options.meta?.addRowBelow?.(rowIndex)}
-        className="table-menu-item"
-      >
-        <Plus className="w-4 h-4" /> {t('TABLE.addRowBelow')}
+        <Link2 className="w-4 h-4" /> {t('TABLE.copyLink')}
       </button>
       <div className="table-menu-divider" />
       <button

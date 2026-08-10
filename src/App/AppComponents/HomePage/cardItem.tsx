@@ -121,7 +121,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
   };
 
   return (
-    <div className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''}`} onClick={handleOpen}>
+    <div className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''} ${menuOpen ? 'menu-open' : ''}`} onClick={handleOpen}>
 
       {selectionMode && (
         <div className="document-card__checkbox" onClick={handleCheckboxClick}>
@@ -151,7 +151,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
               <MoreVertical className="document-card__menu-icon" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="document-dropdown">
+          <DropdownMenuContent align="end" className="document-dropdown" onCloseAutoFocus={(e) => e.preventDefault()}>
             <DropdownMenuItem onClick={handleCopyId} className="dropdown-menu-item">
               <Copy size={16} style={{ marginRight: '8px' }} />
               {t('DOCUMENT_MENU.copyDocumentId')}

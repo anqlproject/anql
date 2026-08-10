@@ -18,6 +18,15 @@
   border-color: var(--text-primary);
 }
 
+.document-card.menu-open {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.document-card--list.menu-open {
+  border-bottom: 1px solid var(--primary-color);
+}
+
 .document-card__checkbox {
   display: flex;
   align-items: center;
@@ -278,13 +287,21 @@
 }
 
 .delete-menu-item:hover {
-  background-color: var(--destructive-container) !important;
-  color: var(--destructive) !important;
+  background-color: var(--destructive) !important;
+  color: var(--primary-white) !important;
+}
+
+.delete-menu-item:hover svg {
+  color: var(--primary-white) !important;
 }
 
 .delete-menu-item:focus {
-  background-color: var(--destructive-container) !important;
-  color: var(--destructive) !important;
+  background-color: var(--destructive) !important;
+  color: var(--primary-white) !important;
+}
+
+.delete-menu-item:focus svg {
+  color: var(--primary-white) !important;
 }
 
 .dropdown-menu-item {

@@ -1,6 +1,6 @@
 import './SortDropdown.css';
 
-import { ArrowDown,ArrowUp, ArrowUpDown } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownZA, ArrowUpDown,ClockArrowDown, ClockArrowUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,11 @@ export default function SortDropdown({ currentSort, onSortChange }: SortDropdown
   const { t } = useTranslation();
   const getSortIcon = (field: SortField, direction: SortDirection) => {
     if (currentSort.field === field) {
-      return direction === 'asc' ? <ArrowUp className="sort-dropdown__icon" /> : <ArrowDown className="sort-dropdown__icon" />;
+      if (field === 'title') {
+        return direction === 'asc' ? <ArrowDownAZ className="sort-dropdown__icon" /> : <ArrowDownZA className="sort-dropdown__icon" />;
+      } else {
+        return direction === 'asc' ? <ClockArrowUp className="sort-dropdown__icon" /> : <ClockArrowDown className="sort-dropdown__icon" />;
+      }
     }
     return null;
   };
@@ -39,16 +43,26 @@ export default function SortDropdown({ currentSort, onSortChange }: SortDropdown
   };
 
   const getCurrentSortLabel = () => {
+    let icon;
+    let label;
     switch (currentSort.field) {
       case 'title':
-        return currentSort.direction === 'asc' ? t('HOME_PAGE.nameAsc') as string : t('HOME_PAGE.nameDesc') as string;
+        icon = currentSort.direction === 'asc' ? <ArrowDownAZ className="sort-dropdown__icon" /> : <ArrowDownZA className="sort-dropdown__icon" />;
+        label = t('HOME_PAGE.sortByName');
+        break;
       case 'created_at':
-        return currentSort.direction === 'asc' ? t('HOME_PAGE.creationAsc') as string : t('HOME_PAGE.creationDesc') as string;
+        icon = currentSort.direction === 'asc' ? <ClockArrowUp className="sort-dropdown__icon" /> : <ClockArrowDown className="sort-dropdown__icon" />;
+        label = t('HOME_PAGE.sortByCreation');
+        break;
       case 'updated_at':
-        return currentSort.direction === 'asc' ? t('HOME_PAGE.modificationAsc') as string : t('HOME_PAGE.modificationDesc') as string;
+        icon = currentSort.direction === 'asc' ? <ClockArrowUp className="sort-dropdown__icon" /> : <ClockArrowDown className="sort-dropdown__icon" />;
+        label = t('HOME_PAGE.sortByModification');
+        break;
       default:
-        return t('HOME_PAGE.sort') as string;
+        icon = currentSort.direction === 'asc' ? <ClockArrowUp className="sort-dropdown__icon" /> : <ClockArrowDown className="sort-dropdown__icon" />;
+        label = t('HOME_PAGE.sort');
     }
+    return <>{label} {icon}</>;
   };
 
   return (
@@ -87,14 +101,12 @@ export default function SortDropdown({ currentSort, onSortChange }: SortDropdown
           onClick={() => onSortChange({ field: 'created_at', direction: 'asc' })}
           className={`sort-dropdown__item ${isCurrentSort('created_at', 'asc') ? 'sort-dropdown__item--selected' : ''}`}
         >
-          {getSortIcon('created_at', 'asc')}
           {t('HOME_PAGE.oldestToNewest')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onSortChange({ field: 'created_at', direction: 'desc' })}
           className={`sort-dropdown__item ${isCurrentSort('created_at', 'desc') ? 'sort-dropdown__item--selected' : ''}`}
         >
-          {getSortIcon('created_at', 'desc')}
           {t('HOME_PAGE.newestToOldest')}
         </DropdownMenuItem>
 

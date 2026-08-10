@@ -57,7 +57,7 @@ export default function TitleBar(): JSX.Element {
           isOpen={openExitDialog}
           onClose={() => setOpenExitDialog(false)}
           title={t('DIALOG.exitTitle') as string}
-          description="Êtes-vous sûr de vouloir quitter ?"
+          description={t('DIALOG.exitDescription') as string}
           mode="urgent"
           leftButton={{
             text: t('DIALOG.cancel') as string,

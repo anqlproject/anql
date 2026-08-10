@@ -391,11 +391,19 @@
   text-align: left;
   cursor: pointer;
   color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
-.table-menu-item:hover,
-.table-menu-item-danger:hover {
+.table-menu-item svg {
+  color: var(--text-secondary);
+}
+
+.table-menu-item:hover {
   background: var(--action-hover);
+}
+
+.table-menu-item:hover svg {
+  color: var(--text-primary);
 }
 
 .table-menu-item-active {
@@ -404,7 +412,20 @@
 }
 
 .table-menu-item-danger {
-  color: #e03e3e;
+  color: var(--destructive);
+}
+
+.table-menu-item-danger svg {
+  color: var(--destructive);
+}
+
+.table-menu-item-danger:hover {
+  background: var(--destructive);
+  color: var(--primary-white);
+}
+
+.table-menu-item-danger:hover svg {
+  color: var(--primary-white);
 }
 
 .table-menu-divider {

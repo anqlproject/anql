@@ -129,6 +129,7 @@
       "cleanup": "Cleanup",
       "clear": "Clear",
       "exitTitle": "Exit App",
+      "exitDescription": "Are you sure you want to quit?",
       "deleteTitle": "Permanent Deletion",
       "emptyTrashTitle": "Empty Trash",
       "unauthorizedTablesTitle": "Unauthorized Tables Detected",
@@ -257,6 +258,7 @@
       "delete": "Delete",
       "addRowAbove": "Add row above",
       "addRowBelow": "Add row below",
+      "copyLink": "Copy link",
       "placeholderText": "Enter text...",
       "placeholderNumber": "Number...",
       "chooseDate": "Choose..."
