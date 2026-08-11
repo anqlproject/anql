@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 interface CustomCaretProps {
-  position: {x: number, y: number}
+  position: { x: number, y: number }
   visible: boolean;
   timestamp: number;
 }

@@ -25,7 +25,9 @@ import {
   registerEventListeners,
 } from 'lexical';
 import {
+  cloneElement,
   type DragEvent as ReactDragEvent,
+  isValidElement,
   type JSX,
   type ReactNode,
   useCallback,
@@ -340,14 +342,36 @@ function useDraggableBlockMenu(
   useEffect(() => {
     const zoomLevel = calculateZoomLevel(editor.getRootElement(), true);
     if (menuRef.current) {
-      setMenuPosition(
-        draggableBlockElem,
-        menuRef.current,
-        anchorElem,
-        zoomLevel,
-      );
+      if (draggableBlockElem && !draggableBlockElem.isConnected) {
+        setMenuPosition(null, menuRef.current, anchorElem, zoomLevel);
+      } else {
+        setMenuPosition(
+          draggableBlockElem,
+          menuRef.current,
+          anchorElem,
+          zoomLevel,
+        );
+      }
     }
   }, [editor, anchorElem, draggableBlockElem, menuRef]);
+
+  useEffect(() => {
+    return editor.registerUpdateListener(() => {
+      if (draggableBlockElem) {
+        if (!draggableBlockElem.isConnected) {
+          setDraggableBlockElem(null);
+        } else if (menuRef.current) {
+          const zoomLevel = calculateZoomLevel(editor.getRootElement(), true);
+          setMenuPosition(
+            draggableBlockElem,
+            menuRef.current,
+            anchorElem,
+            zoomLevel,
+          );
+        }
+      }
+    });
+  }, [editor, anchorElem, draggableBlockElem, menuRef, setDraggableBlockElem]);
 
   useEffect(() => {
     function onDragover(event: DragEvent): boolean {
@@ -468,9 +492,15 @@ function useDraggableBlockMenu(
   }
   return createPortal(
     <>
-      <div draggable={true} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        {isEditable && menuComponent}
-      </div>
+      {isEditable && isValidElement(menuComponent)
+        ? cloneElement(menuComponent as React.ReactElement<any>, {
+          draggable: true,
+          onDragStart,
+          onDragEnd,
+        })
+        : isEditable
+          ? menuComponent
+          : null}
       {targetLineComponent}
     </>,
     anchorElem,

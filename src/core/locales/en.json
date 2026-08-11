@@ -40,6 +40,25 @@
       "math": "Math expression",
       "emptyPlaceholder": "Write or type node name"
     },
+    "MATH_PANEL": {
+      "trigonometry": "Trigonometry",
+      "arithmetic": "Arithmetic",
+      "logarithms": "Logarithms",
+      "constants": "Constants",
+      "statistics": "Statistics",
+      "algebra": "Algebra",
+      "matrices": "Matrices",
+      "comparisons": "Comparisons",
+      "variables": "Variables",
+      "noVariables": "No variables defined",
+      "random": "Random",
+      "logic": "Logic",
+      "geometry": "Geometry",
+      "searchResults": "Search Results",
+      "noResults": "No results found",
+      "searchPlaceholder": "Search...",
+      "fractions": "Fractions"
+    },
     "INLINES": {
       "date": "Date time",
       "inlineCode": "Inline Code",
