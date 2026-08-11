@@ -23,9 +23,13 @@ function MathResultDisplayPlugin() {
       (payload: MouseEvent) => {
         const target = payload.target as HTMLElement;
         const mathNode = target.closest('.math-exp-node');
-        if (mathNode) {
+        if (mathNode && mathNode.classList.contains('has-plus')) {
           const rect = mathNode.getBoundingClientRect();
-          if (payload.clientY > rect.bottom - 30) {
+          // The plus button is in the bottom right corner (approx 45px wide, 20px tall)
+          if (
+            payload.clientY > rect.bottom - 24 &&
+            payload.clientX > rect.right - 50
+          ) {
             if (mathNode.classList.contains('has-error')) {
               const fullError = mathNode.getAttribute('data-full-error');
               if (fullError) {
@@ -34,7 +38,7 @@ function MathResultDisplayPlugin() {
               }
             } else {
               const fullResult = mathNode.getAttribute('data-full-result');
-              if (fullResult && fullResult.length > 50) {
+              if (fullResult) {
                 setErrorDialog(fullResult);
                 return true;
               }
@@ -79,6 +83,8 @@ function MathResultDisplayPlugin() {
               const shortError = result.error.length > 30 ? result.error.substring(0, 30) + '...' : result.error;
               dom.setAttribute('data-error', shortError);
               dom.setAttribute('data-full-error', result.error);
+              if (result.error.length > 30) dom.classList.add('has-plus');
+              else dom.classList.remove('has-plus');
               dom.removeAttribute('data-result');
               dom.removeAttribute('data-placeholder');
             } else if (result.result) {
@@ -87,10 +93,13 @@ function MathResultDisplayPlugin() {
               const shortResult = result.result.length > 50 ? result.result.substring(0, 50) + '...' : result.result;
               dom.setAttribute('data-result', shortResult);
               dom.setAttribute('data-full-result', result.result);
+              if (result.result.length > 50) dom.classList.add('has-plus');
+              else dom.classList.remove('has-plus');
               dom.removeAttribute('data-error');
               dom.removeAttribute('data-placeholder');
             } else {
               dom.classList.remove('has-error');
+              dom.classList.remove('has-plus');
               dom.classList.add('is-empty');
               dom.removeAttribute('data-result');
               dom.removeAttribute('data-error');
@@ -98,6 +107,7 @@ function MathResultDisplayPlugin() {
             }
           } else {
             dom.classList.remove('has-error');
+            dom.classList.remove('has-plus');
             dom.classList.add('is-empty');
             dom.removeAttribute('data-result');
             dom.removeAttribute('data-error');
@@ -126,10 +136,11 @@ function MathResultDisplayPlugin() {
 
 export default function MathPlugin() {
   const [editor] = useLexicalComposerContext();
-  const { setResults } = useMathVariables();
+  const { setResults, setVariables, setScopes } = useMathVariables();
 
   const evaluateTree = useCallback(() => {
     const results: Record<string, { result: string, error: string | null }> = {};
+    const variables: Record<string, number> = {};
 
     editor.getEditorState().read(() => {
       const root = $getRoot();
@@ -150,9 +161,14 @@ export default function MathPlugin() {
       traverse(root);
 
       const scope: Record<string, number> = {};
+      const nodeScopes: Record<string, Record<string, number>> = {};
 
       for (const node of mathNodes) {
         const key = node.__key;
+        
+        // Save the variables available AT THIS POINT in the document
+        nodeScopes[key] = { ...scope };
+        
         const expr = node.getTextContent();
 
         if (!expr.trim()) {
@@ -172,6 +188,7 @@ export default function MathPlugin() {
             const val = evaluate(valueExpr, scope);
             if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) throw new Error('Invalid value');
             scope[name] = val;
+            variables[name] = val; // Store variable for the context
             results[key] = { result: `${name} = ${val}`, error: null };
           } else {
             if (expr.includes('/0') || /\/\s*0(?![0-9])/.test(expr)) {
@@ -185,10 +202,12 @@ export default function MathPlugin() {
           results[key] = { result: '', error: e.message };
         }
       }
+      setScopes(nodeScopes);
     });
 
     setResults(results);
-  }, [editor, setResults]);
+    setVariables(variables);
+  }, [editor, setResults, setVariables, setScopes]);
 
   // Re-evaluate on Lexical updates (moves, adds, deletes, typing)
   useEffect(() => {

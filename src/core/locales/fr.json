@@ -40,6 +40,25 @@
       "math": "Expression mathématique",
       "emptyPlaceholder": "Écrivez ou tapez le nom du nœud"
     },
+    "MATH_PANEL": {
+      "trigonometry": "Trigonométrie",
+      "arithmetic": "Arithmétique",
+      "logarithms": "Logarithmes",
+      "constants": "Constantes",
+      "statistics": "Statistiques",
+      "algebra": "Algèbre",
+      "matrices": "Matrices",
+      "comparisons": "Comparaisons",
+      "variables": "Variables",
+      "noVariables": "Aucune variable définie",
+      "random": "Aléatoire",
+      "logic": "Logique",
+      "geometry": "Géométrie",
+      "searchResults": "Résultats de recherche",
+      "noResults": "Aucun résultat trouvé",
+      "searchPlaceholder": "Rechercher...",
+      "fractions": "Fractions"
+    },
     "INLINES": {
       "date": "Date et heure",
       "inlineCode": "Code en ligne",
