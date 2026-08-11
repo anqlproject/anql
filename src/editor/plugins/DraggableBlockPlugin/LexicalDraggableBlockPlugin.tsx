@@ -322,7 +322,10 @@ function useDraggableBlockMenu(
       setDraggableBlockElem(_draggableBlockElem);
     }
 
-    function onMouseLeave() {
+    function onMouseLeave(event: MouseEvent) {
+      if (isOnMenu((event.relatedTarget as HTMLElement) || document.body)) {
+        return;
+      }
       setDraggableBlockElem(null);
     }
 

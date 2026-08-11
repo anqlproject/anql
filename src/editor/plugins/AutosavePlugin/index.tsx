@@ -21,6 +21,7 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
+  $getRoot,
   BLUR_COMMAND,
   COMMAND_PRIORITY_LOW,
   LexicalNode,
@@ -123,6 +124,28 @@ export function AutosavePlugin(): null {
     // Allow mutation listener to populate dynamicState before enabling integrity check
     const stabilizationTimer = setTimeout(() => {
       isStabilizedRef.current = true;
+
+      // Initialize siblingSnapshotRef for all existing root-level nodes.
+      // This is necessary because pre-existing nodes (loaded from DB) never
+      // pass through "created" mutations (they are loaded via navigatingEditors),
+      // so their snapshot is never set — which prevents MOVE detection on first drag.
+      // editor.read('latest', () => {
+      //   const root = $getRoot();
+      //   for (const child of root.getChildren()) {
+      //     if (!siblingSnapshotRef.current.has(child.__key)) {
+      //       siblingSnapshotRef.current.set(child.__key, getSiblingSnapshot(child));
+      //     }
+      //   }
+      // });
+      editor.read('latest', () => {
+        const root = $getRoot();
+        for (const child of root.getChildren()) {
+          if (!siblingSnapshotRef.current.has(child.__key)) {
+            siblingSnapshotRef.current.set(child.__key, getSiblingSnapshot(child));
+          }
+        }
+      });
+
       logger.debug("[ChangePlugin] Stabilization complete");
     }, 3000);
 

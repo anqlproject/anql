@@ -179,7 +179,7 @@ export function hasMoved(
  */
 export function getParentFromDeep(targetNode: LexicalNode | null): LexicalNode | null {
   if (!targetNode || targetNode.__key === "root") return null;
-  
+
   let current = targetNode;
   while (current) {
     const parentNode = current.getParent();

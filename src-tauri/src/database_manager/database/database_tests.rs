@@ -62,6 +62,7 @@ fn make_node(id: &str, document_id: &str, asset_ids: &[&str]) -> NodeJson {
         created_at: 0,
         updated_at: 0,
         checksum: None,
+        metadata: None,
     }
 }
 
@@ -74,6 +75,7 @@ fn make_doc(id: &str) -> DocumentsJson {
         title: id.to_string(),
         created_at: 0,
         updated_at: 0,
+        metadata: None,
     }
 }
 
