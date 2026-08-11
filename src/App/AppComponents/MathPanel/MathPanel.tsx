@@ -6,11 +6,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
+import CustomCaret from "@/App/AppComponents/CustomCaret/CustomCaret";
+import { HightlightSelectedText } from "@/App/AppComponents/HighlightSelectedText/HighlightSelectedText";
 import { MenuPosition } from "@/components/custom/Menu/Menu";
 import { useMathVariables } from "@/editor/context/MathVariablesContext";
 import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
-import CustomCaret from "@/editor/plugins/ContextMenuPlugin/CustomCaret";
-import { HightlightSelectedText } from "@/editor/plugins/ContextMenuPlugin/HighlightSelectedText";
 
 interface MathPanelProps {
   isOpen: boolean;

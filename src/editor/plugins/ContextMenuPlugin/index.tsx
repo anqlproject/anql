@@ -30,9 +30,9 @@ import { CustomLinkDialog } from "@/editor/plugins/LinkPlugin/CustomLinkDialog";
 import { INSERT_PDF_COMMAND } from "@/editor/plugins/PdfPlugin";
 import { PdfDialog } from "@/editor/plugins/PdfPlugin/PdfDialog";
 
+import CustomCaret from "../../../App/AppComponents/CustomCaret/CustomCaret";
+import { HightlightSelectedText } from "../../../App/AppComponents/HighlightSelectedText/HighlightSelectedText";
 import { ContextMenuItems } from "./contextMenuList";
-import CustomCaret from "./CustomCaret";
-import { HightlightSelectedText } from "./HighlightSelectedText";
 
 export default function ContextMenuPlugin() {
   const [editor] = useLexicalComposerContext();

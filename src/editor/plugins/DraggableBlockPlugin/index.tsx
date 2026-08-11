@@ -20,8 +20,8 @@ import { NodeHighlight } from "@/App/AppComponents/NodeHighlight/NodeHighlight";
 import { MenuPosition } from "@/components/custom/Menu/Menu";
 import { MathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 
+import MathPanel from "../../../App/AppComponents/MathPanel/MathPanel";
 import { DraggableBlockPlugin_EXPERIMENTAL } from './LexicalDraggableBlockPlugin';
-import MathPanel from "./MathPanel";
 import NodeMenu from "./NodeMenu";
 
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = "draggable-block-menu";
