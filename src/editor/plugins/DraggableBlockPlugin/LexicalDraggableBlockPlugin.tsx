@@ -6,9 +6,9 @@
  *
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { eventFiles } from '@lexical/rich-text';
-import { calculateZoomLevel } from '@lexical/utils';
+import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import {eventFiles} from '@lexical/rich-text';
+import {calculateZoomLevel} from '@lexical/utils';
 import {
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
@@ -25,9 +25,7 @@ import {
   registerEventListeners,
 } from 'lexical';
 import {
-  cloneElement,
   type DragEvent as ReactDragEvent,
-  isValidElement,
   type JSX,
   type ReactNode,
   useCallback,
@@ -35,10 +33,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { createPortal } from 'react-dom';
+import {createPortal} from 'react-dom';
 
-import { Point } from './point';
-import { Rectangle } from './rect';
+import {Point} from './point';
+import {Rectangle} from './rect';
 
 const SPACE = 4;
 const TARGET_LINE_HALF_HEIGHT = 2;
@@ -77,7 +75,7 @@ function getCollapsedMargins(elem: HTMLElement): {
   ): number =>
     element && view ? parseFloat(view.getComputedStyle(element)[margin]) : 0;
 
-  const { marginTop = '0', marginBottom = '0' } = view
+  const {marginTop = '0', marginBottom = '0'} = view
     ? view.getComputedStyle(elem)
     : {};
   const prevElemSiblingMarginBottom = getMargin(
@@ -97,7 +95,7 @@ function getCollapsedMargins(elem: HTMLElement): {
     nextElemSiblingMarginTop,
   );
 
-  return { marginBottom: collapsedBottomMargin, marginTop: collapsedTopMargin };
+  return {marginBottom: collapsedBottomMargin, marginTop: collapsedTopMargin};
 }
 
 function getBlockElement(
@@ -150,7 +148,7 @@ function getBlockElement(
       const zoom = calculateZoomLevel(elem);
       const point = new Point(event.x / zoom, event.y / zoom);
       const domRect = Rectangle.fromDOM(elem);
-      const { marginTop, marginBottom } = getCollapsedMargins(elem);
+      const {marginTop, marginBottom} = getCollapsedMargins(elem);
       const rect = domRect.generateNewRect({
         bottom: domRect.bottom + marginBottom,
         left: anchorElementRect.left,
@@ -160,7 +158,7 @@ function getBlockElement(
 
       const {
         result,
-        reason: { isOnTopSide, isOnBottomSide },
+        reason: {isOnTopSide, isOnBottomSide},
       } = rect.contains(point);
 
       if (result) {
@@ -218,7 +216,7 @@ function setMenuPosition(
     (targetRect.top +
       (targetCalculateHeight -
         (floatingElemRect.height || targetCalculateHeight)) /
-      2 -
+        2 -
       anchorElementRect.top +
       anchorElem.scrollTop) /
     zoomLevel;
@@ -234,7 +232,7 @@ function setDragImage(
   dataTransfer: DataTransfer,
   draggableBlockElem: HTMLElement,
 ) {
-  const { transform } = draggableBlockElem.style;
+  const {transform} = draggableBlockElem.style;
 
   // Remove dragImage borders
   draggableBlockElem.style.transform = 'translateZ(0)';
@@ -251,11 +249,11 @@ function setTargetLine(
   mouseY: number,
   anchorElem: HTMLElement,
 ) {
-  const { top: targetBlockElemTop, height: targetBlockElemHeight } =
+  const {top: targetBlockElemTop, height: targetBlockElemHeight} =
     targetBlockElem.getBoundingClientRect();
-  const { top: anchorTop, width: anchorWidth } =
+  const {top: anchorTop, width: anchorWidth} =
     anchorElem.getBoundingClientRect();
-  const { marginTop, marginBottom } = getCollapsedMargins(targetBlockElem);
+  const {marginTop, marginBottom} = getCollapsedMargins(targetBlockElem);
   let lineTop = targetBlockElemTop;
   if (mouseY >= targetBlockElemTop) {
     lineTop += targetBlockElemHeight + marginBottom / 2;
@@ -268,8 +266,9 @@ function setTargetLine(
   const left = TEXT_BOX_HORIZONTAL_PADDING - SPACE;
 
   targetLineElem.style.transform = `translate(${left}px, ${top}px)`;
-  targetLineElem.style.width = `${anchorWidth - (TEXT_BOX_HORIZONTAL_PADDING - SPACE) * 2
-    }px`;
+  targetLineElem.style.width = `${
+    anchorWidth - (TEXT_BOX_HORIZONTAL_PADDING - SPACE) * 2
+  }px`;
   targetLineElem.style.opacity = '.4';
 }
 
@@ -324,10 +323,7 @@ function useDraggableBlockMenu(
       setDraggableBlockElem(_draggableBlockElem);
     }
 
-    function onMouseLeave(event: MouseEvent) {
-      if (isOnMenu((event.relatedTarget as HTMLElement) || document.body)) {
-        return;
-      }
+    function onMouseLeave() {
       setDraggableBlockElem(null);
     }
 
@@ -342,36 +338,14 @@ function useDraggableBlockMenu(
   useEffect(() => {
     const zoomLevel = calculateZoomLevel(editor.getRootElement(), true);
     if (menuRef.current) {
-      if (draggableBlockElem && !draggableBlockElem.isConnected) {
-        setMenuPosition(null, menuRef.current, anchorElem, zoomLevel);
-      } else {
-        setMenuPosition(
-          draggableBlockElem,
-          menuRef.current,
-          anchorElem,
-          zoomLevel,
-        );
-      }
+      setMenuPosition(
+        draggableBlockElem,
+        menuRef.current,
+        anchorElem,
+        zoomLevel,
+      );
     }
   }, [editor, anchorElem, draggableBlockElem, menuRef]);
-
-  useEffect(() => {
-    return editor.registerUpdateListener(() => {
-      if (draggableBlockElem) {
-        if (!draggableBlockElem.isConnected) {
-          setDraggableBlockElem(null);
-        } else if (menuRef.current) {
-          const zoomLevel = calculateZoomLevel(editor.getRootElement(), true);
-          setMenuPosition(
-            draggableBlockElem,
-            menuRef.current,
-            anchorElem,
-            zoomLevel,
-          );
-        }
-      }
-    });
-  }, [editor, anchorElem, draggableBlockElem, menuRef, setDraggableBlockElem]);
 
   useEffect(() => {
     function onDragover(event: DragEvent): boolean {
@@ -413,7 +387,7 @@ function useDraggableBlockMenu(
       if (isFileTransfer) {
         return false;
       }
-      const { dataTransfer, pageY } = event;
+      const {dataTransfer, pageY} = event;
       // Composed target so the zoom level is read from the real element rather
       // than the shadow host when the editor is in a shadow tree.
       const target = getComposedEventTarget(event);
@@ -492,15 +466,9 @@ function useDraggableBlockMenu(
   }
   return createPortal(
     <>
-      {isEditable && isValidElement(menuComponent)
-        ? cloneElement(menuComponent as React.ReactElement<any>, {
-          draggable: true,
-          onDragStart,
-          onDragEnd,
-        })
-        : isEditable
-          ? menuComponent
-          : null}
+      <div draggable={true} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+        {isEditable && menuComponent}
+      </div>
       {targetLineComponent}
     </>,
     anchorElem,
