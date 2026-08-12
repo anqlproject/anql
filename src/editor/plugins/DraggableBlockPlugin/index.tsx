@@ -32,7 +32,7 @@ const MATH_PANEL_BUTTON_CLASSNAME = "math-panel-button";
 function isElementOnMenu(element: HTMLElement | null | undefined): boolean {
   return element
     ? !!element.closest(
-      `.${DRAGGABLE_BLOCK_MENU_CLASSNAME}, .${DRAGGABLE_BLOCK_INSERT_BUTTON_CLASSNAME}, .${MATH_PANEL_BUTTON_CLASSNAME}, [data-radix-popper-content-wrapper]`,
+      `.${DRAGGABLE_BLOCK_MENU_CLASSNAME}, .${DRAGGABLE_BLOCK_INSERT_BUTTON_CLASSNAME}, .${MATH_PANEL_BUTTON_CLASSNAME}, .icon-create, [data-radix-popper-content-wrapper]`,
     )
     : false;
 }
@@ -180,7 +180,12 @@ export default function DraggableBlockPlugin({
           <div ref={targetLineRef} className="draggable-block-target-line" />
         }
         isOnMenu={(element) => isMenuOpen || showSelectNodeMenu || showMath || isElementOnMenu(element)}
-        onElementChanged={setDraggableElement}
+        onElementChanged={(elem) => {
+          if (elem === null && (isMenuOpen || showSelectNodeMenu || showMath)) {
+            return;
+          }
+          setDraggableElement(elem);
+        }}
       />
 
       <CreateNode
