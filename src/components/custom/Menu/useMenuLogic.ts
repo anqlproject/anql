@@ -173,7 +173,7 @@ export function useMenuLogic({
     }
   };
 
-  const handleMenuItemMouseLeave = () => {};
+  const handleMenuItemMouseLeave = () => { };
 
   const handleCloseSubmenu = () => {
     setActiveSubmenu(null);
@@ -230,7 +230,7 @@ export function useMenuLogic({
         if (submenuFocusedIndex >= 0 && submenuFocusedIndex < subItems.length) {
           const item = subItems[submenuFocusedIndex];
           if (!item.isSeparator && item.onClick) {
-             
+
             item.onClick(e as any);
           }
         }
@@ -309,7 +309,7 @@ export function useMenuLogic({
               setSubmenuFocusedIndex(0);
             }
           } else if (item.onClick) {
-             
+
             item.onClick(e as any);
           }
         }

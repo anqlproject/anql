@@ -41,7 +41,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighlight";
 
-import { TABLE_ROW_NAVIGATE_COMMAND,TABLE_SEARCH_NAVIGATE_COMMAND } from "../../plugins/TablePlugin";
+import { TABLE_ROW_NAVIGATE_COMMAND, TABLE_SEARCH_NAVIGATE_COMMAND } from "../../plugins/TablePlugin";
 import { CellMenu } from "./CellMenu";
 import EditableCell from "./TableCell";
 import DraggableHeader from "./TableHeader";
@@ -117,7 +117,7 @@ export function TableComponent({
       .map((c) => c.accessorKey || c.id)
       .filter((id): id is string => Boolean(id)),
   );
-  
+
   const [prevInitialColumns, setPrevInitialColumns] = useState(initialColumns);
   if (initialColumns !== prevInitialColumns) {
     setPrevInitialColumns(initialColumns);

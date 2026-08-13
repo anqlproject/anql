@@ -320,7 +320,7 @@ export default function MathPanel({
           <input
             type="text"
             className="math-panel__search-input"
-            placeholder={t('MATH_PANEL.searchPlaceholder')}
+            placeholder={t('MATH_PANEL.searchPlaceholder') || ''}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => {
