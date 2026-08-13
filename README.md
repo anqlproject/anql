@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue" onclick="return false;" style="pointer-events: none;"/>
+  <img alt="Version" src="https://img.shields.io/badge/version-0.2.0-blue" onclick="return false;" style="pointer-events: none;"/>
   <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange" onclick="return false;" style="pointer-events: none;"/>
 </p>
 
@@ -12,6 +12,7 @@
 </p>
 
 <br />
+
 
 ## Overview
 
@@ -26,45 +27,49 @@ ANQL is a visual workspace designed for productive work. Ideal for professionals
   <img src="assets/overview 2.png" alt="ANQL Overview 2" width="45%" />
 </p>
 
-<p align="center">
-  <img src="assets/overview 3.png" alt="ANQL Overview 3" width="45%" />
-</p>
 
-## Features
+### Core Features
 
-- **Rich text editing** - Create and format text with intuitive controls, perfect for note-taking.
-- **Data management** - Structure and organize data through tables, mathematical operations, smart links between documents, local database storage, and organizations
-- **Offline first** - Work without internet connectivity.
-- **Dynamic calculations** - Perform mathematical operations and conversions perfect for engineering work and scientific calculations.
-- **Unit conversion** - Convert between different units seamlessly.
-- **Light & Dark mode** - Switch between light and dark themes for comfortable viewing in any environment.
+- **Rich text editing** - Create and format text with intuitive controls, perfect for note-taking
+- **Data management** - Structure and organize data through tables, smart links between documents, and local database storage
+- **Offline first** - Work without internet connectivity
+- **Light & Dark mode** - Switch between light and dark themes for comfortable viewing in any environment
+- **Import/Export** - Import Markdown files and export to ANQL format
 
-### Node Types
 
-ANQL supports multiple node types for different content needs, with the flexibility to transform between them:
+### 🔢 Powerful Math System
 
-- **Code** - Insert code blocks with syntax highlighting
-- **Line** - Add horizontal separators
-- **Image** - Insert images from URLs or files
-- **Table** - Create structured tables
-- **Heading 1/2/3** - Main section, subsection, and minor headings
-- **Number List** - Ordered numbered lists
-- **Bullet List** - Unordered bullet lists
-- **Check List** - Todo/task lists with checkboxes
-- **Quote** - Block quotes for citations
-- **Math** - Mathematical operations and conversions
-- **Date/Time** - Insert dates and timestamps
-- **Equation** - Mathematical equations with LaTeX rendering
-- **Link** - Smart links to external URLs, documents, or specific nodes
-- **PDF** - Embed PDF documents directly in your content
+ANQL features an advanced mathematical workspace powered by mathjs, designed for engineering, scientific calculations, and data analysis.
 
-**Smart Transformations**: Seamlessly convert any node type to another - turn text into headings, lists into checklists, or paragraphs into quotes. Adapt your content structure instantly without losing your work.
+#### Math Panel
+Access comprehensive mathematical functions through an organized, searchable panel:
+
+- **Variables** - Dynamic variable management with scope support
+- **Trigonometry** - sin, cos, tan, and inverse functions
+- **Arithmetic** - Complete operations including powers, roots, and modulo
+- **Logarithms** - Natural log, log base 2, and log base 10
+- **Constants** - π, e, ∞, i, phi for mathematical precision
+- **Statistics** - mean, median, std, variance, min, max, sum, prod
+- **Algebra** - derivatives, simplification, fractions, factorial
+- **Matrices** - determinant, inverse, transpose, dot/cross products
+- **Comparisons** - logical operators and comparisons
+- **Random** - random numbers and random selection
+- **Geometry** - distance and intersection calculations
+
+#### Real-time Calculations
+- Results update as you type
+- Define variables and reuse them across calculations
+- Support for complex expressions and functions
+- Error handling with visual feedback
+- Unit conversions - Convert between angles, temperature, length, weight, and more
+
 
 ## Development
 
 ANQL is currently in active development and may be unstable at times. New features and improvements are being added regularly. Feel free to reach out for feedback, bug reports, or feature suggestions.
 
 **Upcoming Focus**: We are placing special emphasis on enhancing the Math node to support advanced calculations, statistical analysis, plotting, and graph generation - all while maintaining the seamless note-taking experience that makes ANQL a productive workspace.
+
 
 ### Tech Stack
 
@@ -73,11 +78,12 @@ ANQL is currently in active development and may be unstable at times. New featur
 - **Lexical** - Rich text editing engine
 - **React** - UI framework
 
+
 ## Platform Support
 
 Currently, ANQL is tested and optimized for macOS only. Windows and Linux support will be available soon.
 
-Download the macOS binary: [GitHub releases](https://github.com/anqlproject/anql/releases/tag/0.1.0)
+Download the macOS binary: [GitHub releases](https://github.com/anqlproject/anql/releases/tag/0.2.0)
 
 ## Community
 

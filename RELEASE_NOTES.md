@@ -1,67 +1,35 @@
-# ANQL v0.1.0 Release Notes
+# ANQL v0.2.0 Release Notes
 
-We're excited to announce the first release of ANQL, the intuitive workspace where ideas become actions!
+We're excited to announce v0.2.0 of ANQL, with significant improvements to the math system and bug fixes!
 
-## 🎉 What's New
+## 🚀 What's New in v0.2.0
 
-### Theme Support
-- **Dark & Light Theme** - Switch between dark and light themes to match your preference and working environment
+### Enhanced Math System
+- **New Math Panel** - Redesigned math panel with organized categories for easier access and comprehensive math capabilities:
+  - **Variables** - Dynamic variable management with scope support
+  - **Trigonometry** - sin, cos, tan, and inverse functions
+  - **Arithmetic** - Complete operations including powers, roots, and modulo
+  - **Logarithms** - Natural log, log base 2, and log base 10
+  - **Constants** - π, e, ∞, i, phi for mathematical precision
+  - **Statistics** - mean, median, std, variance, min, max, sum, prod
+  - **Algebra** - derivatives, simplification, fractions, factorial
+  - **Matrices** - determinant, inverse, transpose, dot/cross products
+  - **Comparisons** - logical operators and comparisons
+  - **Random** - random numbers and random selection
+  - **Geometry** - distance and intersection calculations
+- **Search Functionality** - Quick search through all math functions
+- **Real-time Calculations** - Results update as you type
 
-### Document Creation
-- **Create Documents** - Start new projects and organize your work in dedicated documents
-- **Local Storage** - All your data is stored locally using SQLite for privacy and offline access
+### Bug Fixes
+- **Node Movement Storage** - Fixed issue where node movements couldn't be stored in database
+- **Node Menu Disappearing** - Fixed node menu disappearing unexpectedly (multiple fixes)
+- **Code Node Deletion** - Fixed inability to delete code nodes
+- **Code Line Display** - Fixed code lines not appearing in large code blocks
+- **Performance** - Improved performance when opening large documents
 
-### Import/Export
-- **Import Markdown Files** - Import existing Markdown files into ANQL documents
-- **Import ANQL Projects** - Open and work with existing ANQL project files
-- **Export to ANQL Format** - Export your documents as .anql files (ZIP archives containing all document data and assets)
-
-### Node Types
-ANQL supports multiple node types for different content needs, with the flexibility to transform between them:
-
-- **Code** - Insert code blocks with syntax highlighting
-- **Line** - Add horizontal separators
-- **Image** - Insert images from URLs or files
-- **Table** - Create structured tables
-- **Heading 1/2/3** - Main section, subsection, and minor headings
-- **Number List** - Ordered numbered lists
-- **Bullet List** - Unordered bullet lists
-- **Check List** - Todo/task lists with checkboxes
-- **Quote** - Block quotes for citations
-- **Math** - Mathematical operations and conversions
-- **Date/Time** - Insert dates and timestamps
-- **Equation** - Mathematical equations with LaTeX rendering
-- **Link** - Smart links to external URLs, documents, or specific nodes
-- **PDF** - Embed PDF documents directly in your content
-
-**Smart Transformations**: Seamlessly convert any node type to another - turn text into headings, lists into checklists, or paragraphs into quotes. Adapt your content structure instantly without losing your work.
-
-## ✨ Key Features
-
-- **Rich text editing** - Create and format text with intuitive controls, perfect for note-taking
-- **Data management** - Structure and organize data through tables, mathematical operations, smart links between documents, local database storage, and organizations
-- **Offline first** - Work without internet connectivity
-- **Dynamic calculations** - Perform mathematical operations and conversions perfect for engineering work and scientific calculations
-- **Unit conversion** - Convert between different units seamlessly
-
-## 🖥️ Platform Support
-
-Currently, ANQL is tested and optimized for macOS only. 
-
-## 🔜 Coming Soon
-
-- **Windows Support** - Native Windows application coming soon
-- **Linux Support** - Linux distribution planned for future releases
-
-## 📝 Development Status
-
-ANQL is currently in active development and may be unstable at times. New features and improvements are being added regularly. Feel free to reach out for feedback, bug reports, or feature suggestions.
-
-## 🛠️ Tech Stack
-
-- **Tauri** - Cross-platform desktop application framework
-- **SQLite** - Local database storage
-- **Lexical** - Rich text editing engine
+### Code Improvements
+- **Restructuring** - Improved code organization and maintainability
+- **Type Safety** - Fixed TypeScript issues in MathPanel component
 
 ---
 
