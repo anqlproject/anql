@@ -44,8 +44,8 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
     await saveSettings(getFileFromDocument, newConfig);
 
     // Apply theme change immediately
-    if (newConfig.appearance.theme !== theme) {
-      setTheme(newConfig.appearance.theme as 'light' | 'dark' | 'system');
+    if (newConfig.appearance.theme !== storeTheme) {
+      setStoreTheme(newConfig.appearance.theme as 'light' | 'dark' | 'system');
     }
 
     // Apply language change immediately
