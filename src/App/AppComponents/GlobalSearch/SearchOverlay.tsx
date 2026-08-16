@@ -1,6 +1,6 @@
 import "./SearchOverlay.css";
 
-import { ArrowDown, ArrowUp, FileText, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, FileText, Search, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
@@ -15,6 +15,7 @@ import {
   SearchResult,
 } from "@/core/database/useSearchDatabase";
 import { DIMENSIONS } from "@/core/global/defaultValues";
+import { DATABASE_PATH } from "@/core/global/defaultSettings";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -23,15 +24,42 @@ interface SearchOverlayProps {
 
 const DocumentTitle = ({ documentId }: { documentId: string }) => {
   const [title, setTitle] = useState<string>("Loading...");
+  const [isTrash, setIsTrash] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
     getDocumentById(documentId)
-      .then((doc) => setTitle(doc?.title || (t("SIDEBAR.untitled") as string)))
+      .then((doc) => {
+        setTitle(doc?.title || (t("SIDEBAR.untitled") as string));
+        setIsTrash(doc?.path === DATABASE_PATH.TRASH_PATH);
+      })
       .catch(() => setTitle(t("SIDEBAR.untitled") as string));
   }, [documentId, t]);
 
-  return <span>{title}</span>;
+  return (
+    <>
+      <span>{title}</span>
+      {isTrash && (
+        <span
+          className="search-trash-badge"
+          style={{
+            marginLeft: "8px",
+            color: "var(--destructive, #ef4444)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+            fontSize: "11px",
+            border: "1px solid var(--destructive, #ef4444)",
+            padding: "1px 6px",
+            borderRadius: "4px",
+            fontWeight: 500,
+          }}
+        >
+          <Trash2 size={10} /> {t("SIDEBAR.trash")}
+        </span>
+      )}
+    </>
+  );
 };
 
 /**
