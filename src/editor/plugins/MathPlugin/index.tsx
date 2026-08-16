@@ -7,8 +7,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Dialog } from '@/components/custom/Dialog/Dialog';
 import { useMathVariables } from '@/editor/context/MathVariablesContext';
-import i18n from '@/core/locales';
 import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
+
 export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
 // Plugin to update the DOM with results from MathVariablesContext
@@ -23,14 +23,13 @@ function MathResultDisplayPlugin() {
       (payload: MouseEvent) => {
         const target = payload.target as HTMLElement;
         const mathNode = target.closest('.math-exp-node');
-        
-        if (mathNode) {
+        if (mathNode && mathNode.classList.contains('has-plus')) {
           const rect = mathNode.getBoundingClientRect();
-          const isBottomArea = payload.clientY > rect.bottom - 24;
-          const isRightArea = payload.clientX > rect.right - 50;
-          
-          // Check if plus button clicked
-          if (mathNode.classList.contains('has-plus') && isBottomArea && isRightArea) {
+          // The plus button is in the bottom right corner (approx 45px wide, 20px tall)
+          if (
+            payload.clientY > rect.bottom - 24 &&
+            payload.clientX > rect.right - 50
+          ) {
             if (mathNode.classList.contains('has-error')) {
               const fullError = mathNode.getAttribute('data-full-error');
               if (fullError) {
@@ -43,28 +42,6 @@ function MathResultDisplayPlugin() {
                 setErrorDialog(fullResult);
                 return true;
               }
-            }
-          }
-          
-          // Check if result text clicked
-          if (mathNode.hasAttribute('data-result') && isBottomArea && !isRightArea) {
-            const fullResult = mathNode.getAttribute('data-full-result');
-            if (fullResult) {
-              // Extract just the value (e.g., "x = 5" -> "5", "= 5" -> "5")
-              const valueToCopy = fullResult.replace(/^.*=\s*/, '');
-              navigator.clipboard.writeText(valueToCopy);
-              
-              // Temporary feedback
-              const origResult = mathNode.getAttribute('data-result');
-              const copiedText = i18n.t('MATH_PANEL.copied');
-              mathNode.setAttribute('data-result', copiedText);
-              setTimeout(() => {
-                if (origResult && mathNode.getAttribute('data-result') === copiedText) {
-                  mathNode.setAttribute('data-result', origResult);
-                }
-              }, 1000);
-              
-              return true;
             }
           }
         }
@@ -110,7 +87,6 @@ function MathResultDisplayPlugin() {
               else dom.classList.remove('has-plus');
               dom.removeAttribute('data-result');
               dom.removeAttribute('data-placeholder');
-              dom.removeAttribute('title');
             } else if (result.result) {
               dom.classList.remove('has-error');
               dom.classList.remove('is-empty');
@@ -121,7 +97,6 @@ function MathResultDisplayPlugin() {
               else dom.classList.remove('has-plus');
               dom.removeAttribute('data-error');
               dom.removeAttribute('data-placeholder');
-              dom.setAttribute('title', i18n.t('MATH_PANEL.clickToCopy'));
             } else {
               dom.classList.remove('has-error');
               dom.classList.remove('has-plus');
@@ -129,7 +104,6 @@ function MathResultDisplayPlugin() {
               dom.removeAttribute('data-result');
               dom.removeAttribute('data-error');
               dom.setAttribute('data-placeholder', 'Math');
-              dom.removeAttribute('title');
             }
           } else {
             dom.classList.remove('has-error');
@@ -138,7 +112,6 @@ function MathResultDisplayPlugin() {
             dom.removeAttribute('data-result');
             dom.removeAttribute('data-error');
             dom.setAttribute('data-placeholder', 'Math');
-            dom.removeAttribute('title');
           }
         }
       }

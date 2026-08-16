@@ -53,8 +53,7 @@
   word-break: break-all;
   max-width: calc(100% - 16px);
   text-align: left;
-  pointer-events: auto;
-  cursor: pointer;
+  pointer-events: none; /* Changed from auto to avoid accidental clicks on the text */
   user-select: none;
   z-index: var(--z-base);
 }

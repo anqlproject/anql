@@ -41,8 +41,6 @@
       "emptyPlaceholder": "Écrivez ou tapez le nom du nœud"
     },
     "MATH_PANEL": {
-      "copied": "Copié !",
-      "clickToCopy": "Cliquez pour copier le résultat",
       "trigonometry": "Trigonométrie",
       "arithmetic": "Arithmétique",
       "logarithms": "Logarithmes",
