@@ -37,7 +37,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { DIMENSIONS, ICON_SIZES } from "@/core/global/defaultValues";
-import { useTheme } from "@/core/global/ThemeContext";
 import { useNavigationStore } from "@/GlobalState/navigationStore";
 
 interface LeftPanelsProps {
@@ -63,13 +62,8 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
   const [settingsOverlayOpen, setSettingsOverlayOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const { setTheme, resolvedTheme } = useTheme();
   const isDraggingRef = useRef(false);
   const animationFrameIdRef = useRef<number | null>(null);
-
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
 
   // Register handleNewFile with global shortcut (handleNewFile is now stable with useCallback in FileHooks)
   useEffect(() => {
@@ -304,8 +298,6 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
         <SidebarFooter>
           <FooterMenu
             setSettingsOverlayOpen={setSettingsOverlayOpen}
-            toggleTheme={toggleTheme}
-            resolvedTheme={resolvedTheme}
             onOpenTrash={onOpenTrash}
             setIsHelpOpen={setIsHelpOpen}
             onOpenAbout={() => setIsAboutOpen(true)}

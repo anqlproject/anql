@@ -10,8 +10,8 @@ import { saveSettings } from '@/App/settings';
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { Button } from '@/components/ui/button';
 import { DIMENSIONS } from '@/core/global/defaultValues';
-import { useTheme } from '@/core/global/ThemeContext';
 import { logger } from '@/core/logger';
+import { useThemeStore } from '@/GlobalState/themeStore';
 
 import AppearanceTab from './SettingsTab/AppearanceTab';
 import EditorTab from './SettingsTab/EditorTab';
@@ -24,7 +24,7 @@ interface SettingsOverlayProps {
 
 export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProps) {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { theme: storeTheme, setTheme: setStoreTheme } = useThemeStore();
   const [activeTab, setActiveTab] = useState('appearance');
 
   // ── Zustand config store — source of truth ──────────────────────────
