@@ -11,8 +11,8 @@ import { useGlobalStore } from "@/App/store/useGlobalStore";
 import FeedbackButton from '@/components/custom/FeedbackButton/FeedbackButton';
 import { Button } from '@/components/ui/button';
 import { DIMENSIONS } from '@/core/global/defaultValues';
-import { useTheme } from '@/core/global/ThemeContext';
 import { logger } from '@/core/logger';
+import { useThemeStore } from '@/GlobalState/themeStore';
 
 import AppearanceTab from './SettingsTab/AppearanceTab';
 import EditorTab from './SettingsTab/EditorTab';
@@ -25,7 +25,7 @@ interface SettingsOverlayProps {
 
 export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProps) {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { theme: storeTheme, setTheme: setStoreTheme } = useThemeStore();
   const [activeTab, setActiveTab] = useState('appearance');
 
   // ── Zustand config store — source of truth ──────────────────────────
@@ -40,8 +40,17 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
   // Reset to the store value every time the overlay opens.
   const [draft, setDraft] = useState(config);
   useEffect(() => {
-    if (isOpen) setDraft(config);
-  }, [isOpen, config]);
+    if (isOpen) {
+      // Sync draft with both config store and themeStore
+      setDraft({
+        ...config,
+        appearance: {
+          ...config.appearance,
+          theme: storeTheme, // Always use themeStore as source of truth for theme
+        },
+      });
+    }
+  }, [isOpen, config, storeTheme]);
 
   const hasChanges = JSON.stringify(draft) !== JSON.stringify(config);
 
@@ -68,9 +77,9 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
     // Persist to disk via helper
     await saveSettings(getFileFromDocument, draft);
 
-    // Apply theme change immediately
-    if (draft.appearance.theme !== theme) {
-      setTheme(draft.appearance.theme as 'light' | 'dark' | 'system');
+    // Apply theme change immediately - use themeStore as source of truth
+    if (draft.appearance.theme !== storeTheme) {
+      setStoreTheme(draft.appearance.theme as 'light' | 'dark' | 'system');
     }
 
     // Apply language change immediately
@@ -83,8 +92,14 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
       logger.setErrorLoggingEnabled(draft.privacy?.enableErrorLogging !== false);
     }
 
-    // Push to Zustand store
-    setConfig(draft);
+    // Push to Zustand store (without theme, as themeStore is the source of truth)
+    setConfig({
+      ...draft,
+      appearance: {
+        ...draft.appearance,
+        theme: storeTheme, // Keep themeStore as source of truth
+      },
+    });
   };
 
   // Alias for readability in JSX
