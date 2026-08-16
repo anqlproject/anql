@@ -41,6 +41,8 @@
       "emptyPlaceholder": "Write or type node name"
     },
     "MATH_PANEL": {
+      "copied": "Copied!",
+      "clickToCopy": "Click to copy result",
       "trigonometry": "Trigonometry",
       "arithmetic": "Arithmetic",
       "logarithms": "Logarithms",
