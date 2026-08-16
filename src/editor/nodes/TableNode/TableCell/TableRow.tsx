@@ -1,3 +1,5 @@
+import './TableRow.css';
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
@@ -5,9 +7,9 @@ import * as Popover from "@radix-ui/react-popover";
 import { flexRender, Table } from "@tanstack/react-table";
 import { CSSProperties, useRef } from "react";
 
-import { RowMenu } from "./RowMenu";
-import { TableRowData } from "./TableNode";
-import { toRowDndId } from "./tableUtils";
+import { RowMenu } from "../TableMenu/RowMenu";
+import { TableRowData } from "../TableNode";
+import { toRowDndId } from "../tableUtils";
 
 type TableRowWithId = TableRowData & { _rowId: string };
 

@@ -1,0 +1,14 @@
+/* ── Base cell styles (shared between rows and headers) ── */
+
+.table-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border-right: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+  box-sizing: border-box;
+}
+
+.table-cell:last-of-type {
+  border-right: none;
+}
