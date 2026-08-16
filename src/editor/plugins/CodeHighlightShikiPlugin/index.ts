@@ -13,7 +13,7 @@ import type { JSX } from 'react';
 import { useEffect, useRef } from 'react';
 
 import { useGlobalStore } from '@/App/store/useGlobalStore';
-import { useTheme } from '@/core/global/ThemeContext';
+import { useThemeStore } from '@/GlobalState/themeStore';
 
 export const CODE_LANGUAGES = [
   '',
@@ -49,7 +49,7 @@ export const CODE_THEMES = [
 
 export default function CodeHighlightShikiPlugin(): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme } = useThemeStore();
   const config = useGlobalStore((state) => state.config);
 
   // Ref to hold the current default theme — readable inside the tokenizer

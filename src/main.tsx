@@ -8,7 +8,6 @@ import ReactDOM from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 
 import App from "@/App/App";
-import { ThemeProvider } from "@/core/global/ThemeContext";
 import i18n from "@/core/locales";
 
 import { GlobalStoreProvider } from "./App/store/GlobalStoreProvider";
@@ -65,11 +64,9 @@ document.addEventListener("drop", (event) => {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <I18nextProvider i18n={i18n}>
-      <ThemeProvider>
-        <GlobalStoreProvider>
-          <App />
-        </GlobalStoreProvider>
-      </ThemeProvider>
+      <GlobalStoreProvider>
+        <App />
+      </GlobalStoreProvider>
     </I18nextProvider>
   </React.StrictMode>,
 );

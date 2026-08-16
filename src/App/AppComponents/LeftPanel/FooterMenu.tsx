@@ -15,11 +15,10 @@ import { useTranslation } from "react-i18next";
 import { MenuItemProps } from "@/components/custom/Menu/MenuItem";
 import { MenuX } from "@/components/custom/Menu/MenuX";
 import { ICON_SIZES } from "@/core/global/defaultValues";
+import { useThemeStore } from "@/GlobalState/themeStore";
 
 interface FooterMenuProps {
     setSettingsOverlayOpen: (open: boolean) => void;
-    toggleTheme: () => void;
-    resolvedTheme: string;
     onOpenTrash?: () => void;
     setIsHelpOpen: (open: boolean) => void;
     onOpenAbout?: () => void;
@@ -27,13 +26,12 @@ interface FooterMenuProps {
 
 export const FooterMenu: React.FC<FooterMenuProps> = ({
     setSettingsOverlayOpen,
-    toggleTheme,
-    resolvedTheme,
     onOpenTrash,
     setIsHelpOpen,
     onOpenAbout
 }) => {
     const { t } = useTranslation();
+    const { toggleTheme, resolvedTheme } = useThemeStore();
     const [isOpen, setIsOpen] = useState(false);
 
     const menuItems: MenuItemProps[] = [
