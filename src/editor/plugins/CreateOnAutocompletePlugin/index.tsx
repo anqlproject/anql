@@ -268,6 +268,27 @@ function getPossibleQueryMatch(text: string): MenuTextMatch | null {
     return null;
   }
 
+  // If the text is too long, it's not an autocomplete command
+  if (text.length > 25) {
+    return null;
+  }
+
+  // If there are more than 2 spaces, it's a normal sentence, not an autocomplete command
+  if (text.split(' ').length > 3) {
+    return null;
+  }
+
+  // Only consider it a match if it partially matches at least one autocomplete option
+  const searchLower = text.toLowerCase();
+  const hasMatch = AutocompleteOptions.some((item) => {
+    if (item.name.toLowerCase().startsWith(searchLower)) return true;
+    return item.keywords.some((k) => k.toLowerCase().startsWith(searchLower));
+  });
+
+  if (!hasMatch) {
+    return null;
+  }
+
   return {
     leadOffset: 0,
     matchingString: text,
