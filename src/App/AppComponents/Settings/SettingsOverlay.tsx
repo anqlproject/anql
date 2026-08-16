@@ -1,14 +1,13 @@
 import './SettingsOverlay.css';
 
 import { Palette, Shield, Type, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useSettingsFile } from '@/App/hooks/useSettingsFile';
 import { saveSettings } from '@/App/settings';
 import { useGlobalStore } from "@/App/store/useGlobalStore";
-import FeedbackButton from '@/components/custom/FeedbackButton/FeedbackButton';
 import { Button } from '@/components/ui/button';
 import { DIMENSIONS } from '@/core/global/defaultValues';
 import { useTheme } from '@/core/global/ThemeContext';
@@ -36,59 +35,56 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
     }))
   );
 
-  // ── Local draft — pending edits before Save ─────────────────────────
-  // Reset to the store value every time the overlay opens.
-  const [draft, setDraft] = useState(config);
-  useEffect(() => {
-    if (isOpen) setDraft(config);
-  }, [isOpen, config]);
-
-  const hasChanges = JSON.stringify(draft) !== JSON.stringify(config);
-
-  /** Generic update helper — supports root keys and one level of nesting */
-  const updateSetting = (key: string, value: unknown, category?: string) => {
-    if (category) {
-      setDraft(prev => ({
-        ...prev,
-        [category]: {
-          ...(prev[category as keyof typeof prev] as object),
-          [key]: value,
-        },
-      }));
-    } else {
-      setDraft(prev => ({ ...prev, [key]: value }));
-    }
-  };
-
   const { getFileFromDocument } = useSettingsFile();
 
-  const saveConfig = async () => {
-    const errorLoggingChanged = draft.privacy?.enableErrorLogging !== config.privacy?.enableErrorLogging;
+  const saveConfig = async (newConfig: any) => {
+    const errorLoggingChanged = newConfig.privacy?.enableErrorLogging !== config.privacy?.enableErrorLogging;
 
     // Persist to disk via helper
-    await saveSettings(getFileFromDocument, draft);
+    await saveSettings(getFileFromDocument, newConfig);
 
     // Apply theme change immediately
-    if (draft.appearance.theme !== theme) {
-      setTheme(draft.appearance.theme as 'light' | 'dark' | 'system');
+    if (newConfig.appearance.theme !== theme) {
+      setTheme(newConfig.appearance.theme as 'light' | 'dark' | 'system');
     }
 
     // Apply language change immediately
-    if (draft.appearance.language !== config.appearance.language) {
-      i18n.changeLanguage(draft.appearance.language);
+    if (newConfig.appearance.language !== config.appearance.language) {
+      i18n.changeLanguage(newConfig.appearance.language);
     }
 
     // Apply error logging setting
     if (errorLoggingChanged) {
-      logger.setErrorLoggingEnabled(draft.privacy?.enableErrorLogging !== false);
+      logger.setErrorLoggingEnabled(newConfig.privacy?.enableErrorLogging !== false);
     }
 
     // Push to Zustand store
-    setConfig(draft);
+    setConfig(newConfig);
+  };
+
+  /** Generic update helper — supports root keys and one level of nesting */
+  const updateSetting = (key: string, value: unknown, category?: string) => {
+    let newConfig: any;
+    if (category) {
+      newConfig = {
+        ...config,
+        [category]: {
+          ...(config[category as keyof typeof config] as object),
+          [key]: value,
+        },
+      };
+    } else {
+      newConfig = { ...config, [key]: value };
+    }
+
+    // Fire and forget
+    saveConfig(newConfig).catch((err) => {
+      logger.error("Failed to save config immediately", err);
+    });
   };
 
   // Alias for readability in JSX
-  const settings = draft;
+  const settings = config;
 
   if (!isOpen) return null;
 
@@ -99,15 +95,6 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
         <div className="settings-overlay-header">
           <h2 className="text-lg font-semibold">{t('SETTINGS.title')}</h2>
           <div className="settings-header-actions">
-            <FeedbackButton
-              onSave={saveConfig}
-              disabled={!hasChanges}
-              duration={1000}
-              label={t('FEEDBACK.save') as string}
-              successText={t('FEEDBACK.saved') as string}
-              failedText={t('FEEDBACK.error') as string}
-              variant="primary"
-            />
             <Button
               variant="ghost"
               size="sm"
