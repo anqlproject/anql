@@ -52,10 +52,12 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
               logger.info(`Cleaning up ${unexpectedKeys.length} unexpected config keys...`);
               const cleanedConfig = removeUnexpectedKeys(parsedConfig, DEFAULT_SETTINGS);
               await writeTextFile(configPath, JSON.stringify(cleanedConfig, null, 2));
-              await loadSettings(getFileFromDocument, setConfig);
             }
+            await loadSettings(getFileFromDocument, setConfig);
           } catch (e) {
             console.error('Error checking config integrity:', e);
+            // Fallback: still load settings even if integrity check fails
+            await loadSettings(getFileFromDocument, setConfig).catch(console.error);
           }
         }
 
