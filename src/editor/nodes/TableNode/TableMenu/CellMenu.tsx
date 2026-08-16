@@ -1,3 +1,5 @@
+import './TableMenu.css';
+
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from '@radix-ui/react-popover';
 import { ClipboardCopy, ClipboardPaste, ClipboardX } from "lucide-react";

@@ -1,3 +1,5 @@
+import './TableMenu.css';
+
 import * as Popover from '@radix-ui/react-popover';
 import { Link2, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

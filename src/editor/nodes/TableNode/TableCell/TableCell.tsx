@@ -1,3 +1,5 @@
+import './TableCell.css';
+
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from "@radix-ui/react-popover";
 import { format } from "date-fns";

@@ -1,3 +1,5 @@
+import './TableHeader.css';
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
@@ -6,10 +8,10 @@ import { Header, Table } from "@tanstack/react-table";
 import { GripHorizontal } from "lucide-react";
 import { CSSProperties, useRef } from "react";
 
-import { ColumnMenu } from "./ColumnMenu";
+import { ColumnMenu } from "../TableMenu/ColumnMenu";
+import { TableRowData } from "../TableNode";
+import { toColDndId } from "../tableUtils";
 import EditableCell from "./TableCell";
-import { TableRowData } from "./TableNode";
-import { toColDndId } from "./tableUtils";
 
 type TableRowWithId = TableRowData & { _rowId: string };
 

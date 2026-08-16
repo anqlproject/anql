@@ -1,0 +1,106 @@
+@import './TableCellBase.css';
+
+/* ── Row styles ── */
+
+.table-cell--data {
+  background: transparent;
+  vertical-align: top;
+}
+
+.table-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 36px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 65%, transparent);
+  position: relative;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row--header {
+  min-height: 34px;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-color) 80%, var(--surface-color));
+}
+
+.table-row--header .table-cell--header {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.table-row:hover {
+  background: color-mix(in srgb, var(--action-hover) 50%, transparent);
+}
+
+.table-row--drop-target::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 2px;
+  background: var(--primary-color);
+  z-index: var(--z-elevated);
+  pointer-events: none;
+}
+
+.table-row--dragging {
+  background: transparent;
+}
+
+/* ── Gutter & row handle ── */
+
+.table-gutter {
+  flex: 0 0 24px;
+  width: 24px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-row-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: color-mix(in srgb, var(--text-secondary) 70%, transparent);
+  cursor: grab;
+  padding: 2px;
+  border-radius: 3px;
+  opacity: 0;
+  touch-action: none;
+  user-select: none;
+  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.table-row:hover .table-row-handle,
+.table-row-handle:focus-visible,
+.table-row-handle--overlay {
+  opacity: 1;
+}
+
+.table-row-handle:hover {
+  background: color-mix(in srgb, var(--action-hover) 90%, transparent);
+  color: var(--text-primary);
+}
+
+.table-row-handle:active {
+  cursor: grabbing;
+}
+
+.table-handle-dots {
+  width: 10px;
+  height: 10px;
+}
+
+.table-row-handle-anchor {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}

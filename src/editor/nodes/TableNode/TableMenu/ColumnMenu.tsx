@@ -1,9 +1,11 @@
+import './TableMenu.css';
+
 import * as Popover from '@radix-ui/react-popover';
 import type { Table } from '@tanstack/react-table';
 import { Calendar, CheckSquare, Hash, Plus, Trash2, Type } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { TableRowData } from './TableNode';
+import { TableRowData } from '../TableNode';
 
 type TableRowWithId = TableRowData & { _rowId: string };
 

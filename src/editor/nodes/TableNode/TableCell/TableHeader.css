@@ -1,0 +1,92 @@
+@import './TableCellBase.css';
+
+/* ── Header cell styles ── */
+
+.table-cell--header {
+  background: transparent;
+}
+
+.table-header-inner {
+  width: 100%;
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.table-header-label {
+  display: block;
+  padding: 6px 8px;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Column handle ── */
+
+.table-col-handle {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 14px;
+  z-index: var(--z-modal);
+  border: none;
+  background: var(--panel-color);
+  color: color-mix(in srgb, var(--text-secondary) 70%, transparent);
+  cursor: grab;
+  padding: 2px;
+  border-radius: 3px;
+  opacity: 0;
+  touch-action: none;
+  user-select: none;
+  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.table-col-handle:hover {
+  background: color-mix(in srgb, var(--action-hover) 90%, transparent);
+  color: var(--text-primary);
+}
+
+.table-col-handle:active {
+  cursor: grabbing;
+}
+
+.table-cell:hover .table-col-handle,
+.table-cell--hovered-col .table-col-handle,
+.table-col-handle:focus-visible,
+.table-col-handle.is-dragging {
+  opacity: 1;
+}
+
+.table-col-handle-anchor {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.table-handle-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* ── Column resizer ── */
+
+.table-resizer {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: var(--z-elevated);
+}
+
+.table-resizer-inactive:hover,
+.table-resizer-active {
+  background: var(--primary-color);
+}
