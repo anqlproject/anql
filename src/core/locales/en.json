@@ -23,7 +23,8 @@
       "numberList": "Number List",
       "bulletList": "Bullet List",
       "checkList": "Check List",
-      "copyCode": "Copy Code"
+      "copyCode": "Copy Code",
+      "copyMathResult": "Copy result"
     },
     "NODES": {
       "paragraph": "Paragraph",
@@ -41,6 +42,7 @@
       "emptyPlaceholder": "Write or type node name"
     },
     "MATH_PANEL": {
+      "copied": "Copied!",
       "trigonometry": "Trigonometry",
       "arithmetic": "Arithmetic",
       "logarithms": "Logarithms",

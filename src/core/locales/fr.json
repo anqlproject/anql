@@ -23,7 +23,8 @@
       "numberList": "Liste numérotée",
       "bulletList": "Liste à puces",
       "checkList": "Liste de tâches",
-      "copyCode": "Copier le code"
+      "copyCode": "Copier le code",
+      "copyMathResult": "Copier résultat"
     },
     "NODES": {
       "paragraph": "Paragraphe",
@@ -41,6 +42,7 @@
       "emptyPlaceholder": "Écrivez ou tapez le nom du nœud"
     },
     "MATH_PANEL": {
+      "copied": "Copié !",
       "trigonometry": "Trigonométrie",
       "arithmetic": "Arithmétique",
       "logarithms": "Logarithmes",
