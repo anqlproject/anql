@@ -1,7 +1,6 @@
 import "./LeftPanel.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import {
   HomeIcon,
   MoveRightIcon,
@@ -24,6 +23,7 @@ import SettingsOverlay from "@/App/AppComponents/Settings/SettingsOverlay";
 import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
 import { useFile } from "@/App/hooks/FileHooks";
 import { useSettingsFile } from "@/App/hooks/useSettingsFile";
+import { saveSettings } from '@/App/settings';
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import {
   Sidebar,
@@ -36,7 +36,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { APP_PATH } from "@/core/global/defaultSettings";
 import { DIMENSIONS, ICON_SIZES } from "@/core/global/defaultValues";
 import { useNavigationStore } from "@/GlobalState/navigationStore";
 
@@ -50,7 +49,11 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
   const { handleNewFile, openEditorWithUpdate } = useFile();
   const { getFileFromDocument } = useSettingsFile();
 
-  const { isMac, config } = useGlobalStore(useShallow((state) => ({ isMac: state.isMac, config: state.config })));
+  const { isMac, config, patchConfig } = useGlobalStore(useShallow((state) => ({
+    isMac: state.isMac,
+    config: state.config,
+    patchConfig: state.patchConfig
+  })));
   const isGlobalSearchOpen = useGlobalShortcut((state) => state.isGlobalSearchOpen);
   const openGlobalSearch = useGlobalShortcut((state) => state.openGlobalSearch);
   const closeGlobalSearch = useGlobalShortcut((state) => state.closeGlobalSearch);
@@ -134,78 +137,51 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
     setIsResizing(true);
   }, []);
 
-  // Load leftPanel config on mount
+  // Load leftPanel config from global store on mount
   useEffect(() => {
-    const loadLeftPanelConfig = async () => {
-      try {
-        const configPath = await getFileFromDocument(APP_PATH.CONFIG_FILE);
-        if (!configPath) {
-          throw new Error("Config path not found");
-        }
-        const content = await readTextFile(configPath);
-
-        if (!content || content.trim() === '') {
-          console.warn('Config file is empty');
-          return;
-        }
-
-        const config = JSON.parse(content);
-
-        if (config.leftPanel) {
-          if (config.leftPanel.width) {
-            setSidebarWidth(config.leftPanel.width);
-          }
-          if (typeof config.leftPanel.open === 'boolean') {
-            setOpen(config.leftPanel.open);
-          }
-        }
-      } catch (e) {
-        console.error('No leftPanel config found or error reading config:', e);
-      } finally {
-        isInitialLoadRef.current = false;
-        // Re-enable transitions after config is loaded and DOM has updated
-        setTimeout(() => {
-          setIsResizing(false);
-          setIsConfigLoaded(true);
-        }, 100);
+    if (config.leftPanel) {
+      if (config.leftPanel.width) {
+        setSidebarWidth(config.leftPanel.width);
       }
-    };
+      if (typeof config.leftPanel.open === 'boolean') {
+        setOpen(config.leftPanel.open);
+      }
+    }
 
-    loadLeftPanelConfig();
+    isInitialLoadRef.current = false;
+    // Re-enable transitions after DOM has updated
+    setTimeout(() => {
+      setIsResizing(false);
+      setIsConfigLoaded(true);
+    }, 100);
   }, []);
 
-  // Save leftPanel config when width or open state changes
+  // Save leftPanel config to global store and disk when width or open state changes
   useEffect(() => {
     if (isInitialLoadRef.current) return;
 
-    const saveLeftPanelConfig = async () => {
-      try {
-        const configPath = await getFileFromDocument(APP_PATH.CONFIG_FILE);
-        if (!configPath) {
-          throw new Error("Config path not found");
+    const currentConfig = useGlobalStore.getState().config;
+    if (currentConfig.leftPanel?.width !== sidebarWidth || currentConfig.leftPanel?.open !== open) {
+      const newValues = { width: sidebarWidth, open };
+
+      // Update Zustand store
+      patchConfig('leftPanel', newValues);
+
+      // Compute full new config for saving
+      const updatedConfig = {
+        ...currentConfig,
+        leftPanel: {
+          ...currentConfig.leftPanel,
+          ...newValues
         }
+      };
 
-        let content = '{}';
-        try {
-          content = await readTextFile(configPath);
-        } catch (e) {
-          // File doesn't exist yet, will create it
-        }
-
-        const config = JSON.parse(content);
-        config.leftPanel = {
-          width: sidebarWidth,
-          open
-        };
-
-        await writeTextFile(configPath, JSON.stringify(config, null, 2));
-      } catch (e) {
+      // Save to disk
+      saveSettings(getFileFromDocument, updatedConfig).catch((e) => {
         console.error('Error saving leftPanel config:', e);
-      }
-    };
-
-    saveLeftPanelConfig();
-  }, [sidebarWidth, open]);
+      });
+    }
+  }, [sidebarWidth, open, patchConfig, getFileFromDocument]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
