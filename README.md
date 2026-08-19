@@ -19,7 +19,9 @@
 <p align="center">
   <a href="#why-anql">Why ANQL?</a> |
   <a href="#features">Features</a> |
+  <a href="#see-it-in-action">Demo</a> |
   <a href="#getting-started">Getting Started</a> |
+  <a href="QuickStart.md">Quick Start</a> |
   <a href="#tech-stack">Tech Stack</a> |
   <a href="#community">Community</a>
 </p>
@@ -31,6 +33,31 @@
 <p align="center">
   <img src="assets/overview 1.png" alt="ANQL Overview 1" width="45%" />
   <img src="assets/overview 2.png" alt="ANQL Overview 2" width="45%" />
+</p>
+
+---
+
+## See it in action
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <strong>Create a document</strong><br/><br/>
+      <img src="assets/create new document.gif" alt="Create new document" />
+    </td>
+    <td align="center" width="33%">
+      <strong>Live math panel</strong><br/><br/>
+      <img src="assets/math panel.gif" alt="Math panel" />
+    </td>
+    <td align="center" width="33%">
+      <strong>Node transformation</strong><br/><br/>
+      <img src="assets/node transformation task.gif" alt="Node transformation" />
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <a href="QuickStart.md">→ See all demos</a>
 </p>
 
 ---
@@ -104,6 +131,8 @@ Import Markdown and ANQL files. Export in ANQL format.
 ANQL is currently available for **macOS**.
 
 👉 [Download the latest release (v0.2.0)](https://github.com/anqlproject/anql/releases/tag/0.2.0)
+
+Once installed, open the [**Quick Start guide**](QuickStart.md) to learn the basics in a few minutes — smart block creation, live math, search, and more.
 
 ### Build from source
 
