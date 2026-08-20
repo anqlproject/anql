@@ -5,17 +5,17 @@ import { Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react";
 
 import CustomCaret from "@/App/AppComponents/CustomCaret/CustomCaret";
 import { HightlightSelectedText } from "@/App/AppComponents/HighlightSelectedText/HighlightSelectedText";
-import { MenuPosition } from "@/components/custom/Menu/Menu";
 import { useMathVariables } from "@/editor/context/MathVariablesContext";
 import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 
 interface MathPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  position: MenuPosition;
+  position: any;
   editor: LexicalEditor;
   caretPosition: { x: number; y: number };
   showCaret: boolean;
@@ -183,6 +183,35 @@ export default function MathPanel({
   const isMountedRef = useRef(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const { refs, floatingStyles } = useFloating({
+    placement: 'bottom-start',
+    strategy: 'fixed',
+    open: isOpen,
+    middleware: [
+      offset(8),
+      flip({ fallbackPlacements: ['top-start', 'bottom-end', 'top-end'] }),
+      shift({ padding: 8 }),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
+
+  useEffect(() => {
+    refs.setReference({
+      getBoundingClientRect() {
+        return {
+          width: position.width || 0,
+          height: position.height || 0,
+          x: position.left ?? position.x,
+          y: position.top ?? position.y,
+          top: position.top ?? position.y,
+          left: position.left ?? position.x,
+          right: position.right ?? position.x,
+          bottom: position.bottom ?? position.y,
+        } as DOMRect;
+      },
+    });
+  }, [position, refs]);
+
   // Update variables category dynamically based on the active node's scope
   const mathCategoriesWithVariables = useMemo(() => {
     // Si on a un node actif et un scope calculé pour lui, on utilise ce scope, sinon on fallback sur toutes les variables (ex: mode dégradé)
@@ -310,9 +339,13 @@ export default function MathPanel({
 
       {/* Panel avec tabs et catégories */}
       <div
-        ref={panelRef}
+        ref={(node) => {
+          refs.setFloating(node);
+          // @ts-ignore
+          panelRef.current = node;
+        }}
         className="math-panel"
-        style={{ top: position.y, left: position.x }}
+        style={floatingStyles}
       >
         {/* Search Bar */}
         <div className="math-panel__search-container">

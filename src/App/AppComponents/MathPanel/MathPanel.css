@@ -46,7 +46,6 @@
     0 10px 10px -5px rgba(0, 0, 0, 0.04),
     0 0 0 1px rgba(0, 0, 0, 0.05);
 
-  transform: translateX(-100%) translateX(-8px);
   animation: math-panel-in 0.15s ease-out;
   outline: none;
   overflow: hidden;

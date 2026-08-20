@@ -130,30 +130,41 @@ export default function DraggableBlockPlugin({
                   e.stopPropagation();
 
                   const rect = e.currentTarget.getBoundingClientRect();
-                  setMathPosition({ x: rect.right, y: rect.top });
+                  setMathPosition(rect);
 
-                  // Capturer la sélection avant le blur
-                  const domSel = window.getSelection();
-                  if (domSel && domSel.rangeCount > 0) {
-                    const range = domSel.getRangeAt(0);
-                    if (!range.collapsed) {
-                      setMathSelectionRects(Array.from(range.getClientRects()));
-                      setShowMathCaret(false);
+                  // Restore focus in case the editor was blurred
+                  editor.focus();
+
+                  // Wait for Lexical to restore the DOM selection
+                  setTimeout(() => {
+                    const domSel = window.getSelection();
+                    if (domSel && domSel.rangeCount > 0) {
+                      const range = domSel.getRangeAt(0);
+                      const editorRoot = editor.getRootElement();
+                      if (editorRoot && editorRoot.contains(range.commonAncestorContainer)) {
+                        if (!range.collapsed) {
+                          setMathSelectionRects(Array.from(range.getClientRects()));
+                          setShowMathCaret(false);
+                        } else {
+                          setMathSelectionRects([]);
+                          const rects = range.getClientRects();
+                          if (rects.length > 0) {
+                            setMathCaretPosition({ x: rects[0].left, y: rects[0].top });
+                            setShowMathCaret(true);
+                            setMathCaretTimestamp(Date.now());
+                          }
+                        }
+                      } else {
+                        setMathSelectionRects([]);
+                        setShowMathCaret(false);
+                      }
                     } else {
                       setMathSelectionRects([]);
-                      const rects = range.getClientRects();
-                      if (rects.length > 0) {
-                        setMathCaretPosition({ x: rects[0].left, y: rects[0].top });
-                        setShowMathCaret(true);
-                        setMathCaretTimestamp(Date.now());
-                      }
+                      setShowMathCaret(false);
                     }
-                  } else {
-                    setMathSelectionRects([]);
-                    setShowMathCaret(false);
-                  }
 
-                  setShowMath(true);
+                    setShowMath(true);
+                  }, 10);
                 }}
               >
                 <SquareSigma size={18} />
