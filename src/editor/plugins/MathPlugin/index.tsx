@@ -1,7 +1,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $setBlocksType } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
-import { $getRoot, $getSelection, $isRangeSelection, CLICK_COMMAND, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_LOW, createCommand, LexicalNode } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, $isNodeSelection, $createParagraphNode, CLICK_COMMAND, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_LOW, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, createCommand, LexicalNode } from 'lexical';
 import { evaluate } from 'mathjs';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -252,6 +252,54 @@ export default function MathPlugin() {
           return true; // Command handled
         },
         COMMAND_PRIORITY_EDITOR,
+      ),
+      editor.registerCommand(
+        KEY_BACKSPACE_COMMAND,
+        (event) => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            const nodes = selection.getNodes();
+            if (nodes.length === 1 && $isMathExpNode(nodes[0])) {
+              event.preventDefault();
+              const paragraph = $createParagraphNode();
+              nodes[0].replace(paragraph);
+              paragraph.select();
+              return true;
+            }
+          }
+          if ($isRangeSelection(selection) && selection.isCollapsed()) {
+            const anchorNode = selection.anchor.getNode();
+            const element = anchorNode.getType() === 'mathexp' ? anchorNode : anchorNode.getParent();
+            
+            if (element && $isMathExpNode(element) && element.getTextContent().length === 0) {
+              event.preventDefault();
+              const paragraph = $createParagraphNode();
+              element.replace(paragraph);
+              paragraph.select();
+              return true;
+            }
+          }
+          return false;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+      editor.registerCommand(
+        KEY_DELETE_COMMAND,
+        (event) => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            const nodes = selection.getNodes();
+            if (nodes.length === 1 && $isMathExpNode(nodes[0])) {
+              event.preventDefault();
+              const paragraph = $createParagraphNode();
+              nodes[0].replace(paragraph);
+              paragraph.select();
+              return true;
+            }
+          }
+          return false;
+        },
+        COMMAND_PRIORITY_LOW
       )
     );
   }, [editor, evaluateTree]);
