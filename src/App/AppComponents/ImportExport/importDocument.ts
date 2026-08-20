@@ -8,7 +8,7 @@ import { newNode } from '@/core/database/useBlocDatabase';
 import { DocumentsJson, newDocument } from '@/core/database/useDocumentDatabase';
 import { addRecentDocument } from '@/core/database/useRecentDocumentsDatabase';
 import { DATABASE_PATH } from '@/core/global/defaultSettings';
-import { PLAYGROUND_TRANSFORMERS } from '@/editor/plugins/MarkdownTransformers';
+import { ANQL_MARKDOWN_TRANSFORMERS } from '@/editor/plugins/AnqlMarkdownTransformers';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -161,7 +161,7 @@ export async function importDocument({
         await new Promise<void>((resolve) => {
           editor.update(
             () => {
-              $convertFromMarkdownString(processedContent, PLAYGROUND_TRANSFORMERS);
+              $convertFromMarkdownString(processedContent, ANQL_MARKDOWN_TRANSFORMERS);
             },
             { onUpdate: resolve },
           );
@@ -182,7 +182,7 @@ export async function importDocument({
 
       // Markdown: convert via editor (same as DocumentMenu)
       editor.update(() => {
-        $convertFromMarkdownString(content, PLAYGROUND_TRANSFORMERS);
+        $convertFromMarkdownString(content, ANQL_MARKDOWN_TRANSFORMERS);
       });
     } else {
       onError('Unsupported file format. Please select a .anql or .md file.');

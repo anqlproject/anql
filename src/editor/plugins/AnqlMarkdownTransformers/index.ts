@@ -409,7 +409,7 @@ export const TABLE: MultilineElementTransformer = {
   type: "multiline-element",
 };
 
-export const PLAYGROUND_TRANSFORMERS: Array<Transformer> = [
+export const ANQL_MARKDOWN_TRANSFORMERS: Array<Transformer> = [
   HR,
   IMAGE,
   MATH,
@@ -428,15 +428,15 @@ export const PLAYGROUND_TRANSFORMERS: Array<Transformer> = [
   ...TEXT_MATCH_TRANSFORMERS,
 ];
 
-export const getTransformers = (useBrackets: boolean): Array<Transformer> => {
+export const anqlMarkdownTransformersGetTransformers = (useBrackets: boolean): Array<Transformer> => {
   if (useBrackets) {
-    return PLAYGROUND_TRANSFORMERS;
+    return ANQL_MARKDOWN_TRANSFORMERS;
   }
-  
+
   // Filter out HIGHLIGHT transformer when useBrackets is false
-  return PLAYGROUND_TRANSFORMERS.filter(
-    (transformer) => 
-      !(transformer.type === 'text-format' && 
+  return ANQL_MARKDOWN_TRANSFORMERS.filter(
+    (transformer) =>
+      !(transformer.type === 'text-format' &&
         (transformer as any).format?.includes('highlight'))
   );
 };

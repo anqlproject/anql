@@ -42,12 +42,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighlight";
 
 import { TABLE_ROW_NAVIGATE_COMMAND, TABLE_SEARCH_NAVIGATE_COMMAND } from "../../plugins/TablePlugin";
-import { CellMenu } from "./TableMenu/CellMenu";
 import EditableCell from "./TableCell/TableCell";
 import DraggableHeader from "./TableCell/TableHeader";
+import { DraggableRow } from "./TableCell/TableRow";
+import { CellMenu } from "./TableMenu/CellMenu";
 import { $isTableNode } from "./TableNode";
 import { TableColumn, TableRowData } from "./TableNode";
-import { DraggableRow } from "./TableCell/TableRow";
 import {
   isColDndId,
   isRowDndId,
