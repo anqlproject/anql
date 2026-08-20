@@ -72,9 +72,11 @@ Write your notes and embed live calculations directly inside them. Define a vari
 
 ## Features
 
-### ✍️ Rich Text — the way you expect it
+### ✍️ Rich Text & Markdown Support
 
 A fluid writing experience with intuitive formatting. Headings, lists, links, tables — everything you need for structured note-taking, without the bloat.
+
+**Full Markdown Support**: Write seamlessly using standard Markdown shortcuts. Type `#` for headings, `-` for lists, `>` for blockquotes, or `$$` for math blocks. The editor transforms them instantly as you type.
 
 ### 🔢 Live Math — inline, in context
 

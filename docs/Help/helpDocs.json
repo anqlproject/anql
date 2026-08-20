@@ -109,6 +109,8 @@
           "description": [
             "Math nodes allow you to perform mathematical calculations and define variables within your document.",
             "",
+            "You can quickly create a math node by typing `@math()` or `$$` followed by a space at the beginning of a line.",
+            "",
             "The math functionality is powered by mathjs, a powerful mathematics library that supports a wide range of operations.",
             "",
             "Results are calculated in real-time as you type and displayed below the expression."
@@ -472,6 +474,53 @@
             "",
             "Application:",
             "- Exit application: Ctrl+Q / Mac: ⌘Q"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "markdown-support",
+      "title": "Markdown Support",
+      "content": [
+        {
+          "id": "markdown-intro",
+          "title": "Markdown Shortcuts",
+          "description": [
+            "ANQL supports a wide range of Markdown shortcuts that allow you to format text and create complex blocks just by typing.",
+            "Simply type the markdown syntax followed by a space to instantly transform the text."
+          ]
+        },
+        {
+          "id": "markdown-blocks",
+          "title": "Block Elements",
+          "description": [
+            "Type these shortcuts at the beginning of a new line:",
+            "",
+            "- Headings: Type `# `, `## `, or `### ` for Headings 1, 2, and 3",
+            "- Bullet List: Type `- `, `* `, or `+ `",
+            "- Numbered List: Type `1. `",
+            "- Check List: Type `- [ ] ` or `- [x] `",
+            "- Blockquote: Type `> `",
+            "- Code Block: Type ```` ```` followed by the language name (e.g., ```` ```javascript ````)",
+            "- Horizontal Rule: Type `---`, `***`, or `___`",
+            "- Math Block: Type `$$ ` or `@math() `",
+            "- Table: Type `| column 1 | column 2 |` to start a table"
+          ]
+        },
+        {
+          "id": "markdown-inline",
+          "title": "Inline Formatting",
+          "description": [
+            "Use these shortcuts anywhere in your text:",
+            "",
+            "- Bold: `**text**` or `__text__`",
+            "- Italic: `*text*` or `_text_`",
+            "- Strikethrough: `~~text~~`",
+            "- Inline Code: ` `text` ` (wrap with single backticks)",
+            "- Inline Math: `$equation$`",
+            "- Links: `[Link text](https://example.com)`",
+            "- Images: `![Alt text](image-url.jpg)`",
+            "- Date: `@date(YYYY-MM-DD)`"
           ]
         }
       ]
