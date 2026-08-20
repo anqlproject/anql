@@ -214,12 +214,35 @@ export const MATH: ElementTransformer = {
     return `@math(${exportChildren(node)})`;
   },
   regExp: /^@math\(([^)]*)\)\s?$/,
-  replace: (parentNode, _children, match) => {
+  replace: (parentNode, _children, match, isImport) => {
     const [, expression] = match;
     const mathExpNode = $createMathExpNode();
     const textNode = $createTextNode(expression);
     mathExpNode.append(textNode);
     parentNode.replace(mathExpNode);
+    if (!isImport) {
+      mathExpNode.selectEnd();
+    }
+  },
+  type: "element",
+};
+
+// Markdown: $$
+export const MATH_BLOCK: ElementTransformer = {
+  dependencies: [MathExpNode],
+  export: (node, exportChildren) => {
+    if (!$isMathExpNode(node)) {
+      return null;
+    }
+    return `$$\n${exportChildren(node)}\n$$`;
+  },
+  regExp: /^\$\$\s?$/,
+  replace: (parentNode, _children, _match, isImport) => {
+    const mathExpNode = $createMathExpNode();
+    parentNode.replace(mathExpNode);
+    if (!isImport) {
+      mathExpNode.select();
+    }
   },
   type: "element",
 };
@@ -390,6 +413,7 @@ export const PLAYGROUND_TRANSFORMERS: Array<Transformer> = [
   HR,
   IMAGE,
   MATH,
+  MATH_BLOCK,
   EQUATION,
   LINK,
   DATETIME,
