@@ -1,11 +1,11 @@
 import "./MathPanel.css";
 
+import { autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react";
 import { $getSelection, $isRangeSelection, LexicalEditor } from "lexical";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react";
 
 import CustomCaret from "@/App/AppComponents/CustomCaret/CustomCaret";
 import { HightlightSelectedText } from "@/App/AppComponents/HighlightSelectedText/HighlightSelectedText";

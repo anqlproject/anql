@@ -1,7 +1,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $setBlocksType } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
-import { $getRoot, $getSelection, $isRangeSelection, $isNodeSelection, $createParagraphNode, CLICK_COMMAND, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_LOW, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, createCommand, LexicalNode } from 'lexical';
+import { $createParagraphNode, $getRoot, $getSelection, $isNodeSelection, $isRangeSelection, CLICK_COMMAND, COMMAND_PRIORITY_EDITOR, COMMAND_PRIORITY_LOW, createCommand, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, LexicalNode } from 'lexical';
 import { evaluate } from 'mathjs';
 import { useCallback, useEffect, useState } from 'react';
 

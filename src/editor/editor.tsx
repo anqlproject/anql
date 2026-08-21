@@ -28,6 +28,7 @@ import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { BREAKPOINTS } from "@/core/global/defaultValues";
 import { useSharedHistoryContext } from "@/editor/context/SharedHistoryContext";
 import AddNewPlugin from "@/editor/plugins/AddNew";
+import AnqlMarkdownShortcutPlugin from "@/editor/plugins/AnqlMarkdownShortcutPlugin";
 import AutoLinkPlugin from "@/editor/plugins/AutoLinkPlugin";
 import { AutosavePlugin } from "@/editor/plugins/AutosavePlugin";
 import CodeActionMenuPlugin from "@/editor/plugins/CodeActionMenuPlugin";
@@ -41,11 +42,11 @@ import EquationsPlugin from "@/editor/plugins/EquationsPlugin";
 import ImagesPlugin from "@/editor/plugins/ImagesPlugin";
 import LinkPlugin from "@/editor/plugins/LinkPlugin";
 import ListPlugin from "@/editor/plugins/ListPlugin";
-import MarkdownShortcutPlugin from "@/editor/plugins/MarkdownShortcutPlugin";
 import MathPlugin from "@/editor/plugins/MathPlugin";
 import PdfPlugin from "@/editor/plugins/PdfPlugin";
 import RestoreFormatMemoryPlugin from "@/editor/plugins/RestoreFormatMemoryPlugin";
 import ShortcutsPlugin from "@/editor/plugins/ShortcutsPlugin";
+import StandardMarkdownPastePlugin from "@/editor/plugins/StandardMarkdownPastePlugin";
 import TablePlugin from "@/editor/plugins/TablePlugin";
 import TitlePlugin from "@/editor/plugins/TitlePlugin";
 import ToolbarPlugin from "@/editor/plugins/ToolbarPlugin";
@@ -203,7 +204,8 @@ export default function Editor(): JSX.Element {
             <TablePlugin />
             <AddNewPlugin />
             <DateTimePlugin />
-            <MarkdownShortcutPlugin useBrackets={config.editor.useBrackets} />
+            <AnqlMarkdownShortcutPlugin useBrackets={config.editor.useBrackets} />
+            <StandardMarkdownPastePlugin />
             <CodeHighlightShikiPlugin />
             <ListPlugin />
             <ImagesPlugin />

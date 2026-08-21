@@ -14,8 +14,8 @@ import {
   fuzzySearchNodesWithSnippets,
   SearchResult,
 } from "@/core/database/useSearchDatabase";
-import { DIMENSIONS } from "@/core/global/defaultValues";
 import { DATABASE_PATH } from "@/core/global/defaultSettings";
+import { DIMENSIONS } from "@/core/global/defaultValues";
 
 interface SearchOverlayProps {
   isOpen: boolean;

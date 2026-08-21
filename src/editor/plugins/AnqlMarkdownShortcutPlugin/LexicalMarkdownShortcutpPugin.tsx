@@ -41,7 +41,7 @@ const HR: ElementTransformer = {
 };
 export const DEFAULT_TRANSFORMERS = [HR, ...TRANSFORMERS];
 
-export function MarkdownShortcutPlugin({
+export function anqlMarkdownShortcutPlugin({
     transformers = DEFAULT_TRANSFORMERS,
 }: Readonly<{
     transformers?: Transformer[];
