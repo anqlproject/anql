@@ -9,7 +9,6 @@
   overflow-y: visible;
 }
 
-/*border quand focus dans la table, clique sur les bord*/
 /*
 .table-container--selected:not(:focus-within) {
   outline: 2px solid var(--primary-color);

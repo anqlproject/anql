@@ -87,12 +87,13 @@ function handleCellKeyDown(
     rowIndex: number,
     columnId: string,
 ) {
-    // Allow undo (Ctrl/Cmd+Z), redo (Ctrl/Cmd+Y / Ctrl/Cmd+Shift+Z) and Escape
-    // to bubble up to Lexical so the editor can handle them.
+    // Allow undo (Ctrl/Cmd+Z), redo (Ctrl/Cmd+Y / Ctrl/Cmd+Shift+Z), Escape,
+    // and Select All (Ctrl/Cmd+A) to bubble up to Lexical.
     const isUndoRedo =
         (e.key === 'z' || e.key === 'Z' || e.key === 'y' || e.key === 'Y') &&
         (e.ctrlKey || e.metaKey);
-    if (isUndoRedo || e.key === 'Escape') {
+    const isSelectAll = (e.key === 'a' || e.key === 'A') && (e.ctrlKey || e.metaKey);
+    if (isUndoRedo || isSelectAll || e.key === 'Escape') {
         return; // let the event bubble
     }
 
