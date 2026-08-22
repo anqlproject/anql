@@ -126,3 +126,25 @@
   color: var(--text-muted);
   font-weight: 400;
 }
+
+.table-title-container.is-empty .table-title-input {
+  display: none;
+}
+
+.table-title-marker {
+  width: 12px;
+  height: 4px;
+  background-color: var(--border-color);
+  border-radius: 2px;
+  cursor: pointer;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  opacity: 0.5;
+  transition: opacity 0.2s, background-color 0.2s, width 0.2s;
+}
+
+.table-title-container:hover .table-title-marker {
+  opacity: 1;
+  background-color: var(--primary-color, #89b4fa);
+  width: 20px;
+}

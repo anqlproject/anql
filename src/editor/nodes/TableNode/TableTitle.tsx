@@ -15,6 +15,7 @@
  */
 import { $getNodeByKey, LexicalEditor, NodeKey } from 'lexical';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { $isTableNode } from './TableNode';
 
@@ -26,6 +27,7 @@ interface TableTitleProps {
 }
 
 export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
+  const { t } = useTranslation();
   // Local state: tracks the input value without triggering Lexical updates on every keystroke.
   const [localName, setLocalName] = useState(tableName);
 
@@ -49,17 +51,22 @@ export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
     });
   };
 
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalName(e.target.value);
   };
 
   const handleBlur = () => {
     isFocusedRef.current = false;
+    setIsFocused(false);
     commitToLexical(localName);
   };
 
   const handleFocus = () => {
     isFocusedRef.current = true;
+    setIsFocused(true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -69,18 +76,31 @@ export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
     }
   };
 
+  const isEmpty = localName.trim() === '';
+
   return (
-    <div className="table-title-container">
+    <div className={`table-title-container ${isEmpty && !isFocused ? 'is-empty' : ''}`}>
       <input
+        ref={inputRef}
         className="table-title-input"
         value={localName}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        placeholder="Table name..."
+        placeholder=""
         spellCheck={false}
       />
+      {isEmpty && !isFocused && (
+        <div
+          className="table-title-marker"
+          onClick={() => {
+            setIsFocused(true);
+            setTimeout(() => inputRef.current?.focus(), 0);
+          }}
+          title={t('TABLE.addTitle') as string}
+        />
+      )}
     </div>
   );
 }

@@ -178,8 +178,12 @@ export class TableNode extends DecoratorBlockNode {
   }
 
   getTextContent(): string {
-    // Return all text content from the table (headers + cells)
+    // Return all text content from the table (title + headers + cells)
     const texts: string[] = [];
+
+    if (this.__tableName) {
+      texts.push(this.__tableName);
+    }
 
     // Add headers
     this.__columns.forEach((col) => {
@@ -192,7 +196,7 @@ export class TableNode extends DecoratorBlockNode {
         const columnId = col.accessorKey || col.id;
         if (columnId) {
           const value = row[columnId];
-          if (value !== null && value !== undefined) {
+          if (value !== null && value !== undefined && value !== '') {
             texts.push(String(value));
           }
         }
@@ -281,7 +285,7 @@ export class TableNode extends DecoratorBlockNode {
 
 export function $createTableNode(data: TableRowData[], columns: TableColumn[], tableName?: string): TableNode {
   let name = tableName;
-  if (!name) {
+  if (name === undefined) {
     try {
       const root = $getRoot();
       if (root) {
