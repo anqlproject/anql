@@ -11,6 +11,65 @@ export interface EvaluationOutput {
 
 const DIVISION_BY_ZERO = /\/\s*0(?![0-9])/;
 
+// Matches "TableName.colName" patterns where TableName starts with uppercase
+const DOT_ACCESS_PATTERN = /\b([A-Z][a-zA-Z0-9_]*)\.([a-zA-Z0-9_]*)/g;
+
+/**
+ * Detects table-specific errors in the expression and returns a user-friendly
+ * message. Runs BEFORE mathjs so the user sees clear messages instead of
+ * cryptic mathjs errors like "undefined".
+ *
+ * Also returns a suggestion string when the user typed just a table name
+ * or an incomplete "Table." accessor.
+ */
+function checkTableIssues(
+  expr: string,
+  tableVariables: Record<string, Record<string, number[]>>
+): string | null {
+  const tableNames = Object.keys(tableVariables);
+  if (tableNames.length === 0) return null;
+
+  // Case 1: expression is exactly a known table name → suggest columns as an info "error"
+  const exactTable = tableNames.find(name => expr === name);
+  if (exactTable) {
+    const cols = Object.keys(tableVariables[exactTable]);
+    if (cols.length === 0) return `Table '${exactTable}' has no numeric columns.`;
+    return `Table '${exactTable}' exists. Use ${exactTable}.ColumnName[index] or sum(${exactTable}.ColumnName). Available columns: ${cols.join(', ')}`;
+  }
+
+  // Case 2: expression starts with "KnownTable." but column is incomplete/missing
+  const partialTable = tableNames.find(name => expr.startsWith(name + '.'));
+  if (partialTable) {
+    const afterDot = expr.slice(partialTable.length + 1);
+    const cols = Object.keys(tableVariables[partialTable]);
+    if (!cols.includes(afterDot)) {
+      if (cols.length === 0) return `Table '${partialTable}' has no numeric columns.`;
+      return `Column not found or incomplete. Available columns for '${partialTable}': ${cols.join(', ')}`;
+    }
+  }
+
+  // Case 3: expression contains "UppercaseName.something" pattern — validate it
+  DOT_ACCESS_PATTERN.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = DOT_ACCESS_PATTERN.exec(expr)) !== null) {
+    const potentialTable = match[1];
+    const potentialCol = match[2];
+
+    if (!tableNames.includes(potentialTable)) {
+      return `Table '${potentialTable}' does not exist. Please check the name.`;
+    }
+
+    if (potentialCol) {
+      const cols = Object.keys(tableVariables[potentialTable]);
+      if (!cols.includes(potentialCol)) {
+        return `Column '${potentialCol}' not found in '${potentialTable}'. Available columns: ${cols.join(', ')}`;
+      }
+    }
+  }
+
+  return null;
+}
+
 /**
  * Pure evaluation function — no React, no Lexical editor dependency.
  * Takes an ordered list of MathExpNodes and evaluates them sequentially,
@@ -35,6 +94,13 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
 
     if (!expr.trim()) {
       results[key] = { result: '', error: null };
+      continue;
+    }
+
+    // Check for table-specific messages BEFORE mathjs
+    const tableMessage = checkTableIssues(expr.trim(), tableVariables);
+    if (tableMessage !== null) {
+      results[key] = { result: '', error: tableMessage };
       continue;
     }
 

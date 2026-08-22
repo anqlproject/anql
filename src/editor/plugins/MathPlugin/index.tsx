@@ -33,16 +33,16 @@ export default function MathPlugin() {
       const root = $getRoot();
       const mathNodes = $getAllMathNodes(root);
       const tableNodes = $getAllTableNodes(root);
-      
+
       const tableVariables: Record<string, Record<string, number[]>> = {};
 
       tableNodes.forEach((node, index) => {
         const rawName = node.__tableName || `Table_${index + 1}`;
         const safeTableName = rawName.replace(/[^a-zA-Z0-9_]/g, '');
         if (!safeTableName) return;
-        
+
         const tableData: Record<string, number[]> = {};
-        
+
         node.__columns.forEach(col => {
           if (col.meta?.type === 'number') {
             const safeHeader = (col.header || col.accessorKey).replace(/[^a-zA-Z0-9_]/g, '');
@@ -55,7 +55,7 @@ export default function MathPlugin() {
             }
           }
         });
-        
+
         if (Object.keys(tableData).length > 0) {
           tableVariables[safeTableName] = tableData;
         }
