@@ -407,6 +407,61 @@
             "years = 3",
             "amount = principal * (1 + rate) ^ years  (result: 1157.625)"
           ]
+        },
+        {
+          "id": "autocomplete-system",
+          "title": "Autocomplete System",
+          "description": [
+            "The math autocomplete system provides intelligent suggestions while typing mathematical expressions.",
+            "",
+            "Features:",
+            "- Automatically appears when typing variable names, functions, or table references",
+            "- Shows both regular variables and table cell references",
+            "- Filters suggestions based on what you type",
+            "- Supports keyboard navigation (↑/↓ to select, Enter to confirm)",
+            "",
+            "Autocomplete suggestions include:",
+            "- Regular variables (e.g., x, y, price)",
+            "- Mathematical functions (e.g., sin, cos, sqrt)",
+            "- Table cell references (e.g., Table1.columnName[1])",
+            "- Mathematical constants (e.g., pi, e)"
+          ]
+        },
+        {
+          "id": "table-variables",
+          "title": "Table Variables Integration",
+          "description": [
+            "Math expressions can now reference values from table cells, enabling powerful data-driven calculations.",
+            "",
+            "Table Reference Syntax:",
+            "- Format: TableName.columnName[rowIndex]",
+            "- Example: Table1.price[2] references row 2 of the 'price' column in 'Table1'",
+            "- Row indices start at 1 (not 0)",
+            "",
+            "Practical Examples:",
+            "",
+            "Example 1: Calculate total from table data",
+            "Table1 contains columns: price, quantity",
+            "Table1.price[1] = 10",
+            "Table1.quantity[1] = 5",
+            "total = Table1.price[1] * Table1.quantity[1]  (result: 50)",
+            "",
+            "Example 2: Statistical calculations with table data",
+            "Table1.score[1] = 85",
+            "Table1.score[2] = 92",
+            "Table1.score[3] = 78",
+            "average = (Table1.score[1] + Table1.score[2] + Table1.score[3]) / 3  (result: 85)",
+            "",
+            "Example 3: Column references in formulas",
+            "You can reference individual cells from any table in your document",
+            "result = Table2.data[5] * Table1.multiplier[3]",
+            "",
+            "Benefits:",
+            "- Connect mathematical calculations with table data",
+            "- Create dynamic formulas that reference table values",
+            "- Build spreadsheets-like functionality within documents",
+            "- Update calculations automatically when table data changes"
+          ]
         }
       ]
     },
