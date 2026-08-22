@@ -104,7 +104,7 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     setTimeout(() => setQueryString(null), 0);
   }, []);
 
-  // Fermer le popover quand on clique ailleurs
+  // Close popover when clicking outside
   React.useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
@@ -115,7 +115,7 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [closePopover]);
 
-  // Mettre à jour la référence d'ancrage quand l'élément d'ancrage change
+  // Update anchor reference when anchor element changes
   React.useEffect(() => {
     return () => {
       anchorRef.current = null;
@@ -217,6 +217,22 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     [editor],
   );
 
+  // Scroll selected item into view
+  const scrollSelectedIntoView = useCallback((selectedIndex: number | null) => {
+    if (selectedIndex == null) return;
+    const popover = popoverRef.current;
+    if (!popover) return;
+
+    const items = popover.querySelectorAll('li');
+    const selectedItem = items[selectedIndex];
+    if (!selectedItem) return;
+
+    selectedItem.scrollIntoView({
+      block: 'nearest',
+      behavior: 'auto'
+    });
+  }, []);
+
   return (
     <LexicalTypeaheadMenuPlugin<MathAutocompleteOption>
       onQueryChange={setQueryString}
@@ -228,7 +244,10 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
           return null;
         }
 
-        // Mettre à jour la référence d'ancrage pour floating-ui
+        // Scroll selected item into view when selection changes
+        scrollSelectedIntoView(selectedIndex);
+
+        // Update anchor reference for floating-ui
         if (anchorRef.current !== anchorElementRef.current) {
           anchorRef.current = anchorElementRef.current;
           refs.setReference(anchorElementRef.current);
