@@ -12,7 +12,7 @@ import {
   LexicalEditor,
   TextNode,
 } from "lexical";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { MATH_CATEGORIES, MathItem } from "@/App/AppComponents/MathPanel/MathPanel";
 import { useMathVariables } from "@/editor/context/MathVariablesContext";
@@ -85,9 +85,11 @@ function MathAutocompleteMenuItem({
 export default function MathAutocompletePlugin(): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
   const { variables, tableVariables } = useMathVariables();
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const anchorRef = React.useRef<HTMLElement | null>(null);
+  const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
@@ -102,7 +104,40 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
 
   const closePopover = useCallback(() => {
     setTimeout(() => setQueryString(null), 0);
+    setIsTyping(false);
   }, []);
+
+  // Track typing state
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only track typing if it's a character key (not special keys)
+      if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
+        setIsTyping(true);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+        }, 500);
+      }
+    };
+
+    const handleSelectionChange = () => {
+      setIsTyping(false);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    editor.registerUpdateListener(() => {
+      handleSelectionChange();
+    });
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [editor]);
 
   // Close popover when clicking outside
   React.useEffect(() => {
@@ -124,6 +159,9 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
 
   const checkForMathMatch = useCallback(
     (text: string, editor: LexicalEditor) => {
+      // Only show autocomplete when typing, not when clicking
+      if (!isTyping) return null;
+
       let isMathNode = false;
       editor.getEditorState().read(() => {
         const selection = $getSelection();
@@ -140,7 +178,7 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
 
       return checkForMatch(text);
     },
-    []
+    [isTyping]
   );
 
   const options = useMemo(() => {
@@ -155,6 +193,14 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
 
     Object.entries(tableVariables).forEach(([tableName, columns]) => {
       Object.entries(columns).forEach(([columnName, values]) => {
+        // Add column reference as a variable
+        const columnRef = `${tableName}.${columnName}`;
+        variableItems.push({
+          label: `${columnRef} (column)`,
+          insert: columnRef,
+        });
+
+        // Add individual cell references
         values.forEach((value, index) => {
           const cellRef = `${tableName}.${columnName}[${index + 1}]`;
           variableItems.push({
@@ -200,21 +246,19 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
         const text = selectedOption.insertText;
         nodeToReplace.replace(new TextNode(text));
 
-        if (text.endsWith('()')) {
-          const openParenIndex = text.lastIndexOf('(');
-          const cursorPos = openParenIndex + 1;
-          const updatedSelection = $getSelection();
-          if ($isRangeSelection(updatedSelection)) {
-            const anchor = updatedSelection.anchor;
-            const focus = updatedSelection.focus;
-            anchor.set(anchor.key, cursorPos, anchor.type);
-            focus.set(focus.key, cursorPos, focus.type);
-          }
+        // Place caret at the end of the inserted text
+        const updatedSelection = $getSelection();
+        if ($isRangeSelection(updatedSelection)) {
+          const anchor = updatedSelection.anchor;
+          const focus = updatedSelection.focus;
+          anchor.set(anchor.key, text.length, anchor.type);
+          focus.set(focus.key, text.length, focus.type);
         }
       });
       closeMenu();
+      closePopover();
     },
-    [editor],
+    [editor, closePopover],
   );
 
   // Scroll selected item into view
