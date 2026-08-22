@@ -1,12 +1,13 @@
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $getRoot } from 'lexical';
+import { Check, CornerDownRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
+
 import './MathResultDisplay.css';
 
 import { autoUpdate, offset, useFloating } from '@floating-ui/react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getRoot } from 'lexical';
-import { CornerDownRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-
 import { Dialog } from '@/components/custom/Dialog/Dialog';
 import { MathEvaluationResult, useMathVariables } from '@/editor/context/MathVariablesContext';
 
@@ -25,6 +26,8 @@ function MathResultOverlay({
   result: MathEvaluationResult;
   onShowDetails: (text: string) => void;
 }) {
+  const { t } = useTranslation();
+
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
     strategy: 'fixed', // Fixed avoids jitter during scroll
@@ -48,13 +51,57 @@ function MathResultOverlay({
   const isTruncated = text.length > limit;
   const displayText = isTruncated ? text.substring(0, limit) + '...' : text;
 
+  const [copied, setCopied] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (copied) return;
+
+    // Remove leading '=' and spaces for a clean copy
+    const textToCopy = text.replace(/^=\s*/, '');
+    navigator.clipboard.writeText(textToCopy);
+    
+    setCopied(true);
+
+    // Keep it visible for 1s, then fade out for 300ms
+    setTimeout(() => {
+      setIsFadingOut(true);
+      setTimeout(() => {
+        setCopied(false);
+        setIsFadingOut(false);
+      }, 300);
+    }, 1000);
+  };
+
+  if (copied) {
+    return createPortal(
+      <div
+        ref={refs.setFloating}
+        style={floatingStyles}
+        className="math-react-overlay"
+      >
+        <span className={`math-react-overlay__badge ${isFadingOut ? 'fade-out' : ''}`}>
+          <Check size={12} strokeWidth={2.5} />
+          {t('MATH_PANEL.copied', 'Copié !')}
+        </span>
+      </div>,
+      document.body
+    );
+  }
+
   return createPortal(
     <div
       ref={refs.setFloating}
       style={floatingStyles}
       className="math-react-overlay"
     >
-      <span className={`math-react-overlay__text ${isError ? 'math-react-overlay__text--error' : 'math-react-overlay__text--success'}`}>
+      <span
+        className={`math-react-overlay__text ${isError ? 'math-react-overlay__text--error' : 'math-react-overlay__text--success'}`}
+        onDoubleClick={handleDoubleClick}
+        title={t('MATH_PANEL.doubleClickToCopy', 'Double-clic pour copier') as string}
+      >
         <CornerDownRight size={12} strokeWidth={2} />
         {displayText}
       </span>
@@ -69,7 +116,7 @@ function MathResultOverlay({
             onShowDetails(text);
           }}
         >
-          plus...
+          {t('MATH_PANEL.plus', 'plus...')}
         </button>
       )}
     </div>,
@@ -80,6 +127,7 @@ function MathResultOverlay({
 export function MathResultDisplay() {
   const [editor] = useLexicalComposerContext();
   const { results } = useMathVariables();
+  const { t } = useTranslation();
   const [detailDialog, setDetailDialog] = useState<string | null>(null);
   const [nodes, setNodes] = useState<{ key: string; dom: HTMLElement }[]>([]);
 
@@ -137,7 +185,7 @@ export function MathResultDisplay() {
       <Dialog
         isOpen={!!detailDialog}
         onClose={() => setDetailDialog(null)}
-        title="Détails"
+        title={t('MATH_PANEL.details', 'Détails') as string}
         mode="info"
         size="md"
         description={

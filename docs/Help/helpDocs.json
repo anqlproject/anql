@@ -113,7 +113,9 @@
             "",
             "The math functionality is powered by mathjs, a powerful mathematics library that supports a wide range of operations.",
             "",
-            "Results are calculated in real-time as you type and displayed below the expression."
+            "Results are calculated in real-time as you type and displayed below the expression.",
+            "",
+            "Tip: You can double-click on any mathematical result to instantly copy its value to your clipboard."
           ]
         },
         {

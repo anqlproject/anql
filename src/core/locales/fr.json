@@ -43,6 +43,9 @@
     },
     "MATH_PANEL": {
       "copied": "Copié !",
+      "doubleClickToCopy": "Double-clic pour copier",
+      "details": "Détails",
+      "plus": "plus...",
       "trigonometry": "Trigonométrie",
       "arithmetic": "Arithmétique",
       "logarithms": "Logarithmes",
