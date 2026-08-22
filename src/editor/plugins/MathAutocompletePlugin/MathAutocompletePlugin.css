@@ -44,3 +44,7 @@
 .math-typeahead-popover li .text {
   flex-grow: 1;
 }
+
+.math-typeahead-popover li.variable .text {
+  font-style: italic;
+}

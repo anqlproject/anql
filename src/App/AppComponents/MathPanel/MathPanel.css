@@ -120,7 +120,7 @@
 }
 
 .math-panel__section-title--variables {
-  color: var(--primary-color, #3390ff);
+  color: var(--text-secondary);
 }
 
 /* ── Content Section ── */
@@ -169,12 +169,12 @@
   background: transparent;
   border-color: var(--border-color);
   color: var(--text-primary);
+  font-style: italic;
 }
 
 .math-panel__content--variables .math-panel__item:hover {
   background: var(--action-hover);
   color: var(--text-primary);
-  border-color: var(--primary-color, #3390ff);
 }
 
 .math-panel__item:hover {

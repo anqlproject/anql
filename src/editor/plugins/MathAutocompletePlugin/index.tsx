@@ -21,11 +21,13 @@ import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 class MathAutocompleteOption extends MenuOption {
   title: string;
   insertText: string;
+  isVariable: boolean;
 
-  constructor(title: string, insertText: string) {
+  constructor(title: string, insertText: string, isVariable: boolean = false) {
     super(title);
     this.title = title;
     this.insertText = insertText;
+    this.isVariable = isVariable;
   }
 }
 
@@ -63,6 +65,9 @@ function MathAutocompleteMenuItem({
   let className = 'item';
   if (isSelected) {
     className += ' selected';
+  }
+  if (option.isVariable) {
+    className += ' variable';
   }
   return (
     <li
@@ -216,10 +221,10 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
       });
     });
 
-    let allItems = variableItems;
+    let allItems = variableItems.map(item => ({ ...item, isVariable: true }));
     MATH_CATEGORIES.forEach(category => {
       if (!category.isDynamic) {
-        allItems = allItems.concat(category.items);
+        allItems = allItems.concat(category.items.map(item => ({ ...item, isVariable: false })));
       }
     });
 
@@ -233,7 +238,7 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
       return false;
     });
 
-    return filteredOptions.slice(0, 15).map(item => new MathAutocompleteOption(item.label, item.insert));
+    return filteredOptions.slice(0, 15).map(item => new MathAutocompleteOption(item.label, item.insert, item.isVariable));
   }, [queryString, variables, tableVariables]);
 
   const onSelectOption = useCallback(
@@ -251,13 +256,21 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
         const text = selectedOption.insertText;
         nodeToReplace.replace(new TextNode(text));
 
-        // Place caret at the end of the inserted text
+        // Place caret at the end of the inserted text, or inside parentheses if present
         const updatedSelection = $getSelection();
         if ($isRangeSelection(updatedSelection)) {
           const anchor = updatedSelection.anchor;
           const focus = updatedSelection.focus;
-          anchor.set(anchor.key, text.length, anchor.type);
-          focus.set(focus.key, text.length, focus.type);
+
+          if (text.endsWith('()')) {
+            const openParenIndex = text.lastIndexOf('(');
+            const cursorPos = openParenIndex + 1;
+            anchor.set(anchor.key, cursorPos, anchor.type);
+            focus.set(focus.key, cursorPos, focus.type);
+          } else {
+            anchor.set(anchor.key, text.length, anchor.type);
+            focus.set(focus.key, text.length, focus.type);
+          }
         }
       });
       closeMenu();
