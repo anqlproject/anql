@@ -270,6 +270,8 @@
       "updatedAt": "Updated on"
     },
     "TABLE": {
+      "addTitle": "Add table title",
+      "titlePlaceholder": "Table title...",
       "addColumn": "Add column",
       "addRow": "Add row",
       "columnType": "Column type",

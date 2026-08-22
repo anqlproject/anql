@@ -88,7 +88,7 @@ export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        placeholder=""
+        placeholder={t('TABLE.titlePlaceholder') as string}
         spellCheck={false}
       />
       {isEmpty && !isFocused && (

@@ -270,7 +270,9 @@
       "updatedAt": "Modifié le"
     },
     "TABLE": {
-      "addColumn": "Ajouter une colonne",
+      "addTitle": "Ajouter un titre de table",
+      "titlePlaceholder": "Titre de la table...",
+      "addColumn": "Ajouter colonne",
       "addRow": "Ajouter une ligne",
       "columnType": "Type de colonne",
       "text": "Texte",
