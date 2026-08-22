@@ -166,14 +166,14 @@
   padding: 8px 6px;
   justify-content: flex-start;
   text-align: left;
-  background: rgba(51, 144, 255, 0.08); /* Fond coloré */
-  border-color: rgba(51, 144, 255, 0.2);
-  color: var(--primary-color, #3390ff);
+  background: transparent;
+  border-color: var(--border-color);
+  color: var(--text-primary);
 }
 
 .math-panel__content--variables .math-panel__item:hover {
-  background: var(--primary-color, #3390ff);
-  color: white;
+  background: var(--action-hover);
+  color: var(--text-primary);
   border-color: var(--primary-color, #3390ff);
 }
 
