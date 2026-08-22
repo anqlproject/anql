@@ -5,7 +5,6 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $getRoot } from 'lexical';
 import { Check, CornerDownRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { Dialog } from '@/components/custom/Dialog/Dialog';
@@ -14,7 +13,7 @@ import { MathEvaluationResult, useMathVariables } from '@/editor/context/MathVar
 import { $getAllMathNodes } from './traversal';
 
 /**
- * Renders the result as a React Portal positioned over the DOM node.
+ * Renders the result as a React overlay positioned over the DOM node.
  * This avoids Lexical DOM reconciliation conflicts while allowing rich React UI.
  */
 function MathResultOverlay({
@@ -28,10 +27,10 @@ function MathResultOverlay({
 }) {
   const { t } = useTranslation();
 
-  const { refs, floatingStyles } = useFloating({
+  const { refs, x, y } = useFloating({
     placement: 'bottom-start',
-    strategy: 'fixed', // Fixed avoids jitter during scroll
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: (reference, floating, update) =>
+      autoUpdate(reference, floating, update, { animationFrame: true }),
     middleware: [
       // Move up by 24px (into the node's padding-bottom) and right by 8px
       offset({ mainAxis: -24, crossAxis: 8 }),
@@ -39,10 +38,8 @@ function MathResultOverlay({
   });
 
   useEffect(() => {
-    // Provide a virtual reference matching the node's bounds
-    refs.setReference({
-      getBoundingClientRect: () => dom.getBoundingClientRect(),
-    });
+    // Pass the actual DOM element so autoUpdate can observe it
+    refs.setReference(dom);
   }, [dom, refs]);
 
   const isError = !!result.error;
@@ -53,6 +50,10 @@ function MathResultOverlay({
 
   const [copied, setCopied] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -76,29 +77,39 @@ function MathResultOverlay({
   };
 
   if (copied) {
-    return createPortal(
+    return (
       <div
         ref={refs.setFloating}
-        style={floatingStyles}
+        style={{
+          position: 'absolute',
+          top: y ?? 0,
+          left: x ?? 0,
+          zIndex: 10,
+        }}
         className="math-react-overlay"
       >
         <span className={`math-react-overlay__badge ${isFadingOut ? 'fade-out' : ''}`}>
           <Check size={12} strokeWidth={2.5} />
           {t('MATH_PANEL.copied') as string}
         </span>
-      </div>,
-      document.body
+      </div>
     );
   }
 
-  return createPortal(
+  return (
     <div
       ref={refs.setFloating}
-      style={floatingStyles}
+      style={{
+        position: 'absolute',
+        top: y ?? 0,
+        left: x ?? 0,
+        zIndex: 10,
+      }}
       className="math-react-overlay"
     >
       <span
         className={`math-react-overlay__text ${isError ? 'math-react-overlay__text--error' : 'math-react-overlay__text--success'}`}
+        onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         title={t('MATH_PANEL.doubleClickToCopy') as string}
       >
@@ -116,11 +127,10 @@ function MathResultOverlay({
             onShowDetails(text);
           }}
         >
-          {t('MATH_PANEL.plus', 'plus...')}
+          {t('MATH_PANEL.plus') as string}
         </button>
       )}
-    </div>,
-    document.body
+    </div>
   );
 }
 
@@ -185,7 +195,7 @@ export function MathResultDisplay() {
       <Dialog
         isOpen={!!detailDialog}
         onClose={() => setDetailDialog(null)}
-        title={t('MATH_PANEL.details', 'Détails') as string}
+        title={t('MATH_PANEL.details') as string}
         mode="info"
         size="md"
         description={
