@@ -232,6 +232,14 @@ export default function MathPanel({
         // Add table cell references (e.g., Table1.columnName[index])
         Object.entries(tableVariables).forEach(([tableName, columns]) => {
           Object.entries(columns).forEach(([columnName, values]) => {
+            // Add column reference as a variable
+            const columnRef = `${tableName}.${columnName}`;
+            variableItems.push({
+              label: `${columnRef} (column)`,
+              insert: columnRef,
+            });
+
+            // Add individual cell references
             values.forEach((value, index) => {
               const cellRef = `${tableName}.${columnName}[${index + 1}]`;
               variableItems.push({

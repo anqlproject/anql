@@ -14,6 +14,9 @@ const DIVISION_BY_ZERO = /\/\s*0(?![0-9])/;
 // Matches "TableName.colName" patterns where TableName starts with uppercase
 const DOT_ACCESS_PATTERN = /\b([A-Z][a-zA-Z0-9_]*)\.([a-zA-Z0-9_]*)/g;
 
+// Matches "TableName.colName[index]" patterns for individual cell references
+const CELL_REFERENCE_PATTERN = /\b([A-Z][a-zA-Z0-9_]*)\.([a-zA-Z0-9_]*)\[(\d+)\]/g;
+
 /**
  * Detects table-specific errors in the expression and returns a user-friendly
  * message. Runs BEFORE mathjs so the user sees clear messages instead of
@@ -75,6 +78,43 @@ function checkTableIssues(
 }
 
 /**
+ * Replaces table references with actual values in the expression.
+ * Handles both cell references (Table1.column[1]) and column references (Table1.column).
+ */
+function replaceTableReferences(
+  expr: string,
+  tableVariables: Record<string, Record<string, number[]>>
+): string {
+  // Replace cell references: Table1.column[1] -> actual value
+  let processedExpr = expr.replace(CELL_REFERENCE_PATTERN, (match, tableName, columnName, rowIndex) => {
+    const table = tableVariables[tableName];
+    if (!table) return match;
+
+    const column = table[columnName];
+    if (!column) return match;
+
+    const index = parseInt(rowIndex) - 1; // Convert to 0-based
+    const value = column[index];
+
+    return value !== undefined ? String(value) : match;
+  });
+
+  // Replace column references: Table1.column -> array of values (for functions like sum, mean)
+  processedExpr = processedExpr.replace(DOT_ACCESS_PATTERN, (match, tableName, columnName) => {
+    const table = tableVariables[tableName];
+    if (!table) return match;
+
+    const column = table[columnName];
+    if (!column) return match;
+
+    // Return array representation for mathjs functions
+    return `[${column.join(', ')}]`;
+  });
+
+  return processedExpr;
+}
+
+/**
  * Pure evaluation function — no React, no Lexical editor dependency.
  * Takes an ordered list of MathExpNodes and evaluates them sequentially,
  * accumulating variables in scope as the document progresses.
@@ -119,7 +159,9 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
           throw new Error('Division by zero');
         }
 
-        const val = evaluate(valueExpr, scope);
+        // Replace table references before evaluation
+        const processedExpr = replaceTableReferences(valueExpr, tableVariables);
+        const val = evaluate(processedExpr, scope);
         if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) {
           throw new Error('Invalid value');
         }
@@ -132,7 +174,9 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
           throw new Error('Division by zero');
         }
 
-        const val = evaluate(expr, scope);
+        // Replace table references before evaluation
+        const processedExpr = replaceTableReferences(expr, tableVariables);
+        const val = evaluate(processedExpr, scope);
         if (typeof val === 'number' && !isFinite(val)) {
           throw new Error('Invalid value');
         }
