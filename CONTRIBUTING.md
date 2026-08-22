@@ -78,6 +78,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 - `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc.)
 - `refactor`: A code change that neither fixes a bug nor adds a feature
 - `chore`: Changes to the build process or auxiliary tools and libraries
+- `locales`: Changes to translation files and locale-specific content
 
 *Example:* `feat(editor): add math plugin support`
 
