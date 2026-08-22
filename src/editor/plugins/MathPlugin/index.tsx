@@ -26,7 +26,7 @@ export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
 export default function MathPlugin() {
   const [editor] = useLexicalComposerContext();
-  const { setResults, setVariables, setScopes } = useMathVariables();
+  const { setResults, setVariables, setScopes, setTableVariables } = useMathVariables();
 
   const evaluateTree = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -65,8 +65,9 @@ export default function MathPlugin() {
       setScopes(scopes);
       setResults(results);
       setVariables(variables);
+      setTableVariables(tableVariables);
     });
-  }, [editor, setResults, setVariables, setScopes]);
+  }, [editor, setResults, setVariables, setScopes, setTableVariables]);
 
   useEffect(() => {
     return mergeRegister(

@@ -42,7 +42,9 @@ function checkTableIssues(
   if (partialTable) {
     const afterDot = expr.slice(partialTable.length + 1);
     const cols = Object.keys(tableVariables[partialTable]);
-    if (!cols.includes(afterDot)) {
+    // Only check if it's a column name (not something like "column[0]")
+    const isColumnReference = !afterDot.includes('[');
+    if (isColumnReference && !cols.includes(afterDot)) {
       if (cols.length === 0) return `Table '${partialTable}' has no numeric columns.`;
       return `Column not found or incomplete. Available columns for '${partialTable}': ${cols.join(', ')}`;
     }
@@ -61,7 +63,9 @@ function checkTableIssues(
 
     if (potentialCol) {
       const cols = Object.keys(tableVariables[potentialTable]);
-      if (!cols.includes(potentialCol)) {
+      // Only validate if it's a column name (not indexed access like column[0])
+      const isColumnReference = !potentialCol.includes('[');
+      if (isColumnReference && !cols.includes(potentialCol)) {
         return `Column '${potentialCol}' not found in '${potentialTable}'. Available columns: ${cols.join(', ')}`;
       }
     }

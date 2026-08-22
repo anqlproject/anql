@@ -43,6 +43,7 @@ import ImagesPlugin from "@/editor/plugins/ImagesPlugin";
 import LinkPlugin from "@/editor/plugins/LinkPlugin";
 import ListPlugin from "@/editor/plugins/ListPlugin";
 import MathPlugin from "@/editor/plugins/MathPlugin";
+import MathAutocompletePlugin from "@/editor/plugins/MathAutocompletePlugin";
 import PdfPlugin from "@/editor/plugins/PdfPlugin";
 import RestoreFormatMemoryPlugin from "@/editor/plugins/RestoreFormatMemoryPlugin";
 import ShortcutsPlugin from "@/editor/plugins/ShortcutsPlugin";
@@ -201,6 +202,7 @@ export default function Editor(): JSX.Element {
               ErrorBoundary={LexicalErrorBoundary}
             />
             <MathPlugin />
+            <MathAutocompletePlugin />
             <TablePlugin />
             <AddNewPlugin />
             <DateTimePlugin />

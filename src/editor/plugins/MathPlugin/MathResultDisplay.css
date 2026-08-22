@@ -1,6 +1,6 @@
 .math-react-overlay {
   pointer-events: none;
-  z-index: var(--z-elevated);
+  z-index: var(--z-content);
   display: flex;
   align-items: center;
   gap: var(--text-xs);

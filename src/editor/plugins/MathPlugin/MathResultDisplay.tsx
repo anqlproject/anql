@@ -84,7 +84,6 @@ function MathResultOverlay({
           position: 'absolute',
           top: y ?? 0,
           left: x ?? 0,
-          zIndex: 10,
         }}
         className="math-react-overlay"
       >
@@ -103,7 +102,6 @@ function MathResultOverlay({
         position: 'absolute',
         top: y ?? 0,
         left: x ?? 0,
-        zIndex: 10,
       }}
       className="math-react-overlay"
     >
