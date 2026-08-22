@@ -43,6 +43,7 @@
     },
     "MATH_PANEL": {
       "copied": "Copied!",
+      "copy": "Copy",
       "doubleClickToCopy": "Double-click to copy",
       "details": "Details",
       "plus": "more...",
