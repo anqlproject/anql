@@ -1,3 +1,6 @@
+import './MathResultDisplay.css';
+
+import { autoUpdate, offset, useFloating } from '@floating-ui/react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getRoot } from 'lexical';
 import { Check, CornerDownRight } from 'lucide-react';
@@ -5,9 +8,6 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
-import './MathResultDisplay.css';
-
-import { autoUpdate, offset, useFloating } from '@floating-ui/react';
 import { Dialog } from '@/components/custom/Dialog/Dialog';
 import { MathEvaluationResult, useMathVariables } from '@/editor/context/MathVariablesContext';
 
@@ -62,7 +62,7 @@ function MathResultOverlay({
     // Remove leading '=' and spaces for a clean copy
     const textToCopy = text.replace(/^=\s*/, '');
     navigator.clipboard.writeText(textToCopy);
-    
+
     setCopied(true);
 
     // Keep it visible for 1s, then fade out for 300ms
@@ -84,7 +84,7 @@ function MathResultOverlay({
       >
         <span className={`math-react-overlay__badge ${isFadingOut ? 'fade-out' : ''}`}>
           <Check size={12} strokeWidth={2.5} />
-          {t('MATH_PANEL.copied', 'Copié !')}
+          {t('MATH_PANEL.copied') as string}
         </span>
       </div>,
       document.body
@@ -100,7 +100,7 @@ function MathResultOverlay({
       <span
         className={`math-react-overlay__text ${isError ? 'math-react-overlay__text--error' : 'math-react-overlay__text--success'}`}
         onDoubleClick={handleDoubleClick}
-        title={t('MATH_PANEL.doubleClickToCopy', 'Double-clic pour copier') as string}
+        title={t('MATH_PANEL.doubleClickToCopy') as string}
       >
         <CornerDownRight size={12} strokeWidth={2} />
         {displayText}

@@ -1,10 +1,10 @@
 .math-react-overlay {
   pointer-events: none;
-  z-index: 10;
+  z-index: var(--z-elevated);
   display: flex;
   align-items: center;
-  gap: 8px;
-  max-width: calc(100% - 16px);
+  gap: var(--text-xs);
+  max-width: calc(100% - var(--text-md));
 }
 
 .math-react-overlay__text {
@@ -13,7 +13,7 @@
   word-break: break-all;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--text-2xs);
   pointer-events: auto;
   cursor: pointer;
 }
@@ -29,13 +29,13 @@
 .math-react-overlay__badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
+  gap: var(--text-2xs);
+  padding: 2px var(--text-sm);
   border-radius: 4px;
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: var(--font-medium);
   background-color: rgba(34, 197, 94, 0.15);
-  color: var(--primary-green, #10b981);
+  color: var(--primary-green);
   animation: math-fade-in 0.2s ease;
   pointer-events: none;
 }
@@ -56,13 +56,13 @@
 
 .math-react-overlay__button {
   pointer-events: auto;
-  color: var(--primary-color, #3390ff);
-  background-color: var(--bg-color, #ffffff);
+  color: var(--primary-color);
+  background-color: var(--bg-color);
   border: none;
   border-radius: 4px;
-  padding: 0 4px;
+  padding: 0 var(--text-2xs);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: var(--font-semibold);
   cursor: pointer;
-  box-shadow: -4px 0 4px var(--bg-color, #ffffff);
+  box-shadow: -4px 0 4px var(--bg-color);
 }
