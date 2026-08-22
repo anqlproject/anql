@@ -221,12 +221,16 @@ export default function MathPanel({
       if (category.isDynamic) {
         const variableItems: MathItem[] = [];
 
-        // Add regular variables (e.g., x = 5)
+        // Add regular variables (e.g., x = 5), but filter out table names
         Object.entries(availableVariables).forEach(([name, value]) => {
-          variableItems.push({
-            label: `${name} (${value})`,
-            insert: name,
-          });
+          // Filter out table names (they are objects in tableVariables)
+          const isTableName = tableVariables[name] !== undefined;
+          if (!isTableName) {
+            variableItems.push({
+              label: `${name} (${value})`,
+              insert: name,
+            });
+          }
         });
 
         // Add table cell references (e.g., Table1.columnName[index])

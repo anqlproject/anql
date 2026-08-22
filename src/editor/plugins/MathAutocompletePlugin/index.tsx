@@ -187,8 +187,13 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     const query = queryString.toLowerCase();
     const variableItems: MathItem[] = [];
 
+    // Add regular variables, but filter out table names
     Object.entries(variables).forEach(([name, value]) => {
-      variableItems.push({ label: `${name} (${value})`, insert: name });
+      // Filter out table names (they are objects in tableVariables)
+      const isTableName = tableVariables[name] !== undefined;
+      if (!isTableName) {
+        variableItems.push({ label: `${name} (${value})`, insert: name });
+      }
     });
 
     Object.entries(tableVariables).forEach(([tableName, columns]) => {
