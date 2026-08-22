@@ -55,7 +55,6 @@
 
 .table-menu-item-active {
   background: var(--action-active);
-  color: var(--primary-color);
 }
 
 .table-menu-item-danger {
