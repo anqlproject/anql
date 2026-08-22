@@ -9,7 +9,7 @@
   font-size: var(--text-md);
   line-height: var(--leading-relaxed);
   font-weight: var(--font-normal);
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: var(--tracking-normal);
 }
 
 .editor-shell .editor-container {

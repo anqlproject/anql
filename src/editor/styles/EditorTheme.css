@@ -6,12 +6,15 @@
 }
 .anql_paragraph {
   margin: 0;
+  margin-bottom: calc((var(--leading-relaxed) - 1) * 0.5em);
   position: relative;
+  line-height: var(--leading-relaxed);
+  letter-spacing: var(--tracking-normal);
 }
 .anql_quote {
   margin: 0;
   margin-left: 20px;
-  margin-bottom: 10px;
+  margin-bottom: calc((var(--leading-relaxed) - 1) * 0.5em);
   font-size: var(--text-md);
   line-height: var(--leading-relaxed);
   color: var(--text-secondary);
@@ -25,7 +28,7 @@
   color: var(--text-primary);
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: -0.03em;
   margin: 0;
   margin-top: 1.4rem;
   margin-bottom: 1rem;
@@ -35,7 +38,7 @@
   color: var(--text-primary);
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: var(--tracking-tight);
   margin: 0;
   margin-top: 1.2rem;
   margin-bottom: 0.75rem;
@@ -44,7 +47,7 @@
   font-size: var(--text-lg);
   color: var(--text-primary);
   font-weight: var(--font-semibold);
-  line-height: var(--leading-tight);
+  line-height: var(--leading-snug);
   letter-spacing: var(--tracking-normal);
   margin: 0;
   margin-top: 0.8rem;
@@ -135,6 +138,7 @@
   font-family: var(--font-mono);
   font-size: 0.9em;
   border-radius: 3px;
+  letter-spacing: 0;
 }
 .anql_textLowercase {
   text-transform: lowercase;
@@ -193,6 +197,7 @@
   border-radius: 4px;
   white-space: pre;
   word-break: normal;
+  letter-spacing: 0;
 }
 .anql_code:before {
   content: attr(data-gutter);
