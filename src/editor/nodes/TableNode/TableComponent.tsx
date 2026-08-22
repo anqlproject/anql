@@ -48,6 +48,7 @@ import { DraggableRow } from "./TableCell/TableRow";
 import { CellMenu } from "./TableMenu/CellMenu";
 import { $isTableNode } from "./TableNode";
 import { TableColumn, TableRowData } from "./TableNode";
+import { TableTitle } from "./TableTitle";
 import {
   isColDndId,
   isRowDndId,
@@ -114,15 +115,7 @@ export function TableComponent({
     containerRef,
   );
 
-  const handleTableNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    editor.update(() => {
-      const node = $getNodeByKey(nodeKey);
-      if ($isTableNode(node)) {
-        node.updateTableName(newName);
-      }
-    });
-  };
+  // Table name is managed by the isolated TableTitle component (see TableTitle.tsx).
 
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     initialColumns
@@ -591,14 +584,7 @@ export function TableComponent({
         onContextMenu={handleContextMenu}
         data-node-key={nodeKey}
       >
-        <div className="table-title-container">
-          <input
-            className="table-title-input"
-            value={tableName}
-            onChange={handleTableNameChange}
-            placeholder="Nom du tableau..."
-          />
-        </div>
+        <TableTitle nodeKey={nodeKey} editor={editor} tableName={tableName} />
         <DndContext
           sensors={sensors}
           collisionDetection={collisionDetection}
