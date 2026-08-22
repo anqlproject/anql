@@ -1,106 +1,151 @@
+import './MathResultDisplay.css';
+
+import { autoUpdate, offset, useFloating } from '@floating-ui/react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getRoot, CLICK_COMMAND, COMMAND_PRIORITY_LOW } from 'lexical';
+import { $getRoot } from 'lexical';
+import { CornerDownRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Dialog } from '@/components/custom/Dialog/Dialog';
-import { useMathVariables } from '@/editor/context/MathVariablesContext';
+import { MathEvaluationResult, useMathVariables } from '@/editor/context/MathVariablesContext';
 
 import { $getAllMathNodes } from './traversal';
 
 /**
- * Reads results from MathVariablesContext and updates the DOM of each
- * MathExpNode to display the result, error, or empty state.
- *
- * Also handles the "show full result/error" dialog on click.
+ * Renders the result as a React Portal positioned over the DOM node.
+ * This avoids Lexical DOM reconciliation conflicts while allowing rich React UI.
  */
+function MathResultOverlay({
+  dom,
+  result,
+  onShowDetails,
+}: {
+  dom: HTMLElement;
+  result: MathEvaluationResult;
+  onShowDetails: (text: string) => void;
+}) {
+  const { refs, floatingStyles } = useFloating({
+    placement: 'bottom-start',
+    strategy: 'fixed', // Fixed avoids jitter during scroll
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      // Move up by 24px (into the node's padding-bottom) and right by 8px
+      offset({ mainAxis: -24, crossAxis: 8 }),
+    ],
+  });
+
+  useEffect(() => {
+    // Provide a virtual reference matching the node's bounds
+    refs.setReference({
+      getBoundingClientRect: () => dom.getBoundingClientRect(),
+    });
+  }, [dom, refs]);
+
+  const isError = !!result.error;
+  const text = isError ? result.error! : result.result;
+  const limit = isError ? 30 : 50;
+  const isTruncated = text.length > limit;
+  const displayText = isTruncated ? text.substring(0, limit) + '...' : text;
+
+  return createPortal(
+    <div
+      ref={refs.setFloating}
+      style={floatingStyles}
+      className="math-react-overlay"
+    >
+      <span className={`math-react-overlay__text ${isError ? 'math-react-overlay__text--error' : 'math-react-overlay__text--success'}`}>
+        <CornerDownRight size={12} strokeWidth={2} />
+        {displayText}
+      </span>
+
+      {isTruncated && (
+        <button
+          className="math-react-overlay__button"
+          onMouseDown={(e) => {
+            // Prevent editor from losing focus
+            e.preventDefault();
+            e.stopPropagation();
+            onShowDetails(text);
+          }}
+        >
+          plus...
+        </button>
+      )}
+    </div>,
+    document.body
+  );
+}
+
 export function MathResultDisplay() {
   const [editor] = useLexicalComposerContext();
   const { results } = useMathVariables();
   const [detailDialog, setDetailDialog] = useState<string | null>(null);
+  const [nodes, setNodes] = useState<{ key: string; dom: HTMLElement }[]>([]);
 
-  // Handle click on the "plus..." overflow button
+  // 1. Track DOM elements of MathExpNodes
   useEffect(() => {
-    return editor.registerCommand(
-      CLICK_COMMAND,
-      (payload: MouseEvent) => {
-        const target = payload.target as HTMLElement;
-        const mathNode = target.closest('.math-exp-node');
-        if (mathNode && mathNode.classList.contains('has-plus')) {
-          const rect = mathNode.getBoundingClientRect();
-          // The plus button is in the bottom right corner (approx 45px wide, 20px tall)
-          if (payload.clientY > rect.bottom - 24 && payload.clientX > rect.right - 50) {
-            const attr = mathNode.classList.contains('has-error')
-              ? mathNode.getAttribute('data-full-error')
-              : mathNode.getAttribute('data-full-result');
-            if (attr) {
-              setDetailDialog(attr);
-              return true;
-            }
+    const updateNodes = () => {
+      editor.getEditorState().read(() => {
+        const mathNodes = $getAllMathNodes($getRoot());
+        const newNodes = [];
+        for (const node of mathNodes) {
+          const dom = editor.getElementByKey(node.__key);
+          if (dom) {
+            newNodes.push({ key: node.__key, dom });
           }
         }
-        return false;
-      },
-      COMMAND_PRIORITY_LOW,
-    );
+        setNodes(newNodes);
+      });
+    };
+
+    updateNodes();
+    return editor.registerUpdateListener(() => updateNodes());
   }, [editor]);
 
-  // Sync results → DOM attributes & classes
+  // 2. Handle simple "is-empty" class for the placeholder (Lexical safe)
   useEffect(() => {
-    editor.getEditorState().read(() => {
-      const mathNodes = $getAllMathNodes($getRoot());
-
-      for (const node of mathNodes) {
-        const key = node.__key;
-        const dom = editor.getElementByKey(key);
-        if (!dom) continue;
-
-        const result = results[key];
-
-        if (result?.error) {
-          const shortError = result.error.length > 30
-            ? result.error.substring(0, 30) + '...'
-            : result.error;
-          dom.classList.add('has-error');
-          dom.classList.remove('is-empty');
-          dom.setAttribute('data-error', shortError);
-          dom.setAttribute('data-full-error', result.error);
-          dom.classList.toggle('has-plus', result.error.length > 30);
-          dom.removeAttribute('data-result');
-          dom.removeAttribute('data-placeholder');
-        } else if (result?.result) {
-          const shortResult = result.result.length > 50
-            ? result.result.substring(0, 50) + '...'
-            : result.result;
-          dom.classList.remove('has-error');
-          dom.classList.remove('is-empty');
-          dom.setAttribute('data-result', shortResult);
-          dom.setAttribute('data-full-result', result.result);
-          dom.classList.toggle('has-plus', result.result.length > 50);
-          dom.removeAttribute('data-error');
-          dom.removeAttribute('data-placeholder');
-        } else {
-          dom.classList.remove('has-error', 'has-plus');
-          dom.classList.add('is-empty');
-          dom.removeAttribute('data-result');
-          dom.removeAttribute('data-error');
-          dom.setAttribute('data-placeholder', 'Math');
-        }
+    for (const node of nodes) {
+      const result = results[node.key];
+      const isEmpty = !result || (!result.result && !result.error);
+      if (isEmpty) {
+        node.dom.classList.add('is-empty');
+      } else {
+        node.dom.classList.remove('is-empty');
       }
-    });
-  }, [editor, results]);
+    }
+  }, [results, nodes]);
 
   return (
-    <Dialog
-      isOpen={!!detailDialog}
-      onClose={() => setDetailDialog(null)}
-      title="Détails"
-      mode="info"
-      size="md"
-      description={
-        <div style={{ maxHeight: '60vh', overflowY: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'var(--font-mono)' }}>
-          {detailDialog}
-        </div>
-      }
-    />
+    <>
+      {/* 3. Render a React Portal overlay for each node with a result */}
+      {nodes.map((node) => {
+        const result = results[node.key];
+        if (!result || (!result.result && !result.error)) return null;
+
+        return (
+          <MathResultOverlay
+            key={node.key}
+            dom={node.dom}
+            result={result}
+            onShowDetails={setDetailDialog}
+          />
+        );
+      })}
+
+      {/* Detail Dialog */}
+      <Dialog
+        isOpen={!!detailDialog}
+        onClose={() => setDetailDialog(null)}
+        title="Détails"
+        mode="info"
+        size="md"
+        description={
+          <div style={{ maxHeight: '60vh', overflowY: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'var(--font-mono)' }}>
+            {detailDialog}
+          </div>
+        }
+      />
+    </>
   );
 }
