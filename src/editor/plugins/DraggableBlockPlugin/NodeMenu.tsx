@@ -27,7 +27,6 @@ import {
   ListOrderedIcon,
   QuoteIcon,
   RecycleIcon,
-  SquareSigmaIcon,
   TextIcon,
   TrashIcon,
 } from "lucide-react";
@@ -39,10 +38,8 @@ import { useGlobalToast } from "@/App/hooks/useGlobalToast";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { MenuPosition, MenuX as Menu } from "@/components/custom/Menu/MenuX";
 import { DIMENSIONS, ICON_SIZES, TOAST_DURATION } from "@/core/global/defaultValues";
-import { useMathVariables } from "@/editor/context/MathVariablesContext";
 import { $isImageNode } from "@/editor/nodes/ImageNode/ImageNode";
 import { $createListNode, $isListNode } from "@/editor/nodes/ListNode";
-import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 import { $isPdfNode } from "@/editor/nodes/PdfNode/PdfNode";
 import { safeWriteText } from "@/editor/plugins/ContextMenuPlugin/contextMenuActions";
 import { EDITOR_SHORTCUTS } from "@/GlobalState/shortcutStore";
@@ -70,11 +67,9 @@ export default function NodeMenu({
     })),
   );
   const { showToast } = useGlobalToast();
-  const { results } = useMathVariables();
   const nodeRef = useRef<LexicalNode>(null);
   const [canTransform, setCanTransform] = useState(false);
   const [isCodeNode, setIsCodeNode] = useState(false);
-  const [isMathNode, setIsMathNode] = useState(false);
   const ICON_SIZE = ICON_SIZES.default;
 
   // Helper to format shortcut for display
@@ -162,11 +157,9 @@ export default function NodeMenu({
 
           const topLevelNodes = getSelectedTopLevelNodes();
           setIsCodeNode(topLevelNodes.some((n) => n.getType() === "code"));
-          setIsMathNode(topLevelNodes.some((n) => $isMathExpNode(n)));
         } else {
           console.error("node not found");
           setIsCodeNode(false);
-          setIsMathNode(false);
         }
       });
       editor.blur();
@@ -413,34 +406,6 @@ export default function NodeMenu({
                 if (code) {
                   try {
                     safeWriteText(code);
-                  } catch (err) {
-                    console.error(err);
-                  }
-                }
-              }
-            });
-            setIsMenuOpen(false);
-          },
-        },
-      ]
-      : []),
-    ...(isMathNode
-      ? [
-        {
-          icon: <SquareSigmaIcon size={ICON_SIZE} />,
-          title: t("NODE_MENU.copyMathResult") as string,
-          onClick: async () => {
-            editor.read(() => {
-              const mathNode = nodeRef.current;
-              if ($isMathExpNode(mathNode)) {
-                const nodeKey = mathNode.getKey();
-                const mathResult = results[nodeKey];
-                if (mathResult && mathResult.result) {
-                  try {
-                    // Remove "=" prefix if present
-                    const cleanResult = mathResult.result.replace(/^=\s*/, '');
-                    safeWriteText(cleanResult);
-                    showToast(t("MATH_PANEL.copied") as string, "success", TOAST_DURATION);
                   } catch (err) {
                     console.error(err);
                   }
