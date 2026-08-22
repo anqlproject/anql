@@ -1,6 +1,6 @@
 import { DecoratorBlockNode, SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode';
 import type { EditorConfig } from 'lexical';
-import { DOMConversionMap, DOMConversionOutput, DOMExportOutput, ElementFormatType, LexicalEditor, LexicalNode, NodeKey, Spread } from 'lexical';
+import { $getRoot, DOMConversionMap, DOMConversionOutput, DOMExportOutput, ElementFormatType, LexicalEditor, LexicalNode, NodeKey, Spread } from 'lexical';
 import React from 'react';
 
 import { TableComponent } from './TableComponent';
@@ -43,6 +43,7 @@ export type SerializedTableNode = Spread<
   {
     data: TableRowData[];
     columns: TableColumn[];
+    tableName?: string;
   },
   SerializedDecoratorBlockNode
 >;
@@ -118,25 +119,28 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
 export class TableNode extends DecoratorBlockNode {
   __data: TableRowData[];
   __columns: TableColumn[];
+  __tableName: string;
 
   static getType(): string {
     return 'table';
   }
 
   static clone(node: TableNode): TableNode {
-    return new TableNode(node.__data, node.__columns, node.__format, node.__key);
+    return new TableNode(node.__data, node.__columns, node.__tableName, node.__format, node.__key);
   }
 
   afterCloneFrom(prevNode: this): void {
     super.afterCloneFrom(prevNode);
     this.__data = prevNode.__data;
     this.__columns = prevNode.__columns;
+    this.__tableName = prevNode.__tableName;
   }
 
-  constructor(data: TableRowData[], columns: TableColumn[], format?: ElementFormatType, key?: NodeKey) {
+  constructor(data: TableRowData[], columns: TableColumn[], tableName?: string, format?: ElementFormatType, key?: NodeKey) {
     super(format, key);
     this.__data = data || [];
     this.__columns = columns || [];
+    this.__tableName = tableName || '';
   }
 
   exportJSON(): SerializedTableNode {
@@ -144,11 +148,12 @@ export class TableNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       data: this.__data,
       columns: this.__columns,
+      tableName: this.__tableName,
     };
   }
 
   static importJSON(serializedNode: SerializedTableNode): TableNode {
-    return $createTableNode(serializedNode.data, serializedNode.columns).updateFromJSON(
+    return $createTableNode(serializedNode.data, serializedNode.columns, serializedNode.tableName).updateFromJSON(
       serializedNode,
     );
   }
@@ -161,6 +166,11 @@ export class TableNode extends DecoratorBlockNode {
   updateColumns(newColumns: TableColumn[]): void {
     const writable = this.getWritable();
     writable.__columns = newColumns;
+  }
+
+  updateTableName(name: string): void {
+    const writable = this.getWritable();
+    writable.__tableName = name;
   }
 
   getSearchMatches(query: string): TableSearchMatch[] {
@@ -261,6 +271,7 @@ export class TableNode extends DecoratorBlockNode {
         nodeKey={this.getKey()}
         data={this.__data}
         columns={this.__columns}
+        tableName={this.__tableName}
         format={this.__format}
         className={className}
       />
@@ -268,9 +279,36 @@ export class TableNode extends DecoratorBlockNode {
   }
 }
 
-export function $createTableNode(data: TableRowData[], columns: TableColumn[]): TableNode {
+export function $createTableNode(data: TableRowData[], columns: TableColumn[], tableName?: string): TableNode {
+  let name = tableName;
+  if (!name) {
+    try {
+      const root = $getRoot();
+      if (root) {
+        const existingNames: string[] = [];
+        const traverse = (node: any) => {
+          if ($isTableNode(node)) {
+            existingNames.push(node.__tableName);
+          }
+          if (node.getChildren) {
+            node.getChildren().forEach(traverse);
+          }
+        };
+        traverse(root);
+
+        let counter = 1;
+        while (existingNames.includes(`Table${counter}`)) {
+          counter++;
+        }
+        name = `Table${counter}`;
+      }
+    } catch (e) {
+      // Ignored if not in a Lexical context
+    }
+  }
+
   const dataWithIds = data.map(row => row._rowId ? row : { ...row, _rowId: `row-${crypto.randomUUID()}` });
-  return new TableNode(dataWithIds, columns);
+  return new TableNode(dataWithIds, columns, name);
 }
 
 export function $isTableNode(node: LexicalNode | null | undefined): node is TableNode {

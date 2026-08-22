@@ -18,12 +18,12 @@ const DIVISION_BY_ZERO = /\/\s*0(?![0-9])/;
  *
  * Must be called inside a Lexical read callback.
  */
-export function evaluateAllMathNodes(nodes: MathExpNode[]): EvaluationOutput {
+export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Record<string, Record<string, number[]>> = {}): EvaluationOutput {
   const results: Record<string, MathEvaluationResult> = {};
   const variables: Record<string, number> = {};
   const scopes: Record<string, Record<string, number>> = {};
 
-  const scope: Record<string, number> = {};
+  const scope: Record<string, any> = { ...tableVariables };
 
   for (const node of nodes) {
     const key = node.__key;

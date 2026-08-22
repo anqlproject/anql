@@ -93,6 +93,7 @@ interface TableComponentProps {
   nodeKey: NodeKey;
   data: (TableRowData & { _rowId?: string })[];
   columns: (TableColumn & { size?: number; meta?: { type?: string } })[];
+  tableName: string;
   format: ElementFormatType | null;
   className: Readonly<{ base: string; focus: string }>;
 }
@@ -101,6 +102,7 @@ export function TableComponent({
   nodeKey,
   data: initialData,
   columns: initialColumns,
+  tableName,
   format,
   className,
 }: TableComponentProps) {
@@ -111,6 +113,16 @@ export function TableComponent({
     nodeKey,
     containerRef,
   );
+
+  const handleTableNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value;
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isTableNode(node)) {
+        node.updateTableName(newName);
+      }
+    });
+  };
 
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     initialColumns
@@ -579,6 +591,14 @@ export function TableComponent({
         onContextMenu={handleContextMenu}
         data-node-key={nodeKey}
       >
+        <div className="table-title-container">
+          <input
+            className="table-title-input"
+            value={tableName}
+            onChange={handleTableNameChange}
+            placeholder="Nom du tableau..."
+          />
+        </div>
         <DndContext
           sensors={sensors}
           collisionDetection={collisionDetection}

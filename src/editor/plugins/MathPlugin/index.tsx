@@ -20,7 +20,7 @@ import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/Math
 
 import { evaluateAllMathNodes } from './evaluator';
 import { MathResultDisplay } from './MathResultDisplay';
-import { $getAllMathNodes } from './traversal';
+import { $getAllMathNodes, $getAllTableNodes } from './traversal';
 
 export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
@@ -30,8 +30,38 @@ export default function MathPlugin() {
 
   const evaluateTree = useCallback(() => {
     editor.getEditorState().read(() => {
-      const nodes = $getAllMathNodes($getRoot());
-      const { results, variables, scopes } = evaluateAllMathNodes(nodes);
+      const root = $getRoot();
+      const mathNodes = $getAllMathNodes(root);
+      const tableNodes = $getAllTableNodes(root);
+      
+      const tableVariables: Record<string, Record<string, number[]>> = {};
+
+      tableNodes.forEach((node, index) => {
+        const rawName = node.__tableName || `Table_${index + 1}`;
+        const safeTableName = rawName.replace(/[^a-zA-Z0-9_]/g, '');
+        if (!safeTableName) return;
+        
+        const tableData: Record<string, number[]> = {};
+        
+        node.__columns.forEach(col => {
+          if (col.meta?.type === 'number') {
+            const safeHeader = (col.header || col.accessorKey).replace(/[^a-zA-Z0-9_]/g, '');
+            if (safeHeader) {
+              tableData[safeHeader] = node.__data.map(row => {
+                const val = row[col.accessorKey];
+                const num = Number(val);
+                return isNaN(num) ? 0 : num;
+              });
+            }
+          }
+        });
+        
+        if (Object.keys(tableData).length > 0) {
+          tableVariables[safeTableName] = tableData;
+        }
+      });
+
+      const { results, variables, scopes } = evaluateAllMathNodes(mathNodes, tableVariables);
       setScopes(scopes);
       setResults(results);
       setVariables(variables);

@@ -4,7 +4,7 @@ import {
   COMMAND_PRIORITY_EDITOR,
   createCommand,
   LexicalCommand,
-  LexicalEditor,
+  LexicalEditor
 } from 'lexical';
 import type { JSX } from 'react';
 import { useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import TextInput from '@/editor/ui/TextInput';
 export type InsertTablePayload = {
   data: TableRowData[];
   columns: TableColumn[];
+  tableName?: string;
 };
 
 export const INSERT_TABLE_COMMAND: LexicalCommand<InsertTablePayload> =
@@ -53,6 +54,7 @@ export default function TablePlugin(): null {
         const tableNode = $createTableNode(
           payload.data,
           payload.columns,
+          payload.tableName
         );
         $insertNodes([tableNode]);
         return true;
