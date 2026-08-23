@@ -19,20 +19,19 @@
 <p align="center">
   <a href="#why-anql">Why ANQL?</a> |
   <a href="#features">Features</a> |
-  <a href="#see-it-in-action">Demo</a> |
   <a href="#getting-started">Getting Started</a> |
-  <a href="QuickStart.md">Quick Start</a> |
-  <a href="#tech-stack">Tech Stack</a> |
+  <a href="#technical-details">Technical Details</a> |
+  <a href="CONTRIBUTING.md">Contributing</a> |
   <a href="#community">Community</a>
 </p>
 
 <br />
 
-![ANQL Overview](assets/overview.png)
+![ANQL main interface showing document editor with math calculations and tables](assets/overview.png)
 
 <p align="center">
-  <img src="assets/overview 1.png" alt="ANQL Overview 1" width="45%" />
-  <img src="assets/overview 2.png" alt="ANQL Overview 2" width="45%" />
+  <img src="assets/overview 1.png" alt="ANQL interface showing document list and sidebar navigation" width="45%" />
+  <img src="assets/overview 2.png" alt="ANQL interface showing math panel with live calculations" width="45%" />
 </p>
 
 ---
@@ -46,12 +45,12 @@
       <img src="assets/create new document.gif" alt="Create new document" />
     </td>
     <td align="center" width="33%">
-      <strong>Live math panel</strong><br/><br/>
-      <img src="assets/math panel.gif" alt="Math panel" />
+      <strong>Live math calculations</strong><br/><br/>
+      <img src="assets/math panel.gif" alt="Live math panel" />
     </td>
     <td align="center" width="33%">
-      <strong>Node transformation</strong><br/><br/>
-      <img src="assets/node transformation task.gif" alt="Node transformation" />
+      <strong>Math with variables</strong><br/><br/>
+      <img src="assets/math panel use variable.gif" alt="Math panel using variables" />
     </td>
   </tr>
 </table>
@@ -112,6 +111,17 @@ force = mass * gravity  → 725.94
 
 Structure your knowledge with tables, smart document links, and a local SQLite database. Your data stays on your machine — always.
 
+**Tables & Calculations**
+- Create tables with multiple column types (text, number, checkbox, date)
+- Reference table data directly in math expressions: `Table1.column[1]` or `Table1.column`
+- Automatic cell references and column aggregations (sum, mean, etc.)
+- Link between documents using `@node:id` syntax
+
+**Local Database**
+- SQLite-based storage for fast, reliable data persistence
+- Full-text search across all documents
+- Asset management for images and files
+
 ### 🌐 Offline First
 
 No internet required. ANQL runs entirely on your device. Your notes are yours.
@@ -138,6 +148,11 @@ Once installed, open the [**Quick Start guide**](QuickStart.md) to learn the bas
 
 ### Build from source
 
+**Prerequisites**
+- Node.js 18+ and npm
+- Rust and Cargo (for Tauri)
+- macOS 11+ (Big Sur) or later
+
 ```bash
 # Clone the repository
 git clone https://github.com/anqlproject/anql.git
@@ -148,11 +163,46 @@ npm install
 
 # Run in development mode
 npm run tauri dev
+
+# Build for production
+npm run tauri build
 ```
 
 ---
 
-## What's Coming Next
+## Troubleshooting
+
+**Common Issues**
+
+- **Build fails**: Ensure Node.js 18+ and Rust are installed
+- **Tauri dev crashes**: Try clearing the cache: `rm -rf src-tauri/target`
+- **Math not evaluating**: Check that expressions are valid mathjs syntax
+- **Tables not showing**: Ensure columns have the correct data type
+
+For more help, check our [GitHub Issues](https://github.com/anqlproject/anql/issues) or join our [Discord](https://discord.gg/z5Jgg9m83).
+
+---
+
+## Technical Details
+
+### Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Desktop framework | [Tauri](https://tauri.app/) |
+| UI | [React](https://react.dev/) |
+| Editor engine | [Lexical](https://lexical.dev/) |
+| Math engine | [mathjs](https://mathjs.org/) |
+
+### Platform Support
+
+| Platform | Status |
+|---|---|
+| macOS | ✅ Supported |
+| Windows | 🚧 Coming soon |
+| Linux | 🚧 Coming soon |
+
+### Roadmap
 
 We're actively building. Here's what's on the roadmap:
 
@@ -162,31 +212,18 @@ We're actively building. Here's what's on the roadmap:
 
 ---
 
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Desktop framework | [Tauri](https://tauri.app/) |
-| UI | [React](https://react.dev/) |
-| Editor engine | [Lexical](https://lexical.dev/) |
-| Math engine | [mathjs](https://mathjs.org/) |
-
----
-
-## Platform Support
-
-| Platform | Status |
-|---|---|
-| macOS | ✅ Supported |
-| Windows | 🚧 Coming soon |
-| Linux | 🚧 Coming soon |
-
----
-
 ## Community
 
 Got feedback? Found a bug? Have an idea?
 
 💬 [Join our Discord server](https://discord.gg/z5Jgg9m83) — we'd love to hear from you.
 
-🐦 Follow us on [X / Twitter](https://x.com/anqlproject) for updates.
+🐛 [Report a bug or request a feature](https://github.com/anqlproject/anql/issues)
+
+ Follow us on [X / Twitter](https://x.com/anqlproject) for updates.
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
