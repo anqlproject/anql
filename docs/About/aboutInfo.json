@@ -1,7 +1,7 @@
 {
   "title": "ANQL",
   "subtitle": "A visual workspace designed for productive work. Ideal for professionals, and anyone who needs to organize and work efficiently.",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "features": [
     "Rich text editing",
     "Data management",

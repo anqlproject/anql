@@ -1,6 +1,6 @@
 [package]
 name = "ANQL"
-version = "0.1.0"
+version = "0.3.0"
 description = "ANQL App"
 authors = ["An Solo"]
 edition = "2024"
