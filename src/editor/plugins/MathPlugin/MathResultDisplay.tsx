@@ -84,7 +84,6 @@ function MathResultOverlay({
           position: 'absolute',
           top: y ?? 0,
           left: x ?? 0,
-          zIndex: 10,
         }}
         className="math-react-overlay"
       >
@@ -103,7 +102,6 @@ function MathResultOverlay({
         position: 'absolute',
         top: y ?? 0,
         left: x ?? 0,
-        zIndex: 10,
       }}
       className="math-react-overlay"
     >
@@ -140,6 +138,17 @@ export function MathResultDisplay() {
   const { t } = useTranslation();
   const [detailDialog, setDetailDialog] = useState<string | null>(null);
   const [nodes, setNodes] = useState<{ key: string; dom: HTMLElement }[]>([]);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (detailDialog) {
+      // Remove leading '=' and spaces for a clean copy
+      const textToCopy = detailDialog.replace(/^=\s*/, '');
+      navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // 1. Track DOM elements of MathExpNodes
   useEffect(() => {
@@ -198,6 +207,10 @@ export function MathResultDisplay() {
         title={t('MATH_PANEL.details') as string}
         mode="info"
         size="md"
+        okButton={{
+          text: copied ? (t('MATH_PANEL.copied') as string) : (t('MATH_PANEL.copy') as string),
+          onClick: handleCopy,
+        }}
         description={
           <div style={{ maxHeight: '60vh', overflowY: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'var(--font-mono)' }}>
             {detailDialog}

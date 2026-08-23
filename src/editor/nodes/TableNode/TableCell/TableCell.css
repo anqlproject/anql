@@ -40,6 +40,19 @@
   box-shadow: inset 0 0 0 1px var(--primary-color);
 }
 
+/* Hide number input spin buttons (up/down arrows) */
+.table-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.table-input[type="number"]::-webkit-outer-spin-button,
+.table-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
 .table-search-highlight-overlay {
   position: absolute;
   inset: 0;

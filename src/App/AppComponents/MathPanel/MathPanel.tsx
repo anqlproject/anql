@@ -24,18 +24,18 @@ interface MathPanelProps {
   activeNodeKey: string | null;
 }
 
-interface MathItem {
+export interface MathItem {
   label: string;
   insert: string;
 }
 
-interface MathCategory {
+export interface MathCategory {
   name: string;
   items: MathItem[];
   isDynamic?: boolean;
 }
 
-const MATH_CATEGORIES: MathCategory[] = [
+export const MATH_CATEGORIES: MathCategory[] = [
   {
     name: "variables",
     items: [], // Will be populated dynamically
@@ -178,7 +178,7 @@ export default function MathPanel({
   activeNodeKey,
 }: MathPanelProps) {
   const { t } = useTranslation();
-  const { variables, scopes } = useMathVariables();
+  const { variables, scopes, tableVariables } = useMathVariables();
   const panelRef = useRef<HTMLDivElement>(null);
   const isMountedRef = useRef(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -219,15 +219,46 @@ export default function MathPanel({
 
     return MATH_CATEGORIES.map(category => {
       if (category.isDynamic) {
-        const variableItems: MathItem[] = Object.entries(availableVariables).map(([name, value]) => ({
-          label: `${name} (${value})`,
-          insert: name,
-        }));
+        const variableItems: MathItem[] = [];
+
+        // Add regular variables (e.g., x = 5), but filter out table names
+        Object.entries(availableVariables).forEach(([name, value]) => {
+          // Filter out table names (they are objects in tableVariables)
+          const isTableName = tableVariables[name] !== undefined;
+          if (!isTableName) {
+            variableItems.push({
+              label: `${name} (${value})`,
+              insert: name,
+            });
+          }
+        });
+
+        // Add table cell references (e.g., Table1.columnName[index])
+        Object.entries(tableVariables).forEach(([tableName, columns]) => {
+          Object.entries(columns).forEach(([columnName, values]) => {
+            // Add column reference as a variable
+            const columnRef = `${tableName}.${columnName}`;
+            variableItems.push({
+              label: `${columnRef} (column)`,
+              insert: columnRef,
+            });
+
+            // Add individual cell references
+            values.forEach((value, index) => {
+              const cellRef = `${tableName}.${columnName}[${index + 1}]`;
+              variableItems.push({
+                label: `${cellRef} (${value})`,
+                insert: cellRef,
+              });
+            });
+          });
+        });
+
         return { ...category, items: variableItems };
       }
       return category;
     });
-  }, [variables, scopes, activeNodeKey]);
+  }, [variables, scopes, activeNodeKey, tableVariables]);
 
   // Items filtrés lors d'une recherche (vue flat)
   const searchResults = useMemo(() => {

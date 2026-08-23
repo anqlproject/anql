@@ -21,6 +21,10 @@ interface MathVariablesContextType {
   // Variables available AT a specific node key (scoping based on document order)
   scopes: Record<string, Record<string, number>>;
   setScopes: React.Dispatch<React.SetStateAction<Record<string, Record<string, number>>>>;
+
+  // Table variables for MathPanel display
+  tableVariables: Record<string, Record<string, number[]>>;
+  setTableVariables: React.Dispatch<React.SetStateAction<Record<string, Record<string, number[]>>>>;
 }
 
 const MathVariablesContext = createContext<MathVariablesContextType | undefined>(undefined);
@@ -30,6 +34,7 @@ export const MathVariablesProvider: React.FC<{ children: ReactNode }> = ({ child
   const [localExpressions, setLocalExpressions] = useState<Record<string, string>>({});
   const [variables, setVariables] = useState<Record<string, number>>({});
   const [scopes, setScopes] = useState<Record<string, Record<string, number>>>({});
+  const [tableVariables, setTableVariables] = useState<Record<string, Record<string, number[]>>>({});
 
   // We use a ref to prevent unnecessary re-renders when updating locally
   const localExpressionsRef = useRef<Record<string, string>>({});
@@ -43,7 +48,7 @@ export const MathVariablesProvider: React.FC<{ children: ReactNode }> = ({ child
   }, []);
 
   return (
-    <MathVariablesContext.Provider value={{ results, setResults, localExpressions, setLocalExpression, variables, setVariables, scopes, setScopes }}>
+    <MathVariablesContext.Provider value={{ results, setResults, localExpressions, setLocalExpression, variables, setVariables, scopes, setScopes, tableVariables, setTableVariables }}>
       {children}
     </MathVariablesContext.Provider>
   );

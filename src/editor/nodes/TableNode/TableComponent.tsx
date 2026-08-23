@@ -48,6 +48,7 @@ import { DraggableRow } from "./TableCell/TableRow";
 import { CellMenu } from "./TableMenu/CellMenu";
 import { $isTableNode } from "./TableNode";
 import { TableColumn, TableRowData } from "./TableNode";
+import { TableTitle } from "./TableTitle";
 import {
   isColDndId,
   isRowDndId,
@@ -93,6 +94,7 @@ interface TableComponentProps {
   nodeKey: NodeKey;
   data: (TableRowData & { _rowId?: string })[];
   columns: (TableColumn & { size?: number; meta?: { type?: string } })[];
+  tableName: string;
   format: ElementFormatType | null;
   className: Readonly<{ base: string; focus: string }>;
 }
@@ -101,6 +103,7 @@ export function TableComponent({
   nodeKey,
   data: initialData,
   columns: initialColumns,
+  tableName,
   format,
   className,
 }: TableComponentProps) {
@@ -111,6 +114,8 @@ export function TableComponent({
     nodeKey,
     containerRef,
   );
+
+  // Table name is managed by the isolated TableTitle component (see TableTitle.tsx).
 
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     initialColumns
@@ -579,6 +584,7 @@ export function TableComponent({
         onContextMenu={handleContextMenu}
         data-node-key={nodeKey}
       >
+        <TableTitle nodeKey={nodeKey} editor={editor} tableName={tableName} />
         <DndContext
           sensors={sensors}
           collisionDetection={collisionDetection}

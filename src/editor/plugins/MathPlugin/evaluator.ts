@@ -11,6 +11,109 @@ export interface EvaluationOutput {
 
 const DIVISION_BY_ZERO = /\/\s*0(?![0-9])/;
 
+// Matches "TableName.colName" patterns where TableName starts with uppercase
+const DOT_ACCESS_PATTERN = /\b([A-Z][a-zA-Z0-9_]*)\.([a-zA-Z0-9_]*)/g;
+
+// Matches "TableName.colName[index]" patterns for individual cell references
+const CELL_REFERENCE_PATTERN = /\b([A-Z][a-zA-Z0-9_]*)\.([a-zA-Z0-9_]*)\[(\d+)\]/g;
+
+/**
+ * Detects table-specific errors in the expression and returns a user-friendly
+ * message. Runs BEFORE mathjs so the user sees clear messages instead of
+ * cryptic mathjs errors like "undefined".
+ *
+ * Also returns a suggestion string when the user typed just a table name
+ * or an incomplete "Table." accessor.
+ */
+function checkTableIssues(
+  expr: string,
+  tableVariables: Record<string, Record<string, number[]>>
+): string | null {
+  const tableNames = Object.keys(tableVariables);
+  if (tableNames.length === 0) return null;
+
+  // Case 1: expression is exactly a known table name → suggest columns as an info "error"
+  const exactTable = tableNames.find(name => expr === name);
+  if (exactTable) {
+    const cols = Object.keys(tableVariables[exactTable]);
+    if (cols.length === 0) return `Table '${exactTable}' has no numeric columns.`;
+    return `Table '${exactTable}' exists. Use ${exactTable}.ColumnName[index] or sum(${exactTable}.ColumnName). Available columns: ${cols.join(', ')}`;
+  }
+
+  // Case 2: expression starts with "KnownTable." but column is incomplete/missing
+  const partialTable = tableNames.find(name => expr.startsWith(name + '.'));
+  if (partialTable) {
+    const afterDot = expr.slice(partialTable.length + 1);
+    const cols = Object.keys(tableVariables[partialTable]);
+    // Only check if it's a column name (not something like "column[0]")
+    const isColumnReference = !afterDot.includes('[');
+    if (isColumnReference && !cols.includes(afterDot)) {
+      if (cols.length === 0) return `Table '${partialTable}' has no numeric columns.`;
+      return `Column not found or incomplete. Available columns for '${partialTable}': ${cols.join(', ')}`;
+    }
+  }
+
+  // Case 3: expression contains "UppercaseName.something" pattern — validate it
+  DOT_ACCESS_PATTERN.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = DOT_ACCESS_PATTERN.exec(expr)) !== null) {
+    const potentialTable = match[1];
+    const potentialCol = match[2];
+
+    if (!tableNames.includes(potentialTable)) {
+      return `Table '${potentialTable}' does not exist. Please check the name.`;
+    }
+
+    if (potentialCol) {
+      const cols = Object.keys(tableVariables[potentialTable]);
+      // Only validate if it's a column name (not indexed access like column[0])
+      const isColumnReference = !potentialCol.includes('[');
+      if (isColumnReference && !cols.includes(potentialCol)) {
+        return `Column '${potentialCol}' not found in '${potentialTable}'. Available columns: ${cols.join(', ')}`;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Replaces table references with actual values in the expression.
+ * Handles both cell references (Table1.column[1]) and column references (Table1.column).
+ */
+function replaceTableReferences(
+  expr: string,
+  tableVariables: Record<string, Record<string, number[]>>
+): string {
+  // Replace cell references: Table1.column[1] -> actual value
+  let processedExpr = expr.replace(CELL_REFERENCE_PATTERN, (match, tableName, columnName, rowIndex) => {
+    const table = tableVariables[tableName];
+    if (!table) return match;
+
+    const column = table[columnName];
+    if (!column) return match;
+
+    const index = parseInt(rowIndex) - 1; // Convert to 0-based
+    const value = column[index];
+
+    return value !== undefined ? String(value) : match;
+  });
+
+  // Replace column references: Table1.column -> array of values (for functions like sum, mean)
+  processedExpr = processedExpr.replace(DOT_ACCESS_PATTERN, (match, tableName, columnName) => {
+    const table = tableVariables[tableName];
+    if (!table) return match;
+
+    const column = table[columnName];
+    if (!column) return match;
+
+    // Return array representation for mathjs functions
+    return `[${column.join(', ')}]`;
+  });
+
+  return processedExpr;
+}
+
 /**
  * Pure evaluation function — no React, no Lexical editor dependency.
  * Takes an ordered list of MathExpNodes and evaluates them sequentially,
@@ -18,12 +121,12 @@ const DIVISION_BY_ZERO = /\/\s*0(?![0-9])/;
  *
  * Must be called inside a Lexical read callback.
  */
-export function evaluateAllMathNodes(nodes: MathExpNode[]): EvaluationOutput {
+export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Record<string, Record<string, number[]>> = {}): EvaluationOutput {
   const results: Record<string, MathEvaluationResult> = {};
   const variables: Record<string, number> = {};
   const scopes: Record<string, Record<string, number>> = {};
 
-  const scope: Record<string, number> = {};
+  const scope: Record<string, any> = { ...tableVariables };
 
   for (const node of nodes) {
     const key = node.__key;
@@ -38,6 +141,13 @@ export function evaluateAllMathNodes(nodes: MathExpNode[]): EvaluationOutput {
       continue;
     }
 
+    // Check for table-specific messages BEFORE mathjs
+    const tableMessage = checkTableIssues(expr.trim(), tableVariables);
+    if (tableMessage !== null) {
+      results[key] = { result: '', error: tableMessage };
+      continue;
+    }
+
     try {
       const assignMatch = expr.match(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=(.+)$/);
 
@@ -49,7 +159,9 @@ export function evaluateAllMathNodes(nodes: MathExpNode[]): EvaluationOutput {
           throw new Error('Division by zero');
         }
 
-        const val = evaluate(valueExpr, scope);
+        // Replace table references before evaluation
+        const processedExpr = replaceTableReferences(valueExpr, tableVariables);
+        const val = evaluate(processedExpr, scope);
         if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) {
           throw new Error('Invalid value');
         }
@@ -62,7 +174,9 @@ export function evaluateAllMathNodes(nodes: MathExpNode[]): EvaluationOutput {
           throw new Error('Division by zero');
         }
 
-        const val = evaluate(expr, scope);
+        // Replace table references before evaluation
+        const processedExpr = replaceTableReferences(expr, tableVariables);
+        const val = evaluate(processedExpr, scope);
         if (typeof val === 'number' && !isFinite(val)) {
           throw new Error('Invalid value');
         }

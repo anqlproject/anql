@@ -1,0 +1,50 @@
+.math-typeahead-popover {
+  background: var(--surface-color);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-top: 8px;
+  min-width: 200px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: var(--z-popover);
+  padding: 4px;
+}
+
+.math-typeahead-popover ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.math-typeahead-popover li {
+  margin: 0;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+}
+
+.math-typeahead-popover li.selected {
+  background-color: var(--action-active);
+}
+
+.math-typeahead-popover li.selected:hover {
+  background-color: var(--action-active);
+}
+
+.math-typeahead-popover li:hover {
+  background-color: var(--hover-color);
+}
+
+.math-typeahead-popover li .text {
+  flex-grow: 1;
+}
+
+.math-typeahead-popover li.variable .text {
+  font-style: italic;
+}

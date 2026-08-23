@@ -43,6 +43,7 @@
     },
     "MATH_PANEL": {
       "copied": "Copié !",
+      "copy": "Copier",
       "doubleClickToCopy": "Double-clic pour copier",
       "details": "Détails",
       "plus": "plus...",
@@ -270,7 +271,9 @@
       "updatedAt": "Modifié le"
     },
     "TABLE": {
-      "addColumn": "Ajouter une colonne",
+      "addTitle": "Ajouter un titre de table",
+      "titlePlaceholder": "Titre de la table...",
+      "addColumn": "Ajouter colonne",
       "addRow": "Ajouter une ligne",
       "columnType": "Type de colonne",
       "text": "Texte",
