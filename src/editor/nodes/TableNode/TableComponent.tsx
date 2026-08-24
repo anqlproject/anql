@@ -321,6 +321,7 @@ export function TableComponent({
     () =>
       initialColumns.map((col) => ({
         ...col,
+        accessorKey: col.id,
         cell: EditableCell,
         size: col.size || 180,
         meta: col.meta

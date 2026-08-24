@@ -136,10 +136,10 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
     const [isActiveMatch, setIsActiveMatch] = useState(false);
     const type = columnDef.meta?.type || 'text';
 
-    const onBlur = () => {
+    const handleBlur = (currentValue: string | number | boolean | null | undefined) => {
         setTimeout(() => {
-            table.options.meta?.updateData(index, id, value);
-        }, 0);
+            table.options.meta?.updateData(index, id, currentValue);
+        }, 10);
     };
 
     useEffect(() => {
@@ -199,7 +199,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
         if (e.button !== 2 || !(e.currentTarget instanceof HTMLInputElement)) {
             return;
         }
-        
+
         e.preventDefault();
 
         const input = e.currentTarget;
@@ -292,9 +292,9 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                     type="number"
                     value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''}
                     onChange={e => setValue(e.target.value)}
-                    onBlur={() => {
+                    onBlur={(e) => {
                         setIsFocused(false);
-                        onBlur();
+                        handleBlur(e.target.value);
                     }}
                     onFocus={() => setIsFocused(true)}
                     onMouseDown={handleMouseDown}
@@ -323,9 +323,9 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
             <input
                 value={typeof value === 'string' ? value : ''}
                 onChange={e => setValue(e.target.value)}
-                onBlur={() => {
+                onBlur={(e) => {
                     setIsFocused(false);
-                    onBlur();
+                    handleBlur(e.target.value);
                 }}
                 onFocus={() => setIsFocused(true)}
                 onMouseDown={handleMouseDown}
