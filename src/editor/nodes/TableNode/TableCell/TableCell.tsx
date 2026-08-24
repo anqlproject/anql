@@ -24,10 +24,11 @@ interface Column {
 
 interface Row {
     index: number;
+    original: { _rowId: string };
 }
 
 interface TableMeta {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+    updateData: (rowId: string, columnId: string, value: unknown) => void;
     goToNextCell?: (rowIndex: number, columnIndex: number) => void;
     goToPreviousCell?: (rowIndex: number, columnIndex: number) => void;
     goToCellBelow?: (rowIndex: number, columnIndex: number) => void;
@@ -127,7 +128,9 @@ function handleCellKeyDown(
     }
 }
 
-export default function EditableCell({ getValue, row: { index }, column: { id, columnDef }, table }: EditableCellProps) {
+export default function EditableCell({ getValue, row, column: { id, columnDef }, table }: EditableCellProps) {
+    const index = row.index;
+    const rowId = (row.original as any)?._rowId as string || '';
     const { t } = useTranslation();
     const isEditable = useLexicalEditable();
     const initialValue = getValue();
@@ -144,16 +147,16 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
 
     const handleBlur = (currentValue: string | number | boolean | null | undefined) => {
         setTimeout(() => {
-            tableRef.current.options.meta?.updateData(index, id, currentValue);
+            tableRef.current.options.meta?.updateData(rowId, id, currentValue);
         }, 10);
     };
 
     const debouncedSave = useMemo(
         () =>
             debounce((newValue: string | number | boolean | null | undefined) => {
-                tableRef.current.options.meta?.updateData(index, id, newValue);
+                tableRef.current.options.meta?.updateData(rowId, id, newValue);
             }, 1000),
-        [index, id]
+        [rowId, id]
     );
 
     useEffect(() => {
@@ -250,7 +253,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                     onChange={(e) => {
                         const checked = e.target.checked;
                         setValue(checked);
-                        tableRef.current.options.meta?.updateData(index, id, checked);
+                        tableRef.current.options.meta?.updateData(rowId, id, checked);
                     }}
                     onMouseDown={(e) => e.stopPropagation()}
                     onKeyDown={(e) => handleCellKeyDown(e, table, index, id)}
@@ -284,7 +287,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                                 onSelect={(date) => {
                                     const dateStr = date ? date.toISOString() : '';
                                     setValue(dateStr);
-                                    tableRef.current.options.meta?.updateData(index, id, dateStr);
+                                    tableRef.current.options.meta?.updateData(rowId, id, dateStr);
                                 }}
                             />
                         </Popover.Content>

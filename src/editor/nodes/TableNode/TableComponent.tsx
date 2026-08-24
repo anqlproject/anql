@@ -69,7 +69,7 @@ declare module "@tanstack/react-table" {
   }
 
   interface TableMeta<TData extends RowData> {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+    updateData: (rowId: string, columnId: string, value: unknown) => void;
     updateColumnType: (
       columnId: string,
       type: "text" | "checkbox" | "date" | "number",
@@ -79,10 +79,10 @@ declare module "@tanstack/react-table" {
     addColumn: () => void;
     addColumnLeft: (columnId: string) => void;
     addColumnRight: (columnId: string) => void;
-    deleteRow: (rowIndex: number) => void;
+    deleteRow: (rowId: string) => void;
     addRow: () => void;
-    addRowAbove: (rowIndex: number) => void;
-    addRowBelow: (rowIndex: number) => void;
+    addRowAbove: (rowId: string) => void;
+    addRowBelow: (rowId: string) => void;
     goToNextCell: (rowIndex: number, columnIndex: number) => void;
     goToPreviousCell: (rowIndex: number, columnIndex: number) => void;
     goToCellBelow: (rowIndex: number, columnIndex: number) => void;

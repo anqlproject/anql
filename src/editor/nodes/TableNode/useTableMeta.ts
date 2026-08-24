@@ -61,18 +61,21 @@ export function useTableMeta({
     closeMenus,
     getColumnIndex: (columnId: string) => columnOrder.indexOf(columnId),
 
-    updateData: (rowIndex: number, columnId: string, value: unknown) => {
+    updateData: (rowId: string, columnId: string, value: unknown) => {
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           const newData = [...node.__data];
-          newData[rowIndex] = {
-            ...newData[rowIndex],
-            [columnId]: value as string | number | boolean | null | undefined,
-          };
-          // Ensure _rowId is preserved using centralized function
-          newData[rowIndex] = ensureRowId(newData[rowIndex]);
-          node.updateData(newData);
+          const index = newData.findIndex(r => r._rowId === rowId);
+          if (index !== -1) {
+            newData[index] = {
+              ...newData[index],
+              [columnId]: value as string | number | boolean | null | undefined,
+            };
+            // Ensure _rowId is preserved using centralized function
+            newData[index] = ensureRowId(newData[index]);
+            node.updateData(newData);
+          }
         }
       });
     },
@@ -172,13 +175,11 @@ export function useTableMeta({
       });
     },
 
-    deleteRow: (rowIndex: number) => {
+    deleteRow: (rowId: string) => {
       closeMenus();
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
-          const rowId = node.__data[rowIndex]?._rowId;
-
           // Check if any links point to this row before deletion
           if (rowId && checkRowLinks(editor, nodeKey, String(rowId))) {
             const confirmed = window.confirm(
@@ -190,8 +191,11 @@ export function useTableMeta({
           }
 
           const newData = [...node.__data];
-          newData.splice(rowIndex, 1);
-          node.updateData(newData);
+          const index = newData.findIndex(r => r._rowId === rowId);
+          if (index !== -1) {
+            newData.splice(index, 1);
+            node.updateData(newData);
+          }
         }
       });
     },
@@ -206,26 +210,32 @@ export function useTableMeta({
       });
     },
 
-    addRowAbove: (rowIndex: number) => {
+    addRowAbove: (rowId: string) => {
       closeMenus();
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           const newData = [...node.__data];
-          newData.splice(rowIndex, 0, ensureRowId({}));
-          node.updateData(newData);
+          const index = newData.findIndex(r => r._rowId === rowId);
+          if (index !== -1) {
+            newData.splice(index, 0, ensureRowId({}));
+            node.updateData(newData);
+          }
         }
       });
     },
 
-    addRowBelow: (rowIndex: number) => {
+    addRowBelow: (rowId: string) => {
       closeMenus();
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           const newData = [...node.__data];
-          newData.splice(rowIndex + 1, 0, ensureRowId({}));
-          node.updateData(newData);
+          const index = newData.findIndex(r => r._rowId === rowId);
+          if (index !== -1) {
+            newData.splice(index + 1, 0, ensureRowId({}));
+            node.updateData(newData);
+          }
         }
       });
     },

@@ -135,7 +135,7 @@ export default function DraggableHeader({
                 meta: {
                   ...table.options.meta,
                   updateData: (
-                    _rowIndex: number,
+                    _rowId: string,
                     columnId: string,
                     value: unknown,
                   ) => {

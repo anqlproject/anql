@@ -7,9 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 
 interface TableMeta {
-  deleteRow?: (rowIndex: number) => void;
-  addRowAbove?: (rowIndex: number) => void;
-  addRowBelow?: (rowIndex: number) => void;
+  deleteRow?: (rowId: string) => void;
+  addRowAbove?: (rowId: string) => void;
+  addRowBelow?: (rowId: string) => void;
   nodeKey?: string;
   closeMenus?: () => void;
 }
@@ -32,6 +32,7 @@ interface RowMenuProps {
 
 export function RowMenu({ rowIndex, table }: RowMenuProps) {
   const { t } = useTranslation();
+  const rowId = table.getRowModel().rows[rowIndex]?.original._rowId;
 
   return (
     <Popover.Content
@@ -44,7 +45,7 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       <button
         type="button"
         onPointerDown={(e) => e.preventDefault()}
-        onClick={() => table.options.meta?.addRowAbove?.(rowIndex)}
+        onClick={() => { if (rowId) table.options.meta?.addRowAbove?.(rowId); }}
         className="table-menu-item"
       >
         <Plus className="w-4 h-4" /> {t('TABLE.addRowAbove')}
@@ -52,7 +53,7 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       <button
         type="button"
         onPointerDown={(e) => e.preventDefault()}
-        onClick={() => table.options.meta?.addRowBelow?.(rowIndex)}
+        onClick={() => { if (rowId) table.options.meta?.addRowBelow?.(rowId); }}
         className="table-menu-item"
       >
         <Plus className="w-4 h-4" /> {t('TABLE.addRowBelow')}
@@ -61,7 +62,6 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
         type="button"
         onPointerDown={(e) => e.preventDefault()}
         onClick={async () => {
-          const rowId = table.getRowModel().rows[rowIndex]?.original._rowId;
           const nodeKey = table.options.meta?.nodeKey;
           let blocId = "";
           if (nodeKey) {
@@ -92,7 +92,7 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       <button
         type="button"
         onPointerDown={(e) => e.preventDefault()}
-        onClick={() => table.options.meta?.deleteRow?.(rowIndex)}
+        onClick={() => { if (rowId) table.options.meta?.deleteRow?.(rowId); }}
         className="table-menu-item-danger"
       >
         <Trash2 className="w-4 h-4" /> {t('TABLE.delete')}
