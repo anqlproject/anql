@@ -28,11 +28,11 @@ export function searchInTableData(
     const lowerHeader = headerText.toLowerCase();
     let startIndex = 0;
     let index = lowerHeader.indexOf(lowerQuery, startIndex);
-    
+
     while (index !== -1) {
       matches.push({
         rowIndex: -1, // -1 indicates header
-        columnId: column.accessorKey || column.id || '',
+        columnId: column.id || '',
         startOffset: index,
         endOffset: index + query.length,
         text: headerText.slice(index, index + query.length),
@@ -45,14 +45,14 @@ export function searchInTableData(
   // Search in cell data
   data.forEach((row, rowIndex) => {
     columns.forEach((column) => {
-      const columnId = column.accessorKey || column.id;
+      const columnId = column.id;
       if (!columnId) return;
 
       const cellValue = row[columnId];
-      const text = typeof cellValue === 'string' || typeof cellValue === 'number' 
-        ? String(cellValue) 
+      const text = typeof cellValue === 'string' || typeof cellValue === 'number'
+        ? String(cellValue)
         : '';
-      
+
       if (!text) return;
 
       const lowerText = text.toLowerCase();

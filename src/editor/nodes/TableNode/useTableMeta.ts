@@ -3,7 +3,7 @@ import { $getNodeByKey, $getRoot, LexicalEditor, NodeKey } from "lexical";
 import { $isLinkNode } from "@/editor/nodes/LinkNode/LinkNode";
 
 import { $isTableNode } from "./TableNode";
-import { focusCellInput } from "./tableUtils";
+import { ensureRowId, focusCellInput } from "./tableUtils";
 
 interface UseTableMetaOptions {
   editor: LexicalEditor;
@@ -70,10 +70,8 @@ export function useTableMeta({
             ...newData[rowIndex],
             [columnId]: value as string | number | boolean | null | undefined,
           };
-          // Ensure _rowId is preserved
-          if (!newData[rowIndex]._rowId) {
-            newData[rowIndex]._rowId = `row-${crypto.randomUUID()}`;
-          }
+          // Ensure _rowId is preserved using centralized function
+          newData[rowIndex] = ensureRowId(newData[rowIndex]);
           node.updateData(newData);
         }
       });
@@ -88,7 +86,7 @@ export function useTableMeta({
         if ($isTableNode(node)) {
           node.updateColumns(
             node.__columns.map((c) =>
-              (c.accessorKey || c.id) === columnId
+              c.id === columnId
                 ? { ...c, meta: { ...c.meta, type } }
                 : c,
             ),
@@ -103,7 +101,7 @@ export function useTableMeta({
         if ($isTableNode(node)) {
           node.updateColumns(
             node.__columns.map((c) =>
-              (c.accessorKey || c.id) === columnId
+              c.id === columnId
                 ? { ...c, header: headerName }
                 : c,
             ),
@@ -118,7 +116,7 @@ export function useTableMeta({
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           node.updateColumns(
-            node.__columns.filter((c) => (c.accessorKey || c.id) !== columnId),
+            node.__columns.filter((c) => c.id !== columnId),
           );
         }
       });
@@ -132,7 +130,7 @@ export function useTableMeta({
           const newColId = `col_${Date.now()}`;
           node.updateColumns([
             ...node.__columns,
-            { header: "", accessorKey: newColId, meta: { type: "text" } },
+            { header: "", id: newColId, meta: { type: "text" } },
           ]);
         }
       });
@@ -144,12 +142,12 @@ export function useTableMeta({
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           const idx = node.__columns.findIndex(
-            (c) => (c.accessorKey || c.id) === columnId,
+            (c) => c.id === columnId,
           );
           const newColId = `col_${Date.now()}`;
           node.updateColumns([
             ...node.__columns.slice(0, idx),
-            { header: "", accessorKey: newColId, meta: { type: "text" } },
+            { header: "", id: newColId, meta: { type: "text" } },
             ...node.__columns.slice(idx),
           ]);
         }
@@ -162,12 +160,12 @@ export function useTableMeta({
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           const idx = node.__columns.findIndex(
-            (c) => (c.accessorKey || c.id) === columnId,
+            (c) => c.id === columnId,
           );
           const newColId = `col_${Date.now()}`;
           node.updateColumns([
             ...node.__columns.slice(0, idx + 1),
-            { header: "", accessorKey: newColId, meta: { type: "text" } },
+            { header: "", id: newColId, meta: { type: "text" } },
             ...node.__columns.slice(idx + 1),
           ]);
         }
@@ -203,7 +201,7 @@ export function useTableMeta({
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
-          node.updateData([...node.__data, { _rowId: `row-${crypto.randomUUID()}` }]);
+          node.updateData([...node.__data, ensureRowId({})]);
         }
       });
     },
@@ -214,7 +212,7 @@ export function useTableMeta({
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           const newData = [...node.__data];
-          newData.splice(rowIndex, 0, { _rowId: `row-${crypto.randomUUID()}` });
+          newData.splice(rowIndex, 0, ensureRowId({}));
           node.updateData(newData);
         }
       });
@@ -226,7 +224,7 @@ export function useTableMeta({
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
           const newData = [...node.__data];
-          newData.splice(rowIndex + 1, 0, { _rowId: `row-${crypto.randomUUID()}` });
+          newData.splice(rowIndex + 1, 0, ensureRowId({}));
           node.updateData(newData);
         }
       });

@@ -46,7 +46,7 @@ export default function SelectNodeManager({ editor, optionName, clearOption }: S
 
         if (optionName === "Table") {
             editor.update(() => {
-                const tableNode = $createTableNode([{ a: "" }], [{ header: "", accessorKey: "a" }]);
+                const tableNode = $createTableNode([{ a: "" }], [{ header: "", id: "a" }]);
                 $insertNodes([tableNode]);
                 $setSelection(null);
             });

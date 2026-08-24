@@ -45,10 +45,10 @@ export default function MathPlugin() {
 
         node.__columns.forEach(col => {
           if (col.meta?.type === 'number') {
-            const safeHeader = (col.header || col.accessorKey).replace(/[^a-zA-Z0-9_]/g, '');
+            const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
             if (safeHeader) {
               tableData[safeHeader] = node.__data.map(row => {
-                const val = row[col.accessorKey];
+                const val = row[col.id];
                 const num = Number(val);
                 return isNaN(num) ? 0 : num;
               });

@@ -50,6 +50,7 @@ import { $isTableNode } from "./TableNode";
 import { TableColumn, TableRowData } from "./TableNode";
 import { TableTitle } from "./TableTitle";
 import {
+  ensureRowIds,
   isColDndId,
   isRowDndId,
   parseColDndId,
@@ -119,7 +120,7 @@ export function TableComponent({
 
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     initialColumns
-      .map((c) => c.accessorKey || c.id)
+      .map((c) => c.id)
       .filter((id): id is string => Boolean(id)),
   );
 
@@ -128,16 +129,13 @@ export function TableComponent({
     setPrevInitialColumns(initialColumns);
     setColumnOrder(
       initialColumns
-        .map((c) => c.accessorKey || c.id)
+        .map((c) => c.id)
         .filter((id): id is string => Boolean(id))
     );
   }
 
   const [tableData, setTableData] = useState<TableRowWithId[]>(() =>
-    initialData.map((row) => ({
-      ...row,
-      _rowId: row._rowId || `row-${crypto.randomUUID()}`,
-    })),
+    ensureRowIds(initialData),
   );
 
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
@@ -216,12 +214,7 @@ export function TableComponent({
 
   // NOTE : update row id if not exist (for example when we paste data)
   useEffect(() => {
-    setTableData(
-      initialData.map((row) => ({
-        ...row,
-        _rowId: row._rowId || `row-${crypto.randomUUID()}`,
-      })) as TableRowWithId[]
-    );
+    setTableData(ensureRowIds(initialData) as TableRowWithId[]);
   }, [initialData]);
 
   // NOTE : desactive scrolling when menu is open
@@ -251,7 +244,7 @@ export function TableComponent({
         if (targetKey !== nodeKey) return false;
 
         const columnIndex = initialColumns.findIndex(
-          (c) => (c.accessorKey || c.id) === columnId
+          (c) => c.id === columnId
         );
 
         if (rowIndex >= -1 && columnIndex >= 0) {
@@ -395,7 +388,7 @@ export function TableComponent({
         if ($isTableNode(node)) {
           let changed = false;
           const newColumns = node.__columns.map((c) => {
-            const colId = c.accessorKey || c.id;
+            const colId = c.id;
             if (!colId) return c;
             const newSize = columnSizing[colId];
             if (newSize && newSize !== c.size) {
@@ -473,7 +466,7 @@ export function TableComponent({
         if ($isTableNode(node)) {
           const newColumns = columnOrderRef.current
             .map((id) =>
-              initialColumns.find((c) => (c.accessorKey || c.id) === id),
+              initialColumns.find((c) => c.id === id),
             )
             .filter((c): c is TableColumn => c !== undefined);
           node.updateColumns(newColumns);

@@ -99,7 +99,7 @@ export function InsertTableDialog({
 
     const generatedColumns: TableColumn[] = Array.from({ length: colCount }).map((_, i) => ({
       header: `Colonne ${i + 1}`,
-      accessorKey: `col_${i}`,
+      id: `col_${i}`,
       meta: { type: 'text' },
     }));
 
