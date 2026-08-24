@@ -4,9 +4,10 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from "@radix-ui/react-popover";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { useTranslation } from 'react-i18next';
+import { debounce } from 'lodash-es';
 
 interface ColumnMeta {
     type?: 'text' | 'number' | 'checkbox' | 'date';
@@ -136,11 +137,28 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
     const [isActiveMatch, setIsActiveMatch] = useState(false);
     const type = columnDef.meta?.type || 'text';
 
+    const tableRef = useRef(table);
+    useEffect(() => {
+        tableRef.current = table;
+    }, [table]);
+
     const handleBlur = (currentValue: string | number | boolean | null | undefined) => {
         setTimeout(() => {
-            table.options.meta?.updateData(index, id, currentValue);
+            tableRef.current.options.meta?.updateData(index, id, currentValue);
         }, 10);
     };
+
+    const debouncedSave = useMemo(
+        () =>
+            debounce((newValue: string | number | boolean | null | undefined) => {
+                tableRef.current.options.meta?.updateData(index, id, newValue);
+            }, 1000),
+        [index, id]
+    );
+
+    useEffect(() => {
+        return () => debouncedSave.cancel();
+    }, [debouncedSave]);
 
     useEffect(() => {
         setValue(initialValue);
@@ -232,7 +250,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                     onChange={(e) => {
                         const checked = e.target.checked;
                         setValue(checked);
-                        table.options.meta?.updateData(index, id, checked);
+                        tableRef.current.options.meta?.updateData(index, id, checked);
                     }}
                     onMouseDown={(e) => e.stopPropagation()}
                     onKeyDown={(e) => handleCellKeyDown(e, table, index, id)}
@@ -266,7 +284,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                                 onSelect={(date) => {
                                     const dateStr = date ? date.toISOString() : '';
                                     setValue(dateStr);
-                                    table.options.meta?.updateData(index, id, dateStr);
+                                    tableRef.current.options.meta?.updateData(index, id, dateStr);
                                 }}
                             />
                         </Popover.Content>
@@ -291,7 +309,10 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                 <input
                     type="number"
                     value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''}
-                    onChange={e => setValue(e.target.value)}
+                    onChange={e => {
+                        setValue(e.target.value);
+                        debouncedSave(e.target.value);
+                    }}
                     onBlur={(e) => {
                         setIsFocused(false);
                         handleBlur(e.target.value);
@@ -322,7 +343,10 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
             )}
             <input
                 value={typeof value === 'string' ? value : ''}
-                onChange={e => setValue(e.target.value)}
+                onChange={e => {
+                    setValue(e.target.value);
+                    debouncedSave(e.target.value);
+                }}
                 onBlur={(e) => {
                     setIsFocused(false);
                     handleBlur(e.target.value);
