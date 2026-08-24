@@ -30,13 +30,13 @@ import { BlockWithAlignableContents } from "@lexical/react/LexicalBlockWithAlign
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   ColumnDef,
-  flexRender,
   getCoreRowModel,
   RowData,
   useReactTable,
 } from "@tanstack/react-table";
 import type { ElementFormatType } from "lexical";
 import { $getNodeByKey, COMMAND_PRIORITY_LOW, NodeKey } from "lexical";
+import { Move } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighlight";
@@ -50,6 +50,7 @@ import { $isTableNode } from "./TableNode";
 import { TableColumn, TableRowData } from "./TableNode";
 import { TableTitle } from "./TableTitle";
 import {
+  ensureRowIds,
   isColDndId,
   isRowDndId,
   parseColDndId,
@@ -68,7 +69,7 @@ declare module "@tanstack/react-table" {
   }
 
   interface TableMeta<TData extends RowData> {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+    updateData: (rowId: string, columnId: string, value: unknown) => void;
     updateColumnType: (
       columnId: string,
       type: "text" | "checkbox" | "date" | "number",
@@ -78,10 +79,10 @@ declare module "@tanstack/react-table" {
     addColumn: () => void;
     addColumnLeft: (columnId: string) => void;
     addColumnRight: (columnId: string) => void;
-    deleteRow: (rowIndex: number) => void;
+    deleteRow: (rowId: string) => void;
     addRow: () => void;
-    addRowAbove: (rowIndex: number) => void;
-    addRowBelow: (rowIndex: number) => void;
+    addRowAbove: (rowId: string) => void;
+    addRowBelow: (rowId: string) => void;
     goToNextCell: (rowIndex: number, columnIndex: number) => void;
     goToPreviousCell: (rowIndex: number, columnIndex: number) => void;
     goToCellBelow: (rowIndex: number, columnIndex: number) => void;
@@ -117,33 +118,20 @@ export function TableComponent({
 
   // Table name is managed by the isolated TableTitle component (see TableTitle.tsx).
 
-  const [columnOrder, setColumnOrder] = useState<string[]>(() =>
+  const columnOrder = useMemo(() =>
     initialColumns
-      .map((c) => c.accessorKey || c.id)
+      .map((c) => c.id)
       .filter((id): id is string => Boolean(id)),
+    [initialColumns]
   );
 
-  const [prevInitialColumns, setPrevInitialColumns] = useState(initialColumns);
-  if (initialColumns !== prevInitialColumns) {
-    setPrevInitialColumns(initialColumns);
-    setColumnOrder(
-      initialColumns
-        .map((c) => c.accessorKey || c.id)
-        .filter((id): id is string => Boolean(id))
-    );
-  }
-
-  const [tableData, setTableData] = useState<TableRowWithId[]>(() =>
-    initialData.map((row) => ({
-      ...row,
-      _rowId: row._rowId || `row-${crypto.randomUUID()}`,
-    })),
-  );
+  const tableData = useMemo(() => ensureRowIds(initialData) as TableRowWithId[], [initialData]);
 
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOverRowIndex, setDragOverRowIndex] = useState<number | null>(null);
+  const [dragOverColIndex, setDragOverColIndex] = useState<number | null>(null);
   const [openRowMenuIndex, setOpenRowMenuIndex] = useState<number | null>(null);
   const [openColMenuIndex, setOpenColMenuIndex] = useState<number | null>(null);
 
@@ -214,16 +202,6 @@ export function TableComponent({
     };
   }, []);
 
-  // NOTE : update row id if not exist (for example when we paste data)
-  useEffect(() => {
-    setTableData(
-      initialData.map((row) => ({
-        ...row,
-        _rowId: row._rowId || `row-${crypto.randomUUID()}`,
-      })) as TableRowWithId[]
-    );
-  }, [initialData]);
-
   // NOTE : desactive scrolling when menu is open
   useEffect(() => {
     if (!highlightState.isOpen) return;
@@ -251,7 +229,7 @@ export function TableComponent({
         if (targetKey !== nodeKey) return false;
 
         const columnIndex = initialColumns.findIndex(
-          (c) => (c.accessorKey || c.id) === columnId
+          (c) => c.id === columnId
         );
 
         if (rowIndex >= -1 && columnIndex >= 0) {
@@ -328,6 +306,7 @@ export function TableComponent({
     () =>
       initialColumns.map((col) => ({
         ...col,
+        accessorKey: col.id,
         cell: EditableCell,
         size: col.size || 180,
         meta: col.meta
@@ -374,7 +353,6 @@ export function TableComponent({
     state: { columnOrder },
     enableColumnResizing: true,
     getRowId: (row) => row._rowId,
-    onColumnOrderChange: setColumnOrder,
     columnResizeMode: "onChange",
     getCoreRowModel: getCoreRowModel(),
     meta: tableMeta,
@@ -395,7 +373,7 @@ export function TableComponent({
         if ($isTableNode(node)) {
           let changed = false;
           const newColumns = node.__columns.map((c) => {
-            const colId = c.accessorKey || c.id;
+            const colId = c.id;
             if (!colId) return c;
             const newSize = columnSizing[colId];
             if (newSize && newSize !== c.size) {
@@ -427,17 +405,19 @@ export function TableComponent({
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over) {
+      setDragOverColIndex(null);
+      setDragOverRowIndex(null);
+      return;
+    }
 
     const activeId = String(active.id);
     const overId = String(over.id);
 
     if (isColDndId(activeId) && isColDndId(overId) && activeId !== overId) {
-      setColumnOrder((order) => {
-        const oldIndex = order.indexOf(parseColDndId(activeId));
-        const newIndex = order.indexOf(parseColDndId(overId));
-        return arrayMove(order, oldIndex, newIndex);
-      });
+      const overColId = parseColDndId(overId);
+      const overIndex = columnOrder.indexOf(overColId);
+      setDragOverColIndex(overIndex >= 0 ? overIndex : null);
       return;
     }
 
@@ -445,17 +425,6 @@ export function TableComponent({
       const overRowId = parseRowDndId(overId);
       const overIndex = tableData.findIndex((r) => r._rowId === overRowId);
       setDragOverRowIndex(overIndex >= 0 ? overIndex : null);
-
-      setTableData((rows) => {
-        const oldIndex = rows.findIndex(
-          (r) => r._rowId === parseRowDndId(activeId),
-        );
-        const newIndex = rows.findIndex((r) => r._rowId === overRowId);
-        if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) {
-          return rows;
-        }
-        return arrayMove(rows, oldIndex, newIndex);
-      });
     }
   };
 
@@ -466,15 +435,26 @@ export function TableComponent({
     setActiveRowId(null);
     setActiveColumnId(null);
     setDragOverRowIndex(null);
+    setDragOverColIndex(null);
+
+    const overId = event.over ? String(event.over.id) : null;
 
     if (wasCol) {
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
-          const newColumns = columnOrderRef.current
-            .map((id) =>
-              initialColumns.find((c) => (c.accessorKey || c.id) === id),
-            )
+          let finalOrder = columnOrderRef.current;
+
+          if (overId && isColDndId(overId) && activeId !== overId) {
+            const oldIndex = finalOrder.indexOf(parseColDndId(activeId));
+            const newIndex = finalOrder.indexOf(parseColDndId(overId));
+            if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+              finalOrder = arrayMove(finalOrder, oldIndex, newIndex);
+            }
+          }
+
+          const newColumns = finalOrder
+            .map((id) => initialColumns.find((c) => c.id === id))
             .filter((c): c is TableColumn => c !== undefined);
           node.updateColumns(newColumns);
         }
@@ -483,9 +463,19 @@ export function TableComponent({
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
+          let finalData = node.__data;
+
+          if (overId && isRowDndId(overId) && activeId !== overId) {
+            const oldIndex = finalData.findIndex(r => r._rowId === parseRowDndId(activeId));
+            const newIndex = finalData.findIndex(r => r._rowId === parseRowDndId(overId));
+            if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+              finalData = arrayMove(finalData, oldIndex, newIndex);
+            }
+          }
+
           // Preserve _rowId when updating node data after row drag
           node.updateData(
-            tableDataRef.current.map(({ _rowId, ...rest }) => ({ ...rest, _rowId })),
+            finalData.map(({ _rowId, ...rest }) => ({ ...rest, _rowId })),
           );
         }
       });
@@ -623,6 +613,7 @@ export function TableComponent({
                     columnRef={(el) => {
                       columnRefs.current[index] = el;
                     }}
+                    isDropTarget={dragOverColIndex === index}
                   />
                 ))}
               </SortableContext>
@@ -653,6 +644,7 @@ export function TableComponent({
                   }}
                   isDropTarget={dragOverRowIndex === index}
                   suppressMenuClick={isDragging}
+                  draggingColumnId={activeColumnId}
                 />
               ))}
             </SortableContext>
@@ -660,62 +652,12 @@ export function TableComponent({
 
           <DragOverlay dropAnimation={null}>
             {activeColumn && (
-              <div
-                className="table-drag-preview table-drag-preview--column"
-                style={{ width: activeColumn.getSize() }}
-              >
-                <div className="table-cell table-cell--header">
-                  <span className="table-header-label">
-                    {(activeColumn.columnDef.header as string) || ""}
-                  </span>
-                </div>
-                {table.getRowModel().rows.map((row) => {
-                  const cell = row
-                    .getVisibleCells()
-                    .find((c) => c.column.id === activeColumnId);
-                  return (
-                    <div
-                      key={row.id}
-                      className="table-cell table-cell--data"
-                    >
-                      {cell
-                        ? flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )
-                        : null}
-                    </div>
-                  );
-                })}
+              <div style={{ width: activeColumn.getSize(), display: "flex", justifyContent: "center" }}>
+                <Move size={16} color="var(--primary-color)" strokeWidth={2.5} />
               </div>
             )}
             {activeRow && (
-              <div className="table-drag-preview table-drag-preview--row">
-                <div className="table-gutter">
-                  <span className="table-row-handle table-row-handle--overlay">
-                    <svg viewBox="0 0 10 10" className="table-handle-dots">
-                      <circle cx="2" cy="2" r="1" fill="currentColor" />
-                      <circle cx="2" cy="5" r="1" fill="currentColor" />
-                      <circle cx="2" cy="8" r="1" fill="currentColor" />
-                      <circle cx="6" cy="2" r="1" fill="currentColor" />
-                      <circle cx="6" cy="5" r="1" fill="currentColor" />
-                      <circle cx="6" cy="8" r="1" fill="currentColor" />
-                    </svg>
-                  </span>
-                </div>
-                {activeRow.getVisibleCells().map((cell) => (
-                  <div
-                    key={cell.id}
-                    className="table-cell table-cell--data"
-                    style={{
-                      width: cell.column.getSize(),
-                      flex: `0 0 ${cell.column.getSize()}px`,
-                    }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </div>
-                ))}
-              </div>
+              <Move size={16} color="var(--primary-color)" strokeWidth={2.5} />
             )}
           </DragOverlay>
         </DndContext>

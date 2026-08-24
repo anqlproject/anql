@@ -1,7 +1,6 @@
 import './TableHeader.css';
 
 import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import * as Popover from "@radix-ui/react-popover";
 import { Header, Table } from "@tanstack/react-table";
@@ -22,6 +21,7 @@ interface DraggableHeaderProps {
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
   columnRef: (el: HTMLDivElement | null) => void;
+  isDropTarget?: boolean;
 }
 
 export default function DraggableHeader({
@@ -31,6 +31,7 @@ export default function DraggableHeader({
   menuOpen,
   onMenuOpenChange,
   columnRef,
+  isDropTarget,
 }: DraggableHeaderProps) {
   const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -40,7 +41,6 @@ export default function DraggableHeader({
     isDragging,
     listeners,
     setNodeRef,
-    transform,
     transition,
   } = useSortable({
     id: toColDndId(header.column.id),
@@ -50,7 +50,6 @@ export default function DraggableHeader({
     width: header.getSize(),
     flex: `0 0 ${header.getSize()}px`,
     opacity: isDragging ? 0.35 : 1,
-    transform: CSS.Translate.toString(transform),
     transition,
     position: "relative",
     zIndex: isDragging ? 2 : 1,
@@ -77,7 +76,7 @@ export default function DraggableHeader({
         columnRef(el);
       }}
       style={style}
-      className={`table-cell table-cell--header ${isDragging ? "is-dragging" : ""}`}
+      className={`table-cell table-cell--header ${isDropTarget ? "table-cell--drop-target" : ""} ${isDragging ? "is-dragging" : ""}`}
       data-column-index={columnIndex}
     >
       <Popover.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
@@ -135,7 +134,7 @@ export default function DraggableHeader({
                 meta: {
                   ...table.options.meta,
                   updateData: (
-                    _rowIndex: number,
+                    _rowId: string,
                     columnId: string,
                     value: unknown,
                   ) => {

@@ -335,7 +335,7 @@ function exportTableToMarkdown(node: TableNode): string {
     columns
       .map((col) =>
         escapeMarkdownTableCell(
-          String(col.header ?? col.accessorKey ?? col.id ?? ""),
+          String(col.header ?? col.id ?? ""),
         ),
       )
       .join(" | ") +
@@ -343,7 +343,7 @@ function exportTableToMarkdown(node: TableNode): string {
   const dividerRow = "| " + columns.map(() => "---").join(" | ") + " |";
   const dataRows = (data || []).map((row) => {
     const cells = columns.map((col) => {
-      const key = col.accessorKey ?? col.id;
+      const key = col.id;
       const value = row[key];
       return escapeMarkdownTableCell(
         value !== undefined && value !== null ? String(value) : "",
@@ -385,7 +385,7 @@ export const TABLE: MultilineElementTransformer = {
 
     const columns = headerCells.map((header, index) => ({
       header,
-      accessorKey: `col_${index}`,
+      id: `col_${index}`,
       meta: { type: "text" },
     }));
 
@@ -397,7 +397,7 @@ export const TABLE: MultilineElementTransformer = {
       }
       const rowData: Record<string, string> = {};
       columns.forEach((col, index) => {
-        rowData[col.accessorKey] = cells[index] ?? "";
+        rowData[col.id] = cells[index] ?? "";
       });
       data.push(rowData);
     }

@@ -167,7 +167,7 @@ export default function CreateNodeMenu({
       title: t('NODES.table') as string,
       onClick: () => {
         editor.dispatchCommand(INSERT_TABLE_COMMAND, {
-          columns: [{ header: "", accessorKey: "a" }],
+          columns: [{ header: "", id: "a" }],
           data: [{ a: "" }],
         });
         setIsMenuOpen(false);

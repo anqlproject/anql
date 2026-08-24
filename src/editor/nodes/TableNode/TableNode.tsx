@@ -4,6 +4,7 @@ import { $getRoot, DOMConversionMap, DOMConversionOutput, DOMExportOutput, Eleme
 import React from 'react';
 
 import { TableComponent } from './TableComponent';
+import { ensureRowIds } from './tableUtils';
 import { searchInTableData, TableSearchMatch } from './useTableSearch';
 
 function escapeHTML(str: string) {
@@ -28,9 +29,9 @@ const escapeMap = {
 
 export interface TableColumn {
   header: string;
-  accessorKey: string;
+  id: string;
+  accessorKey?: string;
   meta?: { type: string };
-  id?: string;
   size?: number;
 }
 
@@ -63,7 +64,7 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
     cells.forEach((cell, i) => {
       columns.push({
         header: cell.textContent || `Col ${i + 1}`,
-        accessorKey: `col_${i}`,
+        id: `col_${i}`,
         meta: { type: 'text' }
       });
     });
@@ -71,7 +72,7 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
     headerCells.forEach((cell, i) => {
       columns.push({
         header: cell.textContent || `Col ${i + 1}`,
-        accessorKey: `col_${i}`,
+        id: `col_${i}`,
         meta: { type: 'text' }
       });
     });
@@ -90,7 +91,7 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
 
     columns.forEach((col, colIndex) => {
       const cell = cells[colIndex];
-      rowData[col.accessorKey] = cell ? cell.textContent : '';
+      rowData[col.id] = cell ? cell.textContent : '';
     });
 
     data.push(rowData);
@@ -103,7 +104,7 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
     for (let i = 0; i < maxCols; i++) {
       columns.push({
         header: `Col ${i + 1}`,
-        accessorKey: `col_${i}`,
+        id: `col_${i}`,
         meta: { type: 'text' }
       });
     }
@@ -153,14 +154,46 @@ export class TableNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedTableNode): TableNode {
-    return $createTableNode(serializedNode.data, serializedNode.columns, serializedNode.tableName).updateFromJSON(
+    // Migration: convert old accessorKey-based columns to id-based columns
+    const migratedColumns = serializedNode.columns.map(col => {
+      if (col.accessorKey && !col.id) {
+        // Old format: accessorKey was the primary identifier
+        return {
+          ...col,
+          id: col.accessorKey,
+          accessorKey: undefined
+        };
+      }
+      return col;
+    });
+
+    // Also migrate row data to use the new id field
+    const migratedData = serializedNode.data.map(row => {
+      const migratedRow: TableRowData = {};
+      migratedColumns.forEach(col => {
+        const oldKey = col.accessorKey || col.id;
+        const newKey = col.id;
+        if (oldKey && newKey && oldKey !== newKey && row[oldKey] !== undefined) {
+          migratedRow[newKey] = row[oldKey];
+        } else if (newKey && row[newKey] !== undefined) {
+          migratedRow[newKey] = row[newKey];
+        }
+      });
+      // Preserve _rowId if it exists
+      if (row._rowId) {
+        migratedRow._rowId = row._rowId;
+      }
+      return migratedRow;
+    });
+
+    return $createTableNode(migratedData, migratedColumns, serializedNode.tableName).updateFromJSON(
       serializedNode,
     );
   }
 
   updateData(newData: TableRowData[]): void {
     const writable = this.getWritable();
-    writable.__data = newData.map(row => row._rowId ? row : { ...row, _rowId: `row-${crypto.randomUUID()}` });
+    writable.__data = ensureRowIds(newData);
   }
 
   updateColumns(newColumns: TableColumn[]): void {
@@ -193,7 +226,7 @@ export class TableNode extends DecoratorBlockNode {
     // Add cell data
     this.__data.forEach((row) => {
       this.__columns.forEach((col) => {
-        const columnId = col.accessorKey || col.id;
+        const columnId = col.id;
         if (columnId) {
           const value = row[columnId];
           if (value !== null && value !== undefined && value !== '') {
@@ -233,8 +266,8 @@ export class TableNode extends DecoratorBlockNode {
           return `<tr>${this.__columns
             .map((col) => {
               const cellContent =
-                col.accessorKey && rowData[col.accessorKey]
-                  ? String(rowData[col.accessorKey])
+                col.id && rowData[col.id]
+                  ? String(rowData[col.id])
                   : "";
               const cellStyle = "border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; color: var(--text-primary); height: 36px; white-space: pre-wrap; overflow-wrap: break-word;";
 
@@ -311,7 +344,7 @@ export function $createTableNode(data: TableRowData[], columns: TableColumn[], t
     }
   }
 
-  const dataWithIds = data.map(row => row._rowId ? row : { ...row, _rowId: `row-${crypto.randomUUID()}` });
+  const dataWithIds = ensureRowIds(data);
   return new TableNode(dataWithIds, columns, name);
 }
 

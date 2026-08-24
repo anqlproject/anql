@@ -3,8 +3,9 @@ import './TableCell.css';
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from "@radix-ui/react-popover";
 import { format } from "date-fns";
+import { debounce } from 'lodash-es';
 import { CalendarIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { useTranslation } from 'react-i18next';
 
@@ -23,10 +24,11 @@ interface Column {
 
 interface Row {
     index: number;
+    original: { _rowId: string };
 }
 
 interface TableMeta {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+    updateData: (rowId: string, columnId: string, value: unknown) => void;
     goToNextCell?: (rowIndex: number, columnIndex: number) => void;
     goToPreviousCell?: (rowIndex: number, columnIndex: number) => void;
     goToCellBelow?: (rowIndex: number, columnIndex: number) => void;
@@ -126,7 +128,9 @@ function handleCellKeyDown(
     }
 }
 
-export default function EditableCell({ getValue, row: { index }, column: { id, columnDef }, table }: EditableCellProps) {
+export default function EditableCell({ getValue, row, column: { id, columnDef }, table }: EditableCellProps) {
+    const index = row.index;
+    const rowId = (row.original as any)?._rowId as string || '';
     const { t } = useTranslation();
     const isEditable = useLexicalEditable();
     const initialValue = getValue();
@@ -136,11 +140,28 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
     const [isActiveMatch, setIsActiveMatch] = useState(false);
     const type = columnDef.meta?.type || 'text';
 
-    const onBlur = () => {
+    const tableRef = useRef(table);
+    useEffect(() => {
+        tableRef.current = table;
+    }, [table]);
+
+    const handleBlur = (currentValue: string | number | boolean | null | undefined) => {
         setTimeout(() => {
-            table.options.meta?.updateData(index, id, value);
-        }, 0);
+            tableRef.current.options.meta?.updateData(rowId, id, currentValue);
+        }, 10);
     };
+
+    const debouncedSave = useMemo(
+        () =>
+            debounce((newValue: string | number | boolean | null | undefined) => {
+                tableRef.current.options.meta?.updateData(rowId, id, newValue);
+            }, 1000),
+        [rowId, id]
+    );
+
+    useEffect(() => {
+        return () => debouncedSave.cancel();
+    }, [debouncedSave]);
 
     useEffect(() => {
         setValue(initialValue);
@@ -199,7 +220,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
         if (e.button !== 2 || !(e.currentTarget instanceof HTMLInputElement)) {
             return;
         }
-        
+
         e.preventDefault();
 
         const input = e.currentTarget;
@@ -232,7 +253,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                     onChange={(e) => {
                         const checked = e.target.checked;
                         setValue(checked);
-                        table.options.meta?.updateData(index, id, checked);
+                        tableRef.current.options.meta?.updateData(rowId, id, checked);
                     }}
                     onMouseDown={(e) => e.stopPropagation()}
                     onKeyDown={(e) => handleCellKeyDown(e, table, index, id)}
@@ -266,7 +287,7 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                                 onSelect={(date) => {
                                     const dateStr = date ? date.toISOString() : '';
                                     setValue(dateStr);
-                                    table.options.meta?.updateData(index, id, dateStr);
+                                    tableRef.current.options.meta?.updateData(rowId, id, dateStr);
                                 }}
                             />
                         </Popover.Content>
@@ -291,10 +312,13 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
                 <input
                     type="number"
                     value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''}
-                    onChange={e => setValue(e.target.value)}
-                    onBlur={() => {
+                    onChange={e => {
+                        setValue(e.target.value);
+                        debouncedSave(e.target.value);
+                    }}
+                    onBlur={(e) => {
                         setIsFocused(false);
-                        onBlur();
+                        handleBlur(e.target.value);
                     }}
                     onFocus={() => setIsFocused(true)}
                     onMouseDown={handleMouseDown}
@@ -322,10 +346,13 @@ export default function EditableCell({ getValue, row: { index }, column: { id, c
             )}
             <input
                 value={typeof value === 'string' ? value : ''}
-                onChange={e => setValue(e.target.value)}
-                onBlur={() => {
+                onChange={e => {
+                    setValue(e.target.value);
+                    debouncedSave(e.target.value);
+                }}
+                onBlur={(e) => {
                     setIsFocused(false);
-                    onBlur();
+                    handleBlur(e.target.value);
                 }}
                 onFocus={() => setIsFocused(true)}
                 onMouseDown={handleMouseDown}
