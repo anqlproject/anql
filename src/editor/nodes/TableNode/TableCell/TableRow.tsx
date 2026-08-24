@@ -1,7 +1,6 @@
 import './TableRow.css';
 
 import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import * as Popover from "@radix-ui/react-popover";
 import { flexRender, Table } from "@tanstack/react-table";
@@ -22,6 +21,7 @@ interface DraggableRowProps {
   rowRef: (el: HTMLDivElement | null) => void;
   isDropTarget: boolean;
   suppressMenuClick?: boolean;
+  draggingColumnId?: string | null;
 }
 
 export function DraggableRow({
@@ -33,6 +33,7 @@ export function DraggableRow({
   rowRef,
   isDropTarget,
   suppressMenuClick,
+  draggingColumnId,
 }: DraggableRowProps) {
   const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -41,7 +42,6 @@ export function DraggableRow({
     attributes,
     listeners,
     setNodeRef,
-    transform,
     transition,
     isDragging,
   } = useSortable({
@@ -49,7 +49,6 @@ export function DraggableRow({
   });
 
   const style: CSSProperties = {
-    transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.25 : 1,
     position: "relative",
@@ -128,6 +127,7 @@ export function DraggableRow({
           style={{
             width: cell.column.getSize(),
             flex: `0 0 ${cell.column.getSize()}px`,
+            opacity: draggingColumnId && cell.column.id === draggingColumnId ? 0.35 : undefined,
           }}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}

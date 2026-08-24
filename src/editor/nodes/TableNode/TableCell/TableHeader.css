@@ -90,3 +90,15 @@
 .table-resizer-active {
   background: var(--primary-color);
 }
+
+.table-cell--drop-target::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 2px;
+  height: 100vh;
+  background: var(--primary-color);
+  z-index: var(--z-elevated);
+  pointer-events: none;
+}

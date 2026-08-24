@@ -3,11 +3,11 @@ import './TableCell.css';
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from "@radix-ui/react-popover";
 import { format } from "date-fns";
+import { debounce } from 'lodash-es';
 import { CalendarIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { useTranslation } from 'react-i18next';
-import { debounce } from 'lodash-es';
 
 interface ColumnMeta {
     type?: 'text' | 'number' | 'checkbox' | 'date';
