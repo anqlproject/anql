@@ -272,6 +272,7 @@ export default function Home() {
             selectionMode={selectionMode}
             isSelected={selectedDocuments.has(document.id)}
             onToggleSelection={toggleDocumentSelection}
+            sortBy={sortBy}
           />
         ))}
       </div>

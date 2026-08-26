@@ -22,9 +22,10 @@ interface DocumentItemProps {
   selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelection?: (documentId: string) => void;
+  sortBy?: { field: 'title' | 'created_at' | 'updated_at'; direction: 'asc' | 'desc' };
 }
 
-export default function DocumentItem({ document, formatDate, viewMode, selectionMode = false, isSelected = false, onToggleSelection }: DocumentItemProps) {
+export default function DocumentItem({ document, formatDate, viewMode, selectionMode = false, isSelected = false, onToggleSelection, sortBy }: DocumentItemProps) {
   const { t } = useTranslation();
   const { openEditorWithUpdate } = useFile();
   const { showToast, dismissToast } = useGlobalToast();
@@ -120,6 +121,11 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
     }
   };
 
+  // Determine which date to display based on sort
+  const shouldShowCreatedDate = sortBy?.field === 'created_at';
+  const displayDate = shouldShowCreatedDate ? document.created_at : document.updated_at;
+  const isModifiedDate = !shouldShowCreatedDate;
+
   return (
     <div className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''} ${menuOpen ? 'menu-open' : ''}`} onClick={handleOpen}>
 
@@ -135,12 +141,20 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
 
       <div className="document-card__details">
         <div className="document-card__meta">
-          <Calendar size={12} className="document-card__meta-icon" />
-          <span className="document-card__date" title={new Date(document.created_at).toLocaleString()}>{formatDate(document.created_at)}</span>
-        </div>
-        <div className="document-card__meta">
-          <Clock size={12} className="document-card__meta-icon" />
-          <span className="document-card__date" title={new Date(document.updated_at).toLocaleString()}>{formatDate(document.updated_at)}</span>
+          {isModifiedDate ? (
+            <Clock size={12} className="document-card__meta-icon" />
+          ) : (
+            <Calendar size={12} className="document-card__meta-icon" />
+          )}
+          <span 
+            className="document-card__date" 
+            title={isModifiedDate 
+              ? `Modifié: ${new Date(document.updated_at).toLocaleString()}` 
+              : `Créé: ${new Date(document.created_at).toLocaleString()}`
+            }
+          >
+            {formatDate(displayDate)}
+          </span>
         </div>
       </div>
 

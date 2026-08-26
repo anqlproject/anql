@@ -4,7 +4,7 @@
 
 .document-card {
   cursor: pointer;
-  transition: background-color 0.12s ease;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
@@ -31,18 +31,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 6px;
+}
+
+.document-card__checkbox:hover {
+  background-color: var(--action-hover);
+}
+
+.document-card__checkbox:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .checkbox-icon {
   width: 16px;
   height: 16px;
   color: var(--text-secondary);
-  transition: color 0.12s ease;
+  transition: color 0.2s ease;
 }
 
 .document-card.selected .checkbox-icon {
@@ -139,12 +149,13 @@
   flex-direction: column;
   gap: 10px;
   min-height: 90px;
-  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .document-card--grid:hover {
   background-color: var(--action-hover);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .document-card--grid .document-card__main {
@@ -228,20 +239,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px !important;
-  height: 26px !important;
+  width: 28px !important;
+  height: 28px !important;
   padding: 0 !important;
   border-radius: 6px !important;
   background: transparent !important;
   border: none !important;
   color: var(--text-secondary) !important;
   cursor: pointer;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .document-card__menu-button:hover {
   background-color: var(--action-hover) !important;
   color: var(--text-primary) !important;
+  transform: scale(1.05);
+}
+
+.document-card__menu-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .document-card__menu-icon {
