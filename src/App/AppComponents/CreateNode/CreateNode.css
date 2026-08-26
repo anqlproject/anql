@@ -2,8 +2,8 @@
   position: absolute;
   left: auto;
   top: 0;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   will-change: transform;
   z-index: var(--z-overlay);
   display: flex;
@@ -12,26 +12,52 @@
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  opacity: 0.5;
+  opacity: 0;
   cursor: pointer;
   padding: 0;
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.25s ease-out forwards;
 }
 
-.icon-create:hover .icon-create-wrapper {
-  border: 1px solid var(--primary-color);
-  border-radius: 50%;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 0.5;
+    transform: scale(1);
+  }
 }
 
 .icon-create:hover {
   opacity: 1;
   color: var(--text-primary);
-  transform: scale(1.1);
+  background: var(--action-hover);
+  transform: scale(1.05);
+}
+
+.icon-create:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  opacity: 1;
+  background: var(--action-hover);
 }
 
 .icon-create:active {
-  transform: scale(0.95);
+  opacity: 1;
+  background: var(--action-active);
+  transform: scale(0.98);
+}
+
+.icon-create-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.icon-create:hover .icon-create-wrapper {
+  transform: scale(1.1);
 }
