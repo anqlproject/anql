@@ -28,7 +28,8 @@
   },
   "include": [
     "src",
-    "docs"
+    "docs",
+    "tests"
   ],
   "references": [
     {
