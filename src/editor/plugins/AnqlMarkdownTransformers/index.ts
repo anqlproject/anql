@@ -425,7 +425,9 @@ export const ANQL_MARKDOWN_TRANSFORMERS: Array<Transformer> = [
   TABLE,
   ...MULTILINE_ELEMENT_TRANSFORMERS,
   ...TEXT_FORMAT_TRANSFORMERS,
-  ...TEXT_MATCH_TRANSFORMERS,
+  // Exclude the native Lexical LINK transformer (depends on @lexical/link's _LinkNode with type 'link')
+  // because we handle all link creation via our own 'anql-link' node.
+  ...TEXT_MATCH_TRANSFORMERS.filter((t) => !t.dependencies?.some((d) => (d as any).getType?.() === 'link')),
 ];
 
 export const anqlMarkdownTransformersGetTransformers = (useBrackets: boolean): Array<Transformer> => {

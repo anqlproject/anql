@@ -125,12 +125,18 @@ export class LinkNode extends DecoratorNode<JSX.Element> {
   static importDOM(): DOMConversionMap | null {
     return {
       a: (domNode: HTMLElement) => {
-        if (!domNode.hasAttribute('data-lexical-link')) {
-          return null;
+        if (domNode.hasAttribute('data-lexical-link')) {
+          // Our own serialized link — full fidelity conversion
+          return {
+            conversion: convertLinkElement,
+            priority: 1,
+          };
         }
+        // Any other <a> tag pasted from external sources (chatbots, web pages…)
+        // → create an external link so @lexical/link's _LinkNode is never needed
         return {
-          conversion: convertLinkElement,
-          priority: 1,
+          conversion: convertExternalAnchor,
+          priority: 0,
         };
       },
     };
@@ -166,6 +172,15 @@ function convertLinkElement(domNode: HTMLElement): DOMConversionOutput {
   const node = $createLinkNode(url, linkType, targetId, name);
   return { node };
 }
+
+/** Converts any plain <a> tag (e.g. from chatbots or web pages) to an external link node. */
+function convertExternalAnchor(domNode: HTMLElement): DOMConversionOutput {
+  const url = domNode.getAttribute('href') || '';
+  const name = domNode.textContent?.trim() || url;
+  const node = $createLinkNode(url, 'external', '', name);
+  return { node };
+}
+
 
 declare module 'lexical' {
   interface LexicalTheme {
