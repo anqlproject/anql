@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.3.0-blue" style="pointer-events: none;" />
+  <img alt="Version" src="https://img.shields.io/badge/version-0.3.1-blue" style="pointer-events: none;" />
   <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange" style="pointer-events: none;" />
   <img alt="Platform" src="https://img.shields.io/badge/platform-macOS-lightgrey" style="pointer-events: none;" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-green" style="pointer-events: none;" />
@@ -144,7 +144,7 @@ Import Markdown and ANQL files. Export in ANQL format.
 
 ANQL is currently available for **macOS**.
 
-👉 [Download the latest release (v0.3.0)](https://github.com/anqlproject/anql/releases/tag/0.3.0)
+👉 [Download the latest release (v0.3.1)](https://github.com/anqlproject/anql/releases/tag/0.3.1)
 
 Once installed, open the [**Quick Start guide**](QuickStart.md) to learn the basics in a few minutes — smart block creation, live math, search, and more.
 

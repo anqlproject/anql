@@ -1,3 +1,28 @@
+# ANQL v0.3.1 Release Notes
+
+## What's New
+
+### Table Improvements
+- Centralized column IDs and row ID generation for better data consistency
+- Fixed autosave problems in table cells
+- Added debounced autosave to prevent performance issues
+- Migrated data mutations to use stable rowId instead of index
+- Simplified dragoverlay for better drag-and-drop experience
+
+### Editor Fixes
+- Resolved LinkNode type conflict with @lexical/link
+- Prevented aggressive editor reset on markdown paste
+- Modernized math result typography and visibility
+
+### UX/UI Improvements
+- Improved CreateNode button with better accessibility and modern design
+- Smart date display in HomePage - shows relevant date based on current sort
+- Enhanced button interactions with proper focus states
+- Better document card hover effects and transitions
+- Improved accessibility with larger touch targets and keyboard navigation
+
+---
+
 # ANQL v0.3.0 Release Notes
 
 We're excited to announce v0.3.0 of ANQL, featuring major enhancements to the math system with table integration, improved markdown support, and comprehensive documentation!
