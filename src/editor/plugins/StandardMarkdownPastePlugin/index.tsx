@@ -15,12 +15,10 @@
  *      document content that exists before and after the cursor.
  */
 
-import { $convertFromMarkdownString } from '@lexical/markdown';
+import { $convertFromMarkdownString, $generateNodesFromMarkdownString } from '@lexical/markdown';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
-  $getRoot,
   $getSelection,
-  $isElementNode,
   $isRangeSelection,
   COMMAND_PRIORITY_NORMAL,
   PASTE_COMMAND,
@@ -97,7 +95,6 @@ function standardMarkdownPastePluginHtmlAlreadyRendered(html: string): boolean {
  * then re-appended remain valid in Lexical's nodeMap — this is safe.
  */
 function standardMarkdownPastePluginInsertMarkdownAtCursor(markdown: string): void {
-  const root = $getRoot();
   const sel = $getSelection();
 
   // No active selection — just replace the whole document.
@@ -106,35 +103,11 @@ function standardMarkdownPastePluginInsertMarkdownAtCursor(markdown: string): vo
     return;
   }
 
-  // Remove selected text (if any).
-  sel.removeText();
+  // Generate nodes from markdown string without clearing the root
+  const nodes = $generateNodesFromMarkdownString(markdown, PASTE_TRANSFORMERS);
 
-  // Locate the top-level block node where the cursor lives.
-  const anchorNode = sel.anchor.getNode();
-  const topLevel = $isElementNode(anchorNode)
-    ? anchorNode
-    : anchorNode.getTopLevelElement();
-
-  const allChildren = root.getChildren();
-  const splitIdx = topLevel ? allChildren.indexOf(topLevel) : allChildren.length;
-
-  // Nodes to preserve on each side of the insertion point.
-  const nodesBefore = allChildren.slice(0, splitIdx);
-  const nodesAfter  = allChildren.slice(splitIdx + 1);
-
-  // Keep the current paragraph only if it is not empty
-  // (empty → it will be replaced by the markdown content).
-  if (topLevel && !topLevel.isEmpty()) {
-    nodesBefore.push(topLevel);
-  }
-
-  // Convert markdown → replaces root content.
-  $convertFromMarkdownString(markdown, PASTE_TRANSFORMERS);
-  const markdownNodes = root.getChildren();
-
-  // Rebuild the document.
-  root.clear();
-  [...nodesBefore, ...markdownNodes, ...nodesAfter].forEach((n) => root.append(n));
+  // Insert the generated nodes at the current selection
+  sel.insertNodes(nodes);
 }
 
 // ---------------------------------------------------------------------------
@@ -153,7 +126,7 @@ export default function StandardMarkdownPastePlugin(): null {
           (window as unknown as { clipboardData: DataTransfer }).clipboardData;
         if (!clipboard) return false;
 
-        const html  = clipboard.getData('text/html')  || '';
+        const html = clipboard.getData('text/html') || '';
         const plain = clipboard.getData('text/plain') || '';
 
         if (!plain) return false;
