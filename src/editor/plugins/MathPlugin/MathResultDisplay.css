@@ -8,7 +8,9 @@
 }
 
 .math-react-overlay__text {
+  font-family: var(--font-mono, monospace);
   font-size: var(--text-sm);
+  font-weight: var(--font-medium);
   white-space: normal;
   word-break: break-all;
   display: flex;
@@ -16,6 +18,20 @@
   gap: var(--text-2xs);
   pointer-events: auto;
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.math-react-overlay__text svg {
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.math-react-overlay__text--success {
+  color: var(--text-secondary);
+}
+
+.math-react-overlay__text--success:hover {
+  color: var(--text-primary);
 }
 
 .math-react-overlay__text--error {
