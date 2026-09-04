@@ -8,7 +8,7 @@ import { GripHorizontal } from "lucide-react";
 import { CSSProperties, useRef } from "react";
 
 import { ColumnMenu } from "../TableMenu/ColumnMenu";
-import { TableRowData } from "../TableNode";
+import { ColumnDataType, TableRowData } from "../TableNode";
 import { toColDndId } from "../tableUtils";
 import EditableCell from "./TableCell";
 
@@ -55,7 +55,7 @@ export default function DraggableHeader({
     zIndex: isDragging ? 2 : undefined,
   };
 
-  const type = header.column.columnDef.meta?.type || "text";
+  const type = (header.column.columnDef.meta?.type as ColumnDataType) || "text";
   const headerName = header.column.columnDef.header as string;
 
   const openMenuIfClick = (clientX: number, clientY: number) => {

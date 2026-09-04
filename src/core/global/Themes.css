@@ -26,6 +26,9 @@
   --gradient-primary: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
   --gradient-primary-hover: linear-gradient(135deg, #059669 0%, #0891b2 100%);
   --gradient-primary-color: #10b981;
+
+  --search-match-bg: rgba(255, 212, 0, 0.45);
+  --search-match-active-bg: rgba(255, 140, 0, 0.6);
 }
 
 :root.dark {
@@ -55,4 +58,7 @@
   --gradient-primary: linear-gradient(135deg, #059669 0%, #0891b2 100%);
   --gradient-primary-hover: linear-gradient(135deg, #047857 0%, #0e7490 100%);
   --gradient-primary-color: #059669;
+
+  --search-match-bg: rgba(255, 212, 0, 0.3);
+  --search-match-active-bg: rgba(255, 140, 0, 0.5);
 }

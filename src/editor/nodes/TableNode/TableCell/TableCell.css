@@ -64,14 +64,13 @@
   font-size: 14px;
   line-height: 1.4;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: default;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
   border-radius: 2px;
   outline: none;
   transition: background-color 100ms;
-  user-select: none;
+  user-select: text;
 }
 
 .table-cell-display:hover {
@@ -84,12 +83,12 @@
 }
 
 .table-search-match {
-  background: rgba(255, 212, 0, 0.45);
+  background: var(--search-match-bg, rgba(255, 212, 0, 0.45));
   border-radius: 2px;
 }
 
 .table-search-match-active {
-  background: rgba(255, 140, 0, 0.6);
+  background: var(--search-match-active-bg, rgba(255, 140, 0, 0.6));
   border-radius: 2px;
 }
 

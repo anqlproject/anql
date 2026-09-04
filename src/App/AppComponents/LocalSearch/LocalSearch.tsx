@@ -3,6 +3,7 @@ import './LocalSearch.css';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -17,9 +18,9 @@ interface SearchPluginProps {
 export default function LocalSearch({ onClose }: SearchPluginProps) {
   const { t } = useTranslation();
   const { isMac } = useGlobalStore(useShallow((state) => ({ isMac: state.isMac })));
-  
+
   const shortcutText = isMac ? '⌘F' : 'Ctrl+F';
-  
+
   const {
     query,
     setQuery,
@@ -31,17 +32,18 @@ export default function LocalSearch({ onClose }: SearchPluginProps) {
   } = useSearch();
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    // Focus input on mount with a small delay to ensure menu is closed
-    const timeoutId = setTimeout(() => {
+    editor.blur();
+    const rafId = requestAnimationFrame(() => {
       inputRef.current?.focus();
-    }, 50);
+    });
     return () => {
-      clearTimeout(timeoutId);
+      cancelAnimationFrame(rafId);
       closeSearch();
     };
-  }, [closeSearch]);
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -54,9 +56,8 @@ export default function LocalSearch({ onClose }: SearchPluginProps) {
       }
     }
   };
-  const [editor] = useLexicalComposerContext();
 
-  return (
+  return createPortal(
     <div
       className="search-plugin-container"
       onClick={(e) => e.stopPropagation()}
@@ -94,6 +95,7 @@ export default function LocalSearch({ onClose }: SearchPluginProps) {
           <X size={16} />
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

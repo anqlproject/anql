@@ -33,7 +33,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { DIMENSIONS, ICON_SIZES } from "@/core/global/defaultValues";
@@ -49,7 +48,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
   const { handleNewFile, openEditorWithUpdate } = useFile();
   const { getFileFromDocument } = useSettingsFile();
 
-  const { isMac, config, patchConfig } = useGlobalStore(useShallow((state) => ({
+  const { config, patchConfig } = useGlobalStore(useShallow((state) => ({
     isMac: state.isMac,
     config: state.config,
     patchConfig: state.patchConfig
@@ -229,16 +228,6 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
 
   return (
     <>
-      <SidebarTrigger
-        size="lg"
-        className="sidebar-trigger"
-        style={{
-          left: isMac ? "90px" : "1rem",
-        }}
-        onClick={() => {
-          editor.blur();
-        }}
-      />
       <Sidebar
         variant="inset"
         collapsible={

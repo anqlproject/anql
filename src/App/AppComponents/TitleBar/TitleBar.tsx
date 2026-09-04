@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { DocumentMenu } from "@/App/AppComponents/DocumentMenu/DocumentMenu";
 import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
 import { Dialog } from "@/components/custom/Dialog/Dialog";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { DIMENSIONS } from "@/core/global/defaultValues";
 
 export default function TitleBar(): JSX.Element {
@@ -15,6 +17,7 @@ export default function TitleBar(): JSX.Element {
   const appWindow = getCurrentWindow();
   const [openExitDialog, setOpenExitDialog] = useState(false);
   const { setExitApp } = useGlobalShortcut();
+  const isMac = useGlobalStore((state) => state.isMac);
 
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault();
@@ -48,6 +51,17 @@ export default function TitleBar(): JSX.Element {
           editor.blur();
         }}
       >
+        <SidebarTrigger
+          size="lg"
+          className="sidebar-trigger"
+          style={{
+            marginLeft: isMac ? "90px" : "1rem",
+            marginRight: "0.5rem"
+          }}
+          onClick={() => {
+            editor.blur();
+          }}
+        />
         <DocumentMenu />
       </div>
 
