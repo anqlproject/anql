@@ -494,6 +494,10 @@ export function TableComponent({
     if (!cell) return;
 
     e.preventDefault();
+
+    // Disable context menu when not in edit mode
+    const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+    if (!isInput) return;
     const input =
       target.tagName === "INPUT" || target.tagName === "TEXTAREA"
         ? (target as HTMLInputElement | HTMLTextAreaElement)
