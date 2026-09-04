@@ -280,9 +280,15 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
             return;
         }
 
+        const input = e.currentTarget;
+
+        // If there is an active text selection, preserve it instead of moving the caret
+        if (input.selectionStart !== null && input.selectionEnd !== null && input.selectionStart !== input.selectionEnd) {
+            return;
+        }
+
         e.preventDefault();
 
-        const input = e.currentTarget;
         let offset: number | undefined;
 
         const doc = document as Document & {
