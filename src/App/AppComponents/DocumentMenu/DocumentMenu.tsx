@@ -82,9 +82,9 @@ export const DocumentMenu = () => {
       icon: <SearchIcon size={ICON_SIZE} />,
       title: t("DOCUMENT_MENU.searchInDocument") as string,
       onClick: () => {
-        openLocalSearch();
         setTimeout(() => {
           setIsMenuOpen(false);
+          openLocalSearch();
         }, 100);
       },
       shortcut: isMac ? "⌘F" : "Ctrl+F",
