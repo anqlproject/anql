@@ -88,6 +88,7 @@ function handleCellKeyDown(
     table: Table,
     rowIndex: number,
     columnId: string,
+    onExitEdit?: () => void,
 ) {
     // Allow undo (Ctrl/Cmd+Z), redo (Ctrl/Cmd+Y / Ctrl/Cmd+Shift+Z), Escape,
     // and Select All (Ctrl/Cmd+A) to bubble up to Lexical.
@@ -95,8 +96,14 @@ function handleCellKeyDown(
         (e.key === 'z' || e.key === 'Z' || e.key === 'y' || e.key === 'Y') &&
         (e.ctrlKey || e.metaKey);
     const isSelectAll = (e.key === 'a' || e.key === 'A') && (e.ctrlKey || e.metaKey);
-    if (isUndoRedo || isSelectAll || e.key === 'Escape') {
+
+    if (isUndoRedo || isSelectAll) {
         return; // let the event bubble
+    }
+
+    if (e.key === 'Escape') {
+        onExitEdit?.();
+        return;
     }
 
     e.stopPropagation();
@@ -108,6 +115,7 @@ function handleCellKeyDown(
 
     if (e.key === "Tab") {
         e.preventDefault();
+        onExitEdit?.();
         if (e.shiftKey) {
             table.options.meta?.goToPreviousCell?.(rowIndex, columnIndex);
         } else {
@@ -118,15 +126,73 @@ function handleCellKeyDown(
 
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
+        onExitEdit?.();
         table.options.meta?.goToCellBelow?.(rowIndex, columnIndex);
         return;
     }
 
     if (e.key === "Enter" && e.shiftKey) {
         e.preventDefault();
+        onExitEdit?.();
         table.options.meta?.goToCellAbove?.(rowIndex, columnIndex);
     }
 }
+
+// ── Display cell (div shown when not editing) ──────────────────────────────
+
+interface DisplayCellProps {
+    value: unknown;
+    type: 'text' | 'number';
+    searchQuery: string;
+    isActiveMatch: boolean;
+    isEditable: boolean;
+    onStartEdit: () => void;
+    onKeyDown: (e: React.KeyboardEvent) => void;
+}
+
+function DisplayCell({ value, searchQuery, isActiveMatch, isEditable, onStartEdit, onKeyDown }: DisplayCellProps) {
+    const displayText = typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+    const segments = useMemo(() => getHighlightedSegments(value, searchQuery), [value, searchQuery]);
+    const hasMatch = segments.some(s => s.isMatch);
+
+    const handleClick = () => {
+        if (isEditable) onStartEdit();
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if ((e.key === 'Enter' || e.key === ' ') && isEditable) {
+            e.preventDefault();
+            onStartEdit();
+            return;
+        }
+        onKeyDown(e);
+    };
+
+    return (
+        <div
+            className="table-cell-display"
+            role="gridcell"
+            tabIndex={isEditable ? 0 : -1}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            title={displayText}
+        >
+            {searchQuery && hasMatch
+                ? segments.map((segment, i) => (
+                    <span
+                        key={i}
+                        className={segment.isMatch ? (isActiveMatch ? 'table-search-match-active' : 'table-search-match') : undefined}
+                    >
+                        {segment.text}
+                    </span>
+                ))
+                : displayText
+            }
+        </div>
+    );
+}
+
+// ── Main EditableCell ──────────────────────────────────────────────────────
 
 export default function EditableCell({ getValue, row, column: { id, columnDef }, table }: EditableCellProps) {
     const index = row.index;
@@ -135,8 +201,8 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     const isEditable = useLexicalEditable();
     const initialValue = getValue();
     const [value, setValue] = useState(initialValue);
+    const [isEditing, setIsEditing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isFocused, setIsFocused] = useState(false);
     const [isActiveMatch, setIsActiveMatch] = useState(false);
     const type = columnDef.meta?.type || 'text';
 
@@ -146,6 +212,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     }, [table]);
 
     const handleBlur = (currentValue: string | number | boolean | null | undefined) => {
+        setIsEditing(false);
         setTimeout(() => {
             tableRef.current.options.meta?.updateData(rowId, id, currentValue);
         }, 10);
@@ -206,24 +273,22 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
         return () => observer.disconnect();
     }, [searchQuery, index, id]);
 
-    const highlightedSegments = useMemo(() => getHighlightedSegments(value, searchQuery), [value, searchQuery]);
-    const shouldShowHighlightOverlay = Boolean(searchQuery) && !isFocused && (type === 'text' || type === 'number') && highlightedSegments.some(segment => segment.isMatch);
-
     const handleMouseDown = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-
-        // Force focus on left click
-        if (e.button === 0 && e.currentTarget instanceof HTMLInputElement) {
-            e.currentTarget.focus();
-        }
 
         if (e.button !== 2 || !(e.currentTarget instanceof HTMLInputElement)) {
             return;
         }
 
+        const input = e.currentTarget;
+
+        // If there is an active text selection, preserve it instead of moving the caret
+        if (input.selectionStart !== null && input.selectionEnd !== null && input.selectionStart !== input.selectionEnd) {
+            return;
+        }
+
         e.preventDefault();
 
-        const input = e.currentTarget;
         let offset: number | undefined;
 
         const doc = document as Document & {
@@ -244,6 +309,9 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
         }
     };
 
+    const exitEdit = () => setIsEditing(false);
+
+    // ── Checkbox ────────────────────────────────────────────────────────────
     if (type === 'checkbox') {
         return (
             <div className="table-checkbox-wrapper">
@@ -264,6 +332,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
         );
     }
 
+    // ── Date ────────────────────────────────────────────────────────────────
     if (type === 'date') {
         return (
             <div className="table-date-wrapper">
@@ -297,69 +366,74 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
         );
     }
 
+    // ── Number ──────────────────────────────────────────────────────────────
     if (type === 'number') {
+        if (!isEditing) {
+            return (
+                <DisplayCell
+                    value={value}
+                    type="number"
+                    searchQuery={searchQuery}
+                    isActiveMatch={isActiveMatch}
+                    isEditable={isEditable}
+                    onStartEdit={() => setIsEditing(true)}
+                    onKeyDown={(e) => handleCellKeyDown(e, table, index, id, exitEdit)}
+                />
+            );
+        }
+
         return (
             <div className="table-input-wrapper">
-                {shouldShowHighlightOverlay && (
-                    <div className="table-search-highlight-overlay" aria-hidden="true">
-                        {highlightedSegments.map((segment, segmentIndex) => (
-                            <span key={`${segment.text}-${segmentIndex}`} className={segment.isMatch ? (isActiveMatch ? 'table-search-match-active' : 'table-search-match') : undefined}>
-                                {segment.text}
-                            </span>
-                        ))}
-                    </div>
-                )}
                 <input
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
+                    autoFocus
                     type="number"
                     value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''}
                     onChange={e => {
                         setValue(e.target.value);
                         debouncedSave(e.target.value);
                     }}
-                    onBlur={(e) => {
-                        setIsFocused(false);
-                        handleBlur(e.target.value);
-                    }}
-                    onFocus={() => setIsFocused(true)}
+                    onBlur={(e) => handleBlur(e.target.value)}
                     onMouseDown={handleMouseDown}
-                    onKeyDown={(e) => handleCellKeyDown(e, table, index, id)}
+                    onKeyDown={(e) => handleCellKeyDown(e, table, index, id, exitEdit)}
                     className="table-input"
-                    placeholder={isFocused ? String(t('TABLE.placeholderNumber')) : ''}
-                    style={shouldShowHighlightOverlay ? { color: 'transparent', caretColor: 'var(--text-primary)' } : undefined}
+                    placeholder={String(t('TABLE.placeholderNumber'))}
                     disabled={!isEditable}
                 />
             </div>
         );
     }
 
+    // ── Text (default) ──────────────────────────────────────────────────────
+    if (!isEditing) {
+        return (
+            <DisplayCell
+                value={value}
+                type="text"
+                searchQuery={searchQuery}
+                isActiveMatch={isActiveMatch}
+                isEditable={isEditable}
+                onStartEdit={() => setIsEditing(true)}
+                onKeyDown={(e) => handleCellKeyDown(e, table, index, id, exitEdit)}
+            />
+        );
+    }
 
     return (
         <div className="table-input-wrapper">
-            {shouldShowHighlightOverlay && (
-                <div className="table-search-highlight-overlay" aria-hidden="true">
-                    {highlightedSegments.map((segment, segmentIndex) => (
-                        <span key={`${segment.text}-${segmentIndex}`} className={segment.isMatch ? (isActiveMatch ? 'table-search-match-active' : 'table-search-match') : undefined}>
-                            {segment.text}
-                        </span>
-                    ))}
-                </div>
-            )}
             <input
+                // eslint-disable-next-line jsx-a11y/no-autofocus
+                autoFocus
                 value={typeof value === 'string' ? value : ''}
                 onChange={e => {
                     setValue(e.target.value);
                     debouncedSave(e.target.value);
                 }}
-                onBlur={(e) => {
-                    setIsFocused(false);
-                    handleBlur(e.target.value);
-                }}
-                onFocus={() => setIsFocused(true)}
+                onBlur={(e) => handleBlur(e.target.value)}
                 onMouseDown={handleMouseDown}
-                onKeyDown={(e) => handleCellKeyDown(e, table, index, id)}
+                onKeyDown={(e) => handleCellKeyDown(e, table, index, id, exitEdit)}
                 className="table-input"
-                placeholder={isFocused ? String(t('TABLE.placeholderText')) : ''}
-                style={shouldShowHighlightOverlay ? { color: 'transparent', caretColor: 'var(--text-primary)' } : undefined}
+                placeholder={String(t('TABLE.placeholderText'))}
                 disabled={!isEditable}
             />
         </div>

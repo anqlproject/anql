@@ -52,7 +52,7 @@ export default function DraggableHeader({
     opacity: isDragging ? 0.35 : 1,
     transition,
     position: "relative",
-    zIndex: isDragging ? 2 : 1,
+    zIndex: isDragging ? 2 : undefined,
   };
 
   const type = header.column.columnDef.meta?.type || "text";
