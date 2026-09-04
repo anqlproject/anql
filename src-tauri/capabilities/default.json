@@ -26,6 +26,8 @@
     "fs:allow-read-dir",
     "os:allow-platform",
     "os:allow-version",
+    "updater:default",
+    "process:allow-restart",
     "os:allow-arch",
     "os:allow-family",
     {

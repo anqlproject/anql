@@ -28,6 +28,7 @@ import GlobalShortcutListener from "./GlobalShortcut/GlobalShortcutListener";
 import { useToastContainer } from "./hooks/useGlobalToast";
 import { AppInitializer } from "./Init/AppInitializer";
 import { useGlobalStore } from "./store/useGlobalStore";
+import UpdateDialog from "./AppComponents/UpdateDialog/UpdateDialog";
 
 export default function App(): JSX.Element {
   const app = useMemo(
@@ -55,6 +56,7 @@ export default function App(): JSX.Element {
 
   return (
     <AppInitializer>
+      <UpdateDialog />
       <GlobalShortcut />
       <GlobalShortcutListener />
       <MathVariablesProvider>
