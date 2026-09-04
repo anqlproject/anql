@@ -1,0 +1,16 @@
+.update-dialog-overlay {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.update-dialog-content {
+  width: 320px;
+  pointer-events: auto;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+}
