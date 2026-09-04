@@ -304,6 +304,12 @@ export function useSearch() {
           CSS.highlights?.delete('search-active');
         }
       }
+
+      delete document.body.dataset.searchQuery;
+      delete document.body.dataset.searchActiveIndex;
+      delete document.body.dataset.searchActiveNodeKey;
+      delete document.body.dataset.searchActiveRowIndex;
+      delete document.body.dataset.searchActiveColumnId;
     };
   }, []);
 
