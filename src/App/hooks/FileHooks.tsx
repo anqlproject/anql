@@ -281,7 +281,7 @@ export function useFile() {
 
     setCurrentDocument(newDocumentItem);
     navigateTo("editor", newDocumentItem);
-    
+
     navigatingEditors.add(editor);
     try {
       loadEditorState(ees);

@@ -61,8 +61,11 @@ export default function App(): JSX.Element {
       <GlobalShortcutListener />
       <MathVariablesProvider>
         <LexicalExtensionComposer extension={app} contentEditable={null}>
-          <TitleBar />
-          <SidebarProvider ref={appRef}>
+          <SidebarProvider 
+            ref={appRef} 
+            style={{ paddingTop: DIMENSIONS.titlebarHeight }}
+          >
+            <TitleBar />
             <LeftPanels onOpenTrash={() => setIsTrashOpen(true)} />
             <div
               className={`main-container ${config.sidebar.variant === 'floating' ? 'floating-sidebar' : ''}`}
@@ -86,7 +89,6 @@ export default function App(): JSX.Element {
                 onClose={() => setIsTrashOpen(false)}
               />
             )}
-
           </SidebarProvider>
         </LexicalExtensionComposer>
       </MathVariablesProvider>
