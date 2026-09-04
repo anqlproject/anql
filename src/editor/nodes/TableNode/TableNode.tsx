@@ -27,11 +27,13 @@ const escapeMap = {
   '"': '&quot;'
 };
 
+export type ColumnDataType = "text" | "checkbox" | "date" | "number";
+
 export interface TableColumn {
   header: string;
   id: string;
   accessorKey?: string;
-  meta?: { type: string };
+  meta?: { type: ColumnDataType };
   size?: number;
 }
 

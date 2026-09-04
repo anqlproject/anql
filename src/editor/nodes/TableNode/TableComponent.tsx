@@ -47,7 +47,7 @@ import DraggableHeader from "./TableCell/TableHeader";
 import { DraggableRow } from "./TableCell/TableRow";
 import { CellMenu } from "./TableMenu/CellMenu";
 import { $isTableNode } from "./TableNode";
-import { TableColumn, TableRowData } from "./TableNode";
+import { ColumnDataType, TableColumn, TableRowData } from "./TableNode";
 import { TableTitle } from "./TableTitle";
 import {
   ensureRowIds,
@@ -65,14 +65,14 @@ type TableRowWithId = TableRowData & { _rowId: string };
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
-    type?: "text" | "checkbox" | "date" | "number";
+    type?: ColumnDataType;
   }
 
   interface TableMeta<TData extends RowData> {
     updateData: (rowId: string, columnId: string, value: unknown) => void;
     updateColumnType: (
       columnId: string,
-      type: "text" | "checkbox" | "date" | "number",
+      type: ColumnDataType,
     ) => void;
     updateColumnHeader: (columnId: string, headerName: string) => void;
     deleteColumn: (columnId: string) => void;
@@ -94,7 +94,7 @@ declare module "@tanstack/react-table" {
 interface TableComponentProps {
   nodeKey: NodeKey;
   data: (TableRowData & { _rowId?: string })[];
-  columns: (TableColumn & { size?: number; meta?: { type?: string } })[];
+  columns: (TableColumn & { size?: number; meta?: { type?: ColumnDataType } })[];
   tableName: string;
   format: ElementFormatType | null;
   className: Readonly<{ base: string; focus: string }>;

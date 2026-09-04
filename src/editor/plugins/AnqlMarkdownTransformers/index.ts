@@ -386,7 +386,7 @@ export const TABLE: MultilineElementTransformer = {
     const columns = headerCells.map((header, index) => ({
       header,
       id: `col_${index}`,
-      meta: { type: "text" },
+      meta: { type: "text" as const },
     }));
 
     const data: Record<string, string>[] = [];
