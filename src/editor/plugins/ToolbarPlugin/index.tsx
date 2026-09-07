@@ -8,7 +8,9 @@ import { $getSelection, $isRangeSelection, $setSelection, BaseSelection, FORMAT_
 import { Bold, CaseLower, CaseSensitive, CaseUpper, ChevronDown, Eraser, Highlighter, Italic, PaintBucket, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useShallow } from 'zustand/react/shallow';
 
+import { useGlobalStore } from '@/App/store/useGlobalStore';
 import { Popover } from '@/components/custom/Popover/Popover';
 import { Button } from '@/components/ui/button';
 import { clearFormatting as clearFormattingUtil } from '@/editor/LexicalUtils/formatUtils';
@@ -170,6 +172,9 @@ interface ToolbarPluginProps {
 
 export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPluginProps) {
   const [editor] = useLexicalComposerContext();
+  const { isContextMenuOpen } = useGlobalStore(
+    useShallow((state) => ({ isContextMenuOpen: state.isContextMenuOpen }))
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [virtualRef, setVirtualRef] = useState<VirtualElement | null>(null);
   const isPointerDownRef = useRef(false);
@@ -295,8 +300,9 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       
       const isInsideToolbar = toolbarRef.current && toolbarRef.current.contains(target);
       const isInsideDropdown = target.closest('.toolbar-dropdown-container');
+      const isInsideContextMenu = target.closest('.menu-container') !== null;
 
-      if (!isInsideToolbar) {
+      if (!isInsideToolbar && !isInsideContextMenu) {
         if (!isDropdownOpenRef.current) {
           setIsOpen(false);
         } else {
@@ -392,7 +398,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
     <>
       <Popover
         virtualReference={virtualRef}
-        isOpen={isOpen}
+        isOpen={isOpen && !isContextMenuOpen}
         onClose={() => setIsOpen(false)}
         placement="top"
         offsetDistance={10}
