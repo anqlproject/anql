@@ -55,10 +55,12 @@ const PASTE_TRANSFORMERS = ANQL_MARKDOWN_TRANSFORMERS.filter((t) => !EXCLUDED.ha
 
 /** Markdown block-level patterns that indicate *raw* (un-rendered) content. */
 const RAW_MD_PATTERNS = [
-  /^#{1,6}s/m,   // headings
-  /^>s/m,        // blockquotes
-  /^|.+|/m,    // tables
+  /^#{1,6}\s/m,   // headings
+  /^>\s/m,        // blockquotes
+  /^\|.+\|/m,    // tables
   /^```/m,        // fenced code blocks
+  /^[-*+]\s/m,    // unordered lists
+  /^\d+\.\s/m,    // ordered lists
 ];
 
 function standardMarkdownPastePluginHasRawMarkdown(plain: string): boolean {

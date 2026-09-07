@@ -51,6 +51,7 @@ export function handleCopy(editor: LexicalEditor) {
         }
       }
     } else {
+      editor.focus();
       editor.dispatchCommand(COPY_COMMAND, null);
     }
   };
@@ -82,6 +83,7 @@ export function handleCut(editor: LexicalEditor) {
         }
       }
     } else {
+      editor.focus();
       editor.dispatchCommand(CUT_COMMAND, null);
     }
   };
@@ -140,8 +142,11 @@ export function handlePaste(editor: LexicalEditor) {
           }
 
           const event = new ClipboardEvent("paste", {
-            clipboardData: data,
+            bubbles: true,
+            cancelable: true,
           });
+          Object.defineProperty(event, "clipboardData", { value: data });
+          editor.focus();
           editor.dispatchCommand(PASTE_COMMAND, event);
         } catch (error) {
           console.error("Failed to read clipboard with clipboard-x:", error);
@@ -159,8 +164,11 @@ export function handlePaste(editor: LexicalEditor) {
           }
 
           const event = new ClipboardEvent("paste", {
-            clipboardData: data,
+            bubbles: true,
+            cancelable: true,
           });
+          Object.defineProperty(event, "clipboardData", { value: data });
+          editor.focus();
           editor.dispatchCommand(PASTE_COMMAND, event);
         }
       }
