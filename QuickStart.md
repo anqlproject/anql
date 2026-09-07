@@ -13,35 +13,50 @@
 
 ## Getting started
 
-ANQL is a note-taking workspace where writing and calculating happen in the same place. Here's how to get up and running in a few steps.
+ANQL is a fast, distraction-free workspace for your notes. Here's how to master the flow in just a few steps.
 
 ### 1. Create your first document
 
-Click **New Document** in sidebar or use **⌘N** shortcut. Each document is stored locally on your machine — no account needed.
+Click **New Document** in the sidebar or use the **⌘N** shortcut. Each document is stored locally on your machine — instantly accessible, with no account needed.
 
 ### 2. Write and format
 
-Start typing. ANQL uses a block-based editor: every paragraph, heading, list, or math expression is its own block. You can:
+Start typing. ANQL uses a fluid block-based editor. You can:
 
-- Format text with **bold**, *italic*, `code`, and more
-- Add headings, bullet lists, numbered lists, task lists, tables, and code blocks
-- Drag any block to reorder it
+- Format text seamlessly with standard Markdown: `#` for headings, `-` for lists, `>` for blockquotes.
+- Select any text to reveal the **floating toolbar** for quick formatting (bold, italic, links) without leaving the keyboard flow.
+- Drag any block's handle to easily reorder your content.
 
-### 3. Create blocks with Smart Creation
+### 3. Smart Creation
 
-On any **new empty line**, start typing a keyword and press `TAB` or `↵` to instantly insert a block. No menus, no clicks.
+Don't waste time hunting for menus. On any **new empty line**, just start typing a keyword and press `TAB` or `↵` to instantly transform the block.
 
 ```
-type "math"  → TAB  ⇒  inserts a math block
-type "table" → TAB  ⇒  inserts a table
 type "h2"    → TAB  ⇒  inserts a Heading 2
+type "table" → TAB  ⇒  inserts a table
+type "code"  → TAB  ⇒  inserts a code block
 ```
 
 > See the [full keyword list](#smart-creation-keywords) at the bottom of this page.
 
-### 4. Do live math
+### 4. Lightning Search
 
-In a **Math block**, type any expression and see the result instantly:
+Never lose a thought.
+- **Local search (`⌘ F`)**: Find text within the current document.
+- **Global search (`⌘ G`)**: Search across your entire workspace instantly.
+
+### 5. Transform a block
+
+Changed your mind? Click a block's menu (or use the drag handle) and select **Transform** to switch a paragraph into a heading, or a list into a task list, without losing any content.
+
+---
+
+## 🪄 Discover Hidden Powers (Math & Variables)
+
+ANQL is simple by design, but hides powerful tools for when you need them. 
+If you ever need to calculate something while taking notes, you don't need to open a calculator app.
+
+Just create a **Math block** (type `math` and press `TAB`), and try typing an expression:
 
 ```
 speed = 100        → 100
@@ -49,22 +64,7 @@ time  = 2          → 2
 dist  = speed * time  → 200
 ```
 
-Variables are shared across all math blocks in the same document. Define a value once and reuse it anywhere.
-
-### 5. Transform a block
-
-Want to change a paragraph into a heading? Or a list into a task list? Click the block menu (or use the drag handle) and select **Transform** to switch the block type without losing your content.
-
-### 6. Search
-
-| Scope | Shortcut | Description |
-|---|---|---|
-| Local search | `⌘ F` | Find text within the current document |
-| Global search | `⌘ G` | Search across all your documents at once |
-
-### 7. Format selected text
-
-Select any text to reveal the **floating toolbar** — it appears automatically above your selection. From there you can apply bold, italic, underline, strikethrough, inline code, links, and more without ever leaving the keyboard flow.
+The results compute in real-time. Even better, variables are shared across all math blocks in the same document!
 
 ---
 
@@ -85,64 +85,34 @@ Select any text to reveal the **floating toolbar** — it appears automatically 
       <td align="center"><img src="assets/create new document.gif" alt="Create new document" width="360" /></td>
     </tr>
     <tr>
-      <td><strong>Create node button</strong></td>
-      <td>📝 Documents</td>
-      <td align="center"><img src="assets/create node button in action.gif" alt="Create node button" width="360" /></td>
-    </tr>
-    <tr>
-      <td><strong>Global search</strong></td>
+      <td><strong>Local & Global search</strong></td>
       <td>🔍 Navigation</td>
-      <td align="center"><img src="assets/global search.gif" alt="Global search" width="360" /></td>
+      <td align="center"><img src="assets/global search.gif" alt="Search" width="360" /></td>
     </tr>
     <tr>
-      <td><strong>Local search</strong></td>
-      <td>🔍 Navigation</td>
-      <td align="center"><img src="assets/local search.gif" alt="Local search" width="360" /></td>
-    </tr>
-    <tr>
-      <td><strong>Creation heading</strong></td>
-      <td>➕ Smart Creation</td>
+      <td><strong>Smart creation (Heading)</strong></td>
+      <td>➕ Editing</td>
       <td align="center"><img src="assets/smart creation heading.gif" alt="Creation heading" width="360" /></td>
     </tr>
     <tr>
-      <td><strong>Creation code block</strong></td>
-      <td>➕ Smart Creation</td>
-      <td align="center"><img src="assets/smart creation code.gif" alt="Creation code block" width="360" /></td>
-    </tr>
-    <tr>
-      <td><strong>Creation table</strong></td>
-      <td>➕ Smart Creation</td>
-      <td align="center"><img src="assets/smart creation table.gif" alt="Creation table" width="360" /></td>
-    </tr>
-    <tr>
-      <td><strong>Creation task list</strong></td>
-      <td>➕ Smart Creation</td>
+      <td><strong>Smart creation (Task list)</strong></td>
+      <td>➕ Editing</td>
       <td align="center"><img src="assets/smart creation task.gif" alt="Creation task list" width="360" /></td>
     </tr>
     <tr>
-      <td><strong>Creation math block</strong></td>
-      <td>➕ Smart Creation</td>
-      <td align="center"><img src="assets/smart creation math.gif" alt="Creation math block" width="360" /></td>
-    </tr>
-    <tr>
-      <td><strong>Math panel</strong></td>
-      <td>🔢 Live Math</td>
-      <td align="center"><img src="assets/math panel.gif" alt="Math panel" width="360" /></td>
-    </tr>
-    <tr>
-      <td><strong>Variables across blocks</strong></td>
-      <td>🔢 Live Math</td>
-      <td align="center"><img src="assets/math panel use variable.gif" alt="Math panel use variable" width="360" /></td>
-    </tr>
-    <tr>
-      <td><strong>Square root</strong></td>
-      <td>🔢 Live Math</td>
-      <td align="center"><img src="assets/sqrt demonstration.gif" alt="sqrt demonstration" width="360" /></td>
+      <td><strong>Smart creation (Table)</strong></td>
+      <td>➕ Editing</td>
+      <td align="center"><img src="assets/smart creation table.gif" alt="Creation table" width="360" /></td>
     </tr>
     <tr>
       <td><strong>Node transformation</strong></td>
-      <td>🔄 Transformation</td>
+      <td>🔄 Editing</td>
       <td align="center"><img src="assets/node transformation task.gif" alt="Node transformation" width="360" /></td>
+    </tr>
+    <tr>
+      <td><strong>Live Math (Hidden Feature)</strong></td>
+      <td>🔢 Power Tools</td>
+      <td align="center"><img src="assets/math panel.gif" alt="Math panel" width="360" /></td>
     </tr>
   </tbody>
 </table>
@@ -155,16 +125,16 @@ Select any text to reveal the **floating toolbar** — it appears automatically 
 
 | Block type | Keywords |
 |---|---|
-| Code block | `code`, `script` |
-| Horizontal line | `line`, `separator` |
-| Image | `image`, `photo`, `picture`, `img` |
-| Table | `table` |
 | Heading 1 | `heading 1`, `h1` |
 | Heading 2 | `heading 2`, `h2` |
 | Heading 3 | `heading 3`, `h3` |
-| Number list | `number list`, `ordered list` |
 | Bullet list | `bullet list`, `list`, `unordered list` |
+| Number list | `number list`, `ordered list` |
 | Check list | `check list`, `todo`, `task` |
 | Quote | `quote` |
-| Math block | `math`, `conversion`, `calculator` |
+| Code block | `code`, `script` |
+| Table | `table` |
+| Horizontal line | `line`, `separator` |
+| Math block | `math`, `calculator` |
+| Image | `image`, `photo`, `picture`, `img` |
 | Help | `help`, `documentation`, `doc` |
