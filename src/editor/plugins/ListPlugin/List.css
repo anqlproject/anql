@@ -1,11 +1,10 @@
 .list-item {
   position: relative;
-  /* this interfer on selection margin: 0 0 8px 0;*/
   padding: 0;
   padding-left: 28px;
+  padding-bottom: calc((var(--leading-relaxed) - 1) * 0.5em);
   min-height: 24px;
   line-height: var(--leading-relaxed);
-  margin-bottom: calc((var(--leading-relaxed) - 1) * 0.5em);
   list-style-type: none;
 }
 

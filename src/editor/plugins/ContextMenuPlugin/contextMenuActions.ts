@@ -131,7 +131,7 @@ export function handlePaste(editor: LexicalEditor) {
       } else {
         try {
           const { readText, readHTML, hasHTML } = await import("tauri-plugin-clipboard-x-api");
-          
+
           const data = new DataTransfer();
           const text = await readText();
           data.setData("text/plain", text);

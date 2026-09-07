@@ -207,12 +207,48 @@ export default function ContextMenuPlugin() {
 
         reff.current = selection;
 
-        // Capture selection rects before blur
+        // Capture selection rects before blur.
+        // For .list-item elements:
+        //   - clip left to after the bullet/checkbox (lr.left + paddingLeft)
+        //   - extend bottom on the last rect to cover padding-bottom gap
         const domSelection = window.getSelection();
         if (domSelection && domSelection.rangeCount > 0) {
           const range = domSelection.getRangeAt(0);
           if (!range.collapsed) {
-            setSelectionRects(Array.from(range.getClientRects()));
+            const rawRects = Array.from(range.getClientRects());
+
+            const ancestor = range.commonAncestorContainer;
+            const searchRoot =
+              ancestor.nodeType === Node.ELEMENT_NODE
+                ? (ancestor as Element)
+                : ancestor.parentElement;
+            const listItems = searchRoot
+              ? Array.from(
+                searchRoot.querySelectorAll<HTMLElement>("p.list-item"),
+              )
+              : [];
+
+            const mergedRects: DOMRect[] = rawRects.map((r) => {
+              const li = listItems.find((el) => {
+                const lr = el.getBoundingClientRect();
+                return r.top < lr.bottom && r.bottom > lr.top;
+              });
+              if (!li) return r;
+
+              const lr = li.getBoundingClientRect();
+              const paddingLeft = parseFloat(window.getComputedStyle(li).paddingLeft) || 0;
+              const textLeft = lr.left + paddingLeft;
+
+              const isLastRectForLi = !rawRects.some(
+                (other) => other !== r && other.top > r.top && other.top < lr.bottom,
+              );
+              const bottom = isLastRectForLi ? lr.bottom : r.bottom;
+              const left = Math.max(r.left, textLeft);
+              const right = Math.max(r.right, textLeft);
+              return new DOMRect(left, r.top, right - left, bottom - r.top);
+            });
+
+            setSelectionRects(mergedRects);
           } else {
             setSelectionRects([]);
           }
