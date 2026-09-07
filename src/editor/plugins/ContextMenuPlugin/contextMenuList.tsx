@@ -89,17 +89,26 @@ export function ContextMenuItems(
     {
       title: t("CONTEXT_MENU.copy") as string,
       shortcut: isMac ? "⌘C" : "Ctrl+C",
-      onClick: handleCopy(editor),
+      onClick: () => {
+        handleCopy(editor)();
+        setIsMenuOpen(false);
+      },
     },
     {
       title: t("CONTEXT_MENU.cut") as string,
       shortcut: isMac ? "⌘X" : "Ctrl+X",
-      onClick: handleCut(editor),
+      onClick: () => {
+        handleCut(editor)();
+        setIsMenuOpen(false);
+      },
     },
     {
       title: t("CONTEXT_MENU.paste") as string,
       shortcut: isMac ? "⌘V" : "Ctrl+V",
-      onClick: handlePaste(editor),
+      onClick: () => {
+        handlePaste(editor)();
+        setIsMenuOpen(false);
+      },
     },
     ...(!isInsideCodeNode && !isInsideMathNode
       ? [

@@ -1,4 +1,4 @@
-// src/components/custom/Menu/ContextMenu.tsx
+// src/components/custom/Menu/PopoverContextMenu.tsx
 import "./Menu.css";
 
 import * as Popover from "@radix-ui/react-popover";
@@ -8,7 +8,7 @@ import { MenuItem, MenuItemProps } from "./MenuItem";
 import { SubMenu } from "./SubMenu";
 import { MenuPosition,useMenuLogic } from "./useMenuLogic";
 
-export interface ContextMenuProps {
+export interface PopoverContextMenuProps {
   items: (MenuItemProps & { submenu?: MenuItemProps[] })[];
   isOpen: boolean;
   onClose: () => void;
@@ -27,7 +27,7 @@ export interface ContextMenuProps {
   trigger?: React.ReactNode;
 }
 
-export function ContextMenu({
+export function PopoverContextMenu({
   items,
   isOpen,
   onClose,
@@ -39,7 +39,7 @@ export function ContextMenu({
   overFlowOption,
   children,
   trigger,
-}: ContextMenuProps) {
+}: PopoverContextMenuProps) {
   const posX = position?.x;
   const posY = position?.y;
 

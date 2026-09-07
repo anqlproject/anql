@@ -2,9 +2,9 @@ import "./OverflowMenu.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { ContextMenu } from "@/components/custom/Menu/ContextMenu";
 import { MenuPosition } from "@/components/custom/Menu/Menu";
 import { MenuItemProps } from "@/components/custom/Menu/MenuItem";
+import { PopoverContextMenu } from "@/components/custom/Menu/PopoverContextMenu";
 
 
 export interface OverflowMenuProps {
@@ -58,7 +58,7 @@ export function OverflowMenu({
 
   return (
     <div>
-      <ContextMenu
+      <PopoverContextMenu
         items={menuItems as MenuItemProps[]}
         isOpen={isOpen}
         onClose={onClose}
@@ -88,7 +88,7 @@ export function OverflowMenu({
             }}
           />
         </div>
-      </ContextMenu>
+      </PopoverContextMenu>
     </div>
   );
 }

@@ -16,7 +16,7 @@ import { useShallow } from 'zustand/react/shallow';
 import useModal from "@/App/hooks/useModal";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { extractLinkTypeFromUrl } from "@/App/utils/url";
-import { ContextMenuX } from "@/components/custom/Menu/ContextMenuX";
+import { EditorContextMenu } from "@/components/custom/Menu/EditorContextMenu";
 import { MenuPosition } from "@/components/custom/Menu/MenuX";
 import { uploadAssetIfNeeded } from "@/core/database/useAssetDatabase";
 import {
@@ -31,7 +31,6 @@ import { INSERT_PDF_COMMAND } from "@/editor/plugins/PdfPlugin";
 import { PdfDialog } from "@/editor/plugins/PdfPlugin/PdfDialog";
 
 import CustomCaret from "../../../App/AppComponents/CustomCaret/CustomCaret";
-import { HightlightSelectedText } from "../../../App/AppComponents/HighlightSelectedText/HighlightSelectedText";
 import { ContextMenuItems } from "./contextMenuList";
 
 export default function ContextMenuPlugin() {
@@ -48,7 +47,7 @@ export default function ContextMenuPlugin() {
   const [caretPosition, setCaretPosition] = useState({ x: 0, y: 0 });
   const [showCaret, setShowCaret] = useState(false);
   const [caretTimestamp, setCaretTimestamp] = useState(0);
-  const [selectionRects, setSelectionRects] = useState<DOMRect[]>([]);
+
 
   /**
    * Force Lexical selection at a screen point X, Y
@@ -207,62 +206,10 @@ export default function ContextMenuPlugin() {
 
         reff.current = selection;
 
-        // Capture selection rects before blur.
-        // For .list-item elements:
-        //   - clip left to after the bullet/checkbox (lr.left + paddingLeft)
-        //   - extend bottom on the last rect to cover padding-bottom gap
-        const domSelection = window.getSelection();
-        if (domSelection && domSelection.rangeCount > 0) {
-          const range = domSelection.getRangeAt(0);
-          if (!range.collapsed) {
-            const rawRects = Array.from(range.getClientRects());
-
-            const ancestor = range.commonAncestorContainer;
-            const searchRoot =
-              ancestor.nodeType === Node.ELEMENT_NODE
-                ? (ancestor as Element)
-                : ancestor.parentElement;
-            const listItems = searchRoot
-              ? Array.from(
-                searchRoot.querySelectorAll<HTMLElement>("p.list-item"),
-              )
-              : [];
-
-            const mergedRects: DOMRect[] = rawRects.map((r) => {
-              const li = listItems.find((el) => {
-                const lr = el.getBoundingClientRect();
-                return r.top < lr.bottom && r.bottom > lr.top;
-              });
-              if (!li) return r;
-
-              const lr = li.getBoundingClientRect();
-              const paddingLeft = parseFloat(window.getComputedStyle(li).paddingLeft) || 0;
-              const textLeft = lr.left + paddingLeft;
-
-              const isLastRectForLi = !rawRects.some(
-                (other) => other !== r && other.top > r.top && other.top < lr.bottom,
-              );
-              const bottom = isLastRectForLi ? lr.bottom : r.bottom;
-              const left = Math.max(r.left, textLeft);
-              const right = Math.max(r.right, textLeft);
-              return new DOMRect(left, r.top, right - left, bottom - r.top);
-            });
-
-            setSelectionRects(mergedRects);
-          } else {
-            setSelectionRects([]);
-          }
-        } else {
-          setSelectionRects([]);
-        }
-
         setIsContextMenuOpen(true);
         setIsMenuOpen(true);
         setMenuPosition({ x: event.clientX, y: event.clientY });
       });
-
-      // NOTES: prevent focus on editor when right click
-      editor.blur();
     };
 
     const handleClick = (event: MouseEvent) => {
@@ -419,7 +366,6 @@ export default function ContextMenuPlugin() {
 
   return (
     <>
-      <HightlightSelectedText isMenuOpen={isMenuOpen} selectionRects={selectionRects} />
       {showCaret && isMenuOpen && (
         <CustomCaret
           position={caretPosition}
@@ -428,7 +374,7 @@ export default function ContextMenuPlugin() {
         />
       )}
       {isMenuOpen && (
-        <ContextMenuX
+        <EditorContextMenu
           items={contextMenuItems}
           isOpen={isMenuOpen}
           onClose={() => {

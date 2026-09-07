@@ -12,7 +12,7 @@ export interface MenuPosition {
   y: number;
 }
 
-export interface ContextMenuXProps {
+export interface DropdownContextMenuProps {
   items: (MenuItemProps & { submenu?: MenuItemProps[] })[];
   isOpen: boolean;
   onClose: () => void;
@@ -31,7 +31,7 @@ export interface ContextMenuXProps {
 }
 
 /**
- * ContextMenuX — A drop-in replacement for ContextMenu built on
+ * DropdownContextMenu — A drop-in replacement for ContextMenu built on
  * @radix-ui/react-dropdown-menu instead of Popover.
  *
  * Radix DropdownMenu gives us for free:
@@ -41,7 +41,7 @@ export interface ContextMenuXProps {
  *  - WAI-ARIA roles
  *  - Scroll locking
  */
-export function ContextMenuX({
+export function DropdownContextMenu({
   items,
   isOpen,
   onClose,
@@ -51,7 +51,7 @@ export function ContextMenuX({
   overFlowOption,
   children,
   trigger,
-}: ContextMenuXProps) {
+}: DropdownContextMenuProps) {
   const [anchorPos, setAnchorPos] = useState({ x: 0, y: 0 });
 
   const getAnchorPos = useCallback(() => {
@@ -68,11 +68,11 @@ export function ContextMenuX({
 
   const overflowStyle = overFlowOption
     ? {
-        maxHeight: overFlowOption.height,
-        overflowY: overFlowOption.overflow === "scroll" ? ("auto" as const) : ("hidden" as const),
-        overflowX: "hidden" as const,
-        minHeight: overFlowOption.minHeight,
-      }
+      maxHeight: overFlowOption.height,
+      overflowY: overFlowOption.overflow === "scroll" ? ("auto" as const) : ("hidden" as const),
+      overflowX: "hidden" as const,
+      minHeight: overFlowOption.minHeight,
+    }
     : {};
 
   const renderItem = (item: MenuItemProps, idx: number) => {
