@@ -1,11 +1,12 @@
 import './index.css';
 
-import { autoUpdate, flip, FloatingPortal,offset, shift, useFloating, VirtualElement } from '@floating-ui/react';
+import { autoUpdate, flip, FloatingPortal, offset, shift, useFloating, VirtualElement } from '@floating-ui/react';
 import { $isCodeNode } from '@lexical/code';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getSelectionStyleValueForProperty, $patchStyleText } from '@lexical/selection';
+import { AnimatePresence, motion } from 'framer-motion';
 import { $getSelection, $isRangeSelection, $setSelection, BaseSelection, FORMAT_TEXT_COMMAND, TextFormatType } from 'lexical';
-import { Bold, CaseLower, CaseSensitive, CaseUpper, ChevronDown, Eraser, Highlighter, Italic, PaintBucket, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
+import { Bold, CaseLower, CaseSensitive, CaseUpper, ChevronDown, ChevronRight, Eraser, Highlighter, Italic, PaintBucket, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
@@ -104,7 +105,7 @@ function ToolbarDropdown({
 }) {
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
-    onOpenChange: () => {},
+    onOpenChange: () => { },
     middleware: [offset(4), flip(), shift()],
     whileElementsMounted: autoUpdate,
   });
@@ -128,13 +129,13 @@ function ToolbarDropdown({
       </Button>
       {isOpen && (
         <FloatingPortal>
-          <div 
+          <div
             ref={refs.setFloating}
-            style={{ 
-              ...floatingStyles, 
+            style={{
+              ...floatingStyles,
               zIndex: 999999,
-              maxHeight: '250px', 
-              overflowY: 'auto' 
+              maxHeight: '250px',
+              overflowY: 'auto'
             }}
             className="toolbar-dropdown-content z-50"
           >
@@ -176,6 +177,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
     useShallow((state) => ({ isContextMenuOpen: state.isContextMenuOpen }))
   );
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [virtualRef, setVirtualRef] = useState<VirtualElement | null>(null);
   const isPointerDownRef = useRef(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -297,7 +299,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
     const handlePointerDown = (e: PointerEvent) => {
       isPointerDownRef.current = true;
       const target = e.target as HTMLElement;
-      
+
       const isInsideToolbar = toolbarRef.current && toolbarRef.current.contains(target);
       const isInsideDropdown = target.closest('.toolbar-dropdown-container');
       const isInsideContextMenu = target.closest('.menu-container') !== null;
@@ -319,7 +321,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
         }
       }
     };
-    
+
     const handlePointerUp = () => {
       isPointerDownRef.current = false;
       updateToolbar();
@@ -405,63 +407,111 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
         width="auto"
         disableClickOutside={true}
       >
-        <div ref={toolbarRef} className="floating-text-format-popup" style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '4px' }}>
-          
-          <ToolbarDropdown
-            value={fontFamily}
-            options={FONT_FAMILY_OPTIONS}
-            isOpen={activeDropdown === 'fontFamily'}
-            onToggle={() => handleDropdownToggle('fontFamily')}
-            onSelect={(val) => handleDropdownSelect('fontFamily', val)}
-            isFontFamily={true}
-          />
+        {/*
+          The outer div is the ONLY element floating-ui sees.
+          It never changes size → no position shift on expand.
+          Expansion sections grow outward via position: absolute.
+        */}
+        <div
+          ref={toolbarRef}
+          className={`floating-text-format-popup${isExpanded ? ' expanded' : ''}`}
+          style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '2px', padding: '4px', overflow: 'visible' }}
+        >
+          {/* ── LEFT expansion — grows to the LEFT via position absolute ── */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                key="left"
+                className="toolbar-expansion-left"
+                initial={{ maxWidth: 0, opacity: 0 }}
+                animate={{ maxWidth: 600, opacity: 1 }}
+                exit={{ maxWidth: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                style={{ justifyContent: 'flex-end' }}
+              >
+                <ToolbarDropdown
+                  value={fontFamily}
+                  options={FONT_FAMILY_OPTIONS}
+                  isOpen={activeDropdown === 'fontFamily'}
+                  onToggle={() => handleDropdownToggle('fontFamily')}
+                  onSelect={(val) => handleDropdownSelect('fontFamily', val)}
+                  isFontFamily={true}
+                />
 
-          <ToolbarDropdown
-            value={fontSize}
-            options={FONT_SIZE_OPTIONS}
-            isOpen={activeDropdown === 'fontSize'}
-            onToggle={() => handleDropdownToggle('fontSize')}
-            onSelect={(val) => handleDropdownSelect('fontSize', val)}
-          />
+                <ToolbarDropdown
+                  value={fontSize}
+                  options={FONT_SIZE_OPTIONS}
+                  isOpen={activeDropdown === 'fontSize'}
+                  onToggle={() => handleDropdownToggle('fontSize')}
+                  onSelect={(val) => handleDropdownSelect('fontSize', val)}
+                />
 
-          <div className="divider" />
+                <div className="divider" />
 
+                <ToolbarButton icon={<CaseLower size={20} />} label="Lowercase" isActive={isLowercase} onClick={() => toggleFormat('lowercase')} />
+                <ToolbarButton icon={<CaseUpper size={20} />} label="Uppercase" isActive={isUppercase} onClick={() => toggleFormat('uppercase')} />
+                <ToolbarButton icon={<CaseSensitive size={20} />} label="Capitalize" isActive={isCapitalize} onClick={() => toggleFormat('capitalize')} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ── CENTER — fixed, floating-ui anchor never changes size ── */}
           <ToolbarButton icon={<Bold size={16} />} label="Bold" isActive={isBold} onClick={() => toggleFormat('bold')} />
           <ToolbarButton icon={<Italic size={16} />} label="Italic" isActive={isItalic} onClick={() => toggleFormat('italic')} />
           <ToolbarButton icon={<Underline size={16} />} label="Underline" isActive={isUnderline} onClick={() => toggleFormat('underline')} />
           <ToolbarButton icon={<Strikethrough size={16} />} label="Strikethrough" isActive={isStrikethrough} onClick={() => toggleFormat('strikethrough')} />
-
           <div className="divider" />
-
-          <ToolbarButton icon={<Subscript size={16} />} label="Subscript" isActive={isSubscript} onClick={() => toggleFormat('subscript')} />
-          <ToolbarButton icon={<Superscript size={16} />} label="Superscript" isActive={isSuperscript} onClick={() => toggleFormat('superscript')} />
-
-          <div className="divider" />
-
-          <ToolbarButton icon={<CaseLower size={20} />} label="Lowercase" isActive={isLowercase} onClick={() => toggleFormat('lowercase')} />
-          <ToolbarButton icon={<CaseUpper size={20} />} label="Uppercase" isActive={isUppercase} onClick={() => toggleFormat('uppercase')} />
-          <ToolbarButton icon={<CaseSensitive size={20} />} label="Capitalize" isActive={isCapitalize} onClick={() => toggleFormat('capitalize')} />
-
-          <div className="divider" />
-
-          <ToolbarButton icon={<Highlighter size={16} />} label="Highlight" isActive={isHighlight} onClick={() => toggleFormat('highlight')} />
-
-          <NativeColorPicker
-            icon={<Palette size={16} />}
-            title="Text Color"
-            color={fontColor}
-            onChange={(color) => applyStyleText({ 'color': color })}
-          />
-          <NativeColorPicker
-            icon={<PaintBucket size={16} />}
-            title="Background Color"
-            color={bgColor}
-            onChange={(color) => applyStyleText({ 'background-color': color })}
-          />
-
-          <div className="divider" />
-
           <ToolbarButton icon={<Eraser size={16} />} label="Clear Formatting" onClick={clearFormatting} />
+
+          {/* ── RIGHT section — always visible, expand button always at far right ── */}
+          <div className="toolbar-expansion-right">
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  key="right-extras"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 'auto', opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '2px', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                >
+                  <ToolbarButton icon={<Highlighter size={16} />} label="Highlight" isActive={isHighlight} onClick={() => toggleFormat('highlight')} />
+
+                  <NativeColorPicker
+                    icon={<Palette size={16} />}
+                    title="Text Color"
+                    color={fontColor}
+                    onChange={(color) => applyStyleText({ 'color': color })}
+                  />
+                  <NativeColorPicker
+                    icon={<PaintBucket size={16} />}
+                    title="Background Color"
+                    color={bgColor}
+                    onChange={(color) => applyStyleText({ 'background-color': color })}
+                  />
+                  <div className="divider" />
+                  
+                  <ToolbarButton icon={<Subscript size={16} />} label="Subscript" isActive={isSubscript} onClick={() => toggleFormat('subscript')} />
+                  <ToolbarButton icon={<Superscript size={16} />} label="Superscript" isActive={isSuperscript} onClick={() => toggleFormat('superscript')} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Expand button — always at the far right */}
+            <ToolbarButton
+              icon={
+                <motion.div
+                  animate={{ rotate: isExpanded ? 90 : -90 }}
+                  transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+                  style={{ display: 'flex' }}
+                >
+                  <ChevronRight size={16} />
+                </motion.div>
+              }
+              label={isExpanded ? 'Collapse' : 'Expand'}
+              onClick={() => setIsExpanded(!isExpanded)}
+            />
+          </div>
         </div>
       </Popover>
     </>,

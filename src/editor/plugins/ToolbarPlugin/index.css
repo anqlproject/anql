@@ -5,16 +5,92 @@
   border-radius: 12px;
   height: 40px;
   max-width: calc(100vw - 40px);
-  overflow-x: auto;
-  overflow-y: visible;
+  overflow: visible;
   box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04),
     0 0 0 1px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border-color);
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) transparent;
+  background: var(--surface-color);
+  gap: 2px;
+  transition: border-radius 0.2s ease;
 }
+
+/* When expanded: flatten the inner edges so expansion sections connect visually */
+.floating-text-format-popup.expanded {
+  border-radius: 0 4px 4px 0;
+}
+
+/* Left expansion — absolutely anchored to the LEFT edge of the center pill */
+.toolbar-expansion-left {
+  position: absolute;
+  right: calc(100% - 1px); /* -1px so borders overlap cleanly */
+  top: -1px;
+  bottom: -1px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  gap: 2px;
+  background: var(--surface-color);
+  border-radius: 12px 0 0 12px;
+  border: 1px solid var(--border-color);
+  border-right: none;
+  box-shadow:
+    -8px 20px 25px -5px rgba(0, 0, 0, 0.08),
+    -4px 10px 10px -5px rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+  z-index: -1;
+}
+
+/* Right expansion — absolutely anchored to the RIGHT edge of the center pill */
+.toolbar-expansion-right {
+  position: absolute;
+  left: calc(100% - 1px);
+  top: -1px;
+  bottom: -1px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  gap: 2px;
+  background: var(--surface-color);
+  border-radius: 0 12px 12px 0;
+  border: 1px solid var(--border-color);
+  border-left: none;
+  box-shadow:
+    8px 20px 25px -5px rgba(0, 0, 0, 0.08),
+    4px 10px 10px -5px rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+  z-index: -1;
+}
+
+/* Buttons inside the expansion sections get the same hover/active styles */
+.toolbar-expansion-left button.popup-item,
+.toolbar-expansion-right button.popup-item {
+  border: 1px solid transparent;
+  display: flex;
+  background: transparent;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-secondary);
+}
+
+.toolbar-expansion-left button.popup-item:hover,
+.toolbar-expansion-right button.popup-item:hover {
+  background-color: var(--action-hover);
+}
+
+.toolbar-expansion-left button.popup-item.active,
+.toolbar-expansion-right button.popup-item.active {
+  background-color: var(--action-active);
+}
+
+
 
 .floating-text-format-popup::-webkit-scrollbar {
   height: 4px;
@@ -103,6 +179,14 @@
 .floating-text-format-popup .toolbar-item.color-picker {
   min-width: unset;
   padding: 6px;
+}
+
+.floating-text-format-popup .divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-color);
+  margin: 0 4px;
+  flex-shrink: 0;
 }
 
 .toolbar-dropdown-content {
