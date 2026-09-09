@@ -219,7 +219,7 @@ export default function Editor(): JSX.Element {
             <TabIndentationPlugin maxIndent={7} />
             {floatingAnchorElem && !isSmallWidthViewport && (
               <>
-                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                <DraggableBlockPlugin anchorElem={floatingAnchorElem} scrollRef={editorContainerRef} />
                 <CodeActionMenuPlugin />
                 <ToolbarPlugin anchorElem={floatingAnchorElem} />
               </>

@@ -39,8 +39,10 @@ function isElementOnMenu(element: HTMLElement | null | undefined): boolean {
 
 export default function DraggableBlockPlugin({
   anchorElem = document.body,
+  scrollRef,
 }: {
   anchorElem?: HTMLElement;
+  scrollRef?: React.RefObject<HTMLElement | null>;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
   const { t } = useTranslation();
@@ -119,6 +121,7 @@ export default function DraggableBlockPlugin({
         anchorElem={anchorElem}
         menuRef={menuRef}
         targetLineRef={targetLineRef}
+        scrollRef={scrollRef}
         menuComponent={
           <div ref={menuRef} className="draggable-block-menu">
             {isMathNode ? (

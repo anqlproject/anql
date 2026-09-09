@@ -19,6 +19,7 @@ import {
   DROP_COMMAND,
   getComposedEventTarget,
   getParentElement,
+  IS_APPLE_WEBKIT,
   isHTMLElement,
   type LexicalEditor,
   mergeRegister,
@@ -288,12 +289,15 @@ function useDraggableBlockMenu(
   targetLineComponent: ReactNode,
   isOnMenu: (element: HTMLElement) => boolean,
   onElementChanged?: (element: HTMLElement | null) => void,
+  scrollRef?: React.RefObject<HTMLElement | null>,
 ): JSX.Element {
   const scrollerElem = getParentElement(anchorElem);
 
   const isDraggingBlockRef = useRef<boolean>(false);
   const [draggableBlockElem, setDraggableBlockElemState] =
     useState<HTMLElement | null>(null);
+  const scrollDirectionRef = useRef<number>(0);
+  const scrollIntervalRef = useRef<number | null>(null);
 
   const setDraggableBlockElem = useCallback(
     (elem: HTMLElement | null) => {
@@ -373,6 +377,63 @@ function useDraggableBlockMenu(
         pageY / calculateZoomLevel(target),
         anchorElem,
       );
+
+      if (IS_APPLE_WEBKIT) {
+        let scrollerElem = scrollRef?.current || getParentElement(anchorElem);
+
+        if (!scrollerElem) {
+          scrollerElem = getParentElement(anchorElem);
+        }
+
+        const isWindowScroller = !scrollerElem || scrollerElem === document.body;
+        const edgeSize = 50;
+        let rectTop = 0;
+        let rectBottom = window.innerHeight;
+
+        if (!isWindowScroller && scrollerElem) {
+          const rect = scrollerElem.getBoundingClientRect();
+          rectTop = rect.top;
+          rectBottom = rect.bottom;
+        }
+
+        let scrollDirection = 0;
+
+        if (event.clientY < rectTop + edgeSize || event.clientY < edgeSize) {
+          scrollDirection = -1;
+        } else if (event.clientY > rectBottom - edgeSize || event.clientY > window.innerHeight - edgeSize) {
+          scrollDirection = 1;
+        }
+
+        scrollDirectionRef.current = scrollDirection;
+
+        if (scrollDirection !== 0 && !scrollIntervalRef.current) {
+          scrollIntervalRef.current = window.setInterval(() => {
+            if (scrollDirectionRef.current === -1) {
+              if (isWindowScroller) {
+                window.scrollBy(0, -10);
+              } else if (scrollerElem) {
+                scrollerElem.scrollBy(0, -10);
+                // Fallback to window if scroller reached top
+                if (scrollerElem.scrollTop <= 0) window.scrollBy(0, -10);
+              }
+            } else if (scrollDirectionRef.current === 1) {
+              if (isWindowScroller) {
+                window.scrollBy(0, 10);
+              } else if (scrollerElem) {
+                scrollerElem.scrollBy(0, 10);
+                // Fallback to window if scroller reached bottom
+                if (Math.ceil(scrollerElem.scrollTop + scrollerElem.clientHeight) >= scrollerElem.scrollHeight) {
+                  window.scrollBy(0, 10);
+                }
+              }
+            }
+          }, 20);
+        } else if (scrollDirection === 0 && scrollIntervalRef.current) {
+          window.clearInterval(scrollIntervalRef.current);
+          scrollIntervalRef.current = null;
+        }
+      }
+
       // Prevent default event to be able to trigger onDrop events
       event.preventDefault();
       return true;
@@ -382,6 +443,12 @@ function useDraggableBlockMenu(
       if (!isDraggingBlockRef.current) {
         return false;
       }
+
+      if (scrollIntervalRef.current) {
+        window.clearInterval(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
+      }
+
       const [isFileTransfer] = eventFiles(event);
       if (isFileTransfer) {
         return false;
@@ -462,6 +529,11 @@ function useDraggableBlockMenu(
   function onDragEnd(): void {
     isDraggingBlockRef.current = false;
     hideTargetLine(targetLineRef.current);
+
+    if (scrollIntervalRef.current) {
+      window.clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
   }
   return createPortal(
     <>
@@ -492,6 +564,7 @@ export function DraggableBlockPlugin_EXPERIMENTAL({
   targetLineComponent,
   isOnMenu,
   onElementChanged,
+  scrollRef,
 }: {
   anchorElem?: HTMLElement;
   menuRef: React.RefObject<HTMLElement | null>;
@@ -500,6 +573,7 @@ export function DraggableBlockPlugin_EXPERIMENTAL({
   targetLineComponent: ReactNode;
   isOnMenu: (element: HTMLElement) => boolean;
   onElementChanged?: (element: HTMLElement | null) => void;
+  scrollRef?: React.RefObject<HTMLElement | null>;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
   return useDraggableBlockMenu(
@@ -512,5 +586,6 @@ export function DraggableBlockPlugin_EXPERIMENTAL({
     targetLineComponent,
     isOnMenu,
     onElementChanged,
+    scrollRef,
   );
 }
