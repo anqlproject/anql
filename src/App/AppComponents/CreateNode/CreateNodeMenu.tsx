@@ -286,7 +286,8 @@ export default function CreateNodeMenu({
             }, 10);
           }}
           position={menuPosition}
-          direction="bottom"
+          direction="left"
+          align="center"
           menuRef={editorRef}
           editorRef={editorRef}
         />

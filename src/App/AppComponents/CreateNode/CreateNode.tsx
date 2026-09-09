@@ -199,7 +199,11 @@ export default function CreateNode({ anchorElem, draggableElement, onMenuPositio
               };
             }
 
-            const position = { x: e.clientX, y: e.clientY };
+            // Position the menu at the left edge of the editor
+            const position = editorRef.current 
+              ? { x: editorRef.current.getBoundingClientRect().left, y: e.clientY }
+              : { x: e.clientX, y: e.clientY };
+            
             onMenuPositionChange?.(position);
             setLocalMenuPosition(position);
           }}

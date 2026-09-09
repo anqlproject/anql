@@ -13,6 +13,7 @@ export interface OverflowMenuProps {
   onClose: () => void;
   position?: MenuPosition;
   direction: "left" | "top" | "right" | "bottom";
+  align?: "center";
   menuRef: React.RefObject<HTMLElement | null> | null;
   editorRef?: React.RefObject<HTMLElement | null> | null;
 }
@@ -23,6 +24,7 @@ export function OverflowMenu({
   onClose,
   position,
   direction,
+  align,
   menuRef,
   editorRef,
 }: OverflowMenuProps) {
@@ -64,6 +66,7 @@ export function OverflowMenu({
         onClose={onClose}
         position={position}
         direction={direction}
+        align={align}
         menuRef={menuRef}
         editorRef={editorRef}
         overFlowOption={{ height: "37.5vh", minHeight: 200, overflow: "scroll" }}
