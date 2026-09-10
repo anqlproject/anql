@@ -28,13 +28,13 @@
   color: var(--text-primary);
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
-  letter-spacing: -0.03em;
+  letter-spacing: var(--tracking-tight);
   margin: 0;
   margin-top: 1.4rem;
   margin-bottom: 1rem;
 }
 .anql_h2 {
-  font-size: var(--text-xl);
+  font-size: var(--text-2xl);
   color: var(--text-primary);
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
@@ -44,7 +44,7 @@
   margin-bottom: 0.75rem;
 }
 .anql_h3 {
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   color: var(--text-primary);
   font-weight: var(--font-semibold);
   line-height: var(--leading-snug);
@@ -186,7 +186,7 @@
   display: block;
   padding: 45px 8px 8px 52px;
   line-height: var(--leading-relaxed);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   margin: 0;
   margin-top: 8px;
   margin-bottom: 8px;
