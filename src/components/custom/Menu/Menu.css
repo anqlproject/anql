@@ -111,7 +111,7 @@
 
 .menu-item-title {
   font-family: var(--font-sans);
-  font-size: var(--text-base);
+  font-size: var(--ui-text-base);
   font-weight: var(--font-normal);
   color: var(--text-primary);
   line-height: var(--leading-normal);
@@ -124,7 +124,7 @@
 }
 
 .menu-item-description {
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   color: var(--text-secondary);
   line-height: var(--leading-snug);
   letter-spacing: var(--tracking-tight);
@@ -150,7 +150,7 @@
 
 /* Menu item shortcut */
 .menu-item-shortcut {
-  font-size: var(--text-xs);
+  font-size: var(--ui-text-xs);
   color: var(--text-secondary);
   font-weight: var(--font-medium);
   letter-spacing: var(--tracking-tight);
@@ -197,7 +197,7 @@
 .submenu-arrow {
   margin-left: auto;
   color: var(--text-secondary);
-  font-size: var(--text-lg);
+  font-size: var(--ui-text-sm);
   line-height: var(--leading-normal);
   letter-spacing: var(--tracking-tight);
   display: flex;

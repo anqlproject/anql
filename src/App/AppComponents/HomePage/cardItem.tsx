@@ -146,11 +146,11 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
           ) : (
             <Calendar size={12} className="document-card__meta-icon" />
           )}
-          <span 
-            className="document-card__date" 
-            title={isModifiedDate 
-              ? `Modifié: ${new Date(document.updated_at).toLocaleString()}` 
-              : `Créé: ${new Date(document.created_at).toLocaleString()}`
+          <span
+            className="document-card__date"
+            title={isModifiedDate
+              ? `Modified: ${new Date(document.updated_at).toLocaleString()}`
+              : `Created: ${new Date(document.created_at).toLocaleString()}`
             }
           >
             {formatDate(displayDate)}

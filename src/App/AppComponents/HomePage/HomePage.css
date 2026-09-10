@@ -31,7 +31,7 @@
 }
 
 .home-title {
-  font-size: 15px;
+  font-size: var(--ui-text-md);
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -89,7 +89,7 @@
   gap: 6px;
   padding: 0 12px !important;
   height: 32px;
-  font-size: 13px;
+  font-size: var(--ui-text-base);
   font-weight: 500;
   background-color: var(--destructive) !important;
   color: white !important;
@@ -226,14 +226,14 @@
 }
 
 .home-emptyStateTitle {
-  font-size: 15px;
+  font-size: var(--ui-text-md);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
 
 .home-emptyStateDescription {
-  font-size: 13px;
+  font-size: var(--ui-text-base);
   color: var(--text-secondary);
   opacity: 0.6;
   margin: 0;
@@ -242,7 +242,7 @@
 .home-createDocumentButton {
   margin-top: 8px;
   padding: 10px 20px !important;
-  font-size: 13px;
+  font-size: var(--ui-text-base);
   font-weight: 500;
   border-radius: 8px !important;
   background: var(--gradient-primary) !important;

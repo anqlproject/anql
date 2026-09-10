@@ -73,7 +73,7 @@
   outline: none;
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   line-height: var(--leading-normal);
   width: 100%;
 }

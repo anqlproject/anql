@@ -27,7 +27,7 @@
 .progress-bar-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: var(--ui-text-xs);
   color: var(--text-secondary, inherit);
 }
 

@@ -56,7 +56,7 @@
 }
 
 .help-overlay-header h2 {
-  font-size: var(--text-base);
+  font-size: var(--ui-text-md);
   font-weight: var(--font-semibold);
   color: var(--text-primary);
   margin: 0;
@@ -99,7 +99,7 @@
 }
 
 .help-sidebar-title {
-  font-size: var(--text-xs);
+  font-size: var(--ui-text-xs);
   font-weight: var(--font-semibold);
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -123,7 +123,7 @@
   padding: 7px 10px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   font-weight: var(--font-medium);
   color: var(--text-primary);
   border: none;

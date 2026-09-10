@@ -35,7 +35,7 @@
 }
 
 .toast-message {
-  font-size: 0.875rem;
+  font-size: var(--ui-text-sm);
   color: var(--text-primary);
   font-weight: 500;
 }

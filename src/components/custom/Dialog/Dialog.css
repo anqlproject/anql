@@ -133,7 +133,7 @@
 }
 
 .dialog-title {
-  font-size: var(--text-xl);
+  font-size: var(--ui-text-lg);
   font-weight: var(--font-semibold);
   color: var(--text-primary);
   line-height: 1.4;
@@ -167,7 +167,7 @@
 
 /* Description responsive */
 .dialog-description {
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 1.5rem;
@@ -198,7 +198,7 @@
   justify-content: center;
   padding: 0.5rem 1rem;
   border-radius: 6px;
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   font-weight: var(--font-medium);
   border: 1px solid transparent;
   cursor: pointer;

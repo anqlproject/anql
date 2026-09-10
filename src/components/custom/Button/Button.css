@@ -17,7 +17,7 @@
   color: var(--text-primary);
   border-radius: 5px;
   cursor: pointer;
-  font-size: var(--text-base);
+  font-size: var(--ui-text-md);
   transition: all 0.2s ease;
 }
 .Button__root:hover {
@@ -28,7 +28,7 @@
   padding-bottom: 5px;
   padding-left: 10px;
   padding-right: 10px;
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
 }
 .Button__disabled {
   cursor: not-allowed;

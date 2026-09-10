@@ -106,7 +106,7 @@
 }
 
 .document-card--list .document-card__title {
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   font-weight: var(--font-normal);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -122,7 +122,7 @@
 }
 
 .document-card--list .document-card__date {
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   color: var(--text-secondary);
   opacity: 0.6;
   white-space: nowrap;
@@ -170,7 +170,7 @@
 }
 
 .document-card--grid .document-card__title {
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   font-weight: var(--font-normal);
   color: var(--text-primary);
   overflow: hidden;
@@ -187,7 +187,7 @@
 }
 
 .document-card--grid .document-card__date {
-  font-size: var(--text-xs);
+  font-size: var(--ui-text-xs);
   color: var(--text-secondary);
   opacity: 0.5;
 }
@@ -277,7 +277,7 @@
 }
 
 .document-dropdown [data-radix-dropdown-menu-item] {
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   font-weight: var(--font-normal);
   color: var(--text-primary);
   border-radius: 6px;
@@ -322,7 +322,7 @@
 }
 
 .dropdown-menu-item {
-  font-size: var(--text-sm);
+  font-size: var(--ui-text-sm);
   font-weight: var(--font-normal);
   color: var(--text-primary);
   border-radius: 6px;

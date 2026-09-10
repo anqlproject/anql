@@ -8,7 +8,7 @@ import { ensureRowIds } from './tableUtils';
 import { searchInTableData, TableSearchMatch } from './useTableSearch';
 
 function escapeHTML(str: string) {
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({
       '&': '&amp;',
       '<': '&lt;',
@@ -243,7 +243,7 @@ export class TableNode extends DecoratorBlockNode {
 
   exportDOM(): DOMExportOutput {
     const tableHtml = `
-      <table class="table" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.875rem;">
+      <table class="table" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--text-sm)">
         <colgroup>
           ${this.__columns
         .map(
