@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import * as Popover from "@radix-ui/react-popover";
 import { flexRender, Table } from "@tanstack/react-table";
+import { GripVertical } from "lucide-react";
 import { CSSProperties, useRef } from "react";
 
 import { RowMenu } from "../TableMenu/RowMenu";
@@ -98,18 +99,7 @@ export function DraggableRow({
                 pointerOrigin.current = null;
               }}
             >
-              <svg
-                viewBox="0 0 10 10"
-                className="table-handle-dots"
-                aria-hidden="true"
-              >
-                <circle cx="2" cy="2" r="1" fill="currentColor" />
-                <circle cx="2" cy="5" r="1" fill="currentColor" />
-                <circle cx="2" cy="8" r="1" fill="currentColor" />
-                <circle cx="6" cy="2" r="1" fill="currentColor" />
-                <circle cx="6" cy="5" r="1" fill="currentColor" />
-                <circle cx="6" cy="8" r="1" fill="currentColor" />
-              </svg>
+              <GripVertical className="table-handle-icon" />
             </button>
           )}
         </div>

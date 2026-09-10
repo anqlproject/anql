@@ -66,16 +66,52 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 24px;
+  z-index: var(--z-modal);
   border: none;
   background: transparent;
-  color: color-mix(in srgb, var(--text-secondary) 70%, transparent);
+  color: var(--text-disabled);
   cursor: grab;
   padding: 2px;
   border-radius: 3px;
   opacity: 0;
   touch-action: none;
   user-select: none;
-  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+  transition: opacity 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.table-row-handle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background-color: var(--text-disabled);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.table-row-handle .table-handle-icon {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.table-row-handle:hover::before {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
+}
+
+.table-row-handle:hover .table-handle-icon {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .table-row:hover .table-row-handle,
@@ -85,17 +121,18 @@
 }
 
 .table-row-handle:hover {
-  background: color-mix(in srgb, var(--action-hover) 90%, transparent);
-  color: var(--text-primary);
+  background: var(--surface-color);
+  box-shadow: 0 0 0 1px var(--primary-color), 0 2px 4px rgba(0,0,0,0.05);
+  color: var(--primary-color);
 }
 
 .table-row-handle:active {
   cursor: grabbing;
 }
 
-.table-handle-dots {
-  width: 10px;
-  height: 10px;
+.table-handle-icon {
+  width: 12px;
+  height: 12px;
 }
 
 .table-row-handle-anchor {
