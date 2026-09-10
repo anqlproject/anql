@@ -9,7 +9,7 @@ import { getCodeThemeOptions } from '@lexical/code-shiki';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getNearestNodeFromDOMNode, $getNodeByKey, $nodesOfType } from 'lexical';
 import { ChevronDown } from 'lucide-react';
-import { JSX, useCallback, useEffect, useRef, useState } from 'react';
+import { JSX, useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 
@@ -27,13 +27,19 @@ interface DropdownOption {
 function CodeMenuDropdown({
   value,
   options,
-  onChange
+  onChange,
+  onOpenChange
 }: {
   value: string;
   options: DropdownOption[];
   onChange: (val: string) => void;
+  onOpenChange?: (isOpen: boolean) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-end',
     whileElementsMounted: (reference, floating, update) =>
@@ -116,7 +122,11 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
   const [lang, setLang] = useState('');
   const [theme, setTheme] = useState('github-light');
 
-  const codeDOMNodeRef = useRef<HTMLElement | null>(null);
+  const [codeElement, setCodeElement] = useState<HTMLElement | null>(null);
+
+  const [isHoveringCode, setIsHoveringCode] = useState(false);
+  const [isHoveringMenu, setIsHoveringMenu] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Floating instance for the container relative to the code block
   const { refs, x, y } = useFloating({
@@ -136,15 +146,15 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
       const codeNode = $getNodeByKey(codeNodeKey);
 
       if ($isCodeNode(codeNode)) {
-        const codeElement = editor.getElementByKey(codeNodeKey);
-        if (codeElement) {
-          codeDOMNodeRef.current = codeElement;
-          refs.setReference(codeElement);
+        const elem = editor.getElementByKey(codeNodeKey);
+        if (elem) {
+          setCodeElement(elem);
+          refs.setReference(elem);
           setLang(codeNode.getLanguage() || '');
           setTheme(codeNode.getTheme() || 'github-light');
         }
       } else {
-        codeDOMNodeRef.current = null;
+        setCodeElement(null);
         refs.setReference(null);
       }
     });
@@ -157,10 +167,25 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
     });
   }, [editor, updateMenu]);
 
+  useEffect(() => {
+    if (!codeElement) return;
+
+    const handleMouseEnter = () => setIsHoveringCode(true);
+    const handleMouseLeave = () => setIsHoveringCode(false);
+
+    codeElement.addEventListener('mouseenter', handleMouseEnter);
+    codeElement.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      codeElement.removeEventListener('mouseenter', handleMouseEnter);
+      codeElement.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [codeElement]);
+
   const handleLanguageChange = (newLang: string) => {
     editor.update(() => {
-      if (codeDOMNodeRef.current) {
-        const maybeCodeNode = $getNearestNodeFromDOMNode(codeDOMNodeRef.current);
+      if (codeElement) {
+        const maybeCodeNode = $getNearestNodeFromDOMNode(codeElement);
         if ($isCodeNode(maybeCodeNode)) {
           maybeCodeNode.setLanguage(newLang);
         }
@@ -171,8 +196,8 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
 
   const handleThemeChange = (newTheme: string) => {
     editor.update(() => {
-      if (codeDOMNodeRef.current) {
-        const maybeCodeNode = $getNearestNodeFromDOMNode(codeDOMNodeRef.current);
+      if (codeElement) {
+        const maybeCodeNode = $getNearestNodeFromDOMNode(codeElement);
         if ($isCodeNode(maybeCodeNode)) {
           maybeCodeNode.setTheme(newTheme);
         }
@@ -181,7 +206,9 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
     setTheme(newTheme);
   };
 
-  if (!codeDOMNodeRef.current) return null;
+  const showMenu = isHoveringCode || isHoveringMenu || isDropdownOpen;
+
+  if (!codeElement) return null;
 
   const codeFriendlyName = getLanguageFriendlyName(lang);
 
@@ -193,7 +220,12 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
         position: 'absolute',
         top: y ?? 0,
         left: x ?? 0,
+        opacity: showMenu ? 1 : 0,
+        pointerEvents: showMenu ? 'auto' : 'none',
+        transition: 'opacity 0.15s ease',
       }}
+      onMouseEnter={() => setIsHoveringMenu(true)}
+      onMouseLeave={() => setIsHoveringMenu(false)}
     >
       <CodeMenuDropdown
         value={codeFriendlyName || 'Plain Text'}
@@ -202,6 +234,7 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
           label: language ? getLanguageFriendlyName(language) : 'Plain Text',
         }))}
         onChange={handleLanguageChange}
+        onOpenChange={setIsDropdownOpen}
       />
       <CodeMenuDropdown
         value={theme}
@@ -210,6 +243,7 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
           label: name,
         }))}
         onChange={handleThemeChange}
+        onOpenChange={setIsDropdownOpen}
       />
     </div>
   );
