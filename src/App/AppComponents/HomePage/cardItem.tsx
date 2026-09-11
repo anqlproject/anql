@@ -4,10 +4,12 @@ import { Calendar, Check, Clock, MoreVertical, Square } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { duplicateDocument } from '@/App/AppComponents/duplicateDocument';
 import { useExportDocument } from "@/App/AppComponents/ImportExport/exportDocument";
 import { useFile } from '@/App/hooks/FileHooks';
 import { useGlobalToast } from '@/App/hooks/useGlobalToast';
 import { Button } from '@/components/ui/button';
+import { getNodesByDocumentId } from '@/core/database/useBlocDatabase';
 import { DocumentsJson, updateDocumentPath } from '@/core/database/useDocumentDatabase';
 import { TOAST_DURATION } from '@/core/global/defaultValues';
 import { MoveToTrash } from '@/core/TrashSystem/TrashSystem';
@@ -98,6 +100,19 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
     }
   };
 
+  const handleDuplicate = async () => {
+    try {
+      const nodes = await getNodesByDocumentId(document.id);
+      await duplicateDocument(
+        document,
+        nodes,
+        `${document.title || t('HOME_PAGE.untitled')} (copy)`,
+      );
+    } catch (error) {
+      console.error('Failed to duplicate document:', error);
+    }
+  };
+
   const handleMenuOpen = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     if (isNativeMenuOpening.current) return;
@@ -121,7 +136,11 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
           action: handleExport,
         },
         {
-          text: t("HOME_PAGE.delete") as string,
+          text: t("DOCUMENT_MENU.duplicateDocument") as string,
+          action: handleDuplicate,
+        },
+        {
+          text: t("DOCUMENT_MENU.deleteDocument") as string,
           action: handleDelete,
         },
       ];
@@ -179,8 +198,8 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
           <span
             className="document-card__date"
             title={isModifiedDate
-              ? `Modified: ${new Date(document.updated_at).toLocaleString()}`
-              : `Created: ${new Date(document.created_at).toLocaleString()}`
+              ? `${t('HOME_PAGE.updatedAt')}: ${new Date(document.updated_at).toLocaleString()}`
+              : `${t('HOME_PAGE.createdAt')}: ${new Date(document.created_at).toLocaleString()}`
             }
           >
             {formatDate(displayDate)}

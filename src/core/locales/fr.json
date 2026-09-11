@@ -108,7 +108,7 @@
       "export": "Exporter",
       "exportDocument": "Exporter le document",
       "newDocument": "Nouveau document",
-      "deleteDocument": "Supprimer",
+      "deleteDocument": "Placer dans la corbeille",
       "copyDocumentId": "Copier l'ID",
       "duplicateDocument": "Dupliquer",
       "switchToReadMode": "Passer au mode lecture",

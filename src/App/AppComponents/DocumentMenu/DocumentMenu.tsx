@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 
+import { duplicateDocument } from "@/App/AppComponents/duplicateDocument";
 import { useExportDocument } from "@/App/AppComponents/ImportExport/exportDocument";
 import LocalSearch from "@/App/AppComponents/LocalSearch/LocalSearch";
 import { navigationUtils } from "@/App/AppComponents/navigationUtils";
@@ -14,15 +15,13 @@ import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
 import { useFile } from "@/App/hooks/FileHooks";
 import { useGlobalToast } from "@/App/hooks/useGlobalToast";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
-import { newNode } from "@/core/database/useBlocDatabase";
+import { NodeJson } from "@/core/database/useBlocDatabase";
 import {
   DocumentMetadataKey,
   DocumentsJson,
-  newDocument,
   updateDocumentMetadataField,
   updateDocumentPath,
 } from "@/core/database/useDocumentDatabase";
-import { addRecentDocument } from "@/core/database/useRecentDocumentsDatabase";
 import { ICON_SIZES, TOAST_DURATION } from "@/core/global/defaultValues";
 import { logger } from "@/core/logger";
 import { MoveToTrash } from "@/core/TrashSystem/TrashSystem";
@@ -134,53 +133,37 @@ export const DocumentMenu = () => {
             const editorState = editor.getEditorState();
             const jsonState = editorState.toJSON();
 
-            // Create new document
-            const newDocumentItem = {
-              id: crypto.randomUUID(),
-              title: doc.title + " (copy)",
-              path: doc.path,
-              workspace_id: doc.workspace_id || "default",
-              cache: JSON.stringify(jsonState),
-              created_at: Date.now(),
-              updated_at: Date.now(),
-            };
-
-            await newDocument(newDocumentItem);
-
-            // Add to recent documents
-            try {
-              await addRecentDocument(newDocumentItem.id, "");
-            } catch (error) {
-              console.error("Failed to add to recent documents:", error);
-            }
-
-            // Create nodes from the existing editor state
-            const createNodesFromState = (node: any, documentId: string) => {
+            const nodes: NodeJson[] = [];
+            const collectNodesFromState = (node: any) => {
               if (node.children && Array.isArray(node.children)) {
                 node.children.forEach((child: any) => {
                   if (child.$ && child.$.id) {
-                    const newNodeItem = {
+                    nodes.push({
                       id: child.$.id,
                       position: child.$.position || "aa",
                       content: JSON.stringify(child),
                       full_text: "",
-                      document_id: documentId,
+                      document_id: doc.id,
                       node_type: child.$.node_type || "paragraph",
                       created_at: Date.now(),
                       updated_at: Date.now(),
-                    };
-                    newNode(newNodeItem);
+                    });
                   }
-                  createNodesFromState(child, documentId);
+                  collectNodesFromState(child);
                 });
               }
             };
 
             if (jsonState.root) {
-              createNodesFromState(jsonState.root, newDocumentItem.id);
+              collectNodesFromState(jsonState.root);
             }
 
-            // Open the new document
+            const newDocumentItem = await duplicateDocument(
+              doc,
+              nodes,
+              `${doc.title} (copy)`,
+            );
+
             handleNewFile(newDocumentItem.title);
           });
         }
