@@ -204,12 +204,23 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     const [isEditing, setIsEditing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isActiveMatch, setIsActiveMatch] = useState(false);
+    const editorRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
     const type = columnDef.meta?.type || 'text';
 
     const tableRef = useRef(table);
     useEffect(() => {
         tableRef.current = table;
     }, [table]);
+
+    // Focus the input when entering edit mode
+    useEffect(() => {
+        if (!isEditing || !editorRef.current) return;
+
+        const editor = editorRef.current;
+        editor.focus();
+        const caretPosition = editor.value.length;
+        editor.setSelectionRange(caretPosition, caretPosition);
+    }, [isEditing]);
 
     const handleBlur = (currentValue: string | number | boolean | null | undefined) => {
         setIsEditing(false);
@@ -385,6 +396,9 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
         return (
             <div className="table-input-wrapper">
                 <input
+                    ref={(element) => {
+                        editorRef.current = element;
+                    }}
                     // eslint-disable-next-line jsx-a11y/no-autofocus
                     autoFocus
                     type="number"
@@ -431,6 +445,9 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
                 onKeyDown={() => undefined}
             />
             <textarea
+                ref={(element) => {
+                    editorRef.current = element;
+                }}
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
                 value={typeof value === 'string' ? value : ''}
