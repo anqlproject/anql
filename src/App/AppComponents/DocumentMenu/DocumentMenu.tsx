@@ -106,7 +106,11 @@ export const DocumentMenu = () => {
       },
     },
     {
-      text: t("DOCUMENT_MENU.readModeToggle") as string,
+      text: t(
+        isEditable
+          ? "DOCUMENT_MENU.switchToReadMode"
+          : "DOCUMENT_MENU.switchToWriteMode",
+      ) as string,
       action: async () => {
         const newEditableState = !editor.isEditable();
         editor.setEditable(newEditableState);

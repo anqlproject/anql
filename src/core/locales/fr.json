@@ -104,7 +104,8 @@
       "deleteDocument": "Supprimer",
       "copyDocumentId": "Copier l'ID",
       "duplicateDocument": "Dupliquer",
-      "readModeToggle": "Mode lecture",
+      "switchToReadMode": "Passer au mode lecture",
+      "switchToWriteMode": "Passer au mode écriture",
       "searchInDocument": "Rechercher"
     },
     "SIDEBAR": {
