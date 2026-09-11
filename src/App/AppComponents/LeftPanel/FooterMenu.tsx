@@ -36,6 +36,7 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
                 setIsOpen(false);
                 setSettingsOverlayOpen(true);
             },
+            accelerator: 'CmdOrCtrl+,',
         },
         {
             text: (resolvedTheme === 'dark' ? t('FOOTER_MENU.switchToLightMode') : t('FOOTER_MENU.switchToDarkMode')) as string,
