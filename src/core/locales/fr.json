@@ -43,7 +43,7 @@
       "table": "Tableau",
       "image": "Image",
       "line": "Ligne",
-      "math": "Expression mathématique",
+      "math": "Expression mathématique (tapez @ pour les possibilités)",
       "emptyPlaceholder": "Écrivez ou tapez le nom du nœud"
     },
     "MATH_PANEL": {

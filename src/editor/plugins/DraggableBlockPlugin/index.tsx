@@ -8,19 +8,15 @@
 import "./index.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getNearestNodeOfType } from "@lexical/utils";
-import { $getNearestNodeFromDOMNode, $getSelection, $isRangeSelection } from "lexical";
-import { GripVertical, SquareSigma } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import type { JSX } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CreateNode from "@/App/AppComponents/CreateNode/CreateNode";
 import { NodeHighlight } from "@/App/AppComponents/NodeHighlight/NodeHighlight";
 import { MenuPosition } from "@/components/custom/Menu/Menu";
-import { MathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 
-import MathPanel from "../../../App/AppComponents/MathPanel/MathPanel";
 import { DraggableBlockPlugin_EXPERIMENTAL } from './LexicalDraggableBlockPlugin';
 import NodeMenu from "./NodeMenu";
 
@@ -52,8 +48,8 @@ export default function DraggableBlockPlugin({
   const [draggableElement, setDraggableElement] = useState<HTMLElement | null>(
     null,
   );
-  const [isMathNode, setIsMathNode] = useState(false);
-  const [activeMathNodeKey, setActiveMathNodeKey] = useState<string | null>(null);
+
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const [menuPosition, setMenuPosition] = useState<MenuPosition>({
@@ -64,56 +60,6 @@ export default function DraggableBlockPlugin({
   const [showSelectNodeMenu, setShowSelectNodeMenu] = useState(false);
   const [selectNodeMenuPosition, setSelectNodeMenuPosition] =
     useState<MenuPosition>({ x: 0, y: 0 });
-  const [showMath, setShowMath] = useState(false);
-  const [mathPosition, setMathPosition] = useState<MenuPosition>({ x: 0, y: 0 });
-  const [mathCaretPosition, setMathCaretPosition] = useState({ x: 0, y: 0 });
-  const [showMathCaret, setShowMathCaret] = useState(false);
-  const [mathCaretTimestamp, setMathCaretTimestamp] = useState(0);
-  const [mathSelectionRects, setMathSelectionRects] = useState<DOMRect[]>([]);
-
-  // Detect if caret is inside a MathNode AND hovered draggableElement is also a MathExpNode
-  useEffect(() => {
-    const updateMathNodeState = () => {
-      editor.read(() => {
-        const selection = $getSelection();
-        let caretMathNodeKey: string | null = null;
-
-        if ($isRangeSelection(selection)) {
-          const anchorNode = selection.anchor.getNode();
-          const mathNode = $getNearestNodeOfType(anchorNode, MathExpNode);
-          if (mathNode) {
-            caretMathNodeKey = mathNode.getKey();
-          }
-        }
-
-        // Get the Lexical node from the hovered DOM element
-        const hoveredNode = draggableElement
-          ? $getNearestNodeFromDOMNode(draggableElement)
-          : null;
-        const hoveredIsMathNode = hoveredNode instanceof MathExpNode;
-
-        // The button should only appear if the hovered node is the EXACT SAME math node as the caret
-        if (caretMathNodeKey && hoveredIsMathNode && hoveredNode) {
-          if (caretMathNodeKey === hoveredNode.getKey()) {
-            setIsMathNode(true);
-            setActiveMathNodeKey(caretMathNodeKey);
-          } else {
-            setIsMathNode(false);
-            setActiveMathNodeKey(null);
-          }
-        } else {
-          setIsMathNode(false);
-          setActiveMathNodeKey(null);
-        }
-      });
-    };
-
-    updateMathNodeState();
-
-    return editor.registerUpdateListener(() => {
-      updateMathNodeState();
-    });
-  }, [editor, draggableElement]);
 
   return (
     <>
@@ -124,57 +70,6 @@ export default function DraggableBlockPlugin({
         scrollRef={scrollRef}
         menuComponent={
           <div ref={menuRef} className="draggable-block-menu">
-            {isMathNode ? (
-              <button
-                title="Math functions"
-                className="math-panel-button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setMathPosition(rect);
-
-                  // Restore focus in case the editor was blurred
-                  editor.focus();
-
-                  // Wait for Lexical to restore the DOM selection
-                  setTimeout(() => {
-                    const domSel = window.getSelection();
-                    if (domSel && domSel.rangeCount > 0) {
-                      const range = domSel.getRangeAt(0);
-                      const editorRoot = editor.getRootElement();
-                      if (editorRoot && editorRoot.contains(range.commonAncestorContainer)) {
-                        if (!range.collapsed) {
-                          setMathSelectionRects(Array.from(range.getClientRects()));
-                          setShowMathCaret(false);
-                        } else {
-                          setMathSelectionRects([]);
-                          const rects = range.getClientRects();
-                          if (rects.length > 0) {
-                            setMathCaretPosition({ x: rects[0].left, y: rects[0].top });
-                            setShowMathCaret(true);
-                            setMathCaretTimestamp(Date.now());
-                          }
-                        }
-                      } else {
-                        setMathSelectionRects([]);
-                        setShowMathCaret(false);
-                      }
-                    } else {
-                      setMathSelectionRects([]);
-                      setShowMathCaret(false);
-                    }
-
-                    setShowMath(true);
-                  }, 10);
-                }}
-              >
-                <SquareSigma size={18} />
-              </button>
-            ) : (
-              <div style={{ width: '18px', flexShrink: 0 }} /> /* Placeholder to keep drag handle fixed */
-            )}
             <div
               title={t("DRAGGABLE_BLOCK.menuTitle") as string}
               className="drag-handle"
@@ -193,9 +88,9 @@ export default function DraggableBlockPlugin({
         targetLineComponent={
           <div ref={targetLineRef} className="draggable-block-target-line" />
         }
-        isOnMenu={(element) => isMenuOpen || showSelectNodeMenu || showMath || isElementOnMenu(element)}
+        isOnMenu={(element) => isMenuOpen || showSelectNodeMenu || isElementOnMenu(element)}
         onElementChanged={(elem) => {
-          if (elem === null && (isMenuOpen || showSelectNodeMenu || showMath)) {
+          if (elem === null && (isMenuOpen || showSelectNodeMenu)) {
             return;
           }
           setDraggableElement(elem);
@@ -210,24 +105,6 @@ export default function DraggableBlockPlugin({
         isMenuOpen={showSelectNodeMenu}
         menuPosition={selectNodeMenuPosition}
       />
-
-      {/* Math Help Panel */}
-      {showMath && (
-        <MathPanel
-          isOpen={showMath}
-          onClose={() => {
-            setShowMath(false);
-            setShowMathCaret(false);
-          }}
-          position={mathPosition}
-          editor={editor}
-          caretPosition={mathCaretPosition}
-          showCaret={showMathCaret}
-          caretTimestamp={mathCaretTimestamp}
-          selectionRects={mathSelectionRects}
-          activeNodeKey={activeMathNodeKey}
-        />
-      )}
 
       {/* Rendered via portal to document.body to avoid CSS transform offset from drag handle container */}
       {isMenuOpen &&

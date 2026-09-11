@@ -14,9 +14,10 @@ import {
 } from "lexical";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import { MATH_CATEGORIES, MathItem } from "@/App/AppComponents/MathPanel/MathPanel";
 import { useMathVariables } from "@/editor/context/MathVariablesContext";
 import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
+
+import { MATH_CATEGORIES, MathItem } from "./mathCatalog";
 
 class MathAutocompleteOption extends MenuOption {
   title: string;
@@ -33,8 +34,20 @@ class MathAutocompleteOption extends MenuOption {
 
 // Regex to match math variables (e.g., Tab, Table1, sin, Table1.Col[1])
 const MATCH_MATH_VARIABLE_REGEX = /(?:^|[\s(+\-*/,])([a-zA-Z_][a-zA-Z0-9_.[\]]*)$/;
+const MATCH_MATH_MENU_REGEX = /(?:^|[\s(+\-*/,])@([a-zA-Z_][a-zA-Z0-9_.[\]]*)?$/;
 
 function checkForMatch(text: string) {
+  const menuMatch = MATCH_MATH_MENU_REGEX.exec(text);
+  if (menuMatch !== null) {
+    const query = menuMatch[1] ?? "";
+    const atOffset = menuMatch.index + menuMatch[0].lastIndexOf("@");
+    return {
+      leadOffset: atOffset,
+      matchingString: query,
+      replaceableString: `@${query}`,
+    };
+  }
+
   const match = MATCH_MATH_VARIABLE_REGEX.exec(text);
   if (match !== null) {
     const matchingString = match[1];
@@ -238,7 +251,8 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
       return false;
     });
 
-    return filteredOptions.slice(0, 15).map(item => new MathAutocompleteOption(item.label, item.insert, item.isVariable));
+    const visibleOptions = queryString.trim() ? filteredOptions.slice(0, 15) : filteredOptions;
+    return visibleOptions.map(item => new MathAutocompleteOption(item.label, item.insert, item.isVariable));
   }, [queryString, variables, tableVariables]);
 
   const onSelectOption = useCallback(

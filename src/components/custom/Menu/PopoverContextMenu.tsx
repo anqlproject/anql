@@ -6,7 +6,7 @@ import { useCallback } from "react";
 
 import { MenuItem, MenuItemProps } from "./MenuItem";
 import { SubMenu } from "./SubMenu";
-import { MenuPosition,useMenuLogic } from "./useMenuLogic";
+import { MenuPosition, useMenuLogic } from "./useMenuLogic";
 
 export interface PopoverContextMenuProps {
   items: (MenuItemProps & { submenu?: MenuItemProps[] })[];

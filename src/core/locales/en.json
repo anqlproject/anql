@@ -43,7 +43,7 @@
       "table": "Table",
       "image": "Image",
       "line": "Line",
-      "math": "Math expression",
+      "math": "Math expression (type @ for options)",
       "emptyPlaceholder": "Write or type node name"
     },
     "MATH_PANEL": {
