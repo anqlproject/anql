@@ -165,7 +165,7 @@ export default function CreateNode({ anchorElem, draggableElement, onMenuPositio
       if (!isMenuOpen || !editorRef.current) return;
       const editorRect = editorRef.current.getBoundingClientRect();
       onMenuPositionChange?.({
-        x: editorRect.left + relativePositionRef.current.x,
+        x: editorRect.left,
         y: editorRect.top + relativePositionRef.current.y,
       });
     };

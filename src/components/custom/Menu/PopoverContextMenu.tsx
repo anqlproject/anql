@@ -45,7 +45,7 @@ export function PopoverContextMenu({
 
   const getAnchorPos = useCallback(() => {
     const x = posX ? posX + 10 : 10;
-    const y = posY ? posY + 20 : 20;
+    const y = posY ? posY : 20;
     return { x, y };
   }, [posX, posY]);
 
@@ -128,6 +128,7 @@ export function PopoverContextMenu({
           }
           align={align || (direction === "top" || direction === "bottom" ? "end" : "start")}
           sideOffset={5}
+          avoidCollisions
           onInteractOutside={(e) => {
             // Check if click was inside submenu, if so, don't close
             const target = e.target as Node;
