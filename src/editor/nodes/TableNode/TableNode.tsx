@@ -267,9 +267,10 @@ export class TableNode extends DecoratorBlockNode {
         .map((rowData) => {
           return `<tr>${this.__columns
             .map((col) => {
+              const value = col.id ? rowData[col.id] : undefined;
               const cellContent =
-                col.id && rowData[col.id]
-                  ? String(rowData[col.id])
+                value !== null && value !== undefined && value !== ""
+                  ? String(value)
                   : "";
               const cellStyle = "border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; color: var(--text-primary); height: 36px; white-space: pre-wrap; overflow-wrap: break-word;";
 

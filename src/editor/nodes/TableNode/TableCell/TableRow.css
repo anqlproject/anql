@@ -54,8 +54,8 @@
 /* ── Gutter & row handle ── */
 
 .table-gutter {
-  flex: 0 0 24px;
-  width: 24px;
+  flex: 0 0 0;
+  width: 0;
   position: relative;
   display: flex;
   align-items: center;

@@ -3,14 +3,37 @@
 .table-input-wrapper {
   position: relative;
   width: 100%;
+  align-self: stretch;
   min-height: 36px;
   display: flex;
   align-items: center;
 }
 
+.table-cell-editor {
+  position: relative;
+  width: 100%;
+  align-self: stretch;
+  min-height: 36px;
+}
+
+.table-cell-editor-measure {
+  visibility: hidden;
+  pointer-events: none;
+  height: auto;
+}
+
+.table-cell-editor-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .table-input {
   width: 100%;
   min-height: 36px;
+  resize: none;
+  overflow: hidden;
   padding: 6px 8px;
   border: none;
   outline: none;
@@ -20,6 +43,15 @@
   color: var(--text-primary);
   border-radius: 2px;
   transition: background-color 100ms, box-shadow 100ms;
+}
+
+textarea.table-input {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .table-cell--header .table-input {
@@ -57,10 +89,13 @@
 
 .table-cell-display {
   width: 100%;
+  height: 100%;
+  align-self: stretch;
   min-height: 36px;
   padding: 6px 8px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  box-sizing: border-box;
   font-size: 14px;
   line-height: 1.4;
   color: var(--text-primary);

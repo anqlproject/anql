@@ -420,8 +420,17 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     }
 
     return (
-        <div className="table-input-wrapper">
-            <input
+        <div className="table-cell-editor">
+            <DisplayCell
+                value={value}
+                type="text"
+                searchQuery=""
+                isActiveMatch={false}
+                isEditable={false}
+                onStartEdit={() => undefined}
+                onKeyDown={() => undefined}
+            />
+            <textarea
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
                 value={typeof value === 'string' ? value : ''}
@@ -431,8 +440,14 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
                 }}
                 onBlur={(e) => handleBlur(e.target.value)}
                 onMouseDown={handleMouseDown}
-                onKeyDown={(e) => handleCellKeyDown(e, table, index, id, exitEdit)}
-                className="table-input"
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.stopPropagation();
+                        return;
+                    }
+                    handleCellKeyDown(e, table, index, id, exitEdit);
+                }}
+                className="table-input table-cell-editor-input"
                 placeholder={String(t('TABLE.placeholderText'))}
                 disabled={!isEditable}
             />

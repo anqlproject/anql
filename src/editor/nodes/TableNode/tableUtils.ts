@@ -26,7 +26,22 @@ export function ensureRowId(row: TableRowData): TableRowData & { _rowId: string 
  * Generates missing IDs while preserving existing ones.
  */
 export function ensureRowIds(rows: TableRowData[]): (TableRowData & { _rowId: string })[] {
-  return rows.map(ensureRowId);
+  const usedIds = new Set<string>();
+
+  return rows.map((row) => {
+    if (row._rowId && !usedIds.has(row._rowId)) {
+      usedIds.add(row._rowId);
+      return row as TableRowData & { _rowId: string };
+    }
+
+    let rowWithId: TableRowData & { _rowId: string };
+    do {
+      rowWithId = ensureRowId({ ...row, _rowId: undefined });
+    } while (usedIds.has(rowWithId._rowId));
+
+    usedIds.add(rowWithId._rowId);
+    return rowWithId;
+  });
 }
 
 export function focusCellInput(

@@ -548,7 +548,7 @@ export function TableComponent({
     ? table.getRowModel().rows.find((r) => r.original._rowId === activeRowId)
     : null;
 
-  const totalWidth = table.getCenterTotalSize() + 48;
+  const totalWidth = table.getCenterTotalSize();
 
   const collisionDetection: CollisionDetection = useCallback((args) => {
     const activeId = String(args.active.id);
