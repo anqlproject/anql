@@ -33,18 +33,21 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
         {
             text: t('FOOTER_MENU.generalSettings') as string,
             action: () => {
+                setIsOpen(false);
                 setSettingsOverlayOpen(true);
             },
         },
         {
             text: (resolvedTheme === 'dark' ? t('FOOTER_MENU.switchToLightMode') : t('FOOTER_MENU.switchToDarkMode')) as string,
             action: () => {
+                setIsOpen(false);
                 toggleTheme();
             },
         },
         {
-            text: t('SIDEBAR.trash') as string,
+            text: t('FOOTER_MENU.openTrash') as string,
             action: () => {
+                setIsOpen(false);
                 onOpenTrash?.();
             },
         },
@@ -54,12 +57,14 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
         {
             text: t('FOOTER_MENU.getHelp') as string,
             action: () => {
+                setIsOpen(false);
                 setIsHelpOpen(true);
             },
         },
         {
             text: t('FOOTER_MENU.about') as string,
             action: () => {
+                setIsOpen(false);
                 onOpenAbout?.();
             },
         },
