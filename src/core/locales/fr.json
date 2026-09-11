@@ -112,7 +112,7 @@
       "duplicateDocument": "Dupliquer",
       "switchToReadMode": "Passer au mode lecture",
       "switchToWriteMode": "Passer au mode écriture",
-      "searchInDocument": "Rechercher"
+      "searchInDocument": "Rechercher dans le document"
     },
     "SIDEBAR": {
       "home": "Accueil",
@@ -322,11 +322,12 @@
       "confirmEmptyTrash": "Êtes-vous sûr de vouloir vider la corbeille ? Cette action supprimera définitivement {{count}} élément(s)."
     },
     "FOOTER_MENU": {
-      "generalSettings": "Paramètres généraux",
+      "generalSettings": "Paramètres de l'application",
       "switchToLightMode": "Passer au mode clair",
       "switchToDarkMode": "Passer au mode sombre",
-      "getHelp": "Obtenir de l'aide",
-      "about": "À propos"
+      "openTrash": "Ouvrir la corbeille",
+      "getHelp": "Ouvrir le centre d'aide",
+      "about": "À propos d'ANQL"
     },
     "HELP_PANEL": {
       "title": "Documentation d'aide",

@@ -112,7 +112,7 @@
       "duplicateDocument": "Duplicate",
       "switchToReadMode": "Switch to read mode",
       "switchToWriteMode": "Switch to write mode",
-      "searchInDocument": "Find"
+      "searchInDocument": "Find in document"
     },
     "SIDEBAR": {
       "home": "Home",
@@ -322,11 +322,12 @@
       "confirmEmptyTrash": "Are you sure you want to empty the trash? This action will permanently delete {{count}} item(s)."
     },
     "FOOTER_MENU": {
-      "generalSettings": "General settings",
+      "generalSettings": "App settings",
       "switchToLightMode": "Switch to light mode",
       "switchToDarkMode": "Switch to dark mode",
-      "getHelp": "Get help",
-      "about": "About"
+      "openTrash": "Open trash",
+      "getHelp": "Open help center",
+      "about": "About ANQL"
     },
     "HELP_PANEL": {
       "title": "Help Documentation",
