@@ -1,6 +1,7 @@
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
+import type { Menu as TauriMenu } from "@tauri-apps/api/menu";
 import {
   $createParagraphNode,
   $getNearestNodeFromDOMNode,
@@ -13,7 +14,7 @@ import {
   LexicalEditor,
   LexicalNode,
 } from "lexical";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 
@@ -26,6 +27,14 @@ import { $createListNode, $isListNode } from "@/editor/nodes/ListNode";
 import { $isPdfNode } from "@/editor/nodes/PdfNode/PdfNode";
 import { safeWriteText } from "@/editor/plugins/ContextMenuPlugin/contextMenuActions";
 import { EDITOR_SHORTCUTS } from "@/GlobalState/shortcutStore";
+
+type NativeMenuItem = {
+  text?: string;
+  accelerator?: string;
+  item?: "Separator";
+  action?: () => void | Promise<void>;
+  items?: NativeMenuItem[];
+};
 
 export default function NodeMenu({
   isMenuOpen,
@@ -117,7 +126,6 @@ export default function NodeMenu({
             "code",
             "list",
             "listitem",
-            "list",
           ];
           const allAllowed = topLevelNodes.every((n) =>
             allowedTypes.includes(n.getType()),
@@ -177,7 +185,7 @@ export default function NodeMenu({
     return ids;
   };
 
-  const calculateMenuDimensions = (items: any[]) => {
+  const calculateMenuDimensions = (items: NativeMenuItem[]) => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
     if (context) {
@@ -204,32 +212,31 @@ export default function NodeMenu({
     return { width: Math.ceil(width), height };
   };
 
-  const menuItems: any[] = [
+  const insertParagraph = useCallback((position: "above" | "below") => {
+    editor.update(() => {
+      if (!nodeRef.current) return;
+
+      const paragraphNode = $createParagraphNode();
+      if (position === "above") {
+        nodeRef.current.insertBefore(paragraphNode);
+      } else {
+        nodeRef.current.insertAfter(paragraphNode);
+      }
+      paragraphNode.select();
+    });
+    setIsMenuOpen(false);
+  }, [editor, setIsMenuOpen]);
+
+  const menuItems: NativeMenuItem[] = useMemo(() => [
     {
       text: t("NODE_MENU.addAbove") as string,
       accelerator: "Alt+Shift+Up",
-      action: () => {
-        editor.update(() => {
-          if (!nodeRef.current) return;
-          const pNode = $createParagraphNode();
-          nodeRef.current.insertBefore(pNode);
-          pNode.select();
-        });
-        setIsMenuOpen(false);
-      },
+      action: () => insertParagraph("above"),
     },
     {
       text: t("NODE_MENU.addBelow") as string,
       accelerator: "Alt+Shift+Down",
-      action: () => {
-        editor.update(() => {
-          if (!nodeRef.current) return;
-          const pNode = $createParagraphNode();
-          nodeRef.current.insertAfter(pNode);
-          pNode.select();
-        });
-        setIsMenuOpen(false);
-      },
+      action: () => insertParagraph("below"),
     },
     {
       item: "Separator",
@@ -261,7 +268,7 @@ export default function NodeMenu({
     ...(canTransform
       ? [
         {
-          text: t("NODE_MENU.transformMenu") as string,
+          text: t("NODE_MENU.transform") as string,
           items: [
             {
               text: t("NODE_MENU.normal") as string,
@@ -462,7 +469,7 @@ export default function NodeMenu({
         });
       },
     },
-  ];
+  ], [canTransform, dynamicState, editor, insertParagraph, isCodeNode, setIsMenuOpen, showToast, t]);
 
   useEffect(() => {
     if (!isMenuOpen || !isMenuReady || isNativeMenuOpening.current) return;
@@ -476,7 +483,9 @@ export default function NodeMenu({
         ]);
 
         const menuDimensions = calculateMenuDimensions(menuItems);
-        const nativeMenu = await Menu.new({ items: menuItems });
+        const nativeMenu = await Menu.new({
+          items: menuItems as unknown as NonNullable<Parameters<typeof TauriMenu.new>[0]>["items"],
+        });
         const position = menuPosition
           ? new LogicalPosition(
             Math.max(8, menuPosition.x - menuDimensions.width),
