@@ -10,7 +10,7 @@ import {
   REDO_COMMAND,
   UNDO_COMMAND,
 } from "lexical";
-import { Code, File, Link2, SquareSigma, Timer } from "lucide-react";
+
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -79,33 +79,29 @@ export function ContextMenuItems(
     };
   }, [editor]);
 
-  const { isMac } = useGlobalStore(
-    useShallow((state) => ({ isMac: state.isMac })),
-  );
   const isEditable = editor.isEditable();
-  const ICON_SIZE = ICON_SIZES.default;
 
-  const allContextMenuItems = [
+  const allContextMenuItems: any[] = [
     {
-      title: t("CONTEXT_MENU.copy") as string,
-      shortcut: isMac ? "⌘C" : "Ctrl+C",
-      onClick: () => {
+      text: t("CONTEXT_MENU.copy") as string,
+      accelerator: "CmdOrControl+C",
+      action: () => {
         handleCopy(editor)();
         setIsMenuOpen(false);
       },
     },
     {
-      title: t("CONTEXT_MENU.cut") as string,
-      shortcut: isMac ? "⌘X" : "Ctrl+X",
-      onClick: () => {
+      text: t("CONTEXT_MENU.cut") as string,
+      accelerator: "CmdOrControl+X",
+      action: () => {
         handleCut(editor)();
         setIsMenuOpen(false);
       },
     },
     {
-      title: t("CONTEXT_MENU.paste") as string,
-      shortcut: isMac ? "⌘V" : "Ctrl+V",
-      onClick: () => {
+      text: t("CONTEXT_MENU.paste") as string,
+      accelerator: "CmdOrControl+V",
+      action: () => {
         handlePaste(editor)();
         setIsMenuOpen(false);
       },
@@ -113,13 +109,11 @@ export function ContextMenuItems(
     ...(!isInsideCodeNode && !isInsideMathNode
       ? [
           {
-            title: t("CONTEXT_MENU.insert") as string,
-            hasSubmenu: true,
-            submenu: [
+            text: t("CONTEXT_MENU.insert") as string,
+            items: [
               {
-                icon: <Timer size={ICON_SIZE} />,
-                title: t("INLINES.date") as string,
-                onClick: () => {
+                text: t("INLINES.date") as string,
+                action: () => {
                   editor.dispatchCommand(INSERT_DATETIME_COMMAND, {
                     dateTime: new Date(),
                   });
@@ -127,9 +121,8 @@ export function ContextMenuItems(
                 },
               },
               {
-                icon: <SquareSigma size={ICON_SIZE} />,
-                title: t("INLINES.equation") as string,
-                onClick: () => {
+                text: t("INLINES.equation") as string,
+                action: () => {
                   setIsMenuOpen(false);
                   showModal("Insert Equation", (onClose) => (
                     <InsertEquationDialog
@@ -140,25 +133,22 @@ export function ContextMenuItems(
                 },
               },
               {
-                icon: <Link2 size={ICON_SIZE} />,
-                title: "Link",
-                onClick: () => {
+                text: "Link",
+                action: () => {
                   setCustomLinkDialog({});
                   setIsMenuOpen(false);
                 },
               },
               {
-                icon: <Code size={ICON_SIZE} />,
-                title: t("INLINES.inlineCode") as string,
-                onClick: () => {
+                text: t("INLINES.inlineCode") as string,
+                action: () => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
                   setIsMenuOpen(false);
                 },
               },
               {
-                icon: <File size={ICON_SIZE} />,
-                title: "PDF",
-                onClick: () => {
+                text: "PDF",
+                action: () => {
                   setPdfDialog(true);
                   setIsMenuOpen(false);
                 },
@@ -168,31 +158,31 @@ export function ContextMenuItems(
         ]
       : []),
     {
-      isSeparator: true,
+      item: 'Separator',
     },
     {
-      title: t("CONTEXT_MENU.undo") as string,
-      shortcut: isMac ? "⌘Z" : "Ctrl+Z",
-      onClick: () => {
+      text: t("CONTEXT_MENU.undo") as string,
+      accelerator: "CmdOrControl+Z",
+      action: () => {
         editor.dispatchCommand(UNDO_COMMAND, undefined);
         setIsMenuOpen(false);
       },
-      disabled: !canUndo,
+      enabled: canUndo,
     },
     {
-      title: t("CONTEXT_MENU.redo") as string,
-      shortcut: isMac ? "⌘⇧Z" : "Ctrl+Shift+Z",
-      onClick: () => {
+      text: t("CONTEXT_MENU.redo") as string,
+      accelerator: "CmdOrControl+Shift+Z",
+      action: () => {
         editor.dispatchCommand(REDO_COMMAND, undefined);
         setIsMenuOpen(false);
       },
-      disabled: !canRedo,
+      enabled: canRedo,
     },
   ];
 
   if (!isEditable) {
     return allContextMenuItems.filter(
-      (item) => item.title === (t("CONTEXT_MENU.copy") as string),
+      (item) => item.text === (t("CONTEXT_MENU.copy") as string),
     );
   }
 

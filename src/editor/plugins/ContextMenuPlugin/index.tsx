@@ -16,7 +16,6 @@ import { useShallow } from 'zustand/react/shallow';
 import useModal from "@/App/hooks/useModal";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { extractLinkTypeFromUrl } from "@/App/utils/url";
-import { EditorContextMenu } from "@/components/custom/Menu/EditorContextMenu";
 import { MenuPosition } from "@/components/custom/Menu/MenuX";
 import { uploadAssetIfNeeded } from "@/core/database/useAssetDatabase";
 import {
@@ -37,12 +36,7 @@ export default function ContextMenuPlugin() {
   const [editor] = useLexicalComposerContext();
   const { editorRef, setIsContextMenuOpen, overlayMenuContainerRef } = useGlobalStore(useShallow((state) => ({ editorRef: state.editorRef, setIsContextMenuOpen: state.setIsContextMenuOpen, overlayMenuContainerRef: state.overlayMenuContainerRef })));
 
-  const [menuPosition, setMenuPosition] = useState<MenuPosition>({
-    x: 0,
-    y: 0,
-  });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const relativePositionRef = useRef({ x: 0, y: 0 });
   const reff = useRef<BaseSelection | null>(null);
   const [caretPosition, setCaretPosition] = useState({ x: 0, y: 0 });
   const [showCaret, setShowCaret] = useState(false);
@@ -196,19 +190,12 @@ export default function ContextMenuPlugin() {
           selectTextAtPoint(event.clientX, event.clientY);
         }
 
-        if (editorRef.current) {
-          const editorRect = editorRef.current.getBoundingClientRect();
-          relativePositionRef.current = {
-            x: event.clientX - editorRect.left,
-            y: event.clientY - editorRect.top,
-          };
-        }
+
 
         reff.current = selection;
 
         setIsContextMenuOpen(true);
         setIsMenuOpen(true);
-        setMenuPosition({ x: event.clientX, y: event.clientY });
       });
     };
 
@@ -221,11 +208,6 @@ export default function ContextMenuPlugin() {
 
     const handleResize = () => {
       if (!isMenuOpen || !editorRef.current) return;
-      const editorRect = editorRef.current.getBoundingClientRect();
-      setMenuPosition({
-        x: editorRect.left + relativePositionRef.current.x,
-        y: editorRect.top + relativePositionRef.current.y,
-      });
     };
 
     if (editorRef.current) {
@@ -279,6 +261,26 @@ export default function ContextMenuPlugin() {
     setPdfDialog,
   );
 
+  useEffect(() => {
+    if (isMenuOpen) {
+      const showTauriMenu = async () => {
+        try {
+          const { Menu } = await import('@tauri-apps/api/menu');
+          
+          const tauriMenu = await Menu.new({ items: contextMenuItems });
+          await tauriMenu.popup();
+          
+          setIsMenuOpen(false);
+          setIsContextMenuOpen(false);
+          setShowCaret(false);
+        } catch (error) {
+          console.error("Failed to show native context menu", error);
+        }
+      };
+      
+      showTauriMenu();
+    }
+  }, [isMenuOpen, contextMenuItems, setIsMenuOpen, setIsContextMenuOpen]);
 
   const handleCustomLinkConfirm = (url: string, name: string) => {
     const linkType = extractLinkTypeFromUrl(url);
@@ -371,19 +373,6 @@ export default function ContextMenuPlugin() {
           position={caretPosition}
           visible={showCaret}
           timestamp={caretTimestamp}
-        />
-      )}
-      {isMenuOpen && (
-        <EditorContextMenu
-          items={contextMenuItems}
-          isOpen={isMenuOpen}
-          onClose={() => {
-            setIsMenuOpen(false);
-            setIsContextMenuOpen(false);
-            setShowCaret(false);
-          }}
-          position={menuPosition}
-          direction="right"
         />
       )}
       {modal}
