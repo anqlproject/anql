@@ -6,7 +6,12 @@
       "paste": "Paste",
       "undo": "Undo",
       "redo": "Redo",
-      "insert": "Insert Inlines"
+      "insert": "Insert Inlines",
+      "insertDateTime": "Add date and time",
+      "insertEquation": "Create equation",
+      "insertLink": "Add link",
+      "applyInlineCode": "Format as inline code",
+      "insertPdfDocument": "Attach PDF document"
     },
     "NODE_MENU": {
       "addAbove": "Add above",
@@ -69,6 +74,7 @@
       "date": "Date time",
       "inlineCode": "Inline Code",
       "link": "Link",
+      "pdfDocument": "Insert PDF document",
       "math": "Maths",
       "equation": "Equation",
       "linkUrlPlaceholder": "Copy link from web, node, document, table",

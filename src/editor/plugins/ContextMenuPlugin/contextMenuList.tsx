@@ -10,14 +10,10 @@ import {
   REDO_COMMAND,
   UNDO_COMMAND,
 } from "lexical";
-
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useShallow } from "zustand/react/shallow";
 
-import { useGlobalStore } from "@/App/store/useGlobalStore";
-import { ICON_SIZES } from "@/core/global/defaultValues";
 import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 import { INSERT_DATETIME_COMMAND } from "@/editor/plugins/DateTimePlugin";
 import { InsertEquationDialog } from "@/editor/plugins/EquationsPlugin";
@@ -108,11 +104,11 @@ export function ContextMenuItems(
     },
     ...(!isInsideCodeNode && !isInsideMathNode
       ? [
-          {
-            text: t("CONTEXT_MENU.insert") as string,
-            items: [
               {
-                text: t("INLINES.date") as string,
+                item: "Separator",
+              },
+              {
+                text: t("CONTEXT_MENU.insertDateTime") as string,
                 action: () => {
                   editor.dispatchCommand(INSERT_DATETIME_COMMAND, {
                     dateTime: new Date(),
@@ -121,7 +117,7 @@ export function ContextMenuItems(
                 },
               },
               {
-                text: t("INLINES.equation") as string,
+                text: t("CONTEXT_MENU.insertEquation") as string,
                 action: () => {
                   setIsMenuOpen(false);
                   showModal("Insert Equation", (onClose) => (
@@ -133,28 +129,29 @@ export function ContextMenuItems(
                 },
               },
               {
-                text: "Link",
+                text: t("CONTEXT_MENU.insertLink") as string,
                 action: () => {
                   setCustomLinkDialog({});
                   setIsMenuOpen(false);
                 },
               },
               {
-                text: t("INLINES.inlineCode") as string,
+                text: t("CONTEXT_MENU.applyInlineCode") as string,
                 action: () => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
                   setIsMenuOpen(false);
                 },
               },
               {
-                text: "PDF",
+                item: "Separator",
+              },
+              {
+                text: t("CONTEXT_MENU.insertPdfDocument") as string,
                 action: () => {
                   setPdfDialog(true);
                   setIsMenuOpen(false);
                 },
               },
-            ],
-          },
         ]
       : []),
     {

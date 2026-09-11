@@ -6,7 +6,12 @@
       "paste": "Coller",
       "undo": "Annuler",
       "redo": "Rétablir",
-      "insert": "Insérer des éléments en ligne"
+      "insert": "Insérer des éléments en ligne",
+      "insertDateTime": "Ajouter la date et l'heure",
+      "insertEquation": "Créer une équation",
+      "insertLink": "Ajouter un lien",
+      "applyInlineCode": "Formater en code en ligne",
+      "insertPdfDocument": "Joindre un document PDF"
     },
     "NODE_MENU": {
       "addAbove": "Ajouter en haut",
@@ -69,6 +74,7 @@
       "date": "Date et heure",
       "inlineCode": "Code en ligne",
       "link": "Lien",
+      "pdfDocument": "Insérer un document PDF",
       "math": "Mathématiques",
       "equation": "Équation",
       "linkUrlPlaceholder": "Copier le lien depuis web, node, document, tableau",
