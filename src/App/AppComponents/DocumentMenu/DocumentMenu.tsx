@@ -247,7 +247,7 @@ export const DocumentMenu = () => {
       item: "Separator",
     },
     {
-      text: t("DOCUMENT_MENU.export") as string,
+      text: t("DOCUMENT_MENU.exportDocument") as string,
       action: async () => {
         setIsMenuOpen(false);
         editor.getEditorState().read(() => {

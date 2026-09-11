@@ -106,6 +106,7 @@
     "DOCUMENT_MENU": {
       "import": "Import",
       "export": "Export",
+      "exportDocument": "Export document",
       "newDocument": "New document",
       "deleteDocument": "Delete",
       "copyDocumentId": "Copy ID",
