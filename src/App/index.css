@@ -54,10 +54,3 @@ body {
 .editor-equation.focused {
   outline: 2px solid var(--primary-color);
 }
-
-/* Editor Container */
-.editor-container {
-  position: relative;
-  height: 100%;
-  overflow: auto;
-}
