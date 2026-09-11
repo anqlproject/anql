@@ -5,7 +5,7 @@ import { GLOBAL_SHORTCUTS, useShortcutStore } from '@/GlobalState/shortcutStore'
 import { useGlobalShortcut } from './GlobalShortcutContext';
 
 export default function GlobalShortcut() {
-  const { openLocalSearch, openGlobalSearch, createNewDocument, exitApp } = useGlobalShortcut();
+  const { openLocalSearch, openGlobalSearch, createNewDocument, exitApp, openSettings } = useGlobalShortcut();
 
   useEffect(() => {
     // Register global shortcuts with the central store
@@ -22,6 +22,7 @@ export default function GlobalShortcut() {
     registerCallback('GLOBAL_SEARCH', () => openGlobalSearch());
     registerCallback('NEW_DOCUMENT', () => createNewDocument());
     registerCallback('EXIT_APP', () => exitApp());
+    registerCallback('OPEN_SETTINGS', () => openSettings());
 
     // Cleanup function
     return () => {

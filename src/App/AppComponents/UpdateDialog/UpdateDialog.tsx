@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
-import { Download, Rocket, Loader2, CheckCircle, RefreshCw } from 'lucide-react';
+import { check, Update } from '@tauri-apps/plugin-updater';
+import { CheckCircle, Download, Loader2, RefreshCw,Rocket } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { useGlobalToast } from '@/App/hooks/useGlobalToast';
 
 // ─── Inner toast UI ──────────────────────────────────────────────────────────
@@ -65,7 +66,7 @@ function UpdateToastContent({
       : 0;
 
   return (
-    <div className="flex flex-col gap-2 min-w-[250px] py-1">
+    <div className="flex flex-col gap-2 min-w-62.5 py-1">
       {/* Title */}
       <div className="flex items-center gap-2">
         <Rocket size={16} className="text-blue-500" />

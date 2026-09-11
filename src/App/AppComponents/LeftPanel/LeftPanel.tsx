@@ -58,6 +58,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
   const closeGlobalSearch = useGlobalShortcut((state) => state.closeGlobalSearch);
   const globalSearchCount = useGlobalShortcut((state) => state.globalSearchCount);
   const setCreateNewDocument = useGlobalShortcut((state) => state.setCreateNewDocument);
+  const setOpenSettings = useGlobalShortcut((state) => state.setOpenSettings);
   const [settingsOverlayOpen, setSettingsOverlayOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
@@ -76,6 +77,11 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
   };
 
   const { goHome } = navigationUtils();
+
+  // Register openSettings with global shortcut
+  useEffect(() => {
+    setOpenSettings(() => setSettingsOverlayOpen(true));
+  }, [setOpenSettings, setSettingsOverlayOpen]);
 
   const toggleSidebar = () => {
     setOpen(!open);

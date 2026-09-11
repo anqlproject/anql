@@ -6,7 +6,12 @@
       "paste": "Coller",
       "undo": "Annuler",
       "redo": "Rétablir",
-      "insert": "Insérer des éléments en ligne"
+      "insert": "Insérer des éléments en ligne",
+      "insertDateTime": "Ajouter la date et l'heure",
+      "insertEquation": "Créer une équation",
+      "insertLink": "Ajouter un lien",
+      "applyInlineCode": "Formater en code en ligne",
+      "insertPdfDocument": "Joindre un document PDF"
     },
     "NODE_MENU": {
       "addAbove": "Ajouter en haut",
@@ -38,7 +43,7 @@
       "table": "Tableau",
       "image": "Image",
       "line": "Ligne",
-      "math": "Expression mathématique",
+      "math": "Expression mathématique (tapez @ pour les possibilités)",
       "emptyPlaceholder": "Écrivez ou tapez le nom du nœud"
     },
     "MATH_PANEL": {
@@ -69,6 +74,7 @@
       "date": "Date et heure",
       "inlineCode": "Code en ligne",
       "link": "Lien",
+      "pdfDocument": "Insérer un document PDF",
       "math": "Mathématiques",
       "equation": "Équation",
       "linkUrlPlaceholder": "Copier le lien depuis web, node, document, tableau",
@@ -100,12 +106,14 @@
     "DOCUMENT_MENU": {
       "import": "Importer",
       "export": "Exporter",
+      "exportDocument": "Exporter le document",
       "newDocument": "Nouveau document",
-      "deleteDocument": "Supprimer",
+      "deleteDocument": "Placer dans la corbeille",
       "copyDocumentId": "Copier l'ID",
       "duplicateDocument": "Dupliquer",
-      "readModeToggle": "Mode lecture",
-      "searchInDocument": "Rechercher"
+      "switchToReadMode": "Passer au mode lecture",
+      "switchToWriteMode": "Passer au mode écriture",
+      "searchInDocument": "Rechercher dans le document"
     },
     "SIDEBAR": {
       "home": "Accueil",
@@ -315,11 +323,12 @@
       "confirmEmptyTrash": "Êtes-vous sûr de vouloir vider la corbeille ? Cette action supprimera définitivement {{count}} élément(s)."
     },
     "FOOTER_MENU": {
-      "generalSettings": "Paramètres généraux",
+      "generalSettings": "Paramètres de l'application",
       "switchToLightMode": "Passer au mode clair",
       "switchToDarkMode": "Passer au mode sombre",
-      "getHelp": "Obtenir de l'aide",
-      "about": "À propos"
+      "openTrash": "Ouvrir la corbeille",
+      "getHelp": "Ouvrir le centre d'aide",
+      "about": "À propos d'ANQL"
     },
     "HELP_PANEL": {
       "title": "Documentation d'aide",

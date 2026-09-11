@@ -343,4 +343,10 @@ export const GLOBAL_SHORTCUTS = {
     context: 'both' as ShortcutContext,
     description: 'Exit application',
   },
+  OPEN_SETTINGS: {
+    key: 'Comma',
+    modifiers: CONTROL_OR_META,
+    context: 'both' as ShortcutContext,
+    description: 'Open settings',
+  },
 };

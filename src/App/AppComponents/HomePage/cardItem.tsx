@@ -1,14 +1,15 @@
 import './cardItem.css';
 
-import { Calendar, Check, Clock, Copy, Download, MoreVertical, Square, Trash2 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Calendar, Check, Clock, MoreVertical, Square } from 'lucide-react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { duplicateDocument } from '@/App/AppComponents/duplicateDocument';
 import { useExportDocument } from "@/App/AppComponents/ImportExport/exportDocument";
 import { useFile } from '@/App/hooks/FileHooks';
 import { useGlobalToast } from '@/App/hooks/useGlobalToast';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { getNodesByDocumentId } from '@/core/database/useBlocDatabase';
 import { DocumentsJson, updateDocumentPath } from '@/core/database/useDocumentDatabase';
 import { TOAST_DURATION } from '@/core/global/defaultValues';
 import { MoveToTrash } from '@/core/TrashSystem/TrashSystem';
@@ -30,18 +31,16 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
   const { openEditorWithUpdate } = useFile();
   const { showToast, dismissToast } = useGlobalToast();
   const { exportDocument } = useExportDocument();
-  const [menuOpen, setMenuOpen] = useState(false);
   const documentRef = useRef<DocumentsJson>(null);
+  const isNativeMenuOpening = useRef(false);
   documentRef.current = document;
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDelete = () => {
     if (document.id !== "home-page") {
       const docToDelete = documentRef.current;
       const originalPath = docToDelete?.path;
 
       MoveToTrash(document);
-      setMenuOpen(false);
 
       // Use a ref-like object so the button closure can read the toast id
       // even though it's created before showToast returns the id.
@@ -80,8 +79,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
     }
   };
 
-  const handleCopyId = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleCopyId = () => {
     const documentId = documentRef.current?.id;
     if (documentId) {
       navigator.clipboard.writeText(`@document:${documentId}`).then(() => {
@@ -90,18 +88,69 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
         console.error('Failed to copy document ID:', err);
       });
     }
-    setMenuOpen(false);
   };
 
-  const handleExport = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setMenuOpen(false);
+  const handleExport = async () => {
     // Get document content from database
     const { getDocumentById } = await import('@/core/database/useDocumentDatabase');
     const doc = await getDocumentById(document.id);
     if (doc) {
       const jsonString = JSON.stringify(doc, null, 2);
       exportDocument(jsonString, document.title);
+    }
+  };
+
+  const handleDuplicate = async () => {
+    try {
+      const nodes = await getNodesByDocumentId(document.id);
+      await duplicateDocument(
+        document,
+        nodes,
+        `${document.title || t('HOME_PAGE.untitled')} (copy)`,
+      );
+    } catch (error) {
+      console.error('Failed to duplicate document:', error);
+    }
+  };
+
+  const handleMenuOpen = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (isNativeMenuOpening.current) return;
+
+    isNativeMenuOpening.current = true;
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    try {
+      const [{ Menu }, { LogicalPosition }] = await Promise.all([
+        import("@tauri-apps/api/menu"),
+        import("@tauri-apps/api/dpi"),
+      ]);
+
+      const menuItems = [
+        {
+          text: t("DOCUMENT_MENU.copyDocumentId") as string,
+          action: handleCopyId,
+        },
+        {
+          text: t("DOCUMENT_MENU.exportDocument") as string,
+          action: handleExport,
+        },
+        {
+          text: t("DOCUMENT_MENU.duplicateDocument") as string,
+          action: handleDuplicate,
+        },
+        {
+          text: t("DOCUMENT_MENU.deleteDocument") as string,
+          action: handleDelete,
+        },
+      ];
+
+      const nativeMenu = await Menu.new({ items: menuItems });
+      await nativeMenu.popup(new LogicalPosition(rect.left, rect.bottom));
+    } catch (error) {
+      console.error("Failed to show native document card menu", error);
+    } finally {
+      isNativeMenuOpening.current = false;
     }
   };
 
@@ -127,7 +176,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
   const isModifiedDate = !shouldShowCreatedDate;
 
   return (
-    <div className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''} ${menuOpen ? 'menu-open' : ''}`} onClick={handleOpen}>
+    <div className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''}`} onClick={handleOpen}>
 
       {selectionMode && (
         <div className="document-card__checkbox" onClick={handleCheckboxClick}>
@@ -149,8 +198,8 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
           <span
             className="document-card__date"
             title={isModifiedDate
-              ? `Modified: ${new Date(document.updated_at).toLocaleString()}`
-              : `Created: ${new Date(document.created_at).toLocaleString()}`
+              ? `${t('HOME_PAGE.updatedAt')}: ${new Date(document.updated_at).toLocaleString()}`
+              : `${t('HOME_PAGE.createdAt')}: ${new Date(document.created_at).toLocaleString()}`
             }
           >
             {formatDate(displayDate)}
@@ -159,27 +208,14 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
       </div>
 
       <div className="document-card__actions">
-        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="document-card__menu-button" onClick={(e) => e.stopPropagation()}>
-              <MoreVertical className="document-card__menu-icon" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="document-dropdown" onCloseAutoFocus={(e) => e.preventDefault()}>
-            <DropdownMenuItem onClick={handleCopyId} className="dropdown-menu-item">
-              <Copy size={16} style={{ marginRight: '8px' }} />
-              {t('DOCUMENT_MENU.copyDocumentId')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExport} className="dropdown-menu-item">
-              <Download size={16} style={{ marginRight: '8px' }} />
-              {t('DOCUMENT_MENU.export')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="delete-menu-item">
-              <Trash2 size={16} style={{ marginRight: '8px' }} />
-              {t('HOME_PAGE.delete')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="document-card__menu-button"
+          onClick={handleMenuOpen}
+        >
+          <MoreVertical className="document-card__menu-icon" />
+        </Button>
       </div>
 
     </div>

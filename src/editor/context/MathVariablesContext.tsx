@@ -22,7 +22,7 @@ interface MathVariablesContextType {
   scopes: Record<string, Record<string, number>>;
   setScopes: React.Dispatch<React.SetStateAction<Record<string, Record<string, number>>>>;
 
-  // Table variables for MathPanel display
+  // Table variables used by math autocomplete and evaluation.
   tableVariables: Record<string, Record<string, number[]>>;
   setTableVariables: React.Dispatch<React.SetStateAction<Record<string, Record<string, number[]>>>>;
 }

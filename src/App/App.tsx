@@ -23,12 +23,12 @@ import Home from "./AppComponents/HomePage/HomePage";
 import LeftPanels from "./AppComponents/LeftPanel/LeftPanel";
 import TitleBar from "./AppComponents/TitleBar/TitleBar";
 import TrashPanel from "./AppComponents/TrashPanel/TrashPanel";
+import UpdateDialog from "./AppComponents/UpdateDialog/UpdateDialog";
 import GlobalShortcut from "./GlobalShortcut/GlobalShortcut";
 import GlobalShortcutListener from "./GlobalShortcut/GlobalShortcutListener";
 import { useToastContainer } from "./hooks/useGlobalToast";
 import { AppInitializer } from "./Init/AppInitializer";
 import { useGlobalStore } from "./store/useGlobalStore";
-import UpdateDialog from "./AppComponents/UpdateDialog/UpdateDialog";
 
 export default function App(): JSX.Element {
   const app = useMemo(

@@ -16,8 +16,6 @@ import { useShallow } from 'zustand/react/shallow';
 import useModal from "@/App/hooks/useModal";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { extractLinkTypeFromUrl } from "@/App/utils/url";
-import { EditorContextMenu } from "@/components/custom/Menu/EditorContextMenu";
-import { MenuPosition } from "@/components/custom/Menu/MenuX";
 import { uploadAssetIfNeeded } from "@/core/database/useAssetDatabase";
 import {
   $isLinkNode,
@@ -30,23 +28,14 @@ import { CustomLinkDialog } from "@/editor/plugins/LinkPlugin/CustomLinkDialog";
 import { INSERT_PDF_COMMAND } from "@/editor/plugins/PdfPlugin";
 import { PdfDialog } from "@/editor/plugins/PdfPlugin/PdfDialog";
 
-import CustomCaret from "../../../App/AppComponents/CustomCaret/CustomCaret";
 import { ContextMenuItems } from "./contextMenuList";
 
 export default function ContextMenuPlugin() {
   const [editor] = useLexicalComposerContext();
   const { editorRef, setIsContextMenuOpen, overlayMenuContainerRef } = useGlobalStore(useShallow((state) => ({ editorRef: state.editorRef, setIsContextMenuOpen: state.setIsContextMenuOpen, overlayMenuContainerRef: state.overlayMenuContainerRef })));
 
-  const [menuPosition, setMenuPosition] = useState<MenuPosition>({
-    x: 0,
-    y: 0,
-  });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const relativePositionRef = useRef({ x: 0, y: 0 });
   const reff = useRef<BaseSelection | null>(null);
-  const [caretPosition, setCaretPosition] = useState({ x: 0, y: 0 });
-  const [showCaret, setShowCaret] = useState(false);
-  const [caretTimestamp, setCaretTimestamp] = useState(0);
 
 
   /**
@@ -103,23 +92,6 @@ export default function ContextMenuPlugin() {
             }
           }
 
-          // Afficher le custom caret à la position
-          const rects = range.getClientRects();
-          if (rects && rects.length > 0) {
-            const rect = rects[0];
-            setCaretPosition({ x: rect.left, y: rect.top });
-            setShowCaret(true);
-            setCaretTimestamp(Date.now()); // Forcer le re-render même si position identique
-          } else {
-            // NOTES : custom caret on empty node
-            const element = editor.getElementByKey(lexicalNode.getKey());
-            if (element) {
-              const rect = element.getBoundingClientRect();
-              setCaretPosition({ x: rect.left, y: rect.top });
-              setShowCaret(true);
-              setCaretTimestamp(Date.now());
-            }
-          }
         }
       });
 
@@ -196,19 +168,12 @@ export default function ContextMenuPlugin() {
           selectTextAtPoint(event.clientX, event.clientY);
         }
 
-        if (editorRef.current) {
-          const editorRect = editorRef.current.getBoundingClientRect();
-          relativePositionRef.current = {
-            x: event.clientX - editorRect.left,
-            y: event.clientY - editorRect.top,
-          };
-        }
+
 
         reff.current = selection;
 
         setIsContextMenuOpen(true);
         setIsMenuOpen(true);
-        setMenuPosition({ x: event.clientX, y: event.clientY });
       });
     };
 
@@ -221,11 +186,6 @@ export default function ContextMenuPlugin() {
 
     const handleResize = () => {
       if (!isMenuOpen || !editorRef.current) return;
-      const editorRect = editorRef.current.getBoundingClientRect();
-      setMenuPosition({
-        x: editorRect.left + relativePositionRef.current.x,
-        y: editorRect.top + relativePositionRef.current.y,
-      });
     };
 
     if (editorRef.current) {
@@ -279,6 +239,25 @@ export default function ContextMenuPlugin() {
     setPdfDialog,
   );
 
+  useEffect(() => {
+    if (isMenuOpen) {
+      const showTauriMenu = async () => {
+        try {
+          const { Menu } = await import('@tauri-apps/api/menu');
+          
+          const tauriMenu = await Menu.new({ items: contextMenuItems });
+          await tauriMenu.popup();
+          
+          setIsMenuOpen(false);
+          setIsContextMenuOpen(false);
+        } catch (error) {
+          console.error("Failed to show native context menu", error);
+        }
+      };
+      
+      showTauriMenu();
+    }
+  }, [isMenuOpen, contextMenuItems, setIsMenuOpen, setIsContextMenuOpen]);
 
   const handleCustomLinkConfirm = (url: string, name: string) => {
     const linkType = extractLinkTypeFromUrl(url);
@@ -344,14 +323,6 @@ export default function ContextMenuPlugin() {
     setEditPdfDialog(null);
   };
 
-  useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.addEventListener("focusin", () => {
-        setShowCaret(false);
-      });
-    }
-  });
-
   const handleDeleteLink = () => {
     if (editLinkDialog) {
       editor.update(() => {
@@ -366,26 +337,6 @@ export default function ContextMenuPlugin() {
 
   return (
     <>
-      {showCaret && isMenuOpen && (
-        <CustomCaret
-          position={caretPosition}
-          visible={showCaret}
-          timestamp={caretTimestamp}
-        />
-      )}
-      {isMenuOpen && (
-        <EditorContextMenu
-          items={contextMenuItems}
-          isOpen={isMenuOpen}
-          onClose={() => {
-            setIsMenuOpen(false);
-            setIsContextMenuOpen(false);
-            setShowCaret(false);
-          }}
-          position={menuPosition}
-          direction="right"
-        />
-      )}
       {modal}
       {customLinkDialog && (
         <CustomLinkDialog

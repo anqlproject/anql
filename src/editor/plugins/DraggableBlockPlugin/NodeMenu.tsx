@@ -1,6 +1,7 @@
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
+import type { Menu as TauriMenu } from "@tauri-apps/api/menu";
 import {
   $createParagraphNode,
   $getNearestNodeFromDOMNode,
@@ -13,36 +14,27 @@ import {
   LexicalEditor,
   LexicalNode,
 } from "lexical";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  Code2Icon,
-  Heading1Icon,
-  Heading2Icon,
-  Heading3Icon,
-  Layers2,
-  Link2Icon,
-  ListCheckIcon,
-  ListIcon,
-  ListOrderedIcon,
-  QuoteIcon,
-  RecycleIcon,
-  TextIcon,
-  TrashIcon,
-} from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 
 import { useGlobalToast } from "@/App/hooks/useGlobalToast";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
-import { MenuPosition, MenuX as Menu } from "@/components/custom/Menu/MenuX";
-import { DIMENSIONS, ICON_SIZES, TOAST_DURATION } from "@/core/global/defaultValues";
+import { MenuPosition } from "@/components/custom/Menu/MenuX";
+import { TOAST_DURATION } from "@/core/global/defaultValues";
 import { $isImageNode } from "@/editor/nodes/ImageNode/ImageNode";
 import { $createListNode, $isListNode } from "@/editor/nodes/ListNode";
 import { $isPdfNode } from "@/editor/nodes/PdfNode/PdfNode";
 import { safeWriteText } from "@/editor/plugins/ContextMenuPlugin/contextMenuActions";
 import { EDITOR_SHORTCUTS } from "@/GlobalState/shortcutStore";
+
+type NativeMenuItem = {
+  text?: string;
+  accelerator?: string;
+  item?: "Separator";
+  action?: () => void | Promise<void>;
+  items?: NativeMenuItem[];
+};
 
 export default function NodeMenu({
   isMenuOpen,
@@ -60,36 +52,36 @@ export default function NodeMenu({
   trigger?: React.ReactNode;
 }) {
   const { t } = useTranslation();
-  const { dynamicState, isMac } = useGlobalStore(
+  const { dynamicState } = useGlobalStore(
     useShallow((state) => ({
       dynamicState: state.dynamicState,
-      isMac: state.isMac,
     })),
   );
   const { showToast } = useGlobalToast();
   const nodeRef = useRef<LexicalNode>(null);
   const [canTransform, setCanTransform] = useState(false);
   const [isCodeNode, setIsCodeNode] = useState(false);
-  const ICON_SIZE = ICON_SIZES.default;
+  const [isMenuReady, setIsMenuReady] = useState(false);
+  const isNativeMenuOpening = useRef(false);
 
-  // Helper to format shortcut for display
-  const formatShortcut = (modifiers: { ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean }, key: string): string => {
+  const formatAccelerator = (modifiers: { ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean }, key: string): string => {
     const parts: string[] = [];
-    if (modifiers.ctrlKey) parts.push(isMac ? '⌃' : 'Ctrl');
-    if (modifiers.metaKey) parts.push(isMac ? '⌘' : 'Win');
-    if (modifiers.altKey) parts.push(isMac ? '⌥' : 'Alt');
-    if (modifiers.shiftKey) parts.push(isMac ? '⇧' : 'Shift');
+    if (modifiers.ctrlKey) parts.push("Ctrl");
+    if (modifiers.metaKey) parts.push("CmdOrControl");
+    if (modifiers.altKey) parts.push("Alt");
+    if (modifiers.shiftKey) parts.push("Shift");
 
-    // Format key name
     let keyName = key.replace('Key', '').replace('Digit', '');
-    if (key === 'Comma') keyName = ',';
-    if (key === 'Period') keyName = '.';
-    if (key === 'BracketRight') keyName = ']';
-    if (key === 'BracketLeft') keyName = '[';
-    if (key === 'Backslash') keyName = '\\';
+    if (key === "Comma") keyName = ",";
+    if (key === "Period") keyName = ".";
+    if (key === "BracketRight") keyName = "]";
+    if (key === "BracketLeft") keyName = "[";
+    if (key === "Backslash") keyName = "\\";
+    if (key === "ArrowUp") keyName = "Up";
+    if (key === "ArrowDown") keyName = "Down";
 
     parts.push(keyName);
-    return parts.join(isMac ? '' : '+');
+    return parts.join("+");
   };
 
   const getSelectedTopLevelNodes = () => {
@@ -119,6 +111,7 @@ export default function NodeMenu({
   };
 
   useEffect(() => {
+    setIsMenuReady(false);
     if (isMenuOpen && draggableElement) {
       editor.read(() => {
         const node = $getNearestNodeFromDOMNode(draggableElement);
@@ -133,33 +126,18 @@ export default function NodeMenu({
             "code",
             "list",
             "listitem",
-            "list",
           ];
           const allAllowed = topLevelNodes.every((n) =>
             allowedTypes.includes(n.getType()),
           );
           setCanTransform(allAllowed);
+          setIsCodeNode(topLevelNodes.some((n) => n.getType() === "code"));
+          setIsMenuReady(true);
         } else {
           console.error("node not found");
           setCanTransform(false);
-        }
-      });
-      editor.blur();
-    }
-  }, [isMenuOpen, draggableElement, editor]);
-
-  useEffect(() => {
-    if (isMenuOpen && draggableElement) {
-      editor.read(() => {
-        const node = $getNearestNodeFromDOMNode(draggableElement);
-        if (node) {
-          nodeRef.current = node;
-
-          const topLevelNodes = getSelectedTopLevelNodes();
-          setIsCodeNode(topLevelNodes.some((n) => n.getType() === "code"));
-        } else {
-          console.error("node not found");
           setIsCodeNode(false);
+          setIsMenuReady(false);
         }
       });
       editor.blur();
@@ -207,43 +185,65 @@ export default function NodeMenu({
     return ids;
   };
 
-  const menuItems = [
+  const calculateMenuDimensions = (items: NativeMenuItem[]) => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.font = "13px -apple-system, BlinkMacSystemFont, sans-serif";
+    }
+
+    let width = 0;
+    let height = 8;
+
+    items.forEach((item) => {
+      if (item.item === "Separator") {
+        height += 8;
+        return;
+      }
+
+      const textWidth = context?.measureText(item.text ?? "").width ?? 0;
+      const acceleratorWidth = item.accelerator
+        ? context?.measureText(item.accelerator).width ?? 0
+        : 0;
+      width = Math.max(width, textWidth + acceleratorWidth);
+      height += 28;
+    });
+
+    return { width: Math.ceil(width), height };
+  };
+
+  const insertParagraph = useCallback((position: "above" | "below") => {
+    editor.update(() => {
+      if (!nodeRef.current) return;
+
+      const paragraphNode = $createParagraphNode();
+      if (position === "above") {
+        nodeRef.current.insertBefore(paragraphNode);
+      } else {
+        nodeRef.current.insertAfter(paragraphNode);
+      }
+      paragraphNode.select();
+    });
+    setIsMenuOpen(false);
+  }, [editor, setIsMenuOpen]);
+
+  const menuItems: NativeMenuItem[] = useMemo(() => [
     {
-      icon: <ArrowUpIcon size={ICON_SIZE} />,
-      title: t("NODE_MENU.addAbove") as string,
-      shortcut: isMac ? "⌥⇧↑" : "Alt+Shift+↑",
-      onClick: () => {
-        editor.update(() => {
-          if (!nodeRef.current) return;
-          const pNode = $createParagraphNode();
-          nodeRef.current.insertBefore(pNode);
-          pNode.select();
-        });
-        setIsMenuOpen(false);
-      },
+      text: t("NODE_MENU.addAbove") as string,
+      accelerator: "Alt+Shift+Up",
+      action: () => insertParagraph("above"),
     },
     {
-      icon: <ArrowDownIcon size={ICON_SIZE} />,
-      title: t("NODE_MENU.addBelow") as string,
-      shortcut: isMac ? "⌥⇧↓" : "Alt+Shift+↓",
-      onClick: () => {
-        editor.update(() => {
-          if (!nodeRef.current) return;
-          const pNode = $createParagraphNode();
-          nodeRef.current.insertAfter(pNode);
-          pNode.select();
-        });
-        setIsMenuOpen(false);
-      },
+      text: t("NODE_MENU.addBelow") as string,
+      accelerator: "Alt+Shift+Down",
+      action: () => insertParagraph("below"),
     },
     {
-      title: "sep1",
-      isSeparator: true,
+      item: "Separator",
     },
     {
-      icon: <Link2Icon size={ICON_SIZE} />,
-      title: t("NODE_MENU.copyId") as string,
-      onClick: async () => {
+      text: t("NODE_MENU.copyId") as string,
+      action: async () => {
         editor.read(() => {
           if (nodeRef.current) {
             const nodeKey = nodeRef.current.getKey();
@@ -268,15 +268,12 @@ export default function NodeMenu({
     ...(canTransform
       ? [
         {
-          icon: <RecycleIcon size={ICON_SIZE} />,
-          title: t("NODE_MENU.transformMenu") as string,
-          hasSubmenu: true,
-          submenu: [
+          text: t("NODE_MENU.transform") as string,
+          items: [
             {
-              title: t("NODE_MENU.normal") as string,
-              icon: <TextIcon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.modifiers, EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.key),
-              onClick: () => {
+              text: t("NODE_MENU.normal") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.modifiers, EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.key),
+              action: () => {
                 // FIX : this list
                 applyToNodes((_, selection) => {
                   $setBlocksType(selection, () => $createParagraphNode());
@@ -284,10 +281,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODES.h1") as string,
-              icon: <Heading1Icon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.HEADING1.modifiers, EDITOR_SHORTCUTS.HEADING1.key),
-              onClick: () => {
+              text: t("NODES.h1") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.HEADING1.modifiers, EDITOR_SHORTCUTS.HEADING1.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if (node.__type !== "h1") {
                     $setBlocksType(selection, () => $createHeadingNode("h1"));
@@ -296,10 +292,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODES.h2") as string,
-              icon: <Heading2Icon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.HEADING2.modifiers, EDITOR_SHORTCUTS.HEADING2.key),
-              onClick: () => {
+              text: t("NODES.h2") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.HEADING2.modifiers, EDITOR_SHORTCUTS.HEADING2.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if (node.__type !== "h2") {
                     $setBlocksType(selection, () => $createHeadingNode("h2"));
@@ -308,10 +303,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODES.h3") as string,
-              icon: <Heading3Icon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.HEADING3.modifiers, EDITOR_SHORTCUTS.HEADING3.key),
-              onClick: () => {
+              text: t("NODES.h3") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.HEADING3.modifiers, EDITOR_SHORTCUTS.HEADING3.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if (node.__type !== "h3") {
                     $setBlocksType(selection, () => $createHeadingNode("h3"));
@@ -320,10 +314,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODE_MENU.numberList") as string,
-              icon: <ListOrderedIcon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.NUMBERED_LIST.modifiers, EDITOR_SHORTCUTS.NUMBERED_LIST.key),
-              onClick: () => {
+              text: t("NODE_MENU.numberList") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.NUMBERED_LIST.modifiers, EDITOR_SHORTCUTS.NUMBERED_LIST.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if ($isListNode(node) && node.getListType() === "number") {
                     $setBlocksType(selection, () => $createParagraphNode());
@@ -336,10 +329,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODE_MENU.bulletList") as string,
-              icon: <ListIcon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.BULLET_LIST.modifiers, EDITOR_SHORTCUTS.BULLET_LIST.key),
-              onClick: () => {
+              text: t("NODE_MENU.bulletList") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.BULLET_LIST.modifiers, EDITOR_SHORTCUTS.BULLET_LIST.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if ($isListNode(node) && node.getListType() === "bullet") {
                     $setBlocksType(selection, () => $createParagraphNode());
@@ -352,10 +344,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODE_MENU.checkList") as string,
-              icon: <ListCheckIcon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.CHECK_LIST.modifiers, EDITOR_SHORTCUTS.CHECK_LIST.key),
-              onClick: () => {
+              text: t("NODE_MENU.checkList") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.CHECK_LIST.modifiers, EDITOR_SHORTCUTS.CHECK_LIST.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if ($isListNode(node) && node.getListType() === "check") {
                     $setBlocksType(selection, () => $createParagraphNode());
@@ -366,10 +357,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODES.quote") as string,
-              icon: <QuoteIcon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.FORMAT_QUOTE.modifiers, EDITOR_SHORTCUTS.FORMAT_QUOTE.key),
-              onClick: () => {
+              text: t("NODES.quote") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.FORMAT_QUOTE.modifiers, EDITOR_SHORTCUTS.FORMAT_QUOTE.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if (node.__type !== "quote") {
                     $setBlocksType(selection, () => $createQuoteNode());
@@ -378,10 +368,9 @@ export default function NodeMenu({
               },
             },
             {
-              title: t("NODES.code") as string,
-              icon: <Code2Icon size={ICON_SIZE} />,
-              shortcut: formatShortcut(EDITOR_SHORTCUTS.FORMAT_CODE.modifiers, EDITOR_SHORTCUTS.FORMAT_CODE.key),
-              onClick: () => {
+              text: t("NODES.code") as string,
+              accelerator: formatAccelerator(EDITOR_SHORTCUTS.FORMAT_CODE.modifiers, EDITOR_SHORTCUTS.FORMAT_CODE.key),
+              action: () => {
                 applyToNodes((node, selection) => {
                   if (node.__type !== "code") {
                     $setBlocksType(selection, () => $createCodeNode());
@@ -396,9 +385,8 @@ export default function NodeMenu({
     ...(isCodeNode
       ? [
         {
-          icon: <Code2Icon size={ICON_SIZE} />,
-          title: t("NODE_MENU.copyCode") as string,
-          onClick: async () => {
+          text: t("NODE_MENU.copyCode") as string,
+          action: async () => {
             editor.update(() => {
               const codeNode = nodeRef.current;
               if ($isCodeNode(codeNode)) {
@@ -418,9 +406,8 @@ export default function NodeMenu({
       ]
       : []),
     {
-      icon: <Layers2 size={ICON_SIZE} />,
-      title: t("NODE_MENU.duplicate") as string,
-      onClick: () => {
+      text: t("NODE_MENU.duplicate") as string,
+      action: () => {
         editor.update(() => {
           const topLevelNodes = getSelectedTopLevelNodes();
           if (topLevelNodes.length === 0) return;
@@ -458,10 +445,8 @@ export default function NodeMenu({
       },
     },
     {
-      icon: <TrashIcon size={ICON_SIZE} />,
-      title: t("NODE_MENU.delete") as string,
-      variant: "danger" as const,
-      onClick: () => {
+      text: t("NODE_MENU.delete") as string,
+      action: () => {
         editor.update(() => {
           const topLevelNodes = getSelectedTopLevelNodes();
           if (topLevelNodes.length === 0) return;
@@ -484,31 +469,45 @@ export default function NodeMenu({
         });
       },
     },
-  ];
+  ], [canTransform, dynamicState, editor, insertParagraph, isCodeNode, setIsMenuOpen, showToast, t]);
+
+  useEffect(() => {
+    if (!isMenuOpen || !isMenuReady || isNativeMenuOpening.current) return;
+    isNativeMenuOpening.current = true;
+
+    const showNativeMenu = async () => {
+      try {
+        const [{ Menu }, { LogicalPosition }] = await Promise.all([
+          import("@tauri-apps/api/menu"),
+          import("@tauri-apps/api/dpi"),
+        ]);
+
+        const menuDimensions = calculateMenuDimensions(menuItems);
+        const nativeMenu = await Menu.new({
+          items: menuItems as unknown as NonNullable<Parameters<typeof TauriMenu.new>[0]>["items"],
+        });
+        const position = menuPosition
+          ? new LogicalPosition(
+            Math.max(8, menuPosition.x - menuDimensions.width),
+            Math.min(
+              Math.max(8, menuPosition.y),
+              Math.max(8, window.innerHeight - menuDimensions.height - 8),
+            ),
+          )
+          : undefined;
+        await nativeMenu.popup(position);
+      } catch (error) {
+        console.error("Failed to show native node menu", error);
+      } finally {
+        isNativeMenuOpening.current = false;
+        setIsMenuOpen(false);
+      }
+    };
+
+    void showNativeMenu();
+  }, [isMenuOpen, isMenuReady, menuPosition, menuItems, setIsMenuOpen]);
 
   return (
-    <>
-
-
-      <Menu
-        items={menuItems}
-        isOpen={isMenuOpen}
-        onClose={() => {
-          setIsMenuOpen(false);
-          setTimeout(() => {
-            editor.update(() => {
-              if (nodeRef.current) {
-                //nodeRef.current.selectEnd();
-              }
-            });
-          }, 50);
-        }}
-        direction="left"
-        align="center"
-        trigger={trigger}
-        position={menuPosition}
-        collisionPadding={{ top:DIMENSIONS.titlebarHeight }}
-      />
-    </>
+    <>{trigger}</>
   );
 }

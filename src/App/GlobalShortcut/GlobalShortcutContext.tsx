@@ -13,6 +13,8 @@ interface GlobalShortcutStore {
   setCreateNewDocument: (fn: () => void) => void;
   exitApp: () => void;
   setExitApp: (fn: () => void) => void;
+  openSettings: () => void;
+  setOpenSettings: (fn: () => void) => void;
 }
 
 export const useGlobalShortcut = create<GlobalShortcutStore>((set) => ({
@@ -28,4 +30,6 @@ export const useGlobalShortcut = create<GlobalShortcutStore>((set) => ({
   setCreateNewDocument: (fn) => set({ createNewDocument: fn }),
   exitApp: () => {},
   setExitApp: (fn) => set({ exitApp: fn }),
+  openSettings: () => {},
+  setOpenSettings: (fn) => set({ openSettings: fn }),
 }));

@@ -2,19 +2,12 @@ import "./DocumentMenu.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getRoot } from "lexical";
-import {
-  CheckCircle2,
-  CopyIcon,
-  Download,
-  Layers2,
-  MenuIcon,
-  SearchIcon,
-  TrashIcon,
-} from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 
+import { duplicateDocument } from "@/App/AppComponents/duplicateDocument";
 import { useExportDocument } from "@/App/AppComponents/ImportExport/exportDocument";
 import LocalSearch from "@/App/AppComponents/LocalSearch/LocalSearch";
 import { navigationUtils } from "@/App/AppComponents/navigationUtils";
@@ -22,16 +15,13 @@ import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
 import { useFile } from "@/App/hooks/FileHooks";
 import { useGlobalToast } from "@/App/hooks/useGlobalToast";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
-import { MenuX } from "@/components/custom/Menu/MenuX";
-import { newNode } from "@/core/database/useBlocDatabase";
+import { NodeJson } from "@/core/database/useBlocDatabase";
 import {
   DocumentMetadataKey,
   DocumentsJson,
-  newDocument,
   updateDocumentMetadataField,
   updateDocumentPath,
 } from "@/core/database/useDocumentDatabase";
-import { addRecentDocument } from "@/core/database/useRecentDocumentsDatabase";
 import { ICON_SIZES, TOAST_DURATION } from "@/core/global/defaultValues";
 import { logger } from "@/core/logger";
 import { MoveToTrash } from "@/core/TrashSystem/TrashSystem";
@@ -75,13 +65,13 @@ export const DocumentMenu = () => {
   const { isMac } = useGlobalStore(
     useShallow((state) => ({ isMac: state.isMac })),
   );
-  const ICON_SIZE = ICON_SIZES.default;
-
-  const menuItems = [
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const isNativeMenuOpening = useRef(false);
+  const menuItems: any[] = [
     {
-      icon: <SearchIcon size={ICON_SIZE} />,
-      title: t("DOCUMENT_MENU.searchInDocument") as string,
-      onClick: () => {
+      text: t("DOCUMENT_MENU.searchInDocument") as string,
+      accelerator: "CmdOrControl+F",
+      action: () => {
         setTimeout(() => {
           setIsMenuOpen(false);
           openLocalSearch();
@@ -90,9 +80,8 @@ export const DocumentMenu = () => {
       shortcut: isMac ? "⌘F" : "Ctrl+F",
     },
     {
-      icon: <CopyIcon size={ICON_SIZE} />,
-      title: t("DOCUMENT_MENU.copyDocumentId") as string,
-      onClick: async () => {
+      text: t("DOCUMENT_MENU.copyDocumentId") as string,
+      action: async () => {
         if (currentDocumentRef.current) {
           const documentId = currentDocumentRef.current.id;
           navigator.clipboard
@@ -116,14 +105,12 @@ export const DocumentMenu = () => {
       },
     },
     {
-      icon: (
-        <CheckCircle2
-          size={ICON_SIZE}
-          className={!isEditable ? "text-green-500" : "text-muted-foreground"}
-        />
-      ),
-      title: t("DOCUMENT_MENU.readModeToggle") as string,
-      onClick: async () => {
+      text: t(
+        isEditable
+          ? "DOCUMENT_MENU.switchToReadMode"
+          : "DOCUMENT_MENU.switchToWriteMode",
+      ) as string,
+      action: async () => {
         const newEditableState = !editor.isEditable();
         editor.setEditable(newEditableState);
         const docId = currentDocumentRef.current?.id;
@@ -137,9 +124,8 @@ export const DocumentMenu = () => {
       },
     },
     {
-      icon: <Layers2 size={ICON_SIZE} />,
-      title: t("DOCUMENT_MENU.duplicateDocument") as string,
-      onClick: async () => {
+      text: t("DOCUMENT_MENU.duplicateDocument") as string,
+      action: async () => {
         const doc = currentDocumentRef.current;
         if (doc) {
           setIsMenuOpen(false);
@@ -147,63 +133,45 @@ export const DocumentMenu = () => {
             const editorState = editor.getEditorState();
             const jsonState = editorState.toJSON();
 
-            // Create new document
-            const newDocumentItem = {
-              id: crypto.randomUUID(),
-              title: doc.title + " (copy)",
-              path: doc.path,
-              workspace_id: doc.workspace_id || "default",
-              cache: JSON.stringify(jsonState),
-              created_at: Date.now(),
-              updated_at: Date.now(),
-            };
-
-            await newDocument(newDocumentItem);
-
-            // Add to recent documents
-            try {
-              await addRecentDocument(newDocumentItem.id, "");
-            } catch (error) {
-              console.error("Failed to add to recent documents:", error);
-            }
-
-            // Create nodes from the existing editor state
-            const createNodesFromState = (node: any, documentId: string) => {
+            const nodes: NodeJson[] = [];
+            const collectNodesFromState = (node: any) => {
               if (node.children && Array.isArray(node.children)) {
                 node.children.forEach((child: any) => {
                   if (child.$ && child.$.id) {
-                    const newNodeItem = {
+                    nodes.push({
                       id: child.$.id,
                       position: child.$.position || "aa",
                       content: JSON.stringify(child),
                       full_text: "",
-                      document_id: documentId,
+                      document_id: doc.id,
                       node_type: child.$.node_type || "paragraph",
                       created_at: Date.now(),
                       updated_at: Date.now(),
-                    };
-                    newNode(newNodeItem);
+                    });
                   }
-                  createNodesFromState(child, documentId);
+                  collectNodesFromState(child);
                 });
               }
             };
 
             if (jsonState.root) {
-              createNodesFromState(jsonState.root, newDocumentItem.id);
+              collectNodesFromState(jsonState.root);
             }
 
-            // Open the new document
+            const newDocumentItem = await duplicateDocument(
+              doc,
+              nodes,
+              `${doc.title} (copy)`,
+            );
+
             handleNewFile(newDocumentItem.title);
           });
         }
       },
     },
     {
-      icon: <TrashIcon size={ICON_SIZE} />,
-      title: t("DOCUMENT_MENU.deleteDocument") as string,
-      variant: "danger" as const,
-      onClick: () => {
+      text: t("DOCUMENT_MENU.deleteDocument") as string,
+      action: () => {
         setIsMenuOpen(false);
 
         if (
@@ -259,13 +227,11 @@ export const DocumentMenu = () => {
       },
     },
     {
-      title: "sep",
-      isSeparator: true,
+      item: "Separator",
     },
     {
-      icon: <Download size={ICON_SIZE} />,
-      title: t("DOCUMENT_MENU.export") as string,
-      onClick: async () => {
+      text: t("DOCUMENT_MENU.exportDocument") as string,
+      action: async () => {
         setIsMenuOpen(false);
         editor.getEditorState().read(() => {
           const editorState = editor.getEditorState();
@@ -295,6 +261,59 @@ export const DocumentMenu = () => {
     },
   ];
 
+  useEffect(() => {
+    if (!isMenuOpen || isNativeMenuOpening.current) return;
+    isNativeMenuOpening.current = true;
+
+    const showNativeMenu = async () => {
+      try {
+        const [{ Menu }, { LogicalPosition }] = await Promise.all([
+          import("@tauri-apps/api/menu"),
+          import("@tauri-apps/api/dpi"),
+        ]);
+
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (context) {
+          context.font = "13px -apple-system, BlinkMacSystemFont, sans-serif";
+        }
+
+        const menuWidth = Math.max(
+          ...menuItems.map((item) =>
+            item.item === "Separator"
+              ? 0
+              : (context?.measureText(item.text ?? "").width ?? 0) + 48,
+          ),
+        );
+        const menuHeight = menuItems.reduce(
+          (height, item) => height + (item.item === "Separator" ? 8 : 28),
+          8,
+        );
+
+        const nativeMenu = await Menu.new({ items: menuItems });
+        await nativeMenu.popup(
+          new LogicalPosition(
+            Math.min(
+              Math.max(8, menuPosition.x),
+              Math.max(8, window.innerWidth - menuWidth - 8),
+            ),
+            Math.min(
+              Math.max(8, menuPosition.y),
+              Math.max(8, window.innerHeight - menuHeight - 8),
+            ),
+          ),
+        );
+      } catch (error) {
+        console.error("Failed to show native document menu", error);
+      } finally {
+        isNativeMenuOpening.current = false;
+        setIsMenuOpen(false);
+      }
+    };
+
+    void showNativeMenu();
+  }, [isMenuOpen, menuItems, menuPosition, setIsMenuOpen]);
+
   const triggerRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -307,39 +326,31 @@ export const DocumentMenu = () => {
           style={{
             right: isMac ? "1rem" : "120px",
           }}
-          onClick={() => setIsMenuOpen(true)}
-        >
-          <MenuX
-            items={menuItems}
-            isOpen={isMenuOpen}
-            onClose={() => {
-              if (isMenuOpen) {
-                setIsMenuOpen(false);
-              }
-            }}
-            direction="bottom"
-            trigger={
-              <button
-                style={{ position: "relative" }}
-              >
-                <MenuIcon size={ICON_SIZES.lg} />
-                {!isEditable && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "-2px",
-                      right: "-2px",
-                      width: "8px",
-                      height: "8px",
-                      backgroundColor: "#22c55e",
-                      borderRadius: "50%",
-                      border: "1px solid white",
-                    }}
-                  />
-                )}
-              </button>
+          onClick={() => {
+            const rect = triggerRef.current?.getBoundingClientRect();
+            if (rect) {
+              setMenuPosition({ x: rect.left, y: rect.bottom + 4 });
             }
-          />
+            setIsMenuOpen(true);
+          }}
+        >
+          <button style={{ position: "relative" }}>
+            <MenuIcon size={ICON_SIZES.lg} />
+            {!isEditable && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "-2px",
+                  right: "-2px",
+                  width: "8px",
+                  height: "8px",
+                  backgroundColor: "#22c55e",
+                  borderRadius: "50%",
+                  border: "1px solid white",
+                }}
+              />
+            )}
+          </button>
 
           {isLocalSearchOpen && <LocalSearch onClose={closeLocalSearch} />}
         </div>

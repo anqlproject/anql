@@ -6,7 +6,12 @@
       "paste": "Paste",
       "undo": "Undo",
       "redo": "Redo",
-      "insert": "Insert Inlines"
+      "insert": "Insert Inlines",
+      "insertDateTime": "Add date and time",
+      "insertEquation": "Create equation",
+      "insertLink": "Add link",
+      "applyInlineCode": "Format as inline code",
+      "insertPdfDocument": "Attach PDF document"
     },
     "NODE_MENU": {
       "addAbove": "Add above",
@@ -38,7 +43,7 @@
       "table": "Table",
       "image": "Image",
       "line": "Line",
-      "math": "Math expression",
+      "math": "Math expression (type @ for options)",
       "emptyPlaceholder": "Write or type node name"
     },
     "MATH_PANEL": {
@@ -69,6 +74,7 @@
       "date": "Date time",
       "inlineCode": "Inline Code",
       "link": "Link",
+      "pdfDocument": "Insert PDF document",
       "math": "Maths",
       "equation": "Equation",
       "linkUrlPlaceholder": "Copy link from web, node, document, table",
@@ -100,12 +106,14 @@
     "DOCUMENT_MENU": {
       "import": "Import",
       "export": "Export",
+      "exportDocument": "Export document",
       "newDocument": "New document",
-      "deleteDocument": "Delete",
+      "deleteDocument": "Move to trash",
       "copyDocumentId": "Copy ID",
       "duplicateDocument": "Duplicate",
-      "readModeToggle": "Read Mode",
-      "searchInDocument": "Find"
+      "switchToReadMode": "Switch to read mode",
+      "switchToWriteMode": "Switch to write mode",
+      "searchInDocument": "Find in document"
     },
     "SIDEBAR": {
       "home": "Home",
@@ -315,11 +323,12 @@
       "confirmEmptyTrash": "Are you sure you want to empty the trash? This action will permanently delete {{count}} item(s)."
     },
     "FOOTER_MENU": {
-      "generalSettings": "General settings",
+      "generalSettings": "App settings",
       "switchToLightMode": "Switch to light mode",
       "switchToDarkMode": "Switch to dark mode",
-      "getHelp": "Get help",
-      "about": "About"
+      "openTrash": "Open trash",
+      "getHelp": "Open help center",
+      "about": "About ANQL"
     },
     "HELP_PANEL": {
       "title": "Help Documentation",

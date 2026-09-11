@@ -24,8 +24,9 @@
 
 .settings-field-label {
   display: block;
-  font-size: var(--ui-text-md);
+  font-size: var(--ui-text-base);
   font-weight: var(--font-medium);
+  line-height: var(--leading-snug);
   color: var(--text-primary);
   margin-bottom: 3px;
   letter-spacing: var(--tracking-normal);
@@ -34,9 +35,10 @@
 .settings-field-description {
   font-size: var(--ui-text-sm);
   color: var(--text-secondary);
-  opacity: 0.7;
+  opacity: 0.82;
   margin: 0;
   line-height: var(--leading-snug);
+  max-width: 52ch;
   letter-spacing: var(--tracking-normal);
 }
 
@@ -76,6 +78,7 @@
   background-color: var(--bg-color);
   color: var(--text-primary);
   font-size: var(--ui-text-sm);
+  line-height: var(--leading-normal);
   font-family: inherit;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;

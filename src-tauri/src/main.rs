@@ -6,17 +6,16 @@ pub mod file_manager;
 
 use database_manager::nodes::nodes_operations_tauri::{
     compute_hashes_batch, delete_node, delete_node_by_document_id, get_checksum, get_document_id,
-    get_hashes_by_document_id, get_node_by_id, get_nodes_by_document_id, get_nodes_by_node_type,
-    get_node_metadata, set_node_metadata, remove_node_metadata,
-    new_node, update_node, update_node_content, update_node_document_id, update_node_position,
-    update_node_type,
+    get_hashes_by_document_id, get_node_by_id, get_node_metadata, get_nodes_by_document_id,
+    get_nodes_by_node_type, new_node, remove_node_metadata, set_node_metadata, update_node,
+    update_node_content, update_node_document_id, update_node_position, update_node_type,
 };
 
 use database_manager::documents::documents_operations_tauri::{
-    delete_document, get_document_by_id, get_document_metadata, set_document_metadata,
-    remove_document_metadata, get_documents_by_path, get_documents_by_workspace_id,
-    new_document, update_document, update_document_path, update_document_timestamp,
-    update_document_title, update_document_workspace_id,
+    delete_document, get_document_by_id, get_document_metadata, get_documents_by_path,
+    get_documents_by_workspace_id, new_document, remove_document_metadata, set_document_metadata,
+    update_document, update_document_path, update_document_timestamp, update_document_title,
+    update_document_workspace_id,
 };
 
 use database_manager::search::search_operations_tauri::{
