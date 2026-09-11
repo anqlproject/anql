@@ -1,8 +1,9 @@
 /* SettingsTab — section title + card wrapper */
 
 .settings-section-title {
-  font-size: var(--text-medium);
+  font-size: var(--ui-text-md);
   font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
   color: var(--text-primary);
   margin: 0 0 18px 0;
   letter-spacing: var(--tracking-tight);
