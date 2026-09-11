@@ -7,9 +7,9 @@ import { useTranslation } from 'react-i18next';
 
 import { DocumentMenu } from "@/App/AppComponents/DocumentMenu/DocumentMenu";
 import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
+import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { Dialog } from "@/components/custom/Dialog/Dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { DIMENSIONS } from "@/core/global/defaultValues";
 
 export default function TitleBar(): JSX.Element {

@@ -130,12 +130,17 @@ export default function StandardMarkdownPastePlugin(): null {
 
         const html = clipboard.getData('text/html') || '';
         const plain = clipboard.getData('text/plain') || '';
+        const lexicalEditorData = clipboard.getData('application/x-lexical-editor');
+
+        // Let native Lexical handle internal copy/paste (preserves rich nodes perfectly)
+        if (lexicalEditorData) return false;
 
         if (!plain) return false;
 
         // Let native Lexical handle already-rendered HTML.
         if (standardMarkdownPastePluginHtmlAlreadyRendered(html)) return false;
 
+        // External markdown copy paste
         // Only intercept when raw Markdown block syntax is detected.
         if (!standardMarkdownPastePluginHasRawMarkdown(plain)) return false;
 
