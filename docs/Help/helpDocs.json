@@ -28,7 +28,7 @@
             "- Image: Insert images from URLs or files",
             "- Table: Create structured tables",
             "- Heading 1: Main section headings",
-            "- Heading 2: Subsection headings", 
+            "- Heading 2: Subsection headings",
             "- Heading 3: Minor headings",
             "- Number List: Ordered numbered lists",
             "- Bullet List: Unordered bullet lists",
@@ -69,8 +69,8 @@
             "The menu provides various actions for manipulating and transforming nodes."
           ],
           "image": [
-            "docs/Help/Assets/node menu button.png",
-            "docs/Help/Assets/node menu.png"]
+            "docs/Help/Assets/node menu button.png"
+          ]
         },
         {
           "id": "transform-menu",
@@ -94,8 +94,7 @@
             "- Check List: Convert to todo list (Ctrl+Shift+9 / Mac: ⌘⇧9)",
             "- Quote: Convert to block quote (Ctrl+Shift+. / Mac: ⌘⇧.)",
             "- Code: Convert to code block (Ctrl+Alt+C / Mac: ⌘⌥C)"
-          ],
-          "image": "docs/Help/Assets/transform.png"
+          ]
         }
       ]
     },
