@@ -1,8 +1,10 @@
-import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { resolveResource } from '@tauri-apps/api/path';
+import { exists, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import type { JSX } from 'react';
 import React, { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
+import { importAnqlDocument } from '@/App/AppComponents/ImportExport/importDocument';
 import { useGlobalToast } from '@/App/hooks/useGlobalToast';
 import { useSettingsFile } from '@/App/hooks/useSettingsFile';
 import { getUnexpectedKeys, loadSettings, removeUnexpectedKeys } from '@/App/settings';
@@ -42,6 +44,12 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
     const initApp = async () => {
       try {
         const configPath = await getFileFromDocument(APP_PATH.CONFIG_FILE);
+        const rawDbPath = APP_PATH.DATABASE_FILE;
+        const isAbsolute = rawDbPath.startsWith('/') || /^[A-Z]:[/\\]/.test(rawDbPath);
+        const databasePath = isAbsolute ? rawDbPath : await getFileFromDocument(rawDbPath);
+        const isNewInstallation = Boolean(
+          configPath && databasePath && !(await exists(configPath)) && !(await exists(databasePath)),
+        );
         if (configPath) {
           try {
             const content = await readTextFile(configPath);
@@ -61,10 +69,6 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
           }
         }
 
-        const rawDbPath =  APP_PATH.DATABASE_FILE;
-        const isAbsolute = rawDbPath.startsWith('/') || /^[A-Z]:[/\\]/.test(rawDbPath);
-        const databasePath = isAbsolute ? rawDbPath : await getFileFromDocument(rawDbPath);
-
         if (!databasePath) throw new Error("Database path not found");
 
         // Configure the log directory using APP_PATH.LOG_DIR
@@ -78,6 +82,12 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
 
         // Initialize logger with privacy setting
         await initDatabase(databasePath);
+
+        if (isNewInstallation) {
+          const templatePath = await resolveResource('templates/node_tests.anql');
+          await importAnqlDocument(templatePath);
+        }
+
         cleanupOldPendingDeletions(24 * 60 * 60).catch(console.error);
 
         if (isMounted) {

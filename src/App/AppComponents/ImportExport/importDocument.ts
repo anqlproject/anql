@@ -100,6 +100,55 @@ function extractNodesFromEditorState(editor: LexicalEditor): Record<string, unkn
   return nodes;
 }
 
+/** Import an ANQL archive into the database and return its new document. */
+export async function importAnqlDocument(
+  filePath: string,
+  editor?: LexicalEditor,
+): Promise<DocumentsJson> {
+  const importResult = await invoke<ImportResult>('import_from_zip', { zipPath: filePath });
+  const { content: processedContent, extension: fileExt, title } = importResult;
+  if (fileExt !== 'json' && !editor) {
+    throw new Error(`Unsupported archive document format: ${fileExt}`);
+  }
+
+  const newDocumentItem: DocumentsJson = {
+    id: crypto.randomUUID(),
+    title,
+    path: DATABASE_PATH.HOME_PATH,
+    workspace_id: 'default',
+    created_at: Date.now(),
+    updated_at: Date.now(),
+  };
+
+  await newDocument(newDocumentItem);
+  try {
+    await addRecentDocument(newDocumentItem.id, '');
+  } catch {
+    /* non-critical */
+  }
+
+  if (fileExt === 'json') {
+    const jsonData = JSON.parse(processedContent);
+    if (jsonData.assets) delete jsonData.assets;
+    const stateToLoad = jsonData.editorState ?? jsonData;
+    if (stateToLoad.root?.children) {
+      await saveNodesFromNodes(stateToLoad.root.children, newDocumentItem.id);
+    }
+  } else if (editor) {
+    await new Promise<void>((resolve) => {
+      editor.update(
+        () => {
+          $convertFromMarkdownString(processedContent, ANQL_MARKDOWN_TRANSFORMERS);
+        },
+        { onUpdate: resolve },
+      );
+    });
+    await saveNodesFromNodes(extractNodesFromEditorState(editor), newDocumentItem.id);
+  }
+
+  return newDocumentItem;
+}
+
 // ─── Main entry point ─────────────────────────────────────────────────────────
 
 /**
@@ -128,49 +177,8 @@ export async function importDocument({
     const fileExtension = getFileExtension(selectedPath);
 
     if (fileExtension === 'anql') {
-      // ZIP: use Rust backend to extract and remap assets (full DB flow)
-      const importResult = await invoke<ImportResult>('import_from_zip', { zipPath: selectedPath });
-      const { content: processedContent, extension: fileExt, title } = importResult;
+      const newDocumentItem = await importAnqlDocument(selectedPath, editor);
 
-      // Step 3 — Create the document record in DB (nodes added next)
-      const newDocumentItem: DocumentsJson = {
-        id: crypto.randomUUID(),
-        title,
-        path: DATABASE_PATH.HOME_PATH,
-        workspace_id: 'default',
-        created_at: Date.now(),
-        updated_at: Date.now(),
-      };
-      await newDocument(newDocumentItem);
-      try {
-        await addRecentDocument(newDocumentItem.id, '');
-      } catch {
-        /* non-critical */
-      }
-
-      // Step 4 — Extract Lexical nodes and save nodes
-      if (fileExt === 'json') {
-        const jsonData = JSON.parse(processedContent);
-        if (jsonData.assets) delete jsonData.assets;
-        const stateToLoad = jsonData.editorState ?? jsonData;
-        if (stateToLoad.root?.children) {
-          await saveNodesFromNodes(stateToLoad.root.children, newDocumentItem.id);
-        }
-      } else {
-        // Markdown: convert via editor, then read resulting node JSONs
-        await new Promise<void>((resolve) => {
-          editor.update(
-            () => {
-              $convertFromMarkdownString(processedContent, ANQL_MARKDOWN_TRANSFORMERS);
-            },
-            { onUpdate: resolve },
-          );
-        });
-        const nodes = extractNodesFromEditorState(editor);
-        await saveNodesFromNodes(nodes, newDocumentItem.id);
-      }
-
-      // Step 5 — Open via standard reconstruction flow (DB -> editor)
       await openDocument(newDocumentItem);
     } else if (fileExtension === 'md' || fileExtension === 'markdown') {
       // Direct file: use same technique as DocumentMenu (simple editor update)

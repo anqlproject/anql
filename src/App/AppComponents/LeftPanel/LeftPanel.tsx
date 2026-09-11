@@ -257,7 +257,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
               <React.Fragment key={item.id}>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    className="hover:bg-[var(--action-hover)]"
+                    className="hover:bg-(--action-hover)"
                     isActive={item.id === "home" && currentPage === "home"}
                     onClick={() => {
                       item.onClick();
