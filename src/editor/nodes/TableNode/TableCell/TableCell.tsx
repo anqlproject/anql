@@ -218,6 +218,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
 
         const editor = editorRef.current;
         editor.focus();
+        if (editor instanceof HTMLInputElement && editor.type === 'number') return;
         const caretPosition = editor.value.length;
         editor.setSelectionRange(caretPosition, caretPosition);
     }, [isEditing]);
@@ -292,6 +293,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
         }
 
         const input = e.currentTarget;
+        if (input.type === 'number') return;
 
         // If there is an active text selection, preserve it instead of moving the caret
         if (input.selectionStart !== null && input.selectionEnd !== null && input.selectionStart !== input.selectionEnd) {
