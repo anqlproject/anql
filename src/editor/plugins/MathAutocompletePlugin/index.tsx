@@ -255,6 +255,12 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     return visibleOptions.map(item => new MathAutocompleteOption(item.label, item.insert, item.isVariable));
   }, [queryString, variables, tableVariables]);
 
+  React.useEffect(() => {
+    if (anchorRef.current) {
+      refs.setReference(anchorRef.current);
+    }
+  }, [options, queryString, refs]);
+
   const onSelectOption = useCallback(
     (
       selectedOption: MathAutocompleteOption,
@@ -326,7 +332,6 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
         // Update anchor reference for floating-ui
         if (anchorRef.current !== anchorElementRef.current) {
           anchorRef.current = anchorElementRef.current;
-          refs.setReference(anchorElementRef.current);
         }
 
         return (
