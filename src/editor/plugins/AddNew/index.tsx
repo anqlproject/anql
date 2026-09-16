@@ -8,12 +8,19 @@ import {
   LexicalEditor,
 } from 'lexical';
 import { useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
-function handleClick(event: MouseEvent, editor: LexicalEditor) {
-  const target = event.target as HTMLElement;
+import { useGlobalStore } from '@/App/store/useGlobalStore';
 
-  // Only handle clicks on the editor container
-  if (!target.closest('.editor')) {
+function handleClick(
+  event: MouseEvent,
+  editor: LexicalEditor,
+  editorRootElement: HTMLElement | null,
+) {
+  const target = event.target as Node | null;
+
+  // Only handle clicks inside the editor root element
+  if (!target || !editorRootElement || !editorRootElement.contains(target)) {
     return;
   }
 
@@ -65,9 +72,13 @@ function handleClick(event: MouseEvent, editor: LexicalEditor) {
 
 export default function ClickToAddParagraphPlugin(): null {
   const [editor] = useLexicalComposerContext();
+  const { editorRef } = useGlobalStore(
+    useShallow((state) => ({ editorRef: state.editorRef })),
+  );
 
   useEffect(() => {
-    const onClick = (event: MouseEvent) => handleClick(event, editor);
+    const onClick = (event: MouseEvent) =>
+      handleClick(event, editor, editorRef.current);
 
     // Add click event listener
     document.addEventListener('click', onClick);
@@ -75,7 +86,7 @@ export default function ClickToAddParagraphPlugin(): null {
     return () => {
       document.removeEventListener('click', onClick);
     };
-  }, [editor]);
+  }, [editor, editorRef]);
 
   return null;
 }
