@@ -27,7 +27,7 @@ import { NodeHighlight } from "@/App/AppComponents/NodeHighlight/NodeHighlight";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { BREAKPOINTS } from "@/core/global/defaultValues";
 import { useSharedHistoryContext } from "@/editor/context/SharedHistoryContext";
-import AddNewPlugin from "@/editor/plugins/AddNew";
+import AddNewPlugin from "@/editor/plugins/ClickToAddParagraphPlugin";
 import AnqlMarkdownShortcutPlugin from "@/editor/plugins/AnqlMarkdownShortcutPlugin";
 import AutoLinkPlugin from "@/editor/plugins/AutoLinkPlugin";
 import { AutosavePlugin } from "@/editor/plugins/AutosavePlugin";
