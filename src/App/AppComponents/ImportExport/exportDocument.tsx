@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { save } from '@tauri-apps/plugin-dialog';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 import { Check, X } from 'lucide-react';
 
 import { useGlobalToast } from '@/App/hooks/useGlobalToast';
@@ -183,5 +184,24 @@ export function useExportDocument() {
     }
   };
 
-  return { exportDocument };
+  const exportMarkdown = async (content: string, title?: string) => {
+    try {
+      const sanitizedTitle = title?.replace(/[^a-zA-Z0-9_-]/g, '_') || 'document';
+      const filePath = await save({
+        defaultPath: `${sanitizedTitle}.md`,
+        filters: [{
+          name: 'Markdown',
+          extensions: ['md'],
+        }],
+      });
+
+      if (filePath) {
+        await writeTextFile(filePath, content);
+      }
+    } catch (err) {
+      console.error('Failed to save Markdown file:', err);
+    }
+  };
+
+  return { exportDocument, exportMarkdown };
 }

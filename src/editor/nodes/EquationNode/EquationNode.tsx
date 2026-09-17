@@ -15,8 +15,8 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from 'lexical';
-import {$applyNodeReplacement, DecoratorNode, DOMExportOutput} from 'lexical';
-import type {JSX} from 'react';
+import { $applyNodeReplacement, DecoratorNode, DOMExportOutput } from 'lexical';
+import type { JSX } from 'react';
 import * as React from 'react';
 
 const EquationComponent = React.lazy(() => import('./EquationComponent'));
@@ -38,7 +38,7 @@ function $convertEquationElement(
   equation = atob(equation || '');
   if (equation) {
     const node = $createEquationNode(equation, inline);
-    return {node};
+    return { node };
   }
 
   return null;
@@ -60,6 +60,10 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
     super(key);
     this.__equation = equation;
     this.__inline = inline ?? false;
+  }
+
+  isInline(): boolean {
+    return this.getLatest().__inline;
   }
 
   static importJSON(serializedNode: SerializedEquationNode): EquationNode {
@@ -98,7 +102,7 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
       throwOnError: false,
       trust: false,
     });
-    return {element};
+    return { element };
   }
 
   static importDOM(): DOMConversionMap | null {

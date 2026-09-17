@@ -8,9 +8,9 @@
 
 import './EquationEditor.css';
 
-import {isHTMLElement} from 'lexical';
-import type {JSX, Ref, RefObject} from 'react';
-import {ChangeEvent, forwardRef} from 'react';
+import { isHTMLElement } from 'lexical';
+import type { JSX, Ref, RefObject } from 'react';
+import { ChangeEvent, forwardRef } from 'react';
 
 type BaseEquationEditorProps = {
   equation: string;
@@ -19,7 +19,7 @@ type BaseEquationEditorProps = {
 };
 
 function EquationEditor(
-  {equation, setEquation, inline}: BaseEquationEditorProps,
+  { equation, setEquation, inline }: BaseEquationEditorProps,
   forwardedRef: Ref<HTMLInputElement | HTMLTextAreaElement>,
 ): JSX.Element {
   const onChange = (event: ChangeEvent) => {

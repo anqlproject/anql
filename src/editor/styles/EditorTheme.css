@@ -317,3 +317,16 @@
   background-color: yellow;
   font-weight: bold;
 }
+
+.editor-equation {
+  cursor: default;
+  user-select: none;
+}
+
+span.editor-equation {
+  display: inline-block;
+}
+
+.editor-equation.focused {
+  outline: 2px solid var(--primary-color);
+}

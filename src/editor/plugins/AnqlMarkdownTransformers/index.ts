@@ -12,7 +12,8 @@ import {
   isTableRowDivider,
   MULTILINE_ELEMENT_TRANSFORMERS,
   MultilineElementTransformer,
-  QUOTE, TEXT_FORMAT_TRANSFORMERS,
+  QUOTE,
+  TEXT_FORMAT_TRANSFORMERS,
   TEXT_MATCH_TRANSFORMERS,
   TextMatchTransformer,
   Transformer,
@@ -22,7 +23,7 @@ import {
   $isHorizontalRuleNode,
   HorizontalRuleNode,
 } from "@lexical/react/LexicalHorizontalRuleNode";
-import { $createTextNode, ElementNode, LexicalNode } from "lexical";
+import { $createTextNode, $getRoot, ElementNode, LexicalNode } from "lexical";
 
 import {
   $createDateTimeNode,
@@ -60,6 +61,8 @@ import {
   $isTableNode,
   TableNode,
 } from "@/editor/nodes/TableNode/TableNode";
+import { evaluateAllMathNodes } from "@/editor/plugins/MathPlugin/evaluator";
+import { $getAllMathNodes, $getAllTableNodes } from "@/editor/plugins/MathPlugin/traversal";
 
 const TABLE_ROW_REG_EXP = /^(?:\|)(.+)(?:\|)\s?$/;
 
@@ -118,7 +121,7 @@ const listExport = (
   return indent + prefix + exportChildren(node);
 };
 
-// Markdown: - [ ] text ou - [x] text
+// Markdown: - [ ] text or - [x] text
 export const CHECK_LIST: ElementTransformer = {
   dependencies: [ListNode],
   export: (node, exportChildren) => {
@@ -144,7 +147,7 @@ export const ORDERED_LIST: ElementTransformer = {
   type: "element",
 };
 
-// Markdown: - text, * text, ou + text
+// Markdown: - text, * text, or + text
 export const UNORDERED_LIST: ElementTransformer = {
   dependencies: [ListNode],
   export: (node, exportChildren) => {
@@ -157,7 +160,7 @@ export const UNORDERED_LIST: ElementTransformer = {
   type: "element",
 };
 
-// Markdown: ---, ***, ou ___
+// Markdown: ---, ***, or ___
 export const HR: ElementTransformer = {
   dependencies: [HorizontalRuleNode],
   export: (node: LexicalNode) => {
@@ -179,7 +182,7 @@ export const HR: ElementTransformer = {
   type: "element",
 };
 
-// Markdown: ![texte alternatif](url)
+// Markdown: ![alt text](url)
 export const IMAGE: TextMatchTransformer = {
   dependencies: [ImageNode],
   export: (node) => {
@@ -211,7 +214,51 @@ export const MATH: ElementTransformer = {
     if (!$isMathExpNode(node)) {
       return null;
     }
-    return `@math(${exportChildren(node)})`;
+
+    const root = $getRoot();
+    const mathNodes = $getAllMathNodes(root);
+    const tableNodes = $getAllTableNodes(root);
+
+    const tableVariables: Record<string, Record<string, number[]>> = {};
+
+    tableNodes.forEach((tNode, index) => {
+      const rawName = (tNode as any).__tableName || `Table_${index + 1}`;
+      const safeTableName = rawName.replace(/[^a-zA-Z0-9_]/g, '');
+      if (!safeTableName) return;
+
+      const tableData: Record<string, number[]> = {};
+
+      (tNode as any).__columns.forEach((col: any) => {
+        if (col.meta?.type === 'number') {
+          const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
+          if (safeHeader) {
+            tableData[safeHeader] = (tNode as any).__data.map((row: any) => {
+              const val = row[col.id];
+              const num = Number(val);
+              return isNaN(num) ? 0 : num;
+            });
+          }
+        }
+      });
+
+      if (Object.keys(tableData).length > 0) {
+        tableVariables[safeTableName] = tableData;
+      }
+    });
+
+    const { results } = evaluateAllMathNodes(mathNodes, tableVariables);
+    const res = results[node.getKey()];
+    const expression = exportChildren(node).trim();
+
+    if (res && res.result) {
+      if (expression.includes('=')) {
+        return res.result;
+      } else {
+        return `${expression} ${res.result}`;
+      }
+    }
+
+    return expression;
   },
   regExp: /^@math\(([^)]*)\)\s?$/,
   replace: (parentNode, _children, match, isImport) => {
@@ -227,27 +274,35 @@ export const MATH: ElementTransformer = {
   type: "element",
 };
 
-// Markdown: $$
-export const MATH_BLOCK: ElementTransformer = {
-  dependencies: [MathExpNode],
-  export: (node, exportChildren) => {
-    if (!$isMathExpNode(node)) {
+function escapeInlineEquation(equation: string): string {
+  return equation.replace(/([\\$])/g, '\\$1');
+}
+
+function unescapeInlineEquation(equation: string): string {
+  return equation.replace(/\\([\\$])/g, '$1');
+}
+
+// Markdown: $$\nequation\n$$
+export const BLOCK_EQUATION: MultilineElementTransformer = {
+  dependencies: [EquationNode],
+  export: (node) => {
+    if (!$isEquationNode(node) || node.__inline) {
       return null;
     }
-    return `$$\n${exportChildren(node)}\n$$`;
+    return `$$\n${node.getEquation()}\n$$`;
   },
-  regExp: /^\$\$\s?$/,
-  replace: (parentNode, _children, _match, isImport) => {
-    const mathExpNode = $createMathExpNode();
-    parentNode.replace(mathExpNode);
-    if (!isImport) {
-      mathExpNode.select();
-    }
+  regExpEnd: /^\$\$\s*$/,
+  regExpStart: /^\$\$\s*$/,
+  replace: (rootNode, _children, _startMatch, _endMatch, linesInBetween) => {
+    const equationLines = linesInBetween ?? [];
+    if (equationLines[0] === '') equationLines.shift();
+    if (equationLines[equationLines.length - 1] === '') equationLines.pop();
+    rootNode.append($createEquationNode(equationLines.join('\n'), false));
   },
-  type: "element",
+  type: "multiline-element",
 };
 
-// Markdown: [nom du lien](url)
+// Markdown: [link name](url)
 export const LINK: TextMatchTransformer = {
   dependencies: [LinkNode],
   export: (node) => {
@@ -292,21 +347,36 @@ export const DATETIME: TextMatchTransformer = {
   type: "text-match",
 };
 
+// Markdown: $x$ (inline)
 export const EQUATION: TextMatchTransformer = {
   dependencies: [EquationNode],
   export: (node) => {
-    if (!$isEquationNode(node)) {
+    if (!$isEquationNode(node) || !node.__inline) {
       return null;
     }
-
-    return `$${node.getEquation()}$`;
+    return `$${escapeInlineEquation(node.getEquation())}$`;
   },
-  importRegExp: /\$([^$]+?)\$/,
-  regExp: /\$([^$]+?)\$$/,
+  importRegExp: /\$((?:\\.|[^$\\\n])+?)\$/,
+  regExp: /^\$\$([^$]+?)\$\$$|(?:^|[^$])\$((?:\\.|[^$\\\n])+?)\$$/,
   replace: (textNode, match) => {
-    const [, equation] = match;
-    const equationNode = $createEquationNode(equation, true);
-    textNode.replace(equationNode);
+    const [, firstEquation, secondEquation] = match;
+    const isInline = !match[0].startsWith('$$');
+    const equation = firstEquation ?? secondEquation;
+    const equationNode = isInline
+      ? $createEquationNode(unescapeInlineEquation(equation), true)
+      : new EquationNode(equation, false);
+    if (isInline) {
+      const prefix =
+        match[0][0] === '$' || match[0][0] === '\\' ? '' : match[0][0];
+      if (prefix === '') {
+        textNode.replace(equationNode);
+      } else {
+        textNode.setTextContent(prefix);
+        textNode.insertAfter(equationNode);
+      }
+    } else {
+      textNode.getParentOrThrow().replace(equationNode);
+    }
   },
   trigger: "$",
   type: "text-match",
@@ -413,7 +483,7 @@ export const ANQL_MARKDOWN_TRANSFORMERS: Array<Transformer> = [
   HR,
   IMAGE,
   MATH,
-  MATH_BLOCK,
+  BLOCK_EQUATION,
   EQUATION,
   LINK,
   DATETIME,

@@ -107,6 +107,8 @@
       "import": "Importer",
       "export": "Exporter",
       "exportDocument": "Exporter le document",
+      "exportAnql": "Exporter en format ANQL",
+      "exportMarkdown": "Exporter en Markdown",
       "newDocument": "Nouveau document",
       "deleteDocument": "Placer dans la corbeille",
       "copyDocumentId": "Copier l'ID",

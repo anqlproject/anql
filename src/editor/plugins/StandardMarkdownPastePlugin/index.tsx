@@ -10,7 +10,7 @@
  *      <strong>) let Lexical's native paste handler run — nothing to do.
  *   2. If text/plain has raw Markdown block syntax, intercept and convert using
  *      $convertFromMarkdownString with ALL standard transformers, minus the
- *      app-specific ones (MATH, MATH_BLOCK, EQUATION, DATETIME, LINK).
+ *      app-specific ones (MATH, BLOCK_EQUATION, EQUATION, DATETIME, LINK).
  *   3. The converted nodes are inserted at the cursor position, preserving the
  *      document content that exists before and after the cursor.
  */
@@ -27,17 +27,17 @@ import { useEffect } from 'react';
 
 import {
   ANQL_MARKDOWN_TRANSFORMERS,
+  BLOCK_EQUATION,
   DATETIME,
   EQUATION,
   LINK,
   MATH,
-  MATH_BLOCK,
 } from '@/editor/plugins/AnqlMarkdownTransformers';
 
 // ---------------------------------------------------------------------------
 // Transformers
 // All standard Lexical transformers EXCEPT the app-specific syntax nodes:
-//   - MATH / MATH_BLOCK  →  @math(...) and $$ blocks
+//   - MATH / BLOCK_EQUATION  →  @math(...) and $$ blocks
 //   - EQUATION           →  $inline$ LaTeX
 //   - DATETIME           →  @date(...)
 //   - LINK               →  custom @node: / @document: link syntax
@@ -45,7 +45,7 @@ import {
 // lists, tables, code blocks (fenced), bold, italic, underline, code,
 // strikethrough, highlight, subscript, superscript.
 // ---------------------------------------------------------------------------
-const EXCLUDED = new Set([MATH, MATH_BLOCK, EQUATION, DATETIME, LINK]);
+const EXCLUDED = new Set([MATH, BLOCK_EQUATION, EQUATION, DATETIME, LINK]);
 
 const PASTE_TRANSFORMERS = ANQL_MARKDOWN_TRANSFORMERS.filter((t) => !EXCLUDED.has(t as any)) as any;
 

@@ -1,5 +1,6 @@
 import "./DocumentMenu.css";
 
+import { $convertToMarkdownString } from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getRoot } from "lexical";
 import { MenuIcon } from "lucide-react";
@@ -25,6 +26,7 @@ import {
 import { ICON_SIZES, TOAST_DURATION } from "@/core/global/defaultValues";
 import { logger } from "@/core/logger";
 import { MoveToTrash } from "@/core/TrashSystem/TrashSystem";
+import { ANQL_MARKDOWN_TRANSFORMERS } from "@/editor/plugins/AnqlMarkdownTransformers";
 import { useNavigationStore } from "@/GlobalState/navigationStore";
 
 export const DocumentMenu = () => {
@@ -44,7 +46,7 @@ export const DocumentMenu = () => {
   );
   const openLocalSearch = useGlobalShortcut((state) => state.openLocalSearch);
   const closeLocalSearch = useGlobalShortcut((state) => state.closeLocalSearch);
-  const { exportDocument } = useExportDocument();
+  const { exportDocument, exportMarkdown } = useExportDocument();
   const [isEditable, setIsEditable] = useState(() => editor.isEditable());
   const currentDocumentRef = useRef<DocumentsJson>(null);
   currentDocumentRef.current = currentDocument;
@@ -229,36 +231,6 @@ export const DocumentMenu = () => {
     {
       item: "Separator",
     },
-    {
-      text: t("DOCUMENT_MENU.exportDocument") as string,
-      action: async () => {
-        setIsMenuOpen(false);
-        editor.getEditorState().read(() => {
-          const editorState = editor.getEditorState();
-          const jsonState = editorState.toJSON();
-
-          const root = $getRoot();
-          const childrenKeys = root.getChildrenKeys();
-          const dynamicState = useGlobalStore.getState().dynamicState;
-
-          if (jsonState.root && Array.isArray(jsonState.root.children)) {
-            jsonState.root.children.forEach((childJson: any, index: number) => {
-              const key = childrenKeys[index];
-              const state = dynamicState.current.get(key);
-              if (state) {
-                childJson.$ = {
-                  position: state.position,
-                  node_type: state.node_type
-                };
-              }
-            });
-          }
-
-          const jsonString = JSON.stringify(jsonState, null, 2);
-          exportDocument(jsonString, currentDocument?.title);
-        });
-      },
-    },
   ];
 
   useEffect(() => {
@@ -267,10 +239,67 @@ export const DocumentMenu = () => {
 
     const showNativeMenu = async () => {
       try {
-        const [{ Menu }, { LogicalPosition }] = await Promise.all([
+        const [{ Menu, Submenu }, { LogicalPosition }] = await Promise.all([
           import("@tauri-apps/api/menu"),
           import("@tauri-apps/api/dpi"),
         ]);
+
+        const exportSubmenu = await Submenu.new({
+          text: t("DOCUMENT_MENU.exportDocument") as string,
+          items: [
+            {
+              text: t("DOCUMENT_MENU.exportAnql") as string,
+              action: () => {
+                setIsMenuOpen(false);
+                editor.getEditorState().read(() => {
+                  const editorState = editor.getEditorState();
+                  const jsonState = editorState.toJSON();
+                  const root = $getRoot();
+                  const childrenKeys = root.getChildrenKeys();
+                  const dynamicState = useGlobalStore.getState().dynamicState;
+
+                  if (jsonState.root && Array.isArray(jsonState.root.children)) {
+                    jsonState.root.children.forEach((childJson: any, index: number) => {
+                      const key = childrenKeys[index];
+                      const state = dynamicState.current.get(key);
+                      if (state) {
+                        childJson.$ = {
+                          position: state.position,
+                          node_type: state.node_type,
+                        };
+                      }
+                    });
+                  }
+
+                  void exportDocument(
+                    JSON.stringify(jsonState, null, 2),
+                    currentDocumentRef.current?.title,
+                  );
+                });
+              },
+            },
+            {
+              text: t("DOCUMENT_MENU.exportMarkdown") as string,
+              action: () => {
+                setIsMenuOpen(false);
+                editor.getEditorState().read(() => {
+                  const markdown = $convertToMarkdownString(
+                    ANQL_MARKDOWN_TRANSFORMERS,
+                  );
+                  void exportMarkdown(
+                    markdown,
+                    currentDocumentRef.current?.title,
+                  );
+                });
+              },
+            },
+          ],
+        });
+
+        const measuredMenuItems = [
+          ...menuItems,
+          { text: t("DOCUMENT_MENU.exportDocument") as string },
+        ];
 
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
@@ -279,18 +308,20 @@ export const DocumentMenu = () => {
         }
 
         const menuWidth = Math.max(
-          ...menuItems.map((item) =>
+          ...measuredMenuItems.map((item) =>
             item.item === "Separator"
               ? 0
               : (context?.measureText(item.text ?? "").width ?? 0) + 48,
           ),
         );
-        const menuHeight = menuItems.reduce(
+        const menuHeight = measuredMenuItems.reduce(
           (height, item) => height + (item.item === "Separator" ? 8 : 28),
           8,
         );
 
-        const nativeMenu = await Menu.new({ items: menuItems });
+        const nativeMenu = await Menu.new({
+          items: [...menuItems, exportSubmenu],
+        });
         await nativeMenu.popup(
           new LogicalPosition(
             Math.min(

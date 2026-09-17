@@ -46,11 +46,3 @@ body {
 }
 
 /* Editor Equation */
-.editor-equation {
-  cursor: default;
-  user-select: none;
-}
-
-.editor-equation.focused {
-  outline: 2px solid var(--primary-color);
-}
