@@ -77,6 +77,7 @@ export const MATH_CATEGORIES: MathCategory[] = [
       { label: "max", insert: "max()" },
       { label: "sum", insert: "sum()" },
       { label: "prod", insert: "prod()" },
+      { label: "count", insert: "count()" },
     ],
   },
   {
@@ -132,6 +133,14 @@ export const MATH_CATEGORIES: MathCategory[] = [
     items: [
       { label: "distance", insert: "distance()" },
       { label: "intersect", insert: "intersect()" },
+    ],
+  },
+  {
+    name: "complex",
+    items: [
+      { label: "complex", insert: "complex()" },
+      { label: "re", insert: "re()" },
+      { label: "im", insert: "im()" },
     ],
   },
 ];
