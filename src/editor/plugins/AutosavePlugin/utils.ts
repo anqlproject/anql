@@ -161,6 +161,13 @@ export function hasMoved(
     n = n.getNextSibling();
   }
 
+  // If our neighbors are inverted in the DB, it means one of them is stale 
+  // (was just moved but hasn't been assigned a new position yet).
+  // In this case, we are an innocent bystander, so we should NOT move.
+  if (prevPosition && nextPosition && prevPosition >= nextPosition) {
+    return false;
+  }
+
   const state = dynamicState.current.get(node.__key);
   const currentPos = state?.position;
 
