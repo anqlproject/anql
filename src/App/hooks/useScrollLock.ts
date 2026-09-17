@@ -19,6 +19,16 @@ export function useScrollLock({ enabled, allowedRef }: UseScrollLockOptions) {
     };
 
     const preventKeyScroll = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isEditable =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+
+      if (isEditable) {
+        return;
+      }
+
       if (
         !isInsideAllowedContent(event.target) &&
         ["ArrowUp", "ArrowDown", "PageUp", "PageDown", " "].includes(event.key)
