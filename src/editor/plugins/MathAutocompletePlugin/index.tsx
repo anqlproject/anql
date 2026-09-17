@@ -104,7 +104,8 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
-  const { variables, tableVariables } = useMathVariables();
+  const [activeNodeKey, setActiveNodeKey] = useState<string | null>(null);
+  const { tableVariables, scopes } = useMathVariables();
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const anchorRef = React.useRef<HTMLElement | null>(null);
   const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -181,6 +182,7 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
       if (!isTyping) return null;
 
       let isMathNode = false;
+      let nodeKey: string | null = null;
       editor.getEditorState().read(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
@@ -188,9 +190,12 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
           const element = anchorNode.getType() === 'mathexp' ? anchorNode : anchorNode.getParent();
           if ($isMathExpNode(element)) {
             isMathNode = true;
+            nodeKey = element.getKey();
           }
         }
       });
+      
+      setActiveNodeKey(prev => prev !== nodeKey ? nodeKey : prev);
 
       if (!isMathNode) return null;
 
@@ -205,8 +210,10 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     const query = queryString.toLowerCase();
     const variableItems: MathItem[] = [];
 
+    const currentVariables = (activeNodeKey && scopes[activeNodeKey]) ? scopes[activeNodeKey] : {};
+
     // Add regular variables, but filter out table names
-    Object.entries(variables).forEach(([name, value]) => {
+    Object.entries(currentVariables).forEach(([name, value]) => {
       // Filter out table names (they are objects in tableVariables)
       const isTableName = tableVariables[name] !== undefined;
       if (!isTableName) {
@@ -253,7 +260,7 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
 
     const visibleOptions = queryString.trim() ? filteredOptions.slice(0, 15) : filteredOptions;
     return visibleOptions.map(item => new MathAutocompleteOption(item.label, item.insert, item.isVariable));
-  }, [queryString, variables, tableVariables]);
+  }, [queryString, activeNodeKey, scopes, tableVariables]);
 
   React.useEffect(() => {
     if (anchorRef.current) {
