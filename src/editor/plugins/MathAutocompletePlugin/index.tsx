@@ -107,14 +107,13 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
   const [activeNodeKey, setActiveNodeKey] = useState<string | null>(null);
   const { tableVariables, scopes } = useMathVariables();
   const popoverRef = React.useRef<HTMLDivElement>(null);
-  const anchorRef = React.useRef<HTMLElement | null>(null);
   const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
     strategy: 'fixed',
     middleware: [
-      offset(8),
+      offset(({ placement }) => (placement.startsWith('top') ? 42 : 12)),
       flip({ fallbackPlacements: ['top-start', 'bottom-end', 'top-end'] }),
       shift({ padding: 8 }),
     ],
@@ -169,13 +168,6 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [closePopover]);
 
-  // Update anchor reference when anchor element changes
-  React.useEffect(() => {
-    return () => {
-      anchorRef.current = null;
-    };
-  }, []);
-
   const checkForMathMatch = useCallback(
     (text: string, editor: LexicalEditor) => {
       // Only show autocomplete when typing, not when clicking
@@ -194,7 +186,7 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
           }
         }
       });
-      
+
       setActiveNodeKey(prev => prev !== nodeKey ? nodeKey : prev);
 
       if (!isMathNode) return null;
@@ -262,11 +254,18 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     return visibleOptions.map(item => new MathAutocompleteOption(item.label, item.insert, item.isVariable));
   }, [queryString, activeNodeKey, scopes, tableVariables]);
 
-  React.useEffect(() => {
-    if (anchorRef.current) {
-      refs.setReference(anchorRef.current);
-    }
-  }, [options, queryString, refs]);
+  function AnchorUpdater({
+    anchorElementRef,
+    setReference,
+  }: {
+    anchorElementRef: React.MutableRefObject<HTMLElement | null>;
+    setReference: (node: HTMLElement | null) => void;
+  }) {
+    React.useEffect(() => {
+      setReference(anchorElementRef.current);
+    }, [anchorElementRef, anchorElementRef.current, setReference]);
+    return null;
+  }
 
   const onSelectOption = useCallback(
     (
@@ -336,39 +335,36 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
         // Scroll selected item into view when selection changes
         scrollSelectedIntoView(selectedIndex);
 
-        // Update anchor reference for floating-ui
-        if (anchorRef.current !== anchorElementRef.current) {
-          anchorRef.current = anchorElementRef.current;
-        }
-
         return (
-          <div
-            ref={(node) => {
-              refs.setFloating(node);
-              if (popoverRef.current !== node) {
-                popoverRef.current = node;
-              }
-            }}
-            className="math-typeahead-popover"
-            style={floatingStyles}
-          >
-            <ul>
-              {options.map((option, i) => (
-                <MathAutocompleteMenuItem
-                  key={option.key}
-                  index={i}
-                  isSelected={selectedIndex === i}
-                  onClick={() => {
-                    selectOptionAndCleanUp(option);
-                    closePopover();
-                  }}
-                  onMouseEnter={() => setHighlightedIndex(i)}
-                  option={option}
-                />
-              ))}
-            </ul>
-          </div>
-        );
+          <>
+            <AnchorUpdater anchorElementRef={anchorElementRef} setReference={refs.setReference} />
+            <div
+              ref={(node) => {
+                refs.setFloating(node);
+                if (popoverRef.current !== node) {
+                  popoverRef.current = node;
+                }
+              }}
+              className="math-typeahead-popover"
+              style={floatingStyles}
+            >
+              <ul>
+                {options.map((option, i) => (
+                  <MathAutocompleteMenuItem
+                    key={option.key}
+                    index={i}
+                    isSelected={selectedIndex === i}
+                    onClick={() => {
+                      selectOptionAndCleanUp(option);
+                      closePopover();
+                    }}
+                    onMouseEnter={() => setHighlightedIndex(i)}
+                    option={option}
+                  />
+                ))}
+              </ul>
+            </div>
+          </>);
       }}
     />
   );
