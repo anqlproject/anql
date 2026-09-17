@@ -1,12 +1,12 @@
 import { evaluate } from 'mathjs';
 
-import { MathEvaluationResult } from '@/editor/context/MathVariablesContext';
+import { MathEvaluationResult, MathValue } from '@/editor/context/MathVariablesContext';
 import { MathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
 
 export interface EvaluationOutput {
   results: Record<string, MathEvaluationResult>;
-  variables: Record<string, number>;
-  scopes: Record<string, Record<string, number>>;
+  variables: Record<string, MathValue>;
+  scopes: Record<string, Record<string, MathValue>>;
 }
 
 const DIVISION_BY_ZERO = /\/\s*0(?![0-9])/;
@@ -123,8 +123,8 @@ function replaceTableReferences(
  */
 export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Record<string, Record<string, number[]>> = {}): EvaluationOutput {
   const results: Record<string, MathEvaluationResult> = {};
-  const variables: Record<string, number> = {};
-  const scopes: Record<string, Record<string, number>> = {};
+  const variables: Record<string, MathValue> = {};
+  const scopes: Record<string, Record<string, MathValue>> = {};
 
   const scope: Record<string, any> = { ...tableVariables };
 
@@ -162,7 +162,9 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
         // Replace table references before evaluation
         const processedExpr = replaceTableReferences(valueExpr, tableVariables);
         const val = evaluate(processedExpr, scope);
-        if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) {
+        const isFiniteNumber = typeof val === 'number' && !isNaN(val) && isFinite(val);
+        const isUnit = typeof val === 'object' && val !== null && val.isUnit === true;
+        if (!isFiniteNumber && !isUnit) {
           throw new Error('Invalid value');
         }
 

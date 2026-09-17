@@ -1,4 +1,7 @@
+import type { Unit } from 'mathjs';
 import React, { createContext, ReactNode, useCallback, useContext, useRef, useState } from 'react';
+
+export type MathValue = number | Unit;
 
 export interface MathEvaluationResult {
   result: string;
@@ -15,12 +18,12 @@ interface MathVariablesContextType {
   setLocalExpression: (nodeKey: string, expression: string) => void;
 
   // Variables defined in the document (e.g., x = 5, y = 10)
-  variables: Record<string, number>;
-  setVariables: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  variables: Record<string, MathValue>;
+  setVariables: React.Dispatch<React.SetStateAction<Record<string, MathValue>>>;
 
   // Variables available AT a specific node key (scoping based on document order)
-  scopes: Record<string, Record<string, number>>;
-  setScopes: React.Dispatch<React.SetStateAction<Record<string, Record<string, number>>>>;
+  scopes: Record<string, Record<string, MathValue>>;
+  setScopes: React.Dispatch<React.SetStateAction<Record<string, Record<string, MathValue>>>>;
 
   // Table variables used by math autocomplete and evaluation.
   tableVariables: Record<string, Record<string, number[]>>;
@@ -32,8 +35,8 @@ const MathVariablesContext = createContext<MathVariablesContextType | undefined>
 export const MathVariablesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [results, setResults] = useState<Record<string, MathEvaluationResult>>({});
   const [localExpressions, setLocalExpressions] = useState<Record<string, string>>({});
-  const [variables, setVariables] = useState<Record<string, number>>({});
-  const [scopes, setScopes] = useState<Record<string, Record<string, number>>>({});
+  const [variables, setVariables] = useState<Record<string, MathValue>>({});
+  const [scopes, setScopes] = useState<Record<string, Record<string, MathValue>>>({});
   const [tableVariables, setTableVariables] = useState<Record<string, Record<string, number[]>>>({});
 
   // We use a ref to prevent unnecessary re-renders when updating locally
