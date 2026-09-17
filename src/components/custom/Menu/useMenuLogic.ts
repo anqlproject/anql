@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useScrollLock } from "@/App/hooks/useScrollLock";
+
 import { MenuItemProps } from "./MenuItem";
 
 export interface MenuPosition {
@@ -23,7 +25,6 @@ export function useMenuLogic({
   onClose,
   position,
   menuRef,
-  editorRef,
   getAnchorPos,
 }: UseMenuLogicProps) {
   const modalContentRef = useRef<HTMLDivElement>(null);
@@ -41,39 +42,7 @@ export function useMenuLogic({
 
   const [anchorPos, setAnchorPos] = useState(getAnchorPos());
 
-  // deactive the scroll - scoped to editor container if available
-  useEffect(() => {
-    const preventScroll = (e: Event) => {
-      if (isOpen) {
-        e.preventDefault();
-      }
-    };
-
-    const scrollContainer = editorRef?.current || document;
-
-    if (isOpen) {
-      scrollContainer.addEventListener("wheel", preventScroll, { passive: false });
-      scrollContainer.addEventListener("touchmove", preventScroll, { passive: false });
-      scrollContainer.addEventListener("keydown", (e: Event) => {
-        const keyboardEvent = e as KeyboardEvent;
-        if (
-          isOpen &&
-          (keyboardEvent.key === "ArrowUp" ||
-            keyboardEvent.key === "ArrowDown" ||
-            keyboardEvent.key === "PageUp" ||
-            keyboardEvent.key === "PageDown" ||
-            keyboardEvent.key === "Space")
-        ) {
-          e.preventDefault();
-        }
-      });
-    }
-
-    return () => {
-      scrollContainer.removeEventListener("wheel", preventScroll);
-      scrollContainer.removeEventListener("touchmove", preventScroll);
-    };
-  }, [isOpen, editorRef]);
+  useScrollLock({ enabled: isOpen, allowedRef: modalContentRef });
 
   useEffect(() => {
     if (focusedIndex !== -1) {

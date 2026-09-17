@@ -14,6 +14,7 @@ import {
 } from "lexical";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
+import { useScrollLock } from "@/App/hooks/useScrollLock";
 import { useMathVariables } from "@/editor/context/MathVariablesContext";
 import { $isMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 
@@ -253,6 +254,11 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     const visibleOptions = queryString.trim() ? filteredOptions.slice(0, 15) : filteredOptions;
     return visibleOptions.map(item => new MathAutocompleteOption(item.label, item.insert, item.isVariable));
   }, [queryString, activeNodeKey, scopes, tableVariables]);
+
+  useScrollLock({
+    enabled: queryString !== null,
+    allowedRef: popoverRef,
+  });
 
   function AnchorUpdater({
     anchorElementRef,
