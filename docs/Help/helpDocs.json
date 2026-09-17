@@ -178,6 +178,26 @@
           ]
         },
         {
+          "id": "custom-functions",
+          "title": "User-defined Functions",
+          "description": [
+            "You can define your own functions and reuse them in the expressions that follow:",
+            "",
+            "Syntax: function_name(parameter1, parameter2) = expression",
+            "",
+            "Examples:",
+            "- f(x) = (sin(x) + cos(x/2)) * 5",
+            "- f(0)  (result: 5)",
+            "- f(pi)  (evaluates the function for π)",
+            "",
+            "Functions can have more than one parameter:",
+            "- hyp(a, b) = sqrt(a^2 + b^2)",
+            "- hyp(3, 4)  (result: 5)",
+            "",
+            "A function is available only to expressions written after its definition. The autocomplete menu lists user-defined functions as callable symbols, for example f(...), and inserts the function name without exposing its internal implementation."
+          ]
+        },
+        {
           "id": "constants",
           "title": "Mathematical Constants",
           "description": [

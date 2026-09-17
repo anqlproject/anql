@@ -1,7 +1,7 @@
 import type { Unit } from 'mathjs';
 import React, { createContext, ReactNode, useCallback, useContext, useRef, useState } from 'react';
 
-export type MathValue = number | Unit;
+export type MathValue = number | Unit | ((...args: number[]) => unknown);
 
 export interface MathEvaluationResult {
   result: string;

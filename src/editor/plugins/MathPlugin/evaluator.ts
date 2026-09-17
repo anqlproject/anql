@@ -149,6 +149,23 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
     }
 
     try {
+      const functionMatch = expr.match(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^()]*)\)\s*=(.+)$/);
+
+      if (functionMatch) {
+        const name = functionMatch[1];
+        const processedExpr = replaceTableReferences(expr, tableVariables);
+        const val = evaluate(processedExpr, scope);
+
+        if (typeof val !== 'function') {
+          throw new Error('Invalid function definition');
+        }
+
+        scope[name] = val;
+        variables[name] = val;
+        results[key] = { result: expr.trim(), error: null };
+        continue;
+      }
+
       const assignMatch = expr.match(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=(.+)$/);
 
       if (assignMatch) {

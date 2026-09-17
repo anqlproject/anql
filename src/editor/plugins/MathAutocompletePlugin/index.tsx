@@ -210,7 +210,8 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
       // Filter out table names (they are objects in tableVariables)
       const isTableName = tableVariables[name] !== undefined;
       if (!isTableName) {
-        variableItems.push({ label: `${name} (${value})`, insert: name });
+        const label = typeof value === 'function' ? `${name}(...)` : `${name} (${value})`;
+        variableItems.push({ label, insert: name });
       }
     });
 
