@@ -1,7 +1,6 @@
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
-import type { Menu as TauriMenu } from "@tauri-apps/api/menu";
 import {
   $createParagraphNode,
   $getNearestNodeFromDOMNode,
@@ -31,7 +30,8 @@ import { EDITOR_SHORTCUTS } from "@/GlobalState/shortcutStore";
 type NativeMenuItem = {
   text?: string;
   accelerator?: string;
-  item?: "Separator";
+  item?: "Separator" | "Check";
+  checked?: boolean;
   action?: () => void | Promise<void>;
   items?: NativeMenuItem[];
 };
@@ -61,6 +61,7 @@ export default function NodeMenu({
   const nodeRef = useRef<LexicalNode>(null);
   const [canTransform, setCanTransform] = useState(false);
   const [isCodeNode, setIsCodeNode] = useState(false);
+  const [activeFormat, setActiveFormat] = useState<string | null>(null);
   const [isMenuReady, setIsMenuReady] = useState(false);
   const isNativeMenuOpening = useRef(false);
 
@@ -132,11 +133,32 @@ export default function NodeMenu({
           );
           setCanTransform(allAllowed);
           setIsCodeNode(topLevelNodes.some((n) => n.getType() === "code"));
+
+          let format: string | null = null;
+          if (topLevelNodes.length > 0) {
+            format = topLevelNodes[0].getType();
+            if (format === "heading") {
+              format = (topLevelNodes[0] as any).getTag(); // h1, h2, h3
+            } else if (format === "list") {
+              format = (topLevelNodes[0] as any).getListType(); // number, bullet, check
+            }
+            // Verify if all have the same format
+            const allSame = topLevelNodes.every(n => {
+              let t = n.getType();
+              if (t === "heading") t = (n as any).getTag();
+              if (t === "list") t = (n as any).getListType();
+              return t === format;
+            });
+            if (!allSame) format = null;
+          }
+          setActiveFormat(format);
+
           setIsMenuReady(true);
         } else {
           console.error("node not found");
           setCanTransform(false);
           setIsCodeNode(false);
+          setActiveFormat(null);
           setIsMenuReady(false);
         }
       });
@@ -272,6 +294,8 @@ export default function NodeMenu({
           items: [
             {
               text: t("NODE_MENU.normal") as string,
+              item: "Check" as const,
+              checked: activeFormat === "paragraph",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.modifiers, EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.key),
               action: () => {
                 // FIX : this list
@@ -282,6 +306,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODES.h1") as string,
+              item: "Check" as const,
+              checked: activeFormat === "h1",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.HEADING1.modifiers, EDITOR_SHORTCUTS.HEADING1.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -293,6 +319,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODES.h2") as string,
+              item: "Check" as const,
+              checked: activeFormat === "h2",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.HEADING2.modifiers, EDITOR_SHORTCUTS.HEADING2.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -304,6 +332,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODES.h3") as string,
+              item: "Check" as const,
+              checked: activeFormat === "h3",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.HEADING3.modifiers, EDITOR_SHORTCUTS.HEADING3.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -315,6 +345,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODE_MENU.numberList") as string,
+              item: "Check" as const,
+              checked: activeFormat === "number",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.NUMBERED_LIST.modifiers, EDITOR_SHORTCUTS.NUMBERED_LIST.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -330,6 +362,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODE_MENU.bulletList") as string,
+              item: "Check" as const,
+              checked: activeFormat === "bullet",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.BULLET_LIST.modifiers, EDITOR_SHORTCUTS.BULLET_LIST.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -345,6 +379,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODE_MENU.checkList") as string,
+              item: "Check" as const,
+              checked: activeFormat === "check",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.CHECK_LIST.modifiers, EDITOR_SHORTCUTS.CHECK_LIST.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -358,6 +394,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODES.quote") as string,
+              item: "Check" as const,
+              checked: activeFormat === "quote",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.FORMAT_QUOTE.modifiers, EDITOR_SHORTCUTS.FORMAT_QUOTE.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -369,6 +407,8 @@ export default function NodeMenu({
             },
             {
               text: t("NODES.code") as string,
+              item: "Check" as const,
+              checked: activeFormat === "code",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.FORMAT_CODE.modifiers, EDITOR_SHORTCUTS.FORMAT_CODE.key),
               action: () => {
                 applyToNodes((node, selection) => {
@@ -469,7 +509,7 @@ export default function NodeMenu({
         });
       },
     },
-  ], [canTransform, dynamicState, editor, insertParagraph, isCodeNode, setIsMenuOpen, showToast, t]);
+  ], [activeFormat, canTransform, dynamicState, editor, insertParagraph, isCodeNode, setIsMenuOpen, showToast, t]);
 
   useEffect(() => {
     if (!isMenuOpen || !isMenuReady || isNativeMenuOpening.current) return;
@@ -477,14 +517,31 @@ export default function NodeMenu({
 
     const showNativeMenu = async () => {
       try {
-        const [{ Menu }, { LogicalPosition }] = await Promise.all([
+        const [{ Menu, MenuItem, PredefinedMenuItem, Submenu, CheckMenuItem }, { LogicalPosition }] = await Promise.all([
           import("@tauri-apps/api/menu"),
           import("@tauri-apps/api/dpi"),
         ]);
 
+        const buildItems = async (items: NativeMenuItem[]): Promise<any[]> => {
+          const builtItems = [];
+          for (const item of items) {
+            if (item.item === "Separator") {
+              builtItems.push(await PredefinedMenuItem.new({ item: "Separator" }));
+            } else if (item.items) {
+              builtItems.push(await Submenu.new({ text: item.text ?? "", items: await buildItems(item.items) }));
+            } else if (item.item === "Check" || item.checked !== undefined) {
+              builtItems.push(await CheckMenuItem.new({ text: item.text ?? "", accelerator: item.accelerator, checked: item.checked ?? false, action: item.action as any }));
+            } else {
+              builtItems.push(await MenuItem.new({ text: item.text ?? "", accelerator: item.accelerator, action: item.action as any }));
+            }
+          }
+          return builtItems;
+        };
+
         const menuDimensions = calculateMenuDimensions(menuItems);
+        const builtMenu = await buildItems(menuItems);
         const nativeMenu = await Menu.new({
-          items: menuItems as unknown as NonNullable<Parameters<typeof TauriMenu.new>[0]>["items"],
+          items: builtMenu,
         });
         const position = menuPosition
           ? new LogicalPosition(
