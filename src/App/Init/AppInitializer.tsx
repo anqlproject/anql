@@ -28,6 +28,23 @@ interface AppInitializerProps {
   children: React.ReactNode;
 }
 
+const templateResources = new Map([
+  ['node_tests', 'templates/node_tests.anql'],
+  ['math_node_demonstration', 'templates/math_node_demonstration.anql'],
+]);
+
+async function importTemplateDocuments(): Promise<void> {
+  const templateUrls = new Map<string, string>();
+
+  for (const [name, resourcePath] of templateResources) {
+    templateUrls.set(name, await resolveResource(resourcePath));
+  }
+
+  for (const templateUrl of templateUrls.values()) {
+    await importAnqlDocument(templateUrl);
+  }
+}
+
 export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
   const { config, setConfig } = useGlobalStore(useShallow((state: any) => ({ 
     setConfig: state.setConfig, 
@@ -84,8 +101,7 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
         await initDatabase(databasePath);
 
         if (isNewInstallation) {
-          const templatePath = await resolveResource('templates/node_tests.anql');
-          await importAnqlDocument(templatePath);
+          await importTemplateDocuments();
         }
 
         cleanupOldPendingDeletions(24 * 60 * 60).catch(console.error);
