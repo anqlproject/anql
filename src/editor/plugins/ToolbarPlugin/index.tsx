@@ -6,7 +6,8 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $getSelectionStyleValueForProperty, $patchStyleText } from '@lexical/selection';
 import { AnimatePresence, motion } from 'framer-motion';
 import { $getSelection, $isRangeSelection, $setSelection, BaseSelection, FORMAT_TEXT_COMMAND, TextFormatType } from 'lexical';
-import { Bold, CaseLower, CaseSensitive, CaseUpper, ChevronDown, ChevronRight, Eraser, Highlighter, Italic, PaintBucket, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
+import { Bold, Calculator, CaseLower, CaseSensitive, CaseUpper, ChevronDown, ChevronRight, Eraser, Highlighter, Italic, PaintBucket, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
+import { evaluate } from 'mathjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
@@ -14,16 +15,18 @@ import { useShallow } from 'zustand/react/shallow';
 import { useGlobalStore } from '@/App/store/useGlobalStore';
 import { Popover } from '@/components/custom/Popover/Popover';
 import { Button } from '@/components/ui/button';
+import { useMathVariables } from '@/editor/context/MathVariablesContext';
 import { clearFormatting as clearFormattingUtil } from '@/editor/LexicalUtils/formatUtils';
 
 interface ToolbarButtonProps {
   icon: React.ReactNode;
   label: string;
   isActive?: boolean;
+  isDanger?: boolean;
   onClick: () => void;
 }
 
-function ToolbarButton({ icon, label, isActive, onClick }: ToolbarButtonProps) {
+function ToolbarButton({ icon, label, isActive, isDanger, onClick }: ToolbarButtonProps) {
   return (
     <button
       type="button"
@@ -32,6 +35,7 @@ function ToolbarButton({ icon, label, isActive, onClick }: ToolbarButtonProps) {
       }}
       onClick={onClick}
       className={`popup-item spaced ${isActive ? 'active' : ''}`}
+      style={isDanger ? { backgroundColor: '#ef4444', color: 'white' } : undefined}
       title={label}
       aria-label={label}
     >
@@ -143,7 +147,7 @@ function ToolbarDropdown({
               <div
                 key={opt}
                 role="menuitem"
-                onMouseDown={(e) => {
+                onPointerDown={(e) => {
                   e.preventDefault(); // prevent focus loss
                   e.stopPropagation();
                   onSelect(opt);
@@ -176,6 +180,8 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
   const { isContextMenuOpen } = useGlobalStore(
     useShallow((state) => ({ isContextMenuOpen: state.isContextMenuOpen }))
   );
+  const { variables, tableVariables } = useMathVariables();
+  const [mathError, setMathError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [virtualRef, setVirtualRef] = useState<VirtualElement | null>(null);
@@ -301,7 +307,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       const target = e.target as HTMLElement;
 
       const isInsideToolbar = toolbarRef.current && toolbarRef.current.contains(target);
-      const isInsideDropdown = target.closest('.toolbar-dropdown-container');
+      const isInsideDropdown = target.closest('.toolbar-dropdown-container, .toolbar-dropdown-content');
       const isInsideContextMenu = target.closest('.menu-container') !== null;
 
       if (!isInsideToolbar && !isInsideContextMenu) {
@@ -396,6 +402,36 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
     isDropdownOpenRef.current = isOpening;
   };
 
+  const handleMathCalculate = useCallback(() => {
+    editor.update(() => {
+      let selection = $getSelection();
+
+      if ((!selection || selection.isCollapsed()) && lastSelectionRef.current) {
+        $setSelection(lastSelectionRef.current.clone());
+        selection = $getSelection();
+      }
+
+      if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+        const textContent = selection.getTextContent();
+        try {
+          const val = evaluate(textContent, { ...variables, ...tableVariables });
+          
+          if (typeof val === 'number' && !isFinite(val)) {
+            throw new Error('Invalid value');
+          }
+          
+          selection.insertText(textContent + ' = ' + val);
+          setMathError(false);
+        } catch (error) {
+          setMathError(true);
+          setTimeout(() => {
+            setMathError(false);
+          }, 2000);
+        }
+      }
+    });
+  }, [editor, variables, tableVariables]);
+
   return createPortal(
     <>
       <Popover
@@ -460,6 +496,12 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
           <ToolbarButton icon={<Italic size={16} />} label="Italic" isActive={isItalic} onClick={() => toggleFormat('italic')} />
           <ToolbarButton icon={<Underline size={16} />} label="Underline" isActive={isUnderline} onClick={() => toggleFormat('underline')} />
           <ToolbarButton icon={<Strikethrough size={16} />} label="Strikethrough" isActive={isStrikethrough} onClick={() => toggleFormat('strikethrough')} />
+          <ToolbarButton 
+            icon={<Calculator size={16} />} 
+            label="Calculate Math" 
+            isDanger={mathError} 
+            onClick={handleMathCalculate} 
+          />
           <div className="divider" />
           <ToolbarButton icon={<Eraser size={16} />} label="Clear Formatting" onClick={clearFormatting} />
 
@@ -490,7 +532,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
                     onChange={(color) => applyStyleText({ 'background-color': color })}
                   />
                   <div className="divider" />
-                  
+
                   <ToolbarButton icon={<Subscript size={16} />} label="Subscript" isActive={isSubscript} onClick={() => toggleFormat('subscript')} />
                   <ToolbarButton icon={<Superscript size={16} />} label="Superscript" isActive={isSuperscript} onClick={() => toggleFormat('superscript')} />
                 </motion.div>
