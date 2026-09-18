@@ -38,6 +38,8 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
     <Popover.Content
       className="table-row-popover-content"
       align="end"
+      alignOffset={12}
+      avoidCollisions={false}
       sideOffset={4}
       onOpenAutoFocus={(e) => e.preventDefault()}
       onCloseAutoFocus={(e) => e.preventDefault()}

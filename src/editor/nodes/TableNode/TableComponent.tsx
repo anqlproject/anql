@@ -652,6 +652,15 @@ export function TableComponent({
                 />
               ))}
             </SortableContext>
+
+            <TableHighlight
+              scrollContainerRef={containerRef}
+              isOpen={highlightState.isOpen}
+              highlightType={highlightState.type}
+              targetIndex={highlightState.index}
+              rowRefs={rowRefs}
+              columnRefs={columnRefs}
+            />
           </div>
 
           <DragOverlay dropAnimation={null}>
@@ -665,15 +674,6 @@ export function TableComponent({
             )}
           </DragOverlay>
         </DndContext>
-
-        <TableHighlight
-          scrollContainerRef={containerRef}
-          isOpen={highlightState.isOpen}
-          highlightType={highlightState.type}
-          targetIndex={highlightState.index}
-          rowRefs={rowRefs}
-          columnRefs={columnRefs}
-        />
 
         <CellMenu
           isOpen={contextMenuState.isOpen}

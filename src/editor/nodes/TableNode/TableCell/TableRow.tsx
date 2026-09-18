@@ -53,7 +53,7 @@ export function DraggableRow({
     transition,
     opacity: isDragging ? 0.25 : 1,
     position: "relative",
-    zIndex: isDragging ? 2 : 0,
+    zIndex: isDragging ? 2 : undefined,
   };
 
   const openMenuIfClick = (clientX: number, clientY: number) => {
@@ -63,7 +63,7 @@ export function DraggableRow({
     if (!origin) return;
     const distance = Math.hypot(clientX - origin.x, clientY - origin.y);
     if (distance < 8) {
-      onMenuOpenChange(true);
+      onMenuOpenChange(!menuOpen);
     }
   };
 
@@ -90,6 +90,9 @@ export function DraggableRow({
               aria-label="Row options"
               onPointerDown={(e) => {
                 pointerOrigin.current = { x: e.clientX, y: e.clientY };
+                if (menuOpen) {
+                  e.stopPropagation();
+                }
                 listeners?.onPointerDown?.(e);
               }}
               onPointerUp={(e) => {

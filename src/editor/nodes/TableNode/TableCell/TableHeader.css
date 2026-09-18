@@ -42,7 +42,7 @@
   height: 14px;
   z-index: var(--z-modal);
   border: none;
-  background: transparent;
+  background: var(--surface-color);
   color: var(--text-disabled);
   cursor: grab;
   padding: 2px;

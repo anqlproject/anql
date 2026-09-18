@@ -65,7 +65,7 @@ export default function DraggableHeader({
     if (!origin) return;
     const distance = Math.hypot(clientX - origin.x, clientY - origin.y);
     if (distance < 8) {
-      onMenuOpenChange(true);
+      onMenuOpenChange(!menuOpen);
     }
   };
 
@@ -88,6 +88,9 @@ export default function DraggableHeader({
             title="Drag to move · Click for menu"
             onPointerDown={(e) => {
               pointerOrigin.current = { x: e.clientX, y: e.clientY };
+              if (menuOpen) {
+                e.stopPropagation();
+              }
               listeners?.onPointerDown?.(e);
             }}
             onPointerUp={(e) => {

@@ -141,7 +141,7 @@ export function TableHighlight({
         width: editorShellDimensions.width,
         height: editorShellDimensions.height,
         overflow: "hidden",
-        zIndex: 1000,
+        zIndex: "var(--z-elevated)",
         pointerEvents: "none",
       }}
     >
