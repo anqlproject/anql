@@ -46,7 +46,10 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
     >
       <button
         type="button"
-        onPointerDown={(e) => e.preventDefault()}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         onClick={() => { if (rowId) table.options.meta?.addRowAbove?.(rowId); }}
         className="table-menu-item"
       >
@@ -54,7 +57,10 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       </button>
       <button
         type="button"
-        onPointerDown={(e) => e.preventDefault()}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         onClick={() => { if (rowId) table.options.meta?.addRowBelow?.(rowId); }}
         className="table-menu-item"
       >
@@ -62,7 +68,10 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       </button>
       <button
         type="button"
-        onPointerDown={(e) => e.preventDefault()}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         onClick={async () => {
           const nodeKey = table.options.meta?.nodeKey;
           let blocId = "";
@@ -93,7 +102,10 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       <div className="table-menu-divider" />
       <button
         type="button"
-        onPointerDown={(e) => e.preventDefault()}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         onClick={() => { if (rowId) table.options.meta?.deleteRow?.(rowId); }}
         className="table-menu-item-danger"
       >

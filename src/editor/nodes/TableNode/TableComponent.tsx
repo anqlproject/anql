@@ -403,6 +403,15 @@ export function TableComponent({
     }
   };
 
+  const resetDragState = useCallback(() => {
+    setActiveRowId(null);
+    setActiveColumnId(null);
+    setDragOverRowIndex(null);
+    setDragOverColIndex(null);
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  }, []);
+
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) {
@@ -432,10 +441,7 @@ export function TableComponent({
     const activeId = String(event.active.id);
     const wasCol = isColDndId(activeId);
 
-    setActiveRowId(null);
-    setActiveColumnId(null);
-    setDragOverRowIndex(null);
-    setDragOverColIndex(null);
+    resetDragState();
 
     const overId = event.over ? String(event.over.id) : null;
 
@@ -481,11 +487,11 @@ export function TableComponent({
       });
     }
 
-    requestAnimationFrame(() => {
-      isDraggingRef.current = false;
-      setIsDragging(false);
-    });
   };
+
+  const handleDragCancel = useCallback(() => {
+    resetDragState();
+  }, [resetDragState]);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -585,6 +591,7 @@ export function TableComponent({
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
           modifiers={modifiers}
         >
           <div
