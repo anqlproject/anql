@@ -1,5 +1,6 @@
 import './index.css';
 
+import { useScrollLock } from '@/App/hooks/useScrollLock';
 import { autoUpdate, FloatingPortal, offset, useFloating } from '@floating-ui/react';
 import {
   $isCodeNode,
@@ -47,6 +48,8 @@ function CodeMenuDropdown({
     middleware: [offset(4)],
   });
 
+  useScrollLock({ enabled: isOpen, allowedRef: refs.floating as any });
+
   // Handle outside clicks to close the dropdown
   useEffect(() => {
     if (!isOpen) return;
@@ -74,7 +77,6 @@ function CodeMenuDropdown({
         onMouseDown={(e) => {
           // IMPORTANT: Prevent default to stop Lexical from losing focus
           e.preventDefault();
-          e.stopPropagation();
           setIsOpen((prev) => !prev);
         }}
       >
