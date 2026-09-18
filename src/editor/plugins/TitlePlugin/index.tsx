@@ -67,22 +67,26 @@ const TitlePlugin = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLHeadingElement>) => {
     if (e.key === "Enter" || e.key === "ArrowDown") {
       e.preventDefault();
-      // Replace the first node with a paragraph node
       editor.update(() => {
         const root = $getRoot();
         const firstNode = root.getFirstChild();
-        const paragraphNode = $createParagraphNode();
 
-        if (firstNode) {
-          firstNode.replace(paragraphNode);
-        } else {
-          root.append(paragraphNode);
-        }
-
-        // Set selection to the paragraph node
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
+        if (e.key === "Enter") {
+          const paragraphNode = $createParagraphNode();
+          if (firstNode) {
+            firstNode.insertBefore(paragraphNode);
+          } else {
+            root.append(paragraphNode);
+          }
           paragraphNode.selectStart();
+        } else if (e.key === "ArrowDown") {
+          if (firstNode) {
+            firstNode.selectStart();
+          } else {
+            const paragraphNode = $createParagraphNode();
+            root.append(paragraphNode);
+            paragraphNode.selectStart();
+          }
         }
       });
       editor.focus();
