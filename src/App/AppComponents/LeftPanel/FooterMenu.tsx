@@ -29,9 +29,11 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const isNativeMenuOpening = React.useRef(false);
 
+    const themeIcon = resolvedTheme === 'dark' ? '☀' : '☾';
+
     const menuItems: any[] = [
         {
-            text: t('FOOTER_MENU.generalSettings') as string,
+            text: `   ${t('FOOTER_MENU.generalSettings') as string}`,
             action: () => {
                 setIsOpen(false);
                 setSettingsOverlayOpen(true);
@@ -39,14 +41,14 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
             accelerator: 'CmdOrCtrl+,',
         },
         {
-            text: (resolvedTheme === 'dark' ? t('FOOTER_MENU.switchToLightMode') : t('FOOTER_MENU.switchToDarkMode')) as string,
+            text: `${themeIcon}  ${(resolvedTheme === 'dark' ? t('FOOTER_MENU.switchToLightMode') : t('FOOTER_MENU.switchToDarkMode')) as string}`,
             action: () => {
                 setIsOpen(false);
                 toggleTheme();
             },
         },
         {
-            text: t('FOOTER_MENU.openTrash') as string,
+            text: `   ${t('FOOTER_MENU.openTrash') as string}`,
             action: () => {
                 setIsOpen(false);
                 onOpenTrash?.();
@@ -56,21 +58,21 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
             item: "Separator",
         },
         {
-            text: t('FOOTER_MENU.getHelp') as string,
+            text: `   ${t('FOOTER_MENU.getHelp') as string}`,
             action: () => {
                 setIsOpen(false);
                 setIsHelpOpen(true);
             },
         },
         {
-            text: t('FOOTER_MENU.about') as string,
+            text: `   ${t('FOOTER_MENU.about') as string}`,
             action: () => {
                 setIsOpen(false);
                 onOpenAbout?.();
             },
         },
     ];
-    
+
     const [editor] = useLexicalComposerContext();
 
     React.useEffect(() => {
