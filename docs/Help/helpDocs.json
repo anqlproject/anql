@@ -271,6 +271,8 @@
             "- variance([1, 2, 3, 4, 5])",
             "- count([1, 2, 3, 4, 5])  (result: 5)",
             "- count(Table1.Column1)  (number of values in a table column)",
+            "- sort([3, 1, 4, 2])  (result: [1, 2, 3, 4])",
+            "- sort(Table1.Column1)  (sorts the column values)",
             "",
             "Complex numbers:",
             "- complex(2, 3)",

@@ -78,6 +78,7 @@ export const MATH_CATEGORIES: MathCategory[] = [
       { label: "sum", insert: "sum()" },
       { label: "prod", insert: "prod()" },
       { label: "count", insert: "count()" },
+      { label: "sort", insert: "sort()" },
     ],
   },
   {
