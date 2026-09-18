@@ -18,9 +18,10 @@ import { useCallback, useEffect } from 'react';
 import { useMathVariables } from '@/editor/context/MathVariablesContext';
 import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
 
-import { evaluateAllMathNodes } from './evaluator';
+import { evaluateAllMathNodes, EvaluationItem } from './evaluator';
 import { MathResultDisplay } from './MathResultDisplay';
-import { $getAllMathNodes, $getAllTableNodes } from './traversal';
+import { $getMathAndTableNodes } from './traversal';
+import { $isTableNode } from '@/editor/nodes/TableNode/TableNode';
 
 export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
@@ -31,37 +32,50 @@ export default function MathPlugin() {
   const evaluateTree = useCallback(() => {
     editor.getEditorState().read(() => {
       const root = $getRoot();
-      const mathNodes = $getAllMathNodes(root);
-      const tableNodes = $getAllTableNodes(root);
+      const mathAndTableNodes = $getMathAndTableNodes(root);
 
       const tableVariables: Record<string, Record<string, number[]>> = {};
+      const evaluationItems: EvaluationItem[] = [];
+      let tableIndex = 0;
 
-      tableNodes.forEach((node, index) => {
-        const rawName = node.__tableName || `Table_${index + 1}`;
-        const safeTableName = rawName.replace(/[^a-zA-Z0-9_]/g, '');
-        if (!safeTableName) return;
-
-        const tableData: Record<string, number[]> = {};
-
-        node.__columns.forEach(col => {
-          if (col.meta?.type === 'number') {
-            const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
-            if (safeHeader) {
-              tableData[safeHeader] = node.__data.map(row => {
-                const val = row[col.id];
-                const num = Number(val);
-                return isNaN(num) ? 0 : num;
-              });
-            }
+      mathAndTableNodes.forEach((node) => {
+        if ($isTableNode(node)) {
+          const rawName = node.__tableName || `Table_${tableIndex + 1}`;
+          tableIndex++;
+          const safeTableName = rawName.replace(/[^a-zA-Z0-9_]/g, '');
+          if (!safeTableName) {
+            evaluationItems.push({ type: 'table', name: '', data: null });
+            return;
           }
-        });
 
-        if (Object.keys(tableData).length > 0) {
-          tableVariables[safeTableName] = tableData;
+          const tableData: Record<string, number[]> = {};
+
+          node.__columns.forEach(col => {
+            if (col.meta?.type === 'number') {
+              const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
+              if (safeHeader) {
+                tableData[safeHeader] = node.__data.map(row => {
+                  const val = row[col.id];
+                  const num = Number(val);
+                  return isNaN(num) ? 0 : num;
+                });
+              }
+            }
+          });
+
+          if (Object.keys(tableData).length > 0) {
+            tableVariables[safeTableName] = tableData;
+            evaluationItems.push({ type: 'table', name: safeTableName, data: tableData });
+          } else {
+            evaluationItems.push({ type: 'table', name: safeTableName, data: null });
+          }
+        } else {
+          // Math node
+          evaluationItems.push({ type: 'math', node: node as any });
         }
       });
 
-      const { results, variables, scopes } = evaluateAllMathNodes(mathNodes, tableVariables);
+      const { results, variables, scopes } = evaluateAllMathNodes(evaluationItems);
       setScopes(scopes);
       setResults(results);
       setVariables(variables);

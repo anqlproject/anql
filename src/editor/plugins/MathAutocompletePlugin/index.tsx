@@ -216,6 +216,8 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     });
 
     Object.entries(tableVariables).forEach(([tableName, columns]) => {
+      if (currentVariables[tableName] === undefined) return;
+
       Object.entries(columns).forEach(([columnName, values]) => {
         // Add column reference as a variable
         const columnRef = `${tableName}.${columnName}`;

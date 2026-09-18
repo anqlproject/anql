@@ -114,21 +114,35 @@ function replaceTableReferences(
   return processedExpr;
 }
 
+export type EvaluationItem = 
+  | { type: 'math'; node: MathExpNode }
+  | { type: 'table'; name: string; data: Record<string, number[]> | null };
+
 /**
  * Pure evaluation function — no React, no Lexical editor dependency.
- * Takes an ordered list of MathExpNodes and evaluates them sequentially,
+ * Takes an ordered list of EvaluationItems (math nodes and tables) and evaluates them sequentially,
  * accumulating variables in scope as the document progresses.
  *
  * Must be called inside a Lexical read callback.
  */
-export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Record<string, Record<string, number[]>> = {}): EvaluationOutput {
+export function evaluateAllMathNodes(items: EvaluationItem[]): EvaluationOutput {
   const results: Record<string, MathEvaluationResult> = {};
   const variables: Record<string, MathValue> = {};
   const scopes: Record<string, Record<string, MathValue>> = {};
 
-  const scope: Record<string, any> = { ...tableVariables };
+  const scope: Record<string, any> = {};
+  const currentTableVariables: Record<string, Record<string, number[]>> = {};
 
-  for (const node of nodes) {
+  for (const item of items) {
+    if (item.type === 'table') {
+      if (item.name && item.data) {
+        currentTableVariables[item.name] = item.data;
+        scope[item.name] = item.data;
+      }
+      continue;
+    }
+
+    const node = item.node;
     const key = node.__key;
 
     // Snapshot the variables available AT THIS POINT in the document
@@ -142,7 +156,7 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
     }
 
     // Check for table-specific messages BEFORE mathjs
-    const tableMessage = checkTableIssues(expr.trim(), tableVariables);
+    const tableMessage = checkTableIssues(expr.trim(), currentTableVariables);
     if (tableMessage !== null) {
       results[key] = { result: '', error: tableMessage };
       continue;
@@ -153,7 +167,7 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
 
       if (functionMatch) {
         const name = functionMatch[1];
-        const processedExpr = replaceTableReferences(expr, tableVariables);
+        const processedExpr = replaceTableReferences(expr, currentTableVariables);
         const val = evaluate(processedExpr, scope);
 
         if (typeof val !== 'function') {
@@ -177,7 +191,7 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
         }
 
         // Replace table references before evaluation
-        const processedExpr = replaceTableReferences(valueExpr, tableVariables);
+        const processedExpr = replaceTableReferences(valueExpr, currentTableVariables);
         const val = evaluate(processedExpr, scope);
         const isFiniteNumber = typeof val === 'number' && !isNaN(val) && isFinite(val);
         const isUnit = typeof val === 'object' && val !== null && val.isUnit === true;
@@ -194,7 +208,7 @@ export function evaluateAllMathNodes(nodes: MathExpNode[], tableVariables: Recor
         }
 
         // Replace table references before evaluation
-        const processedExpr = replaceTableReferences(expr, tableVariables);
+        const processedExpr = replaceTableReferences(expr, currentTableVariables);
         const val = evaluate(processedExpr, scope);
         if (typeof val === 'number' && !isFinite(val)) {
           throw new Error('Invalid value');

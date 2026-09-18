@@ -46,3 +46,26 @@ export function $getAllTableNodes(root?: RootNode): TableNode[] {
   traverseTable(root ?? $getRoot(), nodes);
   return nodes;
 }
+
+/**
+ * Returns all MathExpNodes and TableNodes in interleaved document order.
+ * Must be called inside a Lexical read/update callback.
+ */
+export function $getMathAndTableNodes(root?: RootNode): (MathExpNode | TableNode)[] {
+  const nodes: (MathExpNode | TableNode)[] = [];
+  
+  function traverseCombined(node: LexicalNode): void {
+    if ($isMathExpNode(node) || $isTableNode(node)) {
+      nodes.push(node as (MathExpNode | TableNode));
+    }
+    if ('getChildren' in node) {
+      const children = (node as any).getChildren();
+      for (const child of children) {
+        traverseCombined(child);
+      }
+    }
+  }
+  
+  traverseCombined(root ?? $getRoot());
+  return nodes;
+}

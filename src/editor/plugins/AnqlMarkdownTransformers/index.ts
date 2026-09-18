@@ -61,8 +61,8 @@ import {
   $isTableNode,
   TableNode,
 } from "@/editor/nodes/TableNode/TableNode";
-import { evaluateAllMathNodes } from "@/editor/plugins/MathPlugin/evaluator";
-import { $getAllMathNodes, $getAllTableNodes } from "@/editor/plugins/MathPlugin/traversal";
+import { evaluateAllMathNodes, EvaluationItem } from "@/editor/plugins/MathPlugin/evaluator";
+import { $getMathAndTableNodes } from "@/editor/plugins/MathPlugin/traversal";
 
 const TABLE_ROW_REG_EXP = /^(?:\|)(.+)(?:\|)\s?$/;
 
@@ -216,37 +216,47 @@ export const MATH: ElementTransformer = {
     }
 
     const root = $getRoot();
-    const mathNodes = $getAllMathNodes(root);
-    const tableNodes = $getAllTableNodes(root);
+    const mathAndTableNodes = $getMathAndTableNodes(root);
 
-    const tableVariables: Record<string, Record<string, number[]>> = {};
+    const evaluationItems: EvaluationItem[] = [];
+    let tableIndex = 0;
 
-    tableNodes.forEach((tNode, index) => {
-      const rawName = (tNode as any).__tableName || `Table_${index + 1}`;
-      const safeTableName = rawName.replace(/[^a-zA-Z0-9_]/g, '');
-      if (!safeTableName) return;
-
-      const tableData: Record<string, number[]> = {};
-
-      (tNode as any).__columns.forEach((col: any) => {
-        if (col.meta?.type === 'number') {
-          const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
-          if (safeHeader) {
-            tableData[safeHeader] = (tNode as any).__data.map((row: any) => {
-              const val = row[col.id];
-              const num = Number(val);
-              return isNaN(num) ? 0 : num;
-            });
-          }
+    mathAndTableNodes.forEach((tNode) => {
+      if ($isTableNode(tNode)) {
+        const rawName = (tNode as any).__tableName || `Table_${tableIndex + 1}`;
+        tableIndex++;
+        const safeTableName = rawName.replace(/[^a-zA-Z0-9_]/g, '');
+        if (!safeTableName) {
+          evaluationItems.push({ type: 'table', name: '', data: null });
+          return;
         }
-      });
 
-      if (Object.keys(tableData).length > 0) {
-        tableVariables[safeTableName] = tableData;
+        const tableData: Record<string, number[]> = {};
+
+        (tNode as any).__columns.forEach((col: any) => {
+          if (col.meta?.type === 'number') {
+            const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
+            if (safeHeader) {
+              tableData[safeHeader] = (tNode as any).__data.map((row: any) => {
+                const val = row[col.id];
+                const num = Number(val);
+                return isNaN(num) ? 0 : num;
+              });
+            }
+          }
+        });
+
+        if (Object.keys(tableData).length > 0) {
+          evaluationItems.push({ type: 'table', name: safeTableName, data: tableData });
+        } else {
+          evaluationItems.push({ type: 'table', name: safeTableName, data: null });
+        }
+      } else {
+        evaluationItems.push({ type: 'math', node: tNode as any });
       }
     });
 
-    const { results } = evaluateAllMathNodes(mathNodes, tableVariables);
+    const { results } = evaluateAllMathNodes(evaluationItems);
     const res = results[node.getKey()];
     const expression = exportChildren(node).trim();
 
