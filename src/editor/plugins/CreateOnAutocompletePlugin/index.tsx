@@ -248,6 +248,15 @@ function isBlockStartForEmptyAutocomplete(): boolean {
     return false;
   }
 
+  // Ensure the paragraph doesn't contain any non-text elements (like LinkNode, ImageNode, etc.)
+  const children = topLevelElement.getChildren();
+  for (const child of children) {
+    const type = child.getType();
+    if (type !== 'text' && type !== 'linebreak') {
+      return false;
+    }
+  }
+
   if (hasContentBeforeCurrentNode(anchorNode, topLevelElement)) {
     return false;
   }
