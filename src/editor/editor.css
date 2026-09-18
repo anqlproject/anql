@@ -45,21 +45,23 @@
 }
 
 .editor-shell .editor-container::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
   height: 10px;
 }
 
 .editor-shell .editor-container::-webkit-scrollbar-track {
-  background: var(--bg-color);
+  background: transparent;
 }
 
 .editor-shell .editor-container::-webkit-scrollbar-thumb {
   background: var(--text-disabled);
-  border-radius: 5px;
+  opacity: 0.4;
+  border-radius: 2px;
 }
 
 .editor-shell .editor-container::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+  opacity: 0.6;
 }
 
 .editor {

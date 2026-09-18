@@ -33,6 +33,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-color);
   color: var(--text-primary);
+  caret-color: var(--primary-color);
 }
 
 
