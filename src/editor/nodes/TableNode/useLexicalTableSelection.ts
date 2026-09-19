@@ -41,7 +41,7 @@ export function useLexicalTableSelection(
       const target = event.target as HTMLElement;
       if (
         target.closest(
-          'input, textarea, button.table-date-btn, .table-resizer, .table-row-handle, .table-col-handle',
+          'input, textarea, button.table-date-btn, .table-resizer, .table-row-handle, .table-col-handle, .table-add-row-strip, .table-add-col-strip',
         )
       ) {
         return;
@@ -59,7 +59,7 @@ export function useLexicalTableSelection(
 
     const handleFocusIn = (event: FocusEvent) => {
       const target = event.target as HTMLElement;
-      if (target.closest("input, textarea, button.table-date-btn")) {
+      if (target.closest("input, textarea, button.table-date-btn, .table-add-row-strip, .table-add-col-strip")) {
         selectTableNode();
       }
     };

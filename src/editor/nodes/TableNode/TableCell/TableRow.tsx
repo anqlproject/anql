@@ -23,6 +23,7 @@ interface DraggableRowProps {
   isDropTarget: boolean;
   suppressMenuClick?: boolean;
   draggingColumnId?: string | null;
+  isNew?: boolean;
 }
 
 export function DraggableRow({
@@ -35,6 +36,7 @@ export function DraggableRow({
   isDropTarget,
   suppressMenuClick,
   draggingColumnId,
+  isNew,
 }: DraggableRowProps) {
   const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -74,7 +76,7 @@ export function DraggableRow({
         rowRef(el);
       }}
       style={style}
-      className={`table-row ${isDropTarget ? "table-row--drop-target" : ""} ${isDragging ? "table-row--dragging" : ""}`}
+      className={`table-row ${isDropTarget ? "table-row--drop-target" : ""} ${isDragging ? "table-row--dragging" : ""} ${rowIndex % 2 === 1 ? "table-row--even" : ""} ${isNew ? "table-row--new" : ""}`}
       data-row-index={rowIndex}
       data-row-id={row.original._rowId}
     >

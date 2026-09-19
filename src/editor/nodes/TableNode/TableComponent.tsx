@@ -36,7 +36,7 @@ import {
 } from "@tanstack/react-table";
 import type { ElementFormatType } from "lexical";
 import { $getNodeByKey, COMMAND_PRIORITY_LOW, NodeKey } from "lexical";
-import { Move } from "lucide-react";
+import { Move, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighlight";
@@ -134,6 +134,8 @@ export function TableComponent({
   const [dragOverColIndex, setDragOverColIndex] = useState<number | null>(null);
   const [openRowMenuIndex, setOpenRowMenuIndex] = useState<number | null>(null);
   const [openColMenuIndex, setOpenColMenuIndex] = useState<number | null>(null);
+  const [newRowId, setNewRowId] = useState<string | null>(null);
+  const [newColId, setNewColId] = useState<string | null>(null);
 
   const [highlightState, setHighlightState] = useState<{
     type: "row" | "column" | null;
@@ -345,6 +347,14 @@ export function TableComponent({
     columnCount,
     tableDataLength: tableData.length,
     rowRefs,
+    onRowAdded: (rowId) => {
+      setNewRowId(rowId);
+      setTimeout(() => setNewRowId(null), 600);
+    },
+    onColumnAdded: (colId) => {
+      setNewColId(colId);
+      setTimeout(() => setNewColId(null), 600);
+    },
   });
 
   const table = useReactTable({
@@ -594,11 +604,12 @@ export function TableComponent({
           onDragCancel={handleDragCancel}
           modifiers={modifiers}
         >
-          <div
-            ref={gridRef}
-            className="table-grid"
-            style={{ minWidth: totalWidth }}
-          >
+          <div className="table-grid-wrapper">
+            <div
+              ref={gridRef}
+              className="table-grid"
+              style={{ minWidth: totalWidth }}
+            >
             <div className="table-row table-row--header">
               <div className="table-gutter" aria-hidden="true" />
               <SortableContext
@@ -625,6 +636,7 @@ export function TableComponent({
                       columnRefs.current[index] = el;
                     }}
                     isDropTarget={dragOverColIndex === index}
+                    isNew={header.column.id === newColId}
                   />
                 ))}
               </SortableContext>
@@ -656,6 +668,7 @@ export function TableComponent({
                   isDropTarget={dragOverRowIndex === index}
                   suppressMenuClick={isDragging}
                   draggingColumnId={activeColumnId}
+                  isNew={row.original._rowId === newRowId}
                 />
               ))}
             </SortableContext>
@@ -668,6 +681,28 @@ export function TableComponent({
               rowRefs={rowRefs}
               columnRefs={columnRefs}
             />
+            </div>
+
+            <button
+              className="table-add-row-strip"
+              onClick={() => tableMeta.addRow()}
+              type="button"
+              title="Ajouter une ligne"
+            >
+              <span className="table-add-strip-btn" aria-hidden="true">
+                <Plus size={14} />
+              </span>
+            </button>
+            <button
+              className="table-add-col-strip"
+              onClick={() => tableMeta.addColumn()}
+              type="button"
+              title="Ajouter une colonne"
+            >
+              <span className="table-add-strip-btn" aria-hidden="true">
+                <Plus size={14} />
+              </span>
+            </button>
           </div>
 
           <DragOverlay dropAnimation={null}>

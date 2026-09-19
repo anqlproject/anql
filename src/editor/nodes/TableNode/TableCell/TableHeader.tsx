@@ -22,6 +22,7 @@ interface DraggableHeaderProps {
   onMenuOpenChange: (open: boolean) => void;
   columnRef: (el: HTMLDivElement | null) => void;
   isDropTarget?: boolean;
+  isNew?: boolean;
 }
 
 export default function DraggableHeader({
@@ -32,6 +33,7 @@ export default function DraggableHeader({
   onMenuOpenChange,
   columnRef,
   isDropTarget,
+  isNew,
 }: DraggableHeaderProps) {
   const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -76,7 +78,7 @@ export default function DraggableHeader({
         columnRef(el);
       }}
       style={style}
-      className={`table-cell table-cell--header ${isDropTarget ? "table-cell--drop-target" : ""} ${isDragging ? "is-dragging" : ""}`}
+      className={`table-cell table-cell--header ${isDropTarget ? "table-cell--drop-target" : ""} ${isDragging ? "is-dragging" : ""} ${isNew ? "table-col--new" : ""}`}
       data-column-index={columnIndex}
     >
       <Popover.Root open={menuOpen} onOpenChange={onMenuOpenChange}>

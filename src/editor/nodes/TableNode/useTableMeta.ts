@@ -13,6 +13,8 @@ interface UseTableMetaOptions {
   columnCount: number;
   tableDataLength: number;
   rowRefs: React.RefObject<(HTMLElement | null)[]>;
+  onRowAdded?: (rowId: string) => void;
+  onColumnAdded?: (colId: string) => void;
 }
 
 // Helper function to check if any links point to a specific row
@@ -55,6 +57,8 @@ export function useTableMeta({
   columnCount,
   tableDataLength,
   rowRefs,
+  onRowAdded,
+  onColumnAdded,
 }: UseTableMetaOptions) {
   return {
     nodeKey,
@@ -136,6 +140,7 @@ export function useTableMeta({
             ...node.__columns,
             { header: "", id: newColId, meta: { type: "text" } },
           ]);
+          onColumnAdded?.(newColId);
         }
       });
     },
@@ -154,6 +159,7 @@ export function useTableMeta({
             { header: "", id: newColId, meta: { type: "text" } },
             ...node.__columns.slice(idx),
           ]);
+          onColumnAdded?.(newColId);
         }
       });
     },
@@ -172,6 +178,7 @@ export function useTableMeta({
             { header: "", id: newColId, meta: { type: "text" } },
             ...node.__columns.slice(idx + 1),
           ]);
+          onColumnAdded?.(newColId);
         }
       });
     },
@@ -206,7 +213,9 @@ export function useTableMeta({
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
-          node.updateData([...node.__data, ensureRowId({})]);
+          const newRow = ensureRowId({});
+          node.updateData([...node.__data, newRow]);
+          onRowAdded?.(newRow._rowId!);
         }
       });
     },
@@ -219,8 +228,10 @@ export function useTableMeta({
           const newData = [...node.__data];
           const index = newData.findIndex(r => r._rowId === rowId);
           if (index !== -1) {
-            newData.splice(index, 0, ensureRowId({}));
+            const newRow = ensureRowId({});
+            newData.splice(index, 0, newRow);
             node.updateData(newData);
+            onRowAdded?.(newRow._rowId!);
           }
         }
       });
@@ -234,8 +245,10 @@ export function useTableMeta({
           const newData = [...node.__data];
           const index = newData.findIndex(r => r._rowId === rowId);
           if (index !== -1) {
-            newData.splice(index + 1, 0, ensureRowId({}));
+            const newRow = ensureRowId({});
+            newData.splice(index + 1, 0, newRow);
             node.updateData(newData);
+            onRowAdded?.(newRow._rowId!);
           }
         }
       });

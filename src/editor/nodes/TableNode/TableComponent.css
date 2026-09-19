@@ -2,7 +2,7 @@
 .table-container {
   position: relative;
   margin: 0.75rem 0 1.25rem;
-  padding: 8px 0 0 24px;
+  padding: 8px 36px 36px 24px;
   margin-left: -24px;
   max-width: 100%;
   overflow-x: auto;
@@ -18,10 +18,16 @@
 
 /* ── Grid ── */
 
+.table-grid-wrapper {
+  position: relative;
+  width: fit-content;
+}
+
 .table-grid {
   display: flex;
   flex-direction: column;
   width: fit-content;
+  position: relative;
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
   color: var(--text-primary);
@@ -30,10 +36,63 @@
   clip-path: inset(-30px -30px 0 -30px);
 }
 
-/* ── Add row / column ── */
+/* ── Add row / column strips ── */
 
-.table-add-btn,
-.table-add-row-btn {
+/* Bottom strip — spans full width of the table */
+.table-add-row-strip {
+  position: absolute;
+  bottom: -28px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 0 0 4px 4px;
+  opacity: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 120ms, background-color 120ms;
+}
+
+/* Right strip — spans full height of the table */
+.table-add-col-strip {
+  position: absolute;
+  top: 0;
+  right: -28px;
+  bottom: 0;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 0 4px 4px 0;
+  opacity: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 120ms, background-color 120ms;
+}
+
+.table-container:hover .table-add-row-strip,
+.table-container:hover .table-add-col-strip {
+  opacity: 1;
+}
+
+.table-add-row-strip:hover,
+.table-add-col-strip:hover {
+  background-color: var(--action-hover);
+}
+
+.table-add-row-strip:hover .table-add-strip-btn,
+.table-add-col-strip:hover .table-add-strip-btn {
+  color: var(--text-primary);
+}
+
+/* The actual + button inside the strip */
+.table-add-strip-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,27 +103,12 @@
   background: transparent;
   color: var(--text-disabled);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 120ms, background-color 120ms, color 120ms;
+  transition: color 120ms;
 }
 
-.table-container:hover .table-add-btn,
-.table-container:hover .table-add-row-btn,
-.table-add-btn:focus-visible,
-.table-add-row-btn:focus-visible {
-  opacity: 1;
-}
-
-.table-add-btn:hover,
-.table-add-row-btn:hover {
-  background: var(--action-hover);
-  color: var(--text-primary);
-}
-
-.table-add-row-btn {
-  position: absolute;
-  left: 2px;
-  bottom: -12px;
+.table-add-strip-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
 }
 
 /* ── Drag preview ── */
