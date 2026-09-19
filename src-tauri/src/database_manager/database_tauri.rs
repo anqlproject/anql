@@ -27,7 +27,9 @@ pub async fn get_db(state: &AppState) -> Result<Arc<Database>, String> {
 
 #[tauri::command]
 pub async fn init_db(state: State<'_, AppState>, db_path: String) -> Result<(), String> {
-    let db = Database::new(&db_path).await.map_err(|e| e.to_string())?;
+    let db = Database::new(&db_path)
+        .await
+        .map_err(|e| format!("{e:#}"))?;
 
     *state.db.write().await = Some(Arc::new(db));
     Ok(())

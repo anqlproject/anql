@@ -10,33 +10,39 @@ import { useSettingsFile } from '@/App/hooks/useSettingsFile';
 import { getUnexpectedKeys, loadSettings, removeUnexpectedKeys } from '@/App/settings';
 import { useGlobalStore } from '@/App/store/useGlobalStore';
 import { useBackgroundTaskRunner } from '@/core/BackgroundTask/BackgroundTaskRunner';
-import { 
+import {
   cleanupOldPendingDeletions,
-  cleanupUnusedAssets, 
-  getUnusedAssets} from '@/core/database/useAssetDatabase';
-import { 
-  checkOrphanAssets, 
-  checkUnauthorizedTables, 
+  cleanupUnusedAssets,
+  getUnusedAssets
+} from '@/core/database/useAssetDatabase';
+import {
+  checkOrphanAssets,
+  checkUnauthorizedTables,
   cleanupDatabase,
   cleanupOrphanAssets,
-  initDatabase, 
-  quickCheckDb} from '@/core/database/useDatabase';
+  initDatabase,
+  quickCheckDb
+} from '@/core/database/useDatabase';
+import { getDocumentsByWorkspaceId } from '@/core/database/useDocumentDatabase';
 import { APP_PATH, DEFAULT_SETTINGS } from '@/core/global/defaultSettings';
-import { logger,logStorage } from '@/core/logger';
+import { logger, logStorage } from '@/core/logger';
 
 interface AppInitializerProps {
   children: React.ReactNode;
 }
 
 const templateResources = new Map([
-  ['node_tests', 'templates/node_tests.anql'],
+  ['nodes', 'templates/nodes.anql'],
   ['math_node_demonstration', 'templates/math_node_demonstration.anql'],
 ]);
 
 async function importTemplateDocuments(): Promise<void> {
   const templateUrls = new Map<string, string>();
+  const existingDocuments = await getDocumentsByWorkspaceId('default');
+  const existingTitles = new Set(existingDocuments.map((document) => document.title));
 
   for (const [name, resourcePath] of templateResources) {
+    if (existingTitles.has(name)) continue;
     templateUrls.set(name, await resolveResource(resourcePath));
   }
 
@@ -46,9 +52,9 @@ async function importTemplateDocuments(): Promise<void> {
 }
 
 export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
-  const { config, setConfig } = useGlobalStore(useShallow((state: any) => ({ 
-    setConfig: state.setConfig, 
-    config: state.config 
+  const { config, setConfig } = useGlobalStore(useShallow((state: any) => ({
+    setConfig: state.setConfig,
+    config: state.config
   })));
   const { getFileFromDocument } = useSettingsFile();
   const { showToast } = useGlobalToast();
@@ -67,7 +73,7 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
         const isNewInstallation = Boolean(
           configPath && databasePath && !(await exists(configPath)) && !(await exists(databasePath)),
         );
-        if (configPath) {
+        if (configPath && await exists(configPath)) {
           try {
             const content = await readTextFile(configPath);
             const parsedConfig = JSON.parse(content);
@@ -84,6 +90,8 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
             // Fallback: still load settings even if integrity check fails
             await loadSettings(getFileFromDocument, setConfig).catch(console.error);
           }
+        } else {
+          await loadSettings(getFileFromDocument, setConfig);
         }
 
         if (!databasePath) throw new Error("Database path not found");
@@ -100,7 +108,7 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
         // Initialize logger with privacy setting
         await initDatabase(databasePath);
 
-        if (isNewInstallation) {
+        if (isNewInstallation || (await getDocumentsByWorkspaceId('default')).length === 0) {
           await importTemplateDocuments();
         }
 
