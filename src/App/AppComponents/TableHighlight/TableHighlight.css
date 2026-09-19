@@ -15,11 +15,11 @@
 .table-highlight-border--row {
   border-radius: 4px;
   background-color: var(--primary-color);
-  opacity: 0.15;
+  opacity: 0.25;
 }
 
 .table-highlight-border--column {
   border-radius: 0;
   background-color: var(--primary-color);
-  opacity: 0.15;
+  opacity: 0.25;
 }

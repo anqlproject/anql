@@ -62,6 +62,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
   const animationFrameIdRef = useRef<number | null>(null);
 
   // Register handleNewFile with global shortcut (handleNewFile is now stable with useCallback in FileHooks)
@@ -191,6 +192,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
     e.preventDefault();
     e.stopPropagation();
     isDraggingRef.current = true;
+    dragStartXRef.current = e.clientX;
     setIsResizing(true);
   };
 
@@ -210,7 +212,11 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
       }
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      const hasMoved = Math.abs(e.clientX - dragStartXRef.current) > 5;
+      if (!hasMoved) {
+        toggleSidebar();
+      }
       isDraggingRef.current = false;
       setIsResizing(false);
       if (animationFrameIdRef.current !== null) {
@@ -246,14 +252,13 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
         }}
       >
         {
-          // sidebar trigger and resize handle
+          // sidebar resize handle
           <div
             className="sidebar-resize-handle"
             style={{
               width: DIMENSIONS.sidebarWrapperWidth,
             }}
             onMouseDown={handleMouseDown}
-            onClick={toggleSidebar}
           ></div>
         }
         <SidebarHeader>
@@ -327,7 +332,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
             className={`left-sidebar-trigger ${isHovered ? "visible" : ""}`}
             style={{
               height: window.innerHeight,
-              width: DIMENSIONS.sidebarWrapperWidth,
+              width: DIMENSIONS.sidebarWrapperWidth * 1.3,
             }}
             onClick={() => {
               toggleSidebar();

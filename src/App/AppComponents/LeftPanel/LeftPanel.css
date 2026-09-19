@@ -292,8 +292,12 @@
   transition: all 0.2s ease;
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
-  background-color: var(--action-active);
   opacity: 0;
+}
+
+.sidebar-resize-handle:hover {
+  background-color: var(--primary-color);
+  opacity: 0.5;
 }
 
 /* 
@@ -307,10 +311,6 @@ without changing the visual width (3px).
   cursor: col-resize;
 }
 
-.sidebar-resize-handle:hover {
-  background-color: var(--action-active);
-  opacity: 1;
-}
 
 .left-sidebar-wrapper {
   position: absolute;
@@ -322,7 +322,6 @@ without changing the visual width (3px).
 .left-sidebar-trigger {
   position: relative;
   left: 0;
-  background-color: var(--action-active);
   opacity: 0;
   border: none;
   border-radius: 4px;
@@ -331,6 +330,11 @@ without changing the visual width (3px).
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+}
+
+.left-sidebar-trigger.visible {
+  background-color: var(--primary-color);
+  opacity: 0.7;
 }
 
 /*
@@ -342,25 +346,4 @@ without changing the visual width.
   position: absolute;
   inset: 0 -6px;
   cursor: pointer;
-}
-
-.left-sidebar-trigger.visible {
-  opacity: 0.8;
-}
-
-.left-sidebar-trigger-open {
-  position: inherit;
-  background-color: var(--action-active);
-  opacity: 1;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  z-index: var(--z-content);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.left-sidebar-trigger-open:hover {
-  opacity: 0.8;
 }

@@ -14,7 +14,7 @@
   background-color: var(--primary-color);
   border-radius: 6px;
   pointer-events: none;
-  opacity: 0.15;
+  opacity: 0.25;
 }
 
 @keyframes blockPulse {
