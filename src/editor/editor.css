@@ -9,7 +9,7 @@
   font-family: var(--font-sans);
   font-size: var(--text-md);
   line-height: var(--leading-relaxed);
-  font-weight: var(--font-normal);
+  font-weight: 420;
   letter-spacing: var(--tracking-normal);
   white-space: normal;
 }
@@ -66,7 +66,7 @@
 
 .editor {
   background-color: var(--bg-color);
-  width: 50vw;
+  width: 55vw;
   max-width: 800px;
   position: relative;
   z-index: var(--z-base);

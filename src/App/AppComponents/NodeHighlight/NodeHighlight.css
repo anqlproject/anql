@@ -11,11 +11,10 @@
 
 .block-border {
   position: absolute;
-  border: 1px solid var(--primary-color);
+  background-color: var(--primary-color);
   border-radius: 6px;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3), 0 4px 12px rgba(59, 130, 246, 0.2);
   pointer-events: none;
-  animation: blockPulse 2s ease-in-out infinite;
+  opacity: 0.15;
 }
 
 @keyframes blockPulse {

@@ -26,7 +26,7 @@ export const DEFAULT_SETTINGS = {
     },
     sidebar: {
         variant: 'inset',
-        collapsible: true
+        collapsible: false
     },
     homePage: {
         viewMode: 'grid',

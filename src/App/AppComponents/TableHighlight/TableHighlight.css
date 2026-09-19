@@ -4,7 +4,6 @@
 
 .table-highlight-border {
   pointer-events: none;
-  border: 1px solid #3b82f6;
   transition:
     top 0.12s ease-out,
     left 0.12s ease-out,
@@ -15,10 +14,12 @@
 
 .table-highlight-border--row {
   border-radius: 4px;
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--primary-color);
+  opacity: 0.15;
 }
 
 .table-highlight-border--column {
   border-radius: 0;
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: var(--primary-color);
+  opacity: 0.15;
 }

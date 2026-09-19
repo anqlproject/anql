@@ -18,7 +18,7 @@ const RecentDocuments: React.FC = () => {
   const { t } = useTranslation();
   const { currentDocument } = useGlobalStore(useShallow((state) => ({ currentDocument: state.currentDocument })));
 
-  const { openEditorWithUpdate } = useFile();
+  const { openEditor } = useFile();
   const { goHome } = navigationUtils();
 
   const [documents, setDocuments] = useState<DocumentsJson[]>([]);
@@ -98,7 +98,7 @@ const RecentDocuments: React.FC = () => {
               className={`history-item ${document.id === currentDocument.id ? "active" : ""
                 }`}
               onClick={() => {
-                openEditorWithUpdate(document);
+                openEditor(document);
               }}
             >
               <span className="history-item-name">{document.title || t('SIDEBAR.untitled')}</span>

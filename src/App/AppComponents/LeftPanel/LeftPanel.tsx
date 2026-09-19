@@ -3,7 +3,6 @@ import "./LeftPanel.css";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   HomeIcon,
-  MoveRightIcon,
   Plus,
   SearchIcon,
   Upload,
@@ -328,14 +327,13 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
             className={`left-sidebar-trigger ${isHovered ? "visible" : ""}`}
             style={{
               height: window.innerHeight,
-              width: DIMENSIONS.sidebarWrapperWidth * 1.6,
+              width: DIMENSIONS.sidebarWrapperWidth,
             }}
             onClick={() => {
               toggleSidebar();
               setIsHovered(false);
             }}
           >
-            <MoveRightIcon size={14} />
           </div>
         </div>
       )}

@@ -76,7 +76,7 @@ export default function DraggableBlockPlugin({
               onClick={(e) => {
                 e.stopPropagation();
                 const rect = e.currentTarget.getBoundingClientRect();
-                setMenuPosition({ x: rect.left, y: rect.top });
+                setMenuPosition({ x: rect.left - rect.width - 6, y: rect.top });
                 setIsMenuOpen(true);
                 editor.blur();
               }}
