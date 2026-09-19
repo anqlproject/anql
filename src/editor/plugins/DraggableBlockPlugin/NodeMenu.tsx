@@ -1,5 +1,5 @@
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
-import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
+import { $createHeadingNode, $createQuoteNode, $isQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
 import {
   $createParagraphNode,
@@ -298,8 +298,14 @@ export default function NodeMenu({
               checked: activeFormat === "paragraph",
               accelerator: formatAccelerator(EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.modifiers, EDITOR_SHORTCUTS.FORMAT_PARAGRAPH.key),
               action: () => {
-                // FIX : this list
-                applyToNodes((_, selection) => {
+                applyToNodes((node, selection) => {
+                  // A QuoteNode is the block itself. Replacing it directly
+                  // preserves its children even when the native menu opened
+                  // with a collapsed selection inside the quote.
+                  if ($isQuoteNode(node)) {
+                    node.replace($createParagraphNode(), true);
+                    return;
+                  }
                   $setBlocksType(selection, () => $createParagraphNode());
                 });
               },
