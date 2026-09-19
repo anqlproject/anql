@@ -82,7 +82,7 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
           if (rowId && blocId) {
             const url = `@row:${blocId}:${rowId}`;
             const html = `<a href="${url}" data-lexical-link="true" data-link-type="row" data-target-id="${blocId}:${rowId}" data-name="Ligne">Ligne</a>`;
-            
+
             try {
               const blobText = new Blob([url], { type: 'text/plain' });
               const blobHtml = new Blob([html], { type: 'text/html' });
@@ -91,7 +91,7 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
             } catch (err) {
               navigator.clipboard.writeText(url);
             }
-            
+
             table.options.meta?.closeMenus?.();
           }
         }}

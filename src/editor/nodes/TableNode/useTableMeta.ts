@@ -84,6 +84,7 @@ export function useTableMeta({
       columnId: string,
       type: "text" | "checkbox" | "date" | "number",
     ) => {
+      closeMenus();
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isTableNode(node)) {
@@ -183,7 +184,7 @@ export function useTableMeta({
           // Check if any links point to this row before deletion
           if (rowId && checkRowLinks(editor, nodeKey, String(rowId))) {
             const confirmed = window.confirm(
-              "Cette ligne a des liens qui pointent vers elle. La supprimer cassera ces liens. Voulez-vous continuer ?"
+              "This row has links pointing to it. Deleting it will break these links. Do you want to continue?"
             );
             if (!confirmed) {
               return; // Cancel deletion
