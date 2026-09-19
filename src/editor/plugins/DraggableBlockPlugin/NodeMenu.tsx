@@ -103,10 +103,23 @@ export default function NodeMenu({
           ) {
             topLevel = topLevel.getParent() as LexicalNode;
           }
-          topLevelNodes.add(topLevel);
+          if (topLevel.getParent()?.getKey() === "root") {
+            topLevelNodes.add(topLevel);
+          }
         });
         return Array.from(topLevelNodes);
       }
+    }
+
+    let topLevel = nodeRef.current;
+    while (
+      topLevel.getParent() &&
+      topLevel.getParent()?.getKey() !== "root"
+    ) {
+      topLevel = topLevel.getParent() as LexicalNode;
+    }
+    if (topLevel.getParent()?.getKey() === "root") {
+      return [topLevel];
     }
     return [nodeRef.current];
   };
@@ -124,11 +137,10 @@ export default function NodeMenu({
             "paragraph",
             "heading",
             "quote",
-            "code",
             "list",
             "listitem",
           ];
-          const allAllowed = topLevelNodes.every((n) =>
+          const allAllowed = topLevelNodes.length > 0 && topLevelNodes.every((n) =>
             allowedTypes.includes(n.getType()),
           );
           setCanTransform(allAllowed);
@@ -141,12 +153,21 @@ export default function NodeMenu({
               format = (topLevelNodes[0] as any).getTag(); // h1, h2, h3
             } else if (format === "list") {
               format = (topLevelNodes[0] as any).getListType(); // number, bullet, check
+            } else if (format === "listitem") {
+              const parentList = topLevelNodes[0].getParent();
+              if (parentList && parentList.getType() === "list") {
+                format = (parentList as any).getListType();
+              }
             }
             // Verify if all have the same format
             const allSame = topLevelNodes.every(n => {
               let t = n.getType();
               if (t === "heading") t = (n as any).getTag();
               if (t === "list") t = (n as any).getListType();
+              if (t === "listitem") {
+                const p = n.getParent();
+                if (p && p.getType() === "list") t = (p as any).getListType();
+              }
               return t === format;
             });
             if (!allSame) format = null;
