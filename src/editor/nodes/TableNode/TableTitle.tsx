@@ -13,6 +13,7 @@
  * commit to Lexical on blur or Enter. The prop is used only to
  * initialize / sync from external changes (e.g., undo/redo).
  */
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import { $getNodeByKey, LexicalEditor, NodeKey } from 'lexical';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ interface TableTitleProps {
 
 export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
   const { t } = useTranslation();
+  const isEditable = useLexicalEditable();
   // Local state: tracks the input value without triggering Lexical updates on every keystroke.
   const [localName, setLocalName] = useState(tableName);
 
@@ -90,8 +92,9 @@ export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
         onKeyDown={handleKeyDown}
         placeholder={t('TABLE.titlePlaceholder') as string}
         spellCheck={false}
+        disabled={!isEditable}
       />
-      {isEmpty && !isFocused && (
+      {isEmpty && !isFocused && isEditable && (
         <div
           className="table-title-marker"
           onClick={() => {
