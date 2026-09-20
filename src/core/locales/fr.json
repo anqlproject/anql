@@ -63,13 +63,14 @@
       "xAxis": "Axe X",
       "ySeries": "Séries Y",
       "yCalculation": "Calcul de Y",
+      "yBeginAtZero": "Axe Y commence à 0",
       "category": "Catégorie",
       "value": "Valeur",
       "sections": {
         "data": "Données",
         "chart": "Graphique",
         "axesSeries": "Axes et séries",
-        "calculation": "Calcul",
+        "options": "Options d'axe",
         "colors": "Couleurs"
       },
       "textXHint": "X textuel : seules les colonnes numériques sont disponibles pour Y.",

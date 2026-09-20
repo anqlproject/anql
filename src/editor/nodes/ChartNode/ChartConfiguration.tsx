@@ -1,7 +1,7 @@
 import './ChartConfiguration.css';
 
 import type { TFunction } from 'i18next';
-import { BarChart3, Calculator, Check, ChevronDown, Palette, SlidersHorizontal } from 'lucide-react';
+import { BarChart3, Check, ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
 import type { RefObject } from 'react';
 import { useState } from 'react';
 
@@ -15,7 +15,7 @@ import { ChartSelect } from './ChartSelect';
 export const COLOR_PALETTES: Record<string, string[]> = {
   default: ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed'],
   pastel: ['#93c5fd', '#fca5a5', '#86efac', '#fcd34d', '#c4b5fd'],
-  vibrant: ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6'],
+  vibrant: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'],
 };
 
 export const COLORS = COLOR_PALETTES.default;
@@ -42,6 +42,7 @@ export function getDefaultConfig(tables: TableEntry[], chartType: ChartType = 'l
     categoryColumn: columnNames.find(column => !isNumericColumn(columns[column])) || columnNames[0] || '',
     valueColumn: numericColumns[0] || '',
     colorPalette: 'default',
+    yBeginAtZero: true,
   };
 }
 
@@ -67,7 +68,7 @@ interface ChartConfigurationProps {
   t: TFunction;
 }
 
-type ConfigSection = 'chart' | 'axesSeries' | 'calculation' | 'colors';
+type ConfigSection = 'chart' | 'axesSeries' | 'options' | 'colors';
 
 export function ChartConfiguration({
   chartData,
@@ -132,13 +133,13 @@ export function ChartConfiguration({
             <SlidersHorizontal size={15} />
             <span>{t('CHART.sections.axesSeries')}</span>
           </button>
-          <button type="button" className={activeSection === 'calculation' ? 'is-active' : ''} onClick={() => setActiveSection('calculation')}>
-            <Calculator size={15} />
-            <span>{t('CHART.sections.calculation')}</span>
-          </button>
           <button type="button" className={activeSection === 'colors' ? 'is-active' : ''} onClick={() => setActiveSection('colors')}>
             <Palette size={15} />
             <span>{t('CHART.sections.colors')}</span>
+          </button>
+          <button type="button" className={activeSection === 'options' ? 'is-active' : ''} onClick={() => setActiveSection('options')}>
+            <Settings2 size={15} />
+            <span>{t('CHART.sections.options')}</span>
           </button>
         </nav>
         <div className="chart-settings-content">
@@ -255,8 +256,16 @@ function ChartConfigPanel({
           </label>
         </>
       ))}
-      {section === 'calculation' && !isPolarChart(config.chartType) && (
+      {section === 'options' && !isPolarChart(config.chartType) && (
         <>
+          <div className="chart-checkbox-label">
+            <span>{t('CHART.yBeginAtZero')}</span>
+            <input
+              type="checkbox"
+              checked={config.yBeginAtZero}
+              onChange={e => onChange({ ...config, yBeginAtZero: e.target.checked })}
+            />
+          </div>
           <label>{t('CHART.yCalculation')}
             <ChartSelect
               value={config.yAggregation}

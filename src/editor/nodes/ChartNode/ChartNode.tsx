@@ -17,6 +17,7 @@ export interface ChartNodeConfig {
   categoryColumn: string;
   valueColumn: string;
   colorPalette: string;
+  yBeginAtZero: boolean;
 }
 
 export type SerializedChartNode = Spread<ChartNodeConfig, SerializedDecoratorBlockNode>;
@@ -34,6 +35,7 @@ export class ChartNode extends DecoratorBlockNode {
   __categoryColumn: string;
   __valueColumn: string;
   __colorPalette: string;
+  __yBeginAtZero: boolean;
 
   static getType(): string {
     return 'chart';
@@ -54,6 +56,7 @@ export class ChartNode extends DecoratorBlockNode {
     this.__categoryColumn = config.categoryColumn || '';
     this.__valueColumn = config.valueColumn || '';
     this.__colorPalette = config.colorPalette || 'default';
+    this.__yBeginAtZero = config.yBeginAtZero ?? true;
   }
 
   getConfig(): ChartNodeConfig {
@@ -66,6 +69,7 @@ export class ChartNode extends DecoratorBlockNode {
       categoryColumn: this.__categoryColumn,
       valueColumn: this.__valueColumn,
       colorPalette: this.__colorPalette,
+      yBeginAtZero: this.__yBeginAtZero,
     };
   }
 
@@ -79,6 +83,7 @@ export class ChartNode extends DecoratorBlockNode {
     writable.__categoryColumn = config.categoryColumn;
     writable.__valueColumn = config.valueColumn;
     writable.__colorPalette = config.colorPalette;
+    writable.__yBeginAtZero = config.yBeginAtZero;
   }
 
   exportJSON(): SerializedChartNode {

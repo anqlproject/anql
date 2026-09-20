@@ -245,7 +245,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
             }
             : {
               x: { type: xIsNumeric ? 'linear' : 'category', grid: { color: gridColor }, ticks: { color: textColor } },
-              y: { type: yIsCategory ? 'category' : 'linear', labels: yLabels, grid: { color: gridColor }, ticks: { color: textColor } },
+              y: { type: yIsCategory ? 'category' : 'linear', labels: yLabels, grid: { color: gridColor }, ticks: { color: textColor }, beginAtZero: renderConfig?.yBeginAtZero ?? true },
             },
       },
     }) as unknown as Chart;

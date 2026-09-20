@@ -63,13 +63,14 @@
       "xAxis": "X axis",
       "ySeries": "Y series",
       "yCalculation": "Y calculation",
+      "yBeginAtZero": "Y axis starts at 0",
       "category": "Category",
       "value": "Value",
       "sections": {
         "data": "Data",
         "chart": "Chart",
         "axesSeries": "Axes & series",
-        "calculation": "Calculation",
+        "options": "Axis options",
         "colors": "Colors"
       },
       "textXHint": "Text X: only numeric columns are available for Y.",
