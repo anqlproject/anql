@@ -86,9 +86,9 @@ export function ChartConfiguration({
       title={(
         <label className="chart-dialog-title-control">
           <span>{t('CHART.table')}</span>
-          <ChartSelect 
-            value={config.tableName} 
-            onChange={handleTableChange} 
+          <ChartSelect
+            value={config.tableName}
+            onChange={handleTableChange}
             options={tables.map(([name]) => ({ value: name, label: name }))}
             ariaLabel={t('CHART.table') as string}
           />
@@ -177,14 +177,14 @@ function ChartConfigPanel({
       {section === 'axesSeries' && (isPolarChart(config.chartType) ? (
         <>
           <label>{t('CHART.category')}
-            <ChartSelect 
+            <ChartSelect
               value={config.categoryColumn}
               onChange={val => setField('categoryColumn', val)}
               options={columnNames.map(column => ({ value: column, label: column }))}
             />
           </label>
           <label>{t('CHART.value')}
-            <ChartSelect 
+            <ChartSelect
               value={config.valueColumn}
               onChange={val => setField('valueColumn', val)}
               options={numericColumns.map(column => ({ value: column, label: column }))}
@@ -194,7 +194,7 @@ function ChartConfigPanel({
       ) : (
         <>
           <label>{t('CHART.xAxis')}
-            <ChartSelect 
+            <ChartSelect
               value={config.xColumn}
               onChange={val => {
                 const xColumn = val;
@@ -218,9 +218,10 @@ function ChartConfigPanel({
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="chart-series-list" onCloseAutoFocus={(e) => e.preventDefault()}>
-                {columnNames.map((column, index) => {
+                {columnNames.map((column) => {
                   const isDisabled = !xIsNumeric && !isNumericColumn(columns[column] || []);
                   const isSelected = selectedYColumns.includes(column);
+                  const colorIndex = selectedYColumns.indexOf(column);
                   return (
                     <label key={column} className={`chart-series-option${isSelected ? ' is-selected' : ''}${isDisabled ? ' is-disabled' : ''}`} onClick={(e) => e.stopPropagation()}>
                       <input type="checkbox" checked={isSelected} disabled={isDisabled} onChange={event => {
@@ -232,7 +233,7 @@ function ChartConfigPanel({
                       <div className="chart-series-checkbox-custom">
                         <Check strokeWidth={3} />
                       </div>
-                      <span className="chart-series-swatch" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                      <span className="chart-series-swatch" style={{ backgroundColor: isSelected ? COLORS[colorIndex % COLORS.length] : '#d1d5db' }} />
                       <span className="chart-series-label-text">{column}</span>
                     </label>
                   );
@@ -245,7 +246,7 @@ function ChartConfigPanel({
       {section === 'calculation' && !isPolarChart(config.chartType) && (
         <>
           <label>{t('CHART.yCalculation')}
-            <ChartSelect 
+            <ChartSelect
               value={config.yAggregation}
               onChange={val => onChange({ ...config, yAggregation: val as ChartAggregation })}
               options={[
