@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 
 
 interface ComponentDialogProps {
-  title: string;
+  title: ReactNode;
   children: ReactNode;
   onClose: () => void;
   leftButton?: {

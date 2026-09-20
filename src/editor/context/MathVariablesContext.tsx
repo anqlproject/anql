@@ -8,6 +8,9 @@ export interface MathEvaluationResult {
   error: string | null;
 }
 
+export type ChartTableValue = string | number;
+export type ChartTableVariables = Record<string, Record<string, ChartTableValue[]>>;
+
 interface MathVariablesContextType {
   results: Record<string, MathEvaluationResult>;
   setResults: React.Dispatch<React.SetStateAction<Record<string, MathEvaluationResult>>>;
@@ -28,6 +31,8 @@ interface MathVariablesContextType {
   // Table variables used by math autocomplete and evaluation.
   tableVariables: Record<string, Record<string, number[]>>;
   setTableVariables: React.Dispatch<React.SetStateAction<Record<string, Record<string, number[]>>>>;
+  chartTableVariables: ChartTableVariables;
+  setChartTableVariables: React.Dispatch<React.SetStateAction<ChartTableVariables>>;
 }
 
 const MathVariablesContext = createContext<MathVariablesContextType | undefined>(undefined);
@@ -38,6 +43,7 @@ export const MathVariablesProvider: React.FC<{ children: ReactNode }> = ({ child
   const [variables, setVariables] = useState<Record<string, MathValue>>({});
   const [scopes, setScopes] = useState<Record<string, Record<string, MathValue>>>({});
   const [tableVariables, setTableVariables] = useState<Record<string, Record<string, number[]>>>({});
+  const [chartTableVariables, setChartTableVariables] = useState<ChartTableVariables>({});
 
   // We use a ref to prevent unnecessary re-renders when updating locally
   const localExpressionsRef = useRef<Record<string, string>>({});
@@ -51,7 +57,7 @@ export const MathVariablesProvider: React.FC<{ children: ReactNode }> = ({ child
   }, []);
 
   return (
-    <MathVariablesContext.Provider value={{ results, setResults, localExpressions, setLocalExpression, variables, setVariables, scopes, setScopes, tableVariables, setTableVariables }}>
+    <MathVariablesContext.Provider value={{ results, setResults, localExpressions, setLocalExpression, variables, setVariables, scopes, setScopes, tableVariables, setTableVariables, chartTableVariables, setChartTableVariables }}>
       {children}
     </MathVariablesContext.Provider>
   );

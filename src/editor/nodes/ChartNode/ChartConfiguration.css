@@ -1,0 +1,607 @@
+/* ============================================================
+   ChartConfiguration.css — Styles du panneau de configuration
+   ============================================================ */
+
+/* --- Panel grille --- */
+.chart-config-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+  padding: 14px;
+  border-top: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--panel-color);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+.chart-config-panel label {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.chart-config-panel > label {
+  min-width: 0;
+}
+
+.chart-config-panel > label:only-child {
+  grid-column: 1 / -1;
+}
+
+.chart-config-hint {
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.chart-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.chart-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* --- Select personnalisé --- */
+.chart-custom-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 34px;
+  padding: 6px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-primary);
+  background: var(--surface-color);
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-custom-select:hover {
+  border-color: var(--primary-color);
+}
+
+.chart-custom-select:focus-visible,
+.chart-custom-select[data-state="open"] {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+  border-color: var(--primary-color);
+}
+
+.chart-custom-select-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-custom-select-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.chart-custom-select[data-state="open"] .chart-custom-select-icon {
+  transform: rotate(-180deg);
+}
+
+.chart-custom-select-content {
+  z-index: 9999;
+  min-width: var(--radix-dropdown-menu-trigger-width);
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px color-mix(in srgb, #000 20%, transparent);
+}
+
+.chart-custom-select-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-size: var(--text-xs);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background-color 0.2s ease;
+}
+
+.chart-custom-select-item:hover,
+.chart-custom-select-item:focus {
+  background: var(--action-hover);
+  outline: none;
+}
+
+.chart-custom-select-item.is-selected {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+}
+
+.chart-custom-select-item[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chart-custom-select-check {
+  color: var(--primary-color);
+}
+
+/* --- Type de graphique --- */
+.chart-type-fieldset,
+.chart-color-fieldset {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.chart-type-fieldset legend,
+.chart-color-fieldset legend {
+  padding: 0 4px;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.chart-type-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(64px, 1fr));
+  gap: 6px;
+}
+
+.chart-type-option {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  justify-items: center;
+  padding: 7px 5px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+}
+
+.chart-type-option:hover,
+.chart-type-option.is-selected {
+  border-color: var(--primary-color);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+
+.chart-type-option:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+/* --- Aperçu miniature des types --- */
+.chart-type-preview {
+  position: relative;
+  display: block;
+  width: 44px;
+  height: 28px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg-color) 72%, var(--surface-color));
+}
+
+.chart-type-preview--bar {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 3px;
+  padding: 5px 6px;
+}
+
+.chart-type-preview--bar i {
+  width: 5px;
+  height: 45%;
+  background: var(--primary-color);
+}
+
+.chart-type-preview--bar i:nth-child(2) { height: 72%; }
+.chart-type-preview--bar i:nth-child(3) { height: 55%; }
+.chart-type-preview--bar i:nth-child(4) { height: 88%; }
+
+.chart-type-preview--line i,
+.chart-type-preview--scatter i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-color);
+}
+
+.chart-type-preview--line i {
+  left: 7px;
+  top: 16px;
+  width: 31px;
+  height: 2px;
+  border-radius: 0;
+  transform: rotate(-18deg);
+  transform-origin: left center;
+}
+
+.chart-type-preview--line::before,
+.chart-type-preview--line::after {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  content: '';
+}
+
+.chart-type-preview--line::before { left: 7px; top: 17px; }
+.chart-type-preview--line::after { right: 6px; top: 7px; }
+
+.chart-type-preview--scatter i:nth-child(1) { left: 7px; bottom: 6px; }
+.chart-type-preview--scatter i:nth-child(2) { left: 15px; top: 7px; }
+.chart-type-preview--scatter i:nth-child(3) { left: 23px; bottom: 9px; }
+.chart-type-preview--scatter i:nth-child(4) { right: 6px; top: 6px; }
+.chart-type-preview--scatter i:nth-child(5) { right: 12px; bottom: 5px; }
+
+.chart-type-preview--radar::before {
+  position: absolute;
+  inset: 4px 11px;
+  border: 2px solid var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  clip-path: polygon(50% 0, 100% 36%, 80% 100%, 20% 100%, 0 36%);
+  content: '';
+}
+
+.chart-type-preview--pie::before,
+.chart-type-preview--doughnut::before {
+  position: absolute;
+  inset: 5px 13px;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary-color) 0 35%, var(--primary-green) 35% 68%, #f59e0b 68% 100%);
+  content: '';
+}
+
+.chart-type-preview--doughnut::after {
+  position: absolute;
+  inset: 10px 18px;
+  border-radius: 50%;
+  background: var(--bg-color);
+  content: '';
+}
+
+/* --- Séries Y (liste multi-sélection) --- */
+.chart-series-list {
+  display: grid;
+  gap: 8px;
+  max-height: 240px;
+  padding: 10px;
+  overflow-y: auto;
+  min-width: var(--radix-dropdown-menu-trigger-width);
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  z-index: 9999;
+  box-shadow: 0 10px 30px -8px color-mix(in srgb, #000 40%, transparent),
+              0 4px 12px -6px color-mix(in srgb, #000 20%, transparent);
+}
+
+.chart-series-option {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 10px !important;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface-color);
+  color: var(--text-primary) !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+.chart-series-option:hover:not(.is-disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--primary-color) 8%, transparent);
+}
+
+.chart-series-option.is-selected {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 8%, var(--surface-color));
+}
+
+.chart-series-option.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--surface-color) 50%, transparent);
+  border-color: color-mix(in srgb, var(--border-color) 50%, transparent);
+  box-shadow: none;
+}
+
+.chart-series-option input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+.chart-series-checkbox-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--text-secondary);
+  border-radius: 4px;
+  background: transparent;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chart-series-option:hover:not(.is-disabled) .chart-series-checkbox-custom {
+  border-color: var(--primary-color);
+}
+
+.chart-series-option.is-selected .chart-series-checkbox-custom {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.chart-series-checkbox-custom svg {
+  width: 10px;
+  height: 10px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chart-series-option.is-selected .chart-series-checkbox-custom svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.chart-series-swatch {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 10%, transparent);
+  transition: transform 0.2s ease;
+}
+
+.chart-series-option:hover:not(.is-disabled) .chart-series-swatch {
+  transform: scale(1.15);
+}
+
+.chart-series-label-text {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- En-tête de la dialog (sélecteur de table) --- */
+.chart-dialog-title-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.chart-dialog-title-control .chart-custom-select {
+  min-width: 150px;
+  min-height: 30px;
+}
+
+/* --- Aperçu du graphique dans la dialog --- */
+.chart-dialog-preview {
+  min-height: 280px;
+  padding: 4px 0 16px;
+}
+
+.chart-dialog-preview .chart-canvas-wrapper {
+  height: 300px;
+}
+
+.chart-dialog-empty {
+  display: grid;
+  min-height: 280px;
+  place-items: center;
+  color: var(--text-secondary);
+}
+
+/* --- Layout sidebar + contenu --- */
+.chart-settings-layout {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  min-height: 150px;
+  border-top: 1px solid var(--border-color);
+}
+
+.chart-settings-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 8px;
+  border-right: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--panel-color) 72%, var(--bg-color));
+}
+
+.chart-settings-sidebar button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  text-align: left;
+}
+
+.chart-settings-sidebar button:hover,
+.chart-settings-sidebar button.is-active {
+  color: var(--text-primary);
+  background: var(--action-hover);
+}
+
+.chart-settings-sidebar button.is-active {
+  box-shadow: inset 2px 0 0 var(--primary-color);
+}
+
+.chart-settings-sidebar button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -1px;
+}
+
+.chart-settings-content {
+  min-width: 0;
+}
+
+.chart-settings-content .chart-config-panel {
+  min-height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* --- Bouton save (inline) --- */
+.chart-save-button {
+  display: inline-flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 28px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  background: var(--surface-color);
+  cursor: pointer;
+  font-size: var(--text-xs);
+}
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+  .chart-settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-settings-sidebar {
+    grid-template-columns: repeat(4, 1fr);
+    border-right: 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .chart-settings-sidebar button {
+    justify-content: center;
+    padding: 6px 4px;
+  }
+
+  .chart-settings-sidebar button span {
+    display: none;
+  }
+
+  .chart-config-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Palette de couleurs --- */
+.chart-palette-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.chart-palette-grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.chart-palette-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chart-palette-grid::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.chart-palette-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+.chart-palette-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+  padding: 8px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chart-palette-option:hover,
+.chart-palette-option.is-selected {
+  border-color: var(--primary-color);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+
+.chart-palette-option:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.chart-palette-preview {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+}
+
+.chart-palette-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}

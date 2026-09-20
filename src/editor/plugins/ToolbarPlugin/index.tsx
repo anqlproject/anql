@@ -6,7 +6,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $getSelectionStyleValueForProperty, $patchStyleText } from '@lexical/selection';
 import { AnimatePresence, motion } from 'framer-motion';
 import { $getSelection, $isRangeSelection, $setSelection, BaseSelection, FORMAT_TEXT_COMMAND, TextFormatType } from 'lexical';
-import { Bold, Calculator, CaseLower, CaseSensitive, CaseUpper, ChevronDown, ChevronRight, Eraser, Highlighter, Italic, PaintBucket, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
+import { Bold, Calculator, CaseLower, CaseSensitive, CaseUpper, ChevronDown, ChevronsLeftRight, ChevronsRightLeft, Eraser, Highlighter, Italic, PaintBucket, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
 import { evaluate } from 'mathjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -415,11 +415,11 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
         const textContent = selection.getTextContent();
         try {
           const val = evaluate(textContent, { ...variables, ...tableVariables });
-          
+
           if (typeof val === 'number' && !isFinite(val)) {
             throw new Error('Invalid value');
           }
-          
+
           selection.insertText(textContent + ' = ' + val);
           setMathError(false);
         } catch (error) {
@@ -496,11 +496,11 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
           <ToolbarButton icon={<Italic size={16} />} label="Italic" isActive={isItalic} onClick={() => toggleFormat('italic')} />
           <ToolbarButton icon={<Underline size={16} />} label="Underline" isActive={isUnderline} onClick={() => toggleFormat('underline')} />
           <ToolbarButton icon={<Strikethrough size={16} />} label="Strikethrough" isActive={isStrikethrough} onClick={() => toggleFormat('strikethrough')} />
-          <ToolbarButton 
-            icon={<Calculator size={16} />} 
-            label="Calculate Math" 
-            isDanger={mathError} 
-            onClick={handleMathCalculate} 
+          <ToolbarButton
+            icon={<Calculator size={16} />}
+            label="Calculate Math"
+            isDanger={mathError}
+            onClick={handleMathCalculate}
           />
           <div className="divider" />
           <ToolbarButton icon={<Eraser size={16} />} label="Clear Formatting" onClick={clearFormatting} />
@@ -543,11 +543,12 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
             <ToolbarButton
               icon={
                 <motion.div
-                  animate={{ rotate: isExpanded ? 90 : -90 }}
-                  transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+                  whileHover={{ scale: 1.15, x: isExpanded ? -2 : 2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 18 }}
                   style={{ display: 'flex' }}
                 >
-                  <ChevronRight size={16} />
+                  {isExpanded ? <ChevronsRightLeft size={16} /> : <ChevronsLeftRight size={16} />}
                 </motion.div>
               }
               label={isExpanded ? 'Collapse' : 'Expand'}

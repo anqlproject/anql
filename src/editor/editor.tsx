@@ -27,10 +27,11 @@ import { NodeHighlight } from "@/App/AppComponents/NodeHighlight/NodeHighlight";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { BREAKPOINTS } from "@/core/global/defaultValues";
 import { useSharedHistoryContext } from "@/editor/context/SharedHistoryContext";
-import AddNewPlugin from "@/editor/plugins/ClickToAddParagraphPlugin";
 import AnqlMarkdownShortcutPlugin from "@/editor/plugins/AnqlMarkdownShortcutPlugin";
 import AutoLinkPlugin from "@/editor/plugins/AutoLinkPlugin";
 import { AutosavePlugin } from "@/editor/plugins/AutosavePlugin";
+import ChartPlugin from "@/editor/plugins/ChartPlugin";
+import AddNewPlugin from "@/editor/plugins/ClickToAddParagraphPlugin";
 import CodeActionMenuPlugin from "@/editor/plugins/CodeActionMenuPlugin";
 import CodeHighlightShikiPlugin from "@/editor/plugins/CodeHighlightShikiPlugin";
 import ContextMenuPlugin from "@/editor/plugins/ContextMenuPlugin";
@@ -204,6 +205,7 @@ export default function Editor(): JSX.Element {
             <MathPlugin />
             <MathAutocompletePlugin />
             <TablePlugin />
+            <ChartPlugin />
             <AddNewPlugin />
             <DateTimePlugin />
             <AnqlMarkdownShortcutPlugin useBrackets={config.editor.useBrackets} />

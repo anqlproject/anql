@@ -9,6 +9,7 @@ import { HelpDialog } from "@/App/AppComponents/HelpPanel/HelpPanel";
 import { $createListNode } from "@/editor/nodes/ListNode";
 import { $createMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 import { $createTableNode } from "@/editor/nodes/TableNode/TableNode";
+import { INSERT_CHART_COMMAND } from "@/editor/plugins/ChartPlugin";
 import { insertImageFromFile } from "@/editor/plugins/ImagesPlugin";
 
 import { OptionName } from "./index";
@@ -50,6 +51,12 @@ export default function SelectNodeManager({ editor, optionName, clearOption }: S
                 $insertNodes([tableNode]);
                 $setSelection(null);
             });
+            clearOption();
+            return;
+        }
+
+        if (optionName === "Chart") {
+            editor.dispatchCommand(INSERT_CHART_COMMAND, undefined);
             clearOption();
             return;
         }

@@ -34,6 +34,7 @@ import {
   RowData,
   useReactTable,
 } from "@tanstack/react-table";
+import { motion } from "framer-motion";
 import type { ElementFormatType } from "lexical";
 import { $getNodeByKey, COMMAND_PRIORITY_LOW, NodeKey } from "lexical";
 import { Move, Plus } from "lucide-react";
@@ -691,9 +692,15 @@ export function TableComponent({
               type="button"
               title={t("TABLE.addRow") as string}
             >
-              <span className="table-add-strip-btn" aria-hidden="true">
+              <motion.span
+                className="table-add-strip-btn"
+                aria-hidden="true"
+                whileHover={{ scale: 1.15, y: 2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 18 }}
+              >
                 <Plus size={14} />
-              </span>
+              </motion.span>
             </button>
             <button
               className="table-add-col-strip"
@@ -701,9 +708,15 @@ export function TableComponent({
               type="button"
               title={t("TABLE.addColumn") as string}
             >
-              <span className="table-add-strip-btn" aria-hidden="true">
+              <motion.span
+                className="table-add-strip-btn"
+                aria-hidden="true"
+                whileHover={{ scale: 1.15, x: 2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 18 }}
+              >
                 <Plus size={14} />
-              </span>
+              </motion.span>
             </button>
           </div>
 

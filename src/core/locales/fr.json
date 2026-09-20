@@ -41,10 +41,58 @@
       "h2": "Titre 2",
       "h3": "Titre 3",
       "table": "Tableau",
+      "chart": "Graphique",
       "image": "Image",
       "line": "Ligne",
       "math": "Expression mathématique (tapez @ pour les possibilités)",
       "emptyPlaceholder": "Écrivez ou tapez le nom du nœud"
+    },
+    "CHART": {
+      "empty": "Graphique vide",
+      "configure": "Configurer",
+      "configuring": "Configuration en cours...",
+      "title": "Configurer le graphique",
+      "close": "Fermer",
+      "cancel": "Annuler",
+      "ok": "OK",
+      "previewEmpty": "Sélectionnez des données pour afficher un aperçu.",
+      "settingsNavigation": "Navigation des réglages du graphique",
+      "noData": "Ajoutez une table contenant des données graphiques",
+      "type": "Type",
+      "table": "Tableau",
+      "xAxis": "Axe X",
+      "ySeries": "Séries Y",
+      "yCalculation": "Calcul de Y",
+      "yBeginAtZero": "Axe Y commence à 0",
+      "category": "Catégorie",
+      "value": "Valeur",
+      "sections": {
+        "data": "Données",
+        "chart": "Graphique",
+        "axesSeries": "Axes et séries",
+        "options": "Options d'axe",
+        "colors": "Couleurs"
+      },
+      "textXHint": "X textuel : seules les colonnes numériques sont disponibles pour Y.",
+      "types": {
+        "line": "Ligne",
+        "bar": "Barres",
+        "scatter": "Points",
+        "radar": "Radar",
+        "pie": "Camembert",
+        "doughnut": "Anneau"
+      },
+      "aggregations": {
+        "value": "Valeur numérique",
+        "category": "Catégorie texte",
+        "count": "Compter les occurrences"
+      },
+      "colorPalette": "Palette de couleurs",
+      "palettes": {
+        "default": "Défaut",
+        "pastel": "Pastel",
+        "vibrant": "Vibrant"
+      }
     },
     "MATH_PANEL": {
       "copied": "Copié !",
