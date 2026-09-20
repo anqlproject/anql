@@ -7,11 +7,11 @@
       "undo": "Undo",
       "redo": "Redo",
       "insert": "Insert Inlines",
-      "insertDateTime": "Add date and time",
-      "insertEquation": "Create equation",
-      "insertLink": "Add link",
-      "applyInlineCode": "Format as inline code",
-      "insertPdfDocument": "Attach PDF document"
+      "insertDateTime": "Date & Time",
+      "insertEquation": "Equation",
+      "insertLink": "Link",
+      "applyInlineCode": "Inline Code",
+      "insertPdfDocument": "PDF Document"
     },
     "NODE_MENU": {
       "addAbove": "Add above",

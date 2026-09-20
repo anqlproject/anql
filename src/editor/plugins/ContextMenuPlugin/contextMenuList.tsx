@@ -104,55 +104,52 @@ export function ContextMenuItems(
     },
     ...(!isInsideCodeNode && !isInsideMathNode
       ? [
-              {
-                item: "Separator",
-              },
-              {
-                text: t("CONTEXT_MENU.insertDateTime") as string,
-                action: () => {
-                  editor.dispatchCommand(INSERT_DATETIME_COMMAND, {
-                    dateTime: new Date(),
-                  });
-                  setIsMenuOpen(false);
-                },
-              },
-              {
-                text: t("CONTEXT_MENU.insertEquation") as string,
-                action: () => {
-                  setIsMenuOpen(false);
-                  showModal("Insert Equation", (onClose) => (
-                    <InsertEquationDialog
-                      activeEditor={editor}
-                      onClose={onClose}
-                    />
-                  ));
-                },
-              },
-              {
-                text: t("CONTEXT_MENU.insertLink") as string,
-                action: () => {
-                  setCustomLinkDialog({});
-                  setIsMenuOpen(false);
-                },
-              },
-              {
-                text: t("CONTEXT_MENU.applyInlineCode") as string,
-                action: () => {
-                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
-                  setIsMenuOpen(false);
-                },
-              },
-              {
-                item: "Separator",
-              },
-              {
-                text: t("CONTEXT_MENU.insertPdfDocument") as string,
-                action: () => {
-                  setPdfDialog(true);
-                  setIsMenuOpen(false);
-                },
-              },
-        ]
+        {
+          item: "Separator",
+        },
+        {
+          text: t("CONTEXT_MENU.insertDateTime") as string,
+          action: () => {
+            editor.dispatchCommand(INSERT_DATETIME_COMMAND, {
+              dateTime: new Date(),
+            });
+            setIsMenuOpen(false);
+          },
+        },
+        {
+          text: t("CONTEXT_MENU.insertEquation") as string,
+          action: () => {
+            setIsMenuOpen(false);
+            showModal("Insert Equation", (onClose) => (
+              <InsertEquationDialog
+                activeEditor={editor}
+                onClose={onClose}
+              />
+            ));
+          },
+        },
+        {
+          text: t("CONTEXT_MENU.insertLink") as string,
+          action: () => {
+            setCustomLinkDialog({});
+            setIsMenuOpen(false);
+          },
+        },
+        {
+          text: t("CONTEXT_MENU.applyInlineCode") as string,
+          action: () => {
+            editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
+            setIsMenuOpen(false);
+          },
+        },
+        {
+          text: t("CONTEXT_MENU.insertPdfDocument") as string,
+          action: () => {
+            setPdfDialog(true);
+            setIsMenuOpen(false);
+          },
+        },
+      ]
       : []),
     {
       item: 'Separator',
