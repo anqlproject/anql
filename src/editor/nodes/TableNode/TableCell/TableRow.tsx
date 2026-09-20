@@ -76,7 +76,7 @@ export function DraggableRow({
         rowRef(el);
       }}
       style={style}
-      className={`table-row ${isDropTarget ? "table-row--drop-target" : ""} ${isDragging ? "table-row--dragging" : ""} ${rowIndex % 2 === 1 ? "table-row--even" : ""} ${isNew ? "table-row--new" : ""}`}
+      className={`table-row ${isDropTarget ? "table-row--drop-target" : ""} ${isDragging ? "table-row--dragging" : ""} ${rowIndex % 2 === 0 ? "table-row--even" : ""} ${isNew ? "table-row--new" : ""}`}
       data-row-index={rowIndex}
       data-row-id={row.original._rowId}
     >

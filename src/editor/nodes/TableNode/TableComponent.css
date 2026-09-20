@@ -76,8 +76,8 @@
   transition: opacity 120ms, background-color 120ms;
 }
 
-.table-container:hover .table-add-row-strip,
-.table-container:hover .table-add-col-strip {
+.table-add-row-strip:hover,
+.table-add-col-strip:hover {
   opacity: 1;
 }
 

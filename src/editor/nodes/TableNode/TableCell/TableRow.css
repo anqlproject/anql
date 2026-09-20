@@ -38,7 +38,7 @@
 /* ── Zebra striping ── */
 
 .table-row--even:not(:hover) {
-  background: color-mix(in srgb, var(--surface-color) 40%, transparent);
+  background: color-mix(in srgb, var(--text-secondary) 2%, transparent);
 }
 
 /* ── Slide-in animation ── */
