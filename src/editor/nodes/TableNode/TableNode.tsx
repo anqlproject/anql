@@ -304,7 +304,7 @@ export class TableNode extends DecoratorBlockNode {
     const embedBlockTheme = config.theme.embedBlock || {};
     const className = {
       base: embedBlockTheme.base || '',
-      focus: embedBlockTheme.focus || '',
+      focus: '',
     };
     return (
       <TableComponent

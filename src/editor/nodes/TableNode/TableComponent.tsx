@@ -38,6 +38,7 @@ import type { ElementFormatType } from "lexical";
 import { $getNodeByKey, COMMAND_PRIORITY_LOW, NodeKey } from "lexical";
 import { Move, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighlight";
 
@@ -109,6 +110,7 @@ export function TableComponent({
   className,
 }: TableComponentProps) {
   const [editor] = useLexicalComposerContext();
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { isSelected, handleContainerMouseDown } = useLexicalTableSelection(
@@ -687,7 +689,7 @@ export function TableComponent({
               className="table-add-row-strip"
               onClick={() => tableMeta.addRow()}
               type="button"
-              title="Ajouter une ligne"
+              title={t("TABLE.addRow") as string}
             >
               <span className="table-add-strip-btn" aria-hidden="true">
                 <Plus size={14} />
@@ -697,7 +699,7 @@ export function TableComponent({
               className="table-add-col-strip"
               onClick={() => tableMeta.addColumn()}
               type="button"
-              title="Ajouter une colonne"
+              title={t("TABLE.addColumn") as string}
             >
               <span className="table-add-strip-btn" aria-hidden="true">
                 <Plus size={14} />

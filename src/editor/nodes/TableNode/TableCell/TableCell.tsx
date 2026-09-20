@@ -175,7 +175,6 @@ function DisplayCell({ value, searchQuery, isActiveMatch, isEditable, onStartEdi
             tabIndex={isEditable ? 0 : -1}
             onClick={handleClick}
             onKeyDown={handleKeyDown}
-            title={displayText}
         >
             {searchQuery && hasMatch
                 ? segments.map((segment, i) => (

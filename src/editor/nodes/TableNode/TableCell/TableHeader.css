@@ -132,13 +132,15 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: transparent;
-  transition: background-color 0.1s;
+  background: var(--primary-color);
+  opacity: 0;
+  transition: opacity 0.1s;
 }
 
 .table-resizer-inactive:hover::after,
 .table-resizer-active::after {
-  background: var(--primary-color);
+  opacity: 1;
+  transition: opacity 0.1s ease-in 0.1s;
 }
 
 .table-cell--drop-target::before {

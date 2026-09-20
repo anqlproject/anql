@@ -54,7 +54,7 @@
   opacity: 0;
   cursor: pointer;
   padding: 0;
-  transition: opacity 120ms, background-color 120ms;
+  transition: opacity 0.1s, background-color 0.1s;
 }
 
 /* Right strip — spans full height of the table */
@@ -73,17 +73,14 @@
   opacity: 0;
   cursor: pointer;
   padding: 0;
-  transition: opacity 120ms, background-color 120ms;
+  transition: opacity 0.1s, background-color 0.1s;
 }
 
 .table-add-row-strip:hover,
 .table-add-col-strip:hover {
   opacity: 1;
-}
-
-.table-add-row-strip:hover,
-.table-add-col-strip:hover {
   background-color: var(--action-hover);
+  transition: opacity 0.1s ease-in 0.1s, background-color 0.1s ease-in 0.1s;
 }
 
 .table-add-row-strip:hover .table-add-strip-btn,
