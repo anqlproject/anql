@@ -14,6 +14,7 @@ import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import type { Klass, LexicalNode } from 'lexical';
 
+import { ChartNode } from './ChartNode/ChartNode';
 import { DateTimeNode } from './DateTimeNode/DateTimeNode';
 import { EquationNode } from './EquationNode/EquationNode';
 import { ImageNode } from './ImageNode/ImageNode';
@@ -38,6 +39,7 @@ const anqlNodes: Array<Klass<LexicalNode>> = [
   ListNode,
   LinkNode,
   TableNode,
+  ChartNode,
   PdfNode
 ];
 

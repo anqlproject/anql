@@ -17,17 +17,17 @@ import { useCallback, useEffect } from 'react';
 
 import { useMathVariables } from '@/editor/context/MathVariablesContext';
 import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
+import { $isTableNode } from '@/editor/nodes/TableNode/TableNode';
 
 import { evaluateAllMathNodes, EvaluationItem } from './evaluator';
 import { MathResultDisplay } from './MathResultDisplay';
 import { $getMathAndTableNodes } from './traversal';
-import { $isTableNode } from '@/editor/nodes/TableNode/TableNode';
 
 export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
 export default function MathPlugin() {
   const [editor] = useLexicalComposerContext();
-  const { setResults, setVariables, setScopes, setTableVariables } = useMathVariables();
+  const { setResults, setVariables, setScopes, setTableVariables, setChartTableVariables } = useMathVariables();
 
   const evaluateTree = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -35,6 +35,7 @@ export default function MathPlugin() {
       const mathAndTableNodes = $getMathAndTableNodes(root);
 
       const tableVariables: Record<string, Record<string, number[]>> = {};
+      const chartTableVariables: Record<string, Record<string, (string | number)[]>> = {};
       const evaluationItems: EvaluationItem[] = [];
       let tableIndex = 0;
 
@@ -49,10 +50,17 @@ export default function MathPlugin() {
           }
 
           const tableData: Record<string, number[]> = {};
+          const chartData: Record<string, (string | number)[]> = {};
 
           node.__columns.forEach(col => {
+            const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
+            if (safeHeader) {
+              chartData[safeHeader] = node.__data.map(row => {
+                const value = row[col.id];
+                return typeof value === 'number' ? value : String(value ?? '');
+              });
+            }
             if (col.meta?.type === 'number') {
-              const safeHeader = (col.header || col.id).replace(/[^a-zA-Z0-9_]/g, '');
               if (safeHeader) {
                 tableData[safeHeader] = node.__data.map(row => {
                   const val = row[col.id];
@@ -69,6 +77,7 @@ export default function MathPlugin() {
           } else {
             evaluationItems.push({ type: 'table', name: safeTableName, data: null });
           }
+          if (Object.keys(chartData).length > 0) chartTableVariables[safeTableName] = chartData;
         } else {
           // Math node
           evaluationItems.push({ type: 'math', node: node as any });
@@ -80,8 +89,9 @@ export default function MathPlugin() {
       setResults(results);
       setVariables(variables);
       setTableVariables(tableVariables);
+      setChartTableVariables(chartTableVariables);
     });
-  }, [editor, setResults, setVariables, setScopes, setTableVariables]);
+  }, [editor, setResults, setVariables, setScopes, setTableVariables, setChartTableVariables]);
 
   useEffect(() => {
     return mergeRegister(

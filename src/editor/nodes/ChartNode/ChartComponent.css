@@ -1,0 +1,81 @@
+/* ============================================================
+   ChartComponent.css — Styles du nœud graphique (rendu)
+   ============================================================ */
+
+.chart-node {
+  width: 100%;
+  min-height: 240px;
+  margin: 12px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg-color);
+  box-shadow: none;
+  color: var(--text-primary);
+}
+
+.chart-node .chart-configure-button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chart-node:hover .chart-configure-button,
+.chart-node:focus-within .chart-configure-button {
+  opacity: 0.65;
+  pointer-events: auto;
+}
+
+.chart-canvas-wrapper {
+  position: relative;
+  height: 300px;
+}
+
+.chart-content {
+  position: relative;
+}
+
+.chart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 24px;
+  margin-bottom: 2px;
+}
+
+.chart-empty-state {
+  display: flex;
+  min-height: 208px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.chart-configure-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.chart-configure-button:hover {
+  color: var(--text-primary);
+  background: var(--action-hover);
+  opacity: 1;
+}
+
+.chart-configure-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+  opacity: 1;
+}

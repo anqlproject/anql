@@ -12,6 +12,7 @@ import {
   LexicalNode,
 } from "lexical";
 import {
+  BarChart3,
   Calculator,
   Code2Icon,
   Heading1Icon,
@@ -36,6 +37,7 @@ import { MenuItemProps } from "@/components/custom/Menu/MenuItem";
 import { OverflowMenu } from "@/components/custom/OverflowMenu/OverflowMenu";
 import { ICON_SIZES } from "@/core/global/defaultValues";
 import { $createListNode, $isListNode, } from "@/editor/nodes/ListNode";
+import { INSERT_CHART_COMMAND } from "@/editor/plugins/ChartPlugin";
 import { insertImageFromFile } from "@/editor/plugins/ImagesPlugin";
 import { INSERT_MATH_COMMAND } from "@/editor/plugins/MathPlugin";
 
@@ -170,6 +172,14 @@ export default function CreateNodeMenu({
           columns: [{ header: "", id: "a" }],
           data: [{ a: "" }],
         });
+        setIsMenuOpen(false);
+      },
+    },
+    {
+      icon: <BarChart3 size={ICON_SIZES.default} />,
+      title: t('NODES.chart') as string,
+      onClick: () => {
+        editor.dispatchCommand(INSERT_CHART_COMMAND, undefined);
         setIsMenuOpen(false);
       },
     },

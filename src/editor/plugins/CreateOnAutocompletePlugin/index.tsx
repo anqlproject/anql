@@ -79,7 +79,7 @@ const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 const AutocompleteOptionsCache = new Map();
 
 
-export type OptionName = "Code" | "Line" | "Image" | "Table" | "Heading 1"
+export type OptionName = "Code" | "Line" | "Image" | "Table" | "Chart" | "Heading 1"
   | "Heading 2" | "Heading 3" | "Number List" | "Bullet List" | "Check List" | "Quote" | "null" | "Math" | "Help";
 
 export interface OptionData {
@@ -92,6 +92,7 @@ export const AutocompleteOptions: OptionData[] = [
   { name: "Line", keywords: ["line", "separator"] },
   { name: "Image", keywords: ["image", "photo", "picture", "img"] },
   { name: "Table", keywords: ["table"] },
+  { name: "Chart", keywords: ["chart", "graph"] },
   { name: "Heading 1", keywords: ["heading 1", "h1"] },
   { name: "Heading 2", keywords: ["heading 2", "h2"] },
   { name: "Heading 3", keywords: ["heading 3", "h3"] },
