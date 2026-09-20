@@ -205,6 +205,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     const [searchQuery, setSearchQuery] = useState('');
     const [isActiveMatch, setIsActiveMatch] = useState(false);
     const editorRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+    const cellRef = useRef<HTMLDivElement>(null);
     const type = columnDef.meta?.type || 'text';
 
     const tableRef = useRef(table);
@@ -264,8 +265,8 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
             const activeRowIndex = document.body.dataset.searchActiveRowIndex;
             const activeColumnId = document.body.dataset.searchActiveColumnId;
 
-            // Get the node key from the closest table container
-            const tableContainer = document.querySelector('.table-container');
+            // Walk up from this cell's DOM node to find the correct parent table container
+            const tableContainer = cellRef.current?.closest('.table-container');
             const nodeKey = tableContainer?.getAttribute('data-node-key');
 
             const isActive = Boolean(
@@ -327,7 +328,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     // ── Checkbox ────────────────────────────────────────────────────────────
     if (type === 'checkbox') {
         return (
-            <div className="table-checkbox-wrapper">
+            <div ref={cellRef} className="table-checkbox-wrapper">
                 <input
                     type="checkbox"
                     checked={!!value}
@@ -348,7 +349,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     // ── Date ────────────────────────────────────────────────────────────────
     if (type === 'date') {
         return (
-            <div className="table-date-wrapper">
+            <div ref={cellRef} className="table-date-wrapper">
                 <Popover.Root>
                     <Popover.Trigger asChild>
                         <button
@@ -383,7 +384,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     if (type === 'number') {
         if (!isEditing) {
             return (
-                <DisplayCell
+                <div ref={cellRef} style={{ display: 'contents' }}><DisplayCell
                     value={value}
                     type="number"
                     searchQuery={searchQuery}
@@ -391,12 +392,12 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
                     isEditable={isEditable}
                     onStartEdit={() => setIsEditing(true)}
                     onKeyDown={(e) => handleCellKeyDown(e, table, index, id, exitEdit)}
-                />
+                /></div>
             );
         }
 
         return (
-            <div className="table-input-wrapper">
+            <div ref={cellRef} className="table-input-wrapper">
                 <input
                     ref={(element) => {
                         editorRef.current = element;
@@ -423,7 +424,7 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
     // ── Text (default) ──────────────────────────────────────────────────────
     if (!isEditing) {
         return (
-            <DisplayCell
+            <div ref={cellRef} style={{ display: 'contents' }}><DisplayCell
                 value={value}
                 type="text"
                 searchQuery={searchQuery}
@@ -431,12 +432,12 @@ export default function EditableCell({ getValue, row, column: { id, columnDef },
                 isEditable={isEditable}
                 onStartEdit={() => setIsEditing(true)}
                 onKeyDown={(e) => handleCellKeyDown(e, table, index, id, exitEdit)}
-            />
+            /></div>
         );
     }
 
     return (
-        <div className="table-cell-editor">
+        <div ref={cellRef} className="table-cell-editor">
             <DisplayCell
                 value={value}
                 type="text"
