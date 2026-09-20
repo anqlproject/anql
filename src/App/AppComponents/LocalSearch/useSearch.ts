@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getRoot, $isTextNode, ElementNode, LexicalNode } from 'lexical';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useGlobalStore } from "@/App/store/useGlobalStore";
@@ -42,6 +42,7 @@ export function useSearch() {
   const [results, setResults] = useState<SearchMatch[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [editorVersion, setEditorVersion] = useState(0);
+  const shouldNavigateToResultRef = useRef(false);
 
   useEffect(() => {
     return editor.registerUpdateListener(({ dirtyElements, dirtyLeaves }) => {
@@ -54,10 +55,11 @@ export function useSearch() {
 
   // Effect to perform the search when query changes or editor updates
   useEffect(() => {
+    shouldNavigateToResultRef.current = false;
+
     const isHighlightSupported = typeof CSS !== 'undefined' && 'highlights' in CSS && typeof window.Highlight !== 'undefined';
 
     let searchHighlight: Highlight | null | undefined = null;
-    let activeHighlight: Highlight | null | undefined = null;
 
     if (isHighlightSupported) {
       searchHighlight = CSS.highlights?.get('search-results');
@@ -67,12 +69,6 @@ export function useSearch() {
       }
       searchHighlight.clear();
 
-      activeHighlight = CSS.highlights?.get('search-active');
-      if (!activeHighlight) {
-        activeHighlight = new window.Highlight();
-        CSS.highlights?.set('search-active', activeHighlight);
-      }
-      activeHighlight.clear();
     }
 
     // Set search query on document.body for table cell highlighting
@@ -183,14 +179,17 @@ export function useSearch() {
     const isHighlightSupported = typeof CSS !== 'undefined' && 'highlights' in CSS && typeof window.Highlight !== 'undefined';
 
     if (isHighlightSupported) {
-      const activeHighlight = CSS.highlights?.get('search-active');
-      if (activeHighlight) {
-        activeHighlight.clear();
-        if (currentIndex >= 0 && currentIndex < results.length) {
-          const match = results[currentIndex];
-          if (match.range) {
-            activeHighlight.add(match.range);
-          }
+      let activeHighlight = CSS.highlights?.get('search-active');
+      if (!activeHighlight) {
+        activeHighlight = new window.Highlight();
+        CSS.highlights?.set('search-active', activeHighlight);
+      }
+
+      activeHighlight.clear();
+      if (currentIndex >= 0 && currentIndex < results.length) {
+        const match = results[currentIndex];
+        if (match.range) {
+          activeHighlight.add(match.range);
         }
       }
     }
@@ -210,7 +209,7 @@ export function useSearch() {
       }
 
       // Dispatch custom event for table search navigation
-      if (match.isTable && match.tableMatch) {
+      if (match.isTable && match.tableMatch && shouldNavigateToResultRef.current) {
         const event = new CustomEvent('tableSearchNavigate', {
           detail: {
             nodeKey: match.nodeKey,
@@ -221,9 +220,11 @@ export function useSearch() {
         document.dispatchEvent(event);
       }
 
-      // Scroll into view logic
-      const element = editor.getElementByKey(match.nodeKey);
-      if (element) {
+      // Only explicit navigation (Enter or the navigation buttons) moves the viewport.
+      if (shouldNavigateToResultRef.current) {
+        const element = editor.getElementByKey(match.nodeKey);
+        if (!element) return;
+
         requestAnimationFrame(() => {
           const scrollContainer = editorContainerRef?.current;
           if (scrollContainer) {
@@ -238,6 +239,7 @@ export function useSearch() {
             });
           }
         });
+        shouldNavigateToResultRef.current = false;
       }
     } else {
       // Clear active match info
@@ -248,6 +250,7 @@ export function useSearch() {
   }, [currentIndex, results, editor, editorContainerRef, editorRef]);
 
   const nextResult = useCallback(() => {
+    shouldNavigateToResultRef.current = true;
     setCurrentIndex(prev => {
       if (results.length === 0) return -1;
       return prev + 1 >= results.length ? 0 : prev + 1;
@@ -255,6 +258,7 @@ export function useSearch() {
   }, [results.length]);
 
   const prevResult = useCallback(() => {
+    shouldNavigateToResultRef.current = true;
     setCurrentIndex(prev => {
       if (results.length === 0) return -1;
       return prev - 1 < 0 ? results.length - 1 : prev - 1;
@@ -262,6 +266,7 @@ export function useSearch() {
   }, [results.length]);
 
   const goToResult = useCallback((index: number) => {
+    shouldNavigateToResultRef.current = true;
     setCurrentIndex(prev => {
       if (results.length === 0) return -1;
       if (index >= 0 && index < results.length) return index;

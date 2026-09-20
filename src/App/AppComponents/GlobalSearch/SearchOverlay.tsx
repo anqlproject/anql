@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 
-import { globalSearch } from "@/App/AppComponents/GlobalSearch/GlobalSearch";
 import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
 import { useFile } from "@/App/hooks/FileHooks";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
@@ -92,7 +91,6 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const { openEditorWUFocusOnNode } = useFile();
-  const { clearHighlights } = globalSearch();
   const setGlobalSearchCount = useGlobalShortcut(
     (state) => state.setGlobalSearchCount,
   );
@@ -174,9 +172,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     setQuery("");
     setResults([]);
     setSearched(false);
-    clearHighlights();
     onClose();
-  }, [clearHighlights, onClose]);
+  }, [onClose]);
 
   if (!isOpen) return null;
 
