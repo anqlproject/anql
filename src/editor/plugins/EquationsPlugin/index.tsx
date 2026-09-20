@@ -22,6 +22,7 @@ import {
 import type { JSX } from 'react';
 import { useCallback, useEffect } from 'react';
 
+import { ComponentDialog } from '@/components/custom/ComponentDialog/ComponentDialog';
 import { $createEquationNode, EquationNode } from '@/editor/nodes/EquationNode/EquationNode';
 import KatexEquationAlterer from '@/editor/nodes/EquationNode/KatexEquationAlterer';
 
@@ -48,7 +49,11 @@ export function InsertEquationDialog({
     [activeEditor, onClose],
   );
 
-  return <KatexEquationAlterer onConfirm={onEquationConfirm} />;
+  return (
+    <ComponentDialog title="Insert Equation" onClose={onClose}>
+      <KatexEquationAlterer onConfirm={onEquationConfirm} />
+    </ComponentDialog>
+  );
 }
 
 export default function EquationsPlugin(): JSX.Element | null {
