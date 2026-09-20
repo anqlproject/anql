@@ -1,7 +1,7 @@
 import './ChartConfiguration.css';
 
 import type { TFunction } from 'i18next';
-import { BarChart3, Calculator, Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { BarChart3, Calculator, Check, ChevronDown, Palette, SlidersHorizontal } from 'lucide-react';
 import type { RefObject } from 'react';
 import { useState } from 'react';
 
@@ -12,7 +12,13 @@ import { ChartTableValue } from '@/editor/context/MathVariablesContext';
 import { ChartAggregation, ChartNodeConfig, ChartType } from './ChartNode';
 import { ChartSelect } from './ChartSelect';
 
-export const COLORS = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed'];
+export const COLOR_PALETTES: Record<string, string[]> = {
+  default: ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed'],
+  pastel: ['#93c5fd', '#fca5a5', '#86efac', '#fcd34d', '#c4b5fd'],
+  vibrant: ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6'],
+};
+
+export const COLORS = COLOR_PALETTES.default;
 
 export type ChartTable = Record<string, ChartTableValue[]>;
 export type TableEntry = [string, ChartTable];
@@ -35,6 +41,7 @@ export function getDefaultConfig(tables: TableEntry[], chartType: ChartType = 'l
     yAggregation: 'value',
     categoryColumn: columnNames.find(column => !isNumericColumn(columns[column])) || columnNames[0] || '',
     valueColumn: numericColumns[0] || '',
+    colorPalette: 'default',
   };
 }
 
@@ -60,7 +67,7 @@ interface ChartConfigurationProps {
   t: TFunction;
 }
 
-type ConfigSection = 'chart' | 'axesSeries' | 'calculation';
+type ConfigSection = 'chart' | 'axesSeries' | 'calculation' | 'colors';
 
 export function ChartConfiguration({
   chartData,
@@ -129,6 +136,10 @@ export function ChartConfiguration({
             <Calculator size={15} />
             <span>{t('CHART.sections.calculation')}</span>
           </button>
+          <button type="button" className={activeSection === 'colors' ? 'is-active' : ''} onClick={() => setActiveSection('colors')}>
+            <Palette size={15} />
+            <span>{t('CHART.sections.colors')}</span>
+          </button>
         </nav>
         <div className="chart-settings-content">
           <ChartConfigPanel config={config} tables={tables} onChange={onChange} t={t} section={activeSection} />
@@ -160,6 +171,7 @@ function ChartConfigPanel({
   const selectedTextColumn = selectedYColumns.some(column => !isNumericColumn(columns[column] || []));
   const selectedNumericColumn = selectedYColumns.some(column => isNumericColumn(columns[column] || []));
   const setField = (field: keyof ChartNodeConfig, value: string) => onChange({ ...config, [field]: value });
+  const currentColors = COLOR_PALETTES[config.colorPalette] || COLOR_PALETTES.default;
 
   return (
     <div className="chart-config-panel" onClick={event => event.stopPropagation()}>
@@ -233,7 +245,7 @@ function ChartConfigPanel({
                       <div className="chart-series-checkbox-custom">
                         <Check strokeWidth={3} />
                       </div>
-                      <span className="chart-series-swatch" style={{ backgroundColor: isSelected ? COLORS[colorIndex % COLORS.length] : '#d1d5db' }} />
+                      <span className="chart-series-swatch" style={{ backgroundColor: isSelected ? currentColors[colorIndex % currentColors.length] : '#d1d5db' }} />
                       <span className="chart-series-label-text">{column}</span>
                     </label>
                   );
@@ -258,6 +270,29 @@ function ChartConfigPanel({
           </label>
           {!xIsNumeric && <small className="chart-config-hint">{t('CHART.textXHint')}</small>}
         </>
+      )}
+      {section === 'colors' && (
+        <fieldset className="chart-color-fieldset">
+          <legend>{t('CHART.colorPalette')}</legend>
+          <div className="chart-palette-grid">
+            {Object.entries(COLOR_PALETTES).map(([paletteName, colors]) => (
+              <button
+                key={paletteName}
+                type="button"
+                className={`chart-palette-option${config.colorPalette === paletteName ? ' is-selected' : ''}`}
+                aria-pressed={config.colorPalette === paletteName}
+                onClick={() => onChange({ ...config, colorPalette: paletteName })}
+              >
+                <div className="chart-palette-preview">
+                  {colors.map((color, index) => (
+                    <span key={index} className="chart-palette-swatch" style={{ backgroundColor: color }} />
+                  ))}
+                </div>
+                <span>{t(`CHART.palettes.${paletteName}`)}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
       )}
     </div>
   );

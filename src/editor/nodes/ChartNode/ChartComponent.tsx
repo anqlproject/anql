@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { ChartTableValue, useMathVariables } from '@/editor/context/MathVariablesContext';
 import { useThemeStore } from '@/GlobalState/themeStore';
 
-import { ChartConfiguration, COLORS, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
+import { ChartConfiguration, COLOR_PALETTES, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
 import { $isChartNode, ChartNodeConfig } from './ChartNode';
 
 Chart.register(...registerables);
@@ -121,6 +121,8 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       ? 'category'
       : renderConfig.yAggregation;
 
+    const colors = COLOR_PALETTES[renderConfig.colorPalette] || COLOR_PALETTES.default;
+
     if (isPolarChart(renderConfig.chartType)) {
       const categories = previewTable[renderConfig.categoryColumn] || [];
       const values = previewTable[renderConfig.valueColumn] || [];
@@ -129,7 +131,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
         datasets: [{
           label: renderConfig.valueColumn,
           data: values.map(value => Number(value) || 0),
-          backgroundColor: categories.map((_, index) => COLORS[index % COLORS.length]),
+          backgroundColor: categories.map((_, index) => colors[index % colors.length]),
           borderWidth: 1,
         }],
       };
@@ -190,14 +192,14 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
                   x: xPoints[rowIndex],
                   y: Number(value) || 0,
                 })),
-        borderColor: COLORS[index % COLORS.length],
+        borderColor: colors[index % colors.length],
         borderWidth: 2,
         tension: 0.25,
         fill: isRadar,
         backgroundColor: isRadar
-          ? withAlpha(COLORS[index % COLORS.length], 0.3)
-          : COLORS[index % COLORS.length],
-        pointBackgroundColor: COLORS[index % COLORS.length],
+          ? withAlpha(colors[index % colors.length], 0.3)
+          : colors[index % colors.length],
+        pointBackgroundColor: colors[index % colors.length],
         pointBorderColor: '#ffffff',
         pointBorderWidth: isRadar ? 1 : 0,
         pointRadius: renderConfig.chartType === 'line' || isScatter || isRadar ? 3 : 0,

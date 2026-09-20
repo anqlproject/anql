@@ -69,7 +69,8 @@
         "data": "Données",
         "chart": "Graphique",
         "axesSeries": "Axes et séries",
-        "calculation": "Calcul"
+        "calculation": "Calcul",
+        "colors": "Couleurs"
       },
       "textXHint": "X textuel : seules les colonnes numériques sont disponibles pour Y.",
       "types": {
@@ -84,6 +85,12 @@
         "value": "Valeur numérique",
         "category": "Catégorie texte",
         "count": "Compter les occurrences"
+      },
+      "colorPalette": "Palette de couleurs",
+      "palettes": {
+        "default": "Défaut",
+        "pastel": "Pastel",
+        "vibrant": "Vibrant"
       }
     },
     "MATH_PANEL": {

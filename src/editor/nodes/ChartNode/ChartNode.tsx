@@ -16,6 +16,7 @@ export interface ChartNodeConfig {
   yAggregation: ChartAggregation;
   categoryColumn: string;
   valueColumn: string;
+  colorPalette: string;
 }
 
 export type SerializedChartNode = Spread<ChartNodeConfig, SerializedDecoratorBlockNode>;
@@ -32,6 +33,7 @@ export class ChartNode extends DecoratorBlockNode {
   __yAggregation: ChartAggregation;
   __categoryColumn: string;
   __valueColumn: string;
+  __colorPalette: string;
 
   static getType(): string {
     return 'chart';
@@ -51,6 +53,7 @@ export class ChartNode extends DecoratorBlockNode {
     this.__yAggregation = config.yAggregation || 'value';
     this.__categoryColumn = config.categoryColumn || '';
     this.__valueColumn = config.valueColumn || '';
+    this.__colorPalette = config.colorPalette || 'default';
   }
 
   getConfig(): ChartNodeConfig {
@@ -62,6 +65,7 @@ export class ChartNode extends DecoratorBlockNode {
       yAggregation: this.__yAggregation,
       categoryColumn: this.__categoryColumn,
       valueColumn: this.__valueColumn,
+      colorPalette: this.__colorPalette,
     };
   }
 
@@ -74,6 +78,7 @@ export class ChartNode extends DecoratorBlockNode {
     writable.__yAggregation = config.yAggregation;
     writable.__categoryColumn = config.categoryColumn;
     writable.__valueColumn = config.valueColumn;
+    writable.__colorPalette = config.colorPalette;
   }
 
   exportJSON(): SerializedChartNode {
