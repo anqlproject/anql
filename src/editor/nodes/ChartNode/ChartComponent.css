@@ -14,17 +14,6 @@
   color: var(--text-primary);
 }
 
-.chart-node .chart-configure-button {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.chart-node:hover .chart-configure-button,
-.chart-node:focus-within .chart-configure-button {
-  opacity: 0.65;
-  pointer-events: auto;
-}
-
 .chart-canvas-wrapper {
   position: relative;
   height: 300px;
@@ -37,16 +26,80 @@
 .chart-toolbar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 12px;
   min-height: 24px;
   margin-bottom: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.chart-content:hover .chart-toolbar,
+.chart-content:focus-within .chart-toolbar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chart-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.chart-type-menu-button {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 1;
+  pointer-events: auto;
+  transition: color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.chart-type-menu-button:hover,
+.chart-type-menu-button:focus-visible {
+  color: var(--text-primary);
+  background: var(--action-hover);
+  opacity: 1;
+}
+
+.chart-type-menu-content {
+  min-width: 170px;
+  border: 1px solid var(--border-color);
+  background: var(--panel-color) !important;
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+.chart-type-menu-content [data-slot='dropdown-menu-item'] {
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.chart-type-menu-content [data-slot='dropdown-menu-item']:focus,
+.chart-type-menu-content [data-slot='dropdown-menu-item']:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.chart-type-menu-content .chart-type-preview {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 24px;
 }
 
 .chart-axis-tabs {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   overflow-x: auto;
   scrollbar-width: thin;
 }

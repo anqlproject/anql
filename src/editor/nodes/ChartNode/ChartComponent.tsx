@@ -2,10 +2,11 @@ import './ChartComponent.css';
 
 import { Chart, registerables } from 'chart.js';
 import { $getNodeByKey, LexicalEditor } from 'lexical';
-import { Settings2, Sparkles } from 'lucide-react';
+import { BarChart3, Settings2, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ChartTableValue, useMathVariables } from '@/editor/context/MathVariablesContext';
 import { useThemeStore } from '@/GlobalState/themeStore';
 
@@ -118,6 +119,13 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   const createChartWithType = (chartType: ChartType) => {
     const defaultConfig = getDefaultConfig(tables, chartType);
     if (defaultConfig.tableName && defaultConfig.yColumns.length > 0) updateConfig(defaultConfig);
+  };
+
+  const changeChartType = (chartType: ChartType) => {
+    const nextConfig = safeConfig?.tableName && safeConfig.yColumns.length > 0
+      ? { ...safeConfig, chartType }
+      : getDefaultConfig(tables, chartType);
+    if (nextConfig.tableName && nextConfig.yColumns.length > 0) updateConfig(nextConfig, false);
   };
 
   const clearChartConfiguration = () => {
@@ -349,51 +357,68 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   return (
     <div className="chart-content">
       <div className="chart-toolbar">
-        <button type="button" className="chart-configure-button" onClick={openConfiguration} title={t('CHART.configure') as string} aria-label={t('CHART.configure') as string}>
-          <Settings2 size={15} aria-hidden="true" />
-        </button>
-      </div>
-      {seriesTabColumns.length > 1 && (
-        <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.ySeries') as string}>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeSeriesTab === null}
-            className={`chart-axis-tab${activeSeriesTab === null ? ' is-active' : ''}`}
-            onClick={() => setActiveSeriesTab(null)}
-          >
-            {t('CHART.allSeries')}
+        {seriesTabColumns.length > 1 && (
+          <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.ySeries') as string}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeSeriesTab === null}
+              className={`chart-axis-tab${activeSeriesTab === null ? ' is-active' : ''}`}
+              onClick={() => setActiveSeriesTab(null)}
+            >
+              {t('CHART.allSeries')}
+            </button>
+            {seriesTabColumns.map(column => (
+              <button
+                key={column}
+                type="button"
+                role="tab"
+                aria-selected={activeSeriesTab === column}
+                className={`chart-axis-tab${activeSeriesTab === column ? ' is-active' : ''}`}
+                onClick={() => setActiveSeriesTab(column)}
+              >
+                {column}
+              </button>
+            ))}
+          </div>
+        )}
+        {polarValueColumns.length > 1 && (
+          <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.value') as string}>
+            {polarValueColumns.map(column => (
+              <button
+                key={column}
+                type="button"
+                role="tab"
+                aria-selected={safeConfig?.valueColumn === column}
+                className={`chart-axis-tab${safeConfig?.valueColumn === column ? ' is-active' : ''}`}
+                onClick={() => safeConfig && updateConfig({ ...safeConfig, valueColumn: column }, false)}
+              >
+                {column}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="chart-toolbar-actions">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button type="button" className="chart-type-menu-button" title={t('CHART.chooseType') as string} aria-label={t('CHART.chooseType') as string}>
+                <BarChart3 size={15} aria-hidden="true" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="chart-type-menu-content">
+              {CHART_TYPES.map(chartType => (
+                <DropdownMenuItem key={chartType} onSelect={() => changeChartType(chartType)}>
+                  <ChartTypePreview type={chartType} />
+                  <span>{t(`CHART.types.${chartType}`)}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <button type="button" className="chart-configure-button" onClick={openConfiguration} title={t('CHART.configure') as string} aria-label={t('CHART.configure') as string}>
+            <Settings2 size={15} aria-hidden="true" />
           </button>
-          {seriesTabColumns.map(column => (
-            <button
-              key={column}
-              type="button"
-              role="tab"
-              aria-selected={activeSeriesTab === column}
-              className={`chart-axis-tab${activeSeriesTab === column ? ' is-active' : ''}`}
-              onClick={() => setActiveSeriesTab(column)}
-            >
-              {column}
-            </button>
-          ))}
         </div>
-      )}
-      {polarValueColumns.length > 1 && (
-        <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.value') as string}>
-          {polarValueColumns.map(column => (
-            <button
-              key={column}
-              type="button"
-              role="tab"
-              aria-selected={safeConfig?.valueColumn === column}
-              className={`chart-axis-tab${safeConfig?.valueColumn === column ? ' is-active' : ''}`}
-              onClick={() => safeConfig && updateConfig({ ...safeConfig, valueColumn: column }, false)}
-            >
-              {column}
-            </button>
-          ))}
-        </div>
-      )}
+      </div>
       <div className="chart-canvas-wrapper"><canvas ref={canvasRef} /></div>
     </div>
   );
