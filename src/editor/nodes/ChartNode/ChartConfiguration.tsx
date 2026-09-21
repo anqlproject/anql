@@ -1,7 +1,7 @@
 import './ChartConfiguration.css';
 
 import type { TFunction } from 'i18next';
-import { BarChart3, Check, ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
+import { BarChart3, ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
 import type { RefObject } from 'react';
 import { useState } from 'react';
 
@@ -11,7 +11,7 @@ import { DIMENSIONS } from '@/core/global/defaultValues';
 import { ChartTableValue } from '@/editor/context/MathVariablesContext';
 
 import { ChartAggregation, ChartNodeConfig, ChartType } from './ChartNode';
-import { ChartSelect } from './ChartSelect';
+import { ChartSelect, ChartSelectOptionItem } from './ChartSelect';
 
 export const COLOR_PALETTES: Record<string, string[]> = {
   default: ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed'],
@@ -38,7 +38,7 @@ export function getDefaultConfig(tables: TableEntry[], chartType: ChartType = 'l
     chartType,
     tableName,
     xColumn: columnNames[0] || '',
-    yColumns: numericColumns,
+    yColumns: numericColumns.filter(column => column !== columnNames[0]),
     yAggregation: 'value',
     categoryColumn: columnNames.find(column => !isNumericColumn(columns[column])) || columnNames[0] || '',
     valueColumn: numericColumns[0] || '',
@@ -230,11 +230,19 @@ function ChartConfigPanel({
                 const xColumn = val;
                 const nextXIsNumeric = isNumericColumn(columns[xColumn] || []);
                 const yColumns = nextXIsNumeric
-                  ? selectedYColumns
+                  ? selectedYColumns.filter(column => column !== xColumn)
                   : selectedYColumns.filter(column => isNumericColumn(columns[column] || []));
                 onChange({ ...config, xColumn, yColumns, yAggregation: getYAggregation(columns, yColumns) });
               }}
-              options={columnNames.map(column => ({ value: column, label: column }))}
+              options={columnNames.map(column => {
+                const seriesIndex = selectedYColumns.indexOf(column);
+                return {
+                  value: column,
+                  label: column,
+                  color: seriesIndex >= 0 ? currentColors[seriesIndex % currentColors.length] : '#d1d5db',
+                  disabled: selectedYColumns.includes(column),
+                };
+              })}
             />
           </label>
           <label>{t('CHART.ySeries')}
@@ -247,25 +255,25 @@ function ChartConfigPanel({
                   <ChevronDown size={14} className="chart-custom-select-icon" />
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="chart-series-list" onCloseAutoFocus={(e) => e.preventDefault()}>
+              <DropdownMenuContent align="start" className="chart-custom-select-content" onCloseAutoFocus={(e) => e.preventDefault()}>
                 {columnNames.map((column) => {
-                  const isDisabled = !xIsNumeric && !isNumericColumn(columns[column] || []);
+                  const isDisabled = column === config.xColumn || (!xIsNumeric && !isNumericColumn(columns[column] || []));
                   const isSelected = selectedYColumns.includes(column);
                   const colorIndex = selectedYColumns.indexOf(column);
+                  const color = isSelected ? currentColors[colorIndex % currentColors.length] : '#d1d5db';
                   return (
-                    <label key={column} className={`chart-series-option${isSelected ? ' is-selected' : ''}${isDisabled ? ' is-disabled' : ''}`} onClick={(e) => e.stopPropagation()}>
-                      <input type="checkbox" checked={isSelected} disabled={isDisabled} onChange={event => {
-                        const yColumns = event.target.checked
-                          ? [...selectedYColumns, column]
-                          : selectedYColumns.filter(selectedColumn => selectedColumn !== column);
+                    <ChartSelectOptionItem
+                      key={column}
+                      option={{ value: column, label: column, color, disabled: isDisabled }}
+                      selected={isSelected}
+                      keepOpen
+                      onSelect={() => {
+                        const yColumns = isSelected
+                          ? selectedYColumns.filter(selectedColumn => selectedColumn !== column)
+                          : [...selectedYColumns, column];
                         onChange({ ...config, yColumns, yAggregation: getYAggregation(columns, yColumns) });
-                      }} />
-                      <div className="chart-series-checkbox-custom">
-                        <Check strokeWidth={3} />
-                      </div>
-                      <span className="chart-series-swatch" style={{ backgroundColor: isSelected ? currentColors[colorIndex % currentColors.length] : '#d1d5db' }} />
-                      <span className="chart-series-label-text">{column}</span>
-                    </label>
+                      }}
+                    />
                   );
                 })}
               </DropdownMenuContent>

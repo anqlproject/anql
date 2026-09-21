@@ -1,0 +1,111 @@
+.chart-custom-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 34px;
+  padding: 6px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-primary);
+  background: var(--surface-color);
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-dialog-title-control .chart-custom-select {
+  min-width: 150px;
+  min-height: 30px;
+}
+
+.chart-custom-select:hover {
+  border-color: var(--primary-color);
+}
+
+.chart-custom-select:focus-visible,
+.chart-custom-select[data-state="open"] {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+  border-color: var(--primary-color);
+}
+
+.chart-custom-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-custom-select-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.chart-custom-select[data-state="open"] .chart-custom-select-icon {
+  transform: rotate(-180deg);
+}
+
+.chart-custom-select-content {
+  z-index: 9999;
+  min-width: var(--radix-dropdown-menu-trigger-width);
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px color-mix(in srgb, #000 20%, transparent);
+}
+
+.chart-custom-select-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-size: var(--text-xs);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background-color 0.2s ease;
+}
+
+.chart-custom-select-item-label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-select-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 16%, transparent);
+}
+
+.chart-custom-select-item:hover,
+.chart-custom-select-item:focus {
+  background: var(--action-hover);
+  outline: none;
+}
+
+.chart-custom-select-item.is-selected {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+}
+
+.chart-custom-select-item[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chart-custom-select-check {
+  color: var(--primary-color);
+}
