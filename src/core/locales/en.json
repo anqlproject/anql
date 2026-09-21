@@ -50,6 +50,9 @@
     "CHART": {
       "empty": "Empty chart",
       "configure": "Configure",
+      "dataDetected": "Data detected",
+      "chooseTypeToCreate": "Choose a chart type to create it automatically.",
+      "chooseType": "Choose chart type",
       "configuring": "Configuration in progress...",
       "title": "Configure chart",
       "close": "Close",
@@ -75,6 +78,7 @@
       },
       "textXHint": "Text X: only numeric columns are available for Y.",
       "types": {
+        "none": "None",
         "line": "Line",
         "bar": "Bar",
         "scatter": "Points",

@@ -50,6 +50,9 @@
     "CHART": {
       "empty": "Graphique vide",
       "configure": "Configurer",
+      "dataDetected": "Données détectées",
+      "chooseTypeToCreate": "Choisissez un type de graphique pour le créer automatiquement.",
+      "chooseType": "Choisir le type de graphique",
       "configuring": "Configuration en cours...",
       "title": "Configurer le graphique",
       "close": "Fermer",
@@ -75,6 +78,7 @@
       },
       "textXHint": "X textuel : seules les colonnes numériques sont disponibles pour Y.",
       "types": {
+        "none": "Aucun",
         "line": "Ligne",
         "bar": "Barres",
         "scatter": "Points",

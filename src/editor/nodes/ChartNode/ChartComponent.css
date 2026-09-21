@@ -43,13 +43,75 @@
 }
 
 .chart-empty-state {
+  position: relative;
   display: flex;
+  flex-direction: column;
   min-height: 208px;
   align-items: center;
   justify-content: center;
   gap: 10px;
   color: var(--text-secondary);
   font-size: var(--text-sm);
+}
+
+.chart-type-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-auto-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.chart-auto-hint-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 28%, transparent);
+  border-radius: 999px;
+  color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.chart-auto-hint-text {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.chart-type-picker-button {
+  display: grid;
+  width: 56px;
+  height: 44px;
+  align-items: center;
+  justify-items: center;
+  padding: 7px 5px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.chart-type-picker-button:hover {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--text-primary);
+}
+
+.chart-type-picker-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
 }
 
 .chart-configure-button {
@@ -78,4 +140,10 @@
   outline: 2px solid var(--primary-color);
   outline-offset: 1px;
   opacity: 1;
+}
+
+.chart-empty-state > .chart-configure-button {
+  position: absolute;
+  top: 0;
+  right: 0;
 }

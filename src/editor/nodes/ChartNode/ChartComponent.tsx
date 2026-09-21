@@ -2,15 +2,15 @@ import './ChartComponent.css';
 
 import { Chart, registerables } from 'chart.js';
 import { $getNodeByKey, LexicalEditor } from 'lexical';
-import { Settings2 } from 'lucide-react';
+import { Settings2, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ChartTableValue, useMathVariables } from '@/editor/context/MathVariablesContext';
 import { useThemeStore } from '@/GlobalState/themeStore';
 
-import { ChartConfiguration, COLOR_PALETTES, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
-import { $isChartNode, ChartNodeConfig } from './ChartNode';
+import { CHART_TYPES, ChartConfiguration, ChartTypePreview, COLOR_PALETTES, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
+import { $isChartNode, ChartNodeConfig, ChartType } from './ChartNode';
 
 Chart.register(...registerables);
 
@@ -47,9 +47,9 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   const { resolvedTheme } = useThemeStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
-  const autoConfiguredRef = useRef(false);
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [draftConfig, setDraftConfig] = useState<ChartNodeConfig | null>(null);
+  const [hasSelectedConfigType, setHasSelectedConfigType] = useState(false);
 
   const tables = Object.entries(chartTableVariables) as TableEntry[];
   const [nodeConfig, setNodeConfig] = useState<ChartNodeConfig | null>(() => {
@@ -82,7 +82,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
 
   const table = nodeConfig ? chartTableVariables[nodeConfig.tableName] : undefined;
   const safeConfig = nodeConfig && table ? normalizeConfig(nodeConfig, table) : nodeConfig;
-  const previewConfig = isConfiguring ? draftConfig : safeConfig;
+  const previewConfig = isConfiguring && !hasSelectedConfigType ? null : isConfiguring ? draftConfig : safeConfig;
   const previewTable = previewConfig ? chartTableVariables[previewConfig.tableName] : undefined;
   const renderConfig = previewConfig && previewTable ? normalizeConfig(previewConfig, previewTable) : previewConfig;
 
@@ -95,7 +95,11 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   };
 
   const openConfiguration = () => {
-    setDraftConfig(safeConfig || getDefaultConfig(tables));
+    const initialConfig = safeConfig?.tableName && safeConfig.yColumns.length > 0
+      ? safeConfig
+      : getDefaultConfig(tables);
+    setDraftConfig(initialConfig);
+    setHasSelectedConfigType(Boolean(safeConfig?.tableName && safeConfig.yColumns.length > 0));
     setIsConfiguring(true);
   };
 
@@ -103,15 +107,16 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     if (draftConfig) updateConfig(draftConfig);
   };
 
-  useEffect(() => {
-    if (autoConfiguredRef.current || nodeConfig?.tableName || tables.length === 0) return;
+  const createChartWithType = (chartType: ChartType) => {
+    const defaultConfig = getDefaultConfig(tables, chartType);
+    if (defaultConfig.tableName && defaultConfig.yColumns.length > 0) updateConfig(defaultConfig);
+  };
 
-    const defaultConfig = getDefaultConfig(tables);
-    if (!defaultConfig.tableName || defaultConfig.yColumns.length === 0) return;
-
-    autoConfiguredRef.current = true;
-    updateConfig(defaultConfig);
-  }, [nodeConfig?.tableName, tables]);
+  const clearChartConfiguration = () => {
+    setDraftConfig(getDefaultConfig([]));
+    setHasSelectedConfigType(false);
+    updateConfig(getDefaultConfig([]), false);
+  };
 
   const chartData = useMemo(() => {
     if (!renderConfig || !previewTable) return null;
@@ -260,15 +265,28 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     return (
       <>
         <div className="chart-empty-state">{t('CHART.configuring')}</div>
-        {renderConfig && (
+        {draftConfig && (
           <ChartConfiguration
             chartData={chartData}
-            config={renderConfig}
+            config={draftConfig}
             tables={tables}
-            onChange={config => setDraftConfig(config)}
+            onChange={config => {
+              setDraftConfig(config);
+              updateConfig(config, false);
+            }}
+            onTypeSelect={config => {
+              const nextConfig = config.tableName && config.yColumns.length > 0
+                ? config
+                : getDefaultConfig(tables, config.chartType);
+              setDraftConfig(nextConfig);
+              setHasSelectedConfigType(Boolean(nextConfig.tableName && nextConfig.yColumns.length > 0));
+              updateConfig(nextConfig, false);
+            }}
+            onTypeClear={clearChartConfiguration}
             onConfirm={confirmConfiguration}
             onCancel={() => setIsConfiguring(false)}
             canvasRef={canvasRef}
+            hasGeneratedChart={Boolean(nodeConfig?.tableName && nodeConfig.yColumns.length > 0)}
             t={t}
           />
         )}
@@ -284,10 +302,32 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       <div className="chart-empty-state">
         <span>{t('CHART.empty')}</span>
         {canConfigure ? (
-          <button type="button" className="chart-configure-button" onClick={openConfiguration} title={t('CHART.configure') as string} aria-label={t('CHART.configure') as string}>
-            <Settings2 size={14} />
-            {t('CHART.configure')}
-          </button>
+          <>
+            <div className="chart-auto-hint">
+              <span className="chart-auto-hint-badge">
+                <Sparkles size={13} aria-hidden="true" />
+                {t('CHART.dataDetected')}
+              </span>
+              <span className="chart-auto-hint-text">{t('CHART.chooseTypeToCreate')}</span>
+            </div>
+            <div className="chart-type-picker" role="group" aria-label={t('CHART.chooseType') as string}>
+              {CHART_TYPES.map(chartType => (
+                <button
+                  key={chartType}
+                  type="button"
+                  className="chart-type-picker-button"
+                  onClick={() => createChartWithType(chartType)}
+                  title={t(`CHART.types.${chartType}`) as string}
+                  aria-label={t(`CHART.types.${chartType}`) as string}
+                >
+                  <ChartTypePreview type={chartType} />
+                </button>
+              ))}
+            </div>
+            <button type="button" className="chart-configure-button" onClick={openConfiguration} title={t('CHART.configure') as string} aria-label={t('CHART.configure') as string}>
+              <Settings2 size={14} aria-hidden="true" />
+            </button>
+          </>
         ) : <small>{t('CHART.noData')}</small>}
       </div>
     );

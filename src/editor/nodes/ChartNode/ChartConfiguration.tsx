@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 import { ComponentDialog } from '@/components/custom/ComponentDialog/ComponentDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DIMENSIONS } from '@/core/global/defaultValues';
 import { ChartTableValue } from '@/editor/context/MathVariablesContext';
 
 import { ChartAggregation, ChartNodeConfig, ChartType } from './ChartNode';
@@ -55,16 +56,20 @@ export function isPolarChart(chartType: ChartType): boolean {
   return chartType === 'pie' || chartType === 'doughnut';
 }
 
-const CHART_TYPES: ChartType[] = ['line', 'bar', 'scatter', 'radar', 'pie', 'doughnut'];
+export const CHART_TYPES: ChartType[] = ['line', 'bar', 'scatter', 'radar', 'pie', 'doughnut'];
+export const CONFIG_CHART_TYPES: Array<ChartType | null> = [null, ...CHART_TYPES];
 
 interface ChartConfigurationProps {
   chartData: { datasets: unknown[] } | null;
   config: ChartNodeConfig;
   tables: TableEntry[];
   onChange: (config: ChartNodeConfig) => void;
+  onTypeSelect: (config: ChartNodeConfig) => void;
+  onTypeClear: () => void;
   onConfirm: () => void;
   onCancel: () => void;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  hasGeneratedChart: boolean;
   t: TFunction;
 }
 
@@ -75,9 +80,12 @@ export function ChartConfiguration({
   config,
   tables,
   onChange,
+  onTypeSelect,
+  onTypeClear,
   onConfirm,
   onCancel,
   canvasRef,
+  hasGeneratedChart,
   t,
 }: ChartConfigurationProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('chart');
@@ -104,16 +112,13 @@ export function ChartConfiguration({
       )}
       onClose={onCancel}
       containerStyle={{
-        width: 'min(860px, 92vw)',
-        maxWidth: '860px',
-        maxHeight: '92vh',
+        width: DIMENSIONS.panelWidth,
+        height: DIMENSIONS.panelHeight,
+        maxWidth: '92vw',
+        maxHeight: '90vh',
         overflowY: 'auto',
       }}
-      leftButton={{
-        text: t('CHART.cancel') as string,
-        onClick: onCancel,
-      }}
-      rightButton={{
+      headerButton={{
         text: t('CHART.ok') as string,
         onClick: onConfirm,
       }}
@@ -143,7 +148,7 @@ export function ChartConfiguration({
           </button>
         </nav>
         <div className="chart-settings-content">
-          <ChartConfigPanel config={config} tables={tables} onChange={onChange} t={t} section={activeSection} />
+          <ChartConfigPanel config={config} tables={tables} onChange={onChange} onTypeSelect={onTypeSelect} onTypeClear={onTypeClear} t={t} section={activeSection} hasGeneratedChart={hasGeneratedChart} />
         </div>
       </div>
     </ComponentDialog>
@@ -154,14 +159,20 @@ function ChartConfigPanel({
   config,
   tables,
   onChange,
+  onTypeSelect,
+  onTypeClear,
   t,
   section,
+  hasGeneratedChart,
 }: {
   config: ChartNodeConfig;
   tables: TableEntry[];
   onChange: (config: ChartNodeConfig) => void;
+  onTypeSelect: (config: ChartNodeConfig) => void;
+  onTypeClear: () => void;
   t: TFunction;
   section: ConfigSection;
+  hasGeneratedChart: boolean;
 }) {
   const columns = tables.find(([name]) => name === config.tableName)?.[1] || {};
   const columnNames = Object.keys(columns);
@@ -179,10 +190,16 @@ function ChartConfigPanel({
       {section === 'chart' && <fieldset className="chart-type-fieldset">
         <legend>{t('CHART.type')}</legend>
         <div className="chart-type-grid">
-          {CHART_TYPES.map(chartType => (
-            <button key={chartType} type="button" className={`chart-type-option${config.chartType === chartType ? ' is-selected' : ''}`} aria-pressed={config.chartType === chartType} onClick={() => onChange({ ...config, chartType })}>
+          {CONFIG_CHART_TYPES.map(chartType => (
+            <button
+              key={chartType || 'none'}
+              type="button"
+              className={`chart-type-option${(chartType === null ? !hasGeneratedChart : hasGeneratedChart && config.chartType === chartType) ? ' is-selected' : ''}`}
+              aria-pressed={chartType === null ? !hasGeneratedChart : hasGeneratedChart && config.chartType === chartType}
+              onClick={() => chartType ? onTypeSelect({ ...config, chartType }) : onTypeClear()}
+            >
               <ChartTypePreview type={chartType} />
-              <span>{t(`CHART.types.${chartType}`)}</span>
+              <span>{chartType === null ? t('CHART.types.none') : t(`CHART.types.${chartType}`)}</span>
             </button>
           ))}
         </div>
@@ -307,7 +324,10 @@ function ChartConfigPanel({
   );
 }
 
-function ChartTypePreview({ type }: { type: ChartType }) {
+export function ChartTypePreview({ type }: { type: ChartType | null }) {
+  if (type === null) {
+    return <span className="chart-type-preview chart-type-preview--none" />;
+  }
   if (type === 'bar') {
     return <span className="chart-type-preview chart-type-preview--bar"><i /><i /><i /><i /></span>;
   }
