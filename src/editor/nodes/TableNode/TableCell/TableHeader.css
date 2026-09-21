@@ -42,7 +42,7 @@
   height: 14px;
   z-index: var(--z-modal);
   border: none;
-  background: var(--surface-color);
+  background: transparent;
   color: var(--text-disabled);
   cursor: grab;
   padding: 2px;
@@ -86,6 +86,11 @@
   background: var(--surface-color);
   box-shadow: 0 0 0 1px var(--primary-color), 0 2px 4px rgba(0,0,0,0.05);
   color: var(--primary-color);
+}
+
+.table-col-handle:focus-visible,
+.table-col-handle.is-dragging {
+  background: var(--surface-color);
 }
 
 .table-col-handle:active {
