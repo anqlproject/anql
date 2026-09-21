@@ -3,7 +3,7 @@ import type { EditorConfig } from 'lexical';
 import { DOMConversionMap, DOMConversionOutput, DOMExportOutput, LexicalEditor, LexicalNode, NodeKey, Spread } from 'lexical';
 import React from 'react';
 
-import { ChartComponent } from './ChartComponent';
+import { ChartComponent } from './ChartComponent.tsx';
 
 export type ChartType = 'bar' | 'line' | 'pie' | 'doughnut' | 'radar' | 'scatter';
 export type ChartAggregation = 'value' | 'category' | 'count';
