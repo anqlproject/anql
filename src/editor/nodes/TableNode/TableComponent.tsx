@@ -114,7 +114,7 @@ export function TableComponent({
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const { isSelected, handleContainerMouseDown } = useLexicalTableSelection(
+  const { handleContainerMouseDown } = useLexicalTableSelection(
     nodeKey,
     containerRef,
   );
@@ -591,7 +591,7 @@ export function TableComponent({
     >
       <div
         ref={containerRef}
-        className={`table-container ${isSelected ? "table-container--selected" : ""}`}
+        className="table-container"
         contentEditable={false}
         onMouseDown={handleContainerMouseDown}
         onContextMenu={handleContextMenu}

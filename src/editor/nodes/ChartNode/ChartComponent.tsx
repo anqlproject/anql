@@ -1,6 +1,7 @@
 import './ChartComponent.css';
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
+import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { Chart, registerables } from 'chart.js';
 import { $getNodeByKey, LexicalEditor } from 'lexical';
 import { BarChart3, Settings2, Sparkles } from 'lucide-react';
@@ -46,6 +47,7 @@ function normalizeConfig(config: ChartNodeConfig, table: Record<string, ChartTab
 export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nodeKey: string }) {
   const { t } = useTranslation();
   const isEditable = useLexicalEditable();
+  const [isNodeSelected] = useLexicalNodeSelection(nodeKey);
   const { chartTableVariables } = useMathVariables();
   const { resolvedTheme } = useThemeStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -236,6 +238,8 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     };
   }, [chartConfigForDisplay, previewTable]);
 
+  const isFocused = isNodeSelected && isEditable;
+
   useEffect(() => {
     if (!canvasRef.current || !chartData || chartData.datasets.length === 0) {
       chartRef.current?.destroy();
@@ -357,7 +361,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   }
 
   return (
-    <div className="chart-content">
+    <div className={`chart-content${isFocused ? ' focused' : ''}`}>
       {isEditable && <div className="chart-toolbar">
         {seriesTabColumns.length > 1 && (
           <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.ySeries') as string}>

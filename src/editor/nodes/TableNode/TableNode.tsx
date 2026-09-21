@@ -128,6 +128,16 @@ export class TableNode extends DecoratorBlockNode {
     return 'table';
   }
 
+  createDOM(): HTMLElement {
+    const dom = document.createElement('div');
+    dom.className = 'table-node';
+    return dom;
+  }
+
+  updateDOM(): false {
+    return false;
+  }
+
   static clone(node: TableNode): TableNode {
     return new TableNode(node.__data, node.__columns, node.__tableName, node.__format, node.__key);
   }
@@ -304,7 +314,7 @@ export class TableNode extends DecoratorBlockNode {
     const embedBlockTheme = config.theme.embedBlock || {};
     const className = {
       base: embedBlockTheme.base || '',
-      focus: '',
+      focus: 'table-node--focused',
     };
     return (
       <TableComponent

@@ -142,16 +142,22 @@ const TitlePlugin = () => {
               const lineHeight =
                 parseInt(window.getComputedStyle(rootElement).lineHeight) || 20;
 
-              // Use Lexical selection to get current node and check content
+              // Only the first text block can move focus back to the title.
               const hasContent = editor.getEditorState().read(() => {
                 const selection = $getSelection();
                 if (!$isRangeSelection(selection)) return false;
 
-                // Get the current node from Lexical selection
                 const currentNode = selection.anchor.getNode();
-                if (!currentNode) return false;
+                const firstNode = $getRoot().getFirstChild();
+                if (!currentNode || !firstNode || !selection.isCollapsed()) {
+                  return false;
+                }
 
-                // Check if the node has meaningful content
+                const currentTopLevelNode = currentNode.getTopLevelElement();
+                if (currentTopLevelNode !== firstNode) {
+                  return false;
+                }
+
                 const nodeText = currentNode.getTextContent();
                 return nodeText.trim().length > 0;
               });

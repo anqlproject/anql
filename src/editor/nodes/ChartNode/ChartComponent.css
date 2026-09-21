@@ -23,6 +23,11 @@
   position: relative;
 }
 
+.chart-content.focused {
+  outline: 2px solid var(--primary-color);
+  user-select: none;
+}
+
 .chart-toolbar {
   display: flex;
   align-items: center;

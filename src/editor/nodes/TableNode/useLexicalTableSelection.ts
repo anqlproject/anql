@@ -1,32 +1,16 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $createNodeSelection,
-  $getSelection,
-  $isNodeSelection,
   $setSelection,
   NodeKey,
 } from "lexical";
-import { RefObject, useCallback, useEffect, useState } from "react";
+import { RefObject, useCallback, useEffect } from "react";
 
 export function useLexicalTableSelection(
   nodeKey: NodeKey,
   containerRef: RefObject<HTMLElement | null>,
 ) {
   const [editor] = useLexicalComposerContext();
-  const [isSelected, setIsSelected] = useState(false);
-
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        const selection = $getSelection();
-        if ($isNodeSelection(selection)) {
-          setIsSelected(selection.has(nodeKey));
-        } else {
-          setIsSelected(false);
-        }
-      });
-    });
-  }, [editor, nodeKey]);
 
   const selectTableNode = useCallback(() => {
     editor.update(() => {
@@ -68,5 +52,5 @@ export function useLexicalTableSelection(
     return () => container.removeEventListener("focusin", handleFocusIn);
   }, [containerRef, selectTableNode]);
 
-  return { isSelected, handleContainerMouseDown, selectTableNode };
+  return { handleContainerMouseDown, selectTableNode };
 }
