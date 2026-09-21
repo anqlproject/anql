@@ -145,6 +145,11 @@
   font-size: var(--text-sm);
 }
 
+.chart-empty-state.focused {
+  outline: 2px solid var(--primary-color);
+  border-radius: 6px;
+}
+
 .chart-type-picker {
   display: inline-flex;
   align-items: center;

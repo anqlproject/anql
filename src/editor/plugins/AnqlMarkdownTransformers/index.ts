@@ -26,6 +26,12 @@ import {
 import { $createTextNode, $getRoot, ElementNode, LexicalNode } from "lexical";
 
 import {
+  $createChartNode,
+  $isChartNode,
+  ChartNode,
+  ChartNodeConfig,
+} from "@/editor/nodes/ChartNode/ChartNode";
+import {
   $createDateTimeNode,
   $isDateTimeNode,
   DateTimeNode,
@@ -59,6 +65,7 @@ import {
 import {
   $createTableNode,
   $isTableNode,
+  ColumnDataType,
   TableNode,
 } from "@/editor/nodes/TableNode/TableNode";
 import { evaluateAllMathNodes, EvaluationItem } from "@/editor/plugins/MathPlugin/evaluator";
@@ -207,6 +214,54 @@ export const IMAGE: TextMatchTransformer = {
   type: "text-match",
 };
 
+function stripMathNodeResult(rawExpression: string): string {
+  const trimmed = rawExpression.trim();
+  const match = trimmed.match(/^@math\(\((.*)\)\s*=\s*(.*)\)\s*$/s);
+  if (match) {
+    return unescapeMathExpression(match[1]);
+  }
+
+  const bareMatch = trimmed.match(/^@math\((.*)\)\s*$/s);
+  if (bareMatch) {
+    return unescapeMathExpression(bareMatch[1]);
+  }
+
+  const legacyMatch = trimmed.match(/^(.*?)(?:\s*=\s*[^=]+)$/s);
+  if (legacyMatch) {
+    const candidate = legacyMatch[1].trim();
+    if (candidate) {
+      return unescapeMathExpression(candidate);
+    }
+  }
+
+  return unescapeMathExpression(trimmed);
+}
+
+function unescapeMathExpression(expression: string): string {
+  return expression.trim().replace(/\\([_\\])/g, '$1');
+}
+
+export function parseMathNodeExpression(rawExpression: string): string {
+  const trimmed = rawExpression.trim();
+  return stripMathNodeResult(trimmed);
+}
+
+export function exportMathNodeExpression(expression: string, result?: string | null): string {
+  const trimmedExpression = expression.trim();
+  const serializedExpression = `(${trimmedExpression})`;
+
+  if (!result || !result.trim()) {
+    return `@math${serializedExpression}`;
+  }
+
+  const normalizedResult = result.trim();
+  const cleanResult = normalizedResult.startsWith('=')
+    ? normalizedResult.trim().slice(1).trim()
+    : normalizedResult.trim();
+
+  return `@math(${serializedExpression} = ${cleanResult})`;
+}
+
 // Markdown: @math(expression)
 export const MATH: ElementTransformer = {
   dependencies: [MathExpNode],
@@ -261,18 +316,19 @@ export const MATH: ElementTransformer = {
     const expression = exportChildren(node).trim();
 
     if (res && res.result) {
+      const resultText = res.result.trim();
+      const resultValue = resultText.startsWith('=') ? resultText.slice(1).trim() : resultText;
       if (expression.includes('=')) {
-        return res.result;
-      } else {
-        return `${expression} ${res.result}`;
+        return exportMathNodeExpression(expression, resultValue);
       }
+      return exportMathNodeExpression(expression, resultValue);
     }
 
-    return expression;
+    return exportMathNodeExpression(expression);
   },
-  regExp: /^@math\(([^)]*)\)\s?$/,
+  regExp: /^@math\((.*)\)\s?$/s,
   replace: (parentNode, _children, match, isImport) => {
-    const [, expression] = match;
+    const expression = parseMathNodeExpression(match[0]);
     const mathExpNode = $createMathExpNode();
     const textNode = $createTextNode(expression);
     mathExpNode.append(textNode);
@@ -404,6 +460,26 @@ function escapeMarkdownTableCell(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
 
+const TABLE_COLUMN_TYPE_MARKER = /\s+\((text|checkbox|date|number)\)$/;
+
+export function exportTableColumnHeader(column: { header?: string; id?: string; meta?: { type?: ColumnDataType } }): string {
+  const header = escapeMarkdownTableCell(String(column.header ?? column.id ?? ""));
+  const type = column.meta?.type;
+  return type && type !== "text" ? `${header} (${type})` : header;
+}
+
+export function parseTableColumnHeader(cell: string): { header: string; type: ColumnDataType } {
+  const marker = cell.match(TABLE_COLUMN_TYPE_MARKER);
+  if (!marker) {
+    return { header: cell, type: "text" };
+  }
+
+  return {
+    header: cell.replace(TABLE_COLUMN_TYPE_MARKER, "").trim(),
+    type: marker[1] as ColumnDataType,
+  };
+}
+
 function exportTableToMarkdown(node: TableNode): string {
   const { data, columns } = node.exportJSON();
   if (!columns || columns.length === 0) {
@@ -413,11 +489,7 @@ function exportTableToMarkdown(node: TableNode): string {
   const headerRow =
     "| " +
     columns
-      .map((col) =>
-        escapeMarkdownTableCell(
-          String(col.header ?? col.id ?? ""),
-        ),
-      )
+      .map(exportTableColumnHeader)
       .join(" | ") +
     " |";
   const dividerRow = "| " + columns.map(() => "---").join(" | ") + " |";
@@ -463,11 +535,14 @@ export const TABLE: MultilineElementTransformer = {
       return null;
     }
 
-    const columns = headerCells.map((header, index) => ({
+    const columns = headerCells.map((rawHeader, index) => {
+      const { header, type } = parseTableColumnHeader(rawHeader);
+      return {
       header,
-      id: `col_${index}`,
-      meta: { type: "text" as const },
-    }));
+        id: `col_${index}`,
+        meta: { type },
+      };
+    });
 
     const data: Record<string, string>[] = [];
     for (let i = 2; i < tableLines.length; i++) {
@@ -489,6 +564,93 @@ export const TABLE: MultilineElementTransformer = {
   type: "multiline-element",
 };
 
+function parseChartOptionValue(value: string): string {
+  return value.trim();
+}
+
+export function parseChartNodeConfig(raw: string): Partial<ChartNodeConfig> | null {
+  const trimmed = raw.trim();
+  const match = trimmed.match(/^@chart\((.*)\)$/s);
+  if (!match) {
+    return null;
+  }
+
+  const inner = match[1].trim();
+  if (!inner) {
+    return null;
+  }
+
+  const params: Record<string, string> = {};
+  for (const part of inner.split(';')) {
+    const entry = part.trim();
+    if (!entry || !entry.includes('=')) {
+      continue;
+    }
+    const index = entry.indexOf('=');
+    const key = entry.slice(0, index).trim();
+    const value = parseChartOptionValue(entry.slice(index + 1));
+    if (key) {
+      params[key] = value;
+    }
+  }
+
+  const yValue = params.y ?? '';
+  const yColumns = yValue
+    ? yValue.split(',').map((column) => column.trim()).filter(Boolean)
+    : [];
+
+  if (!params.type || !params.table || !params.x || yColumns.length === 0) {
+    return null;
+  }
+
+  return {
+    chartType: (params.type as ChartNodeConfig['chartType']) || 'line',
+    tableName: params.table,
+    xColumn: params.x,
+    yColumns,
+    yAggregation: 'value',
+    categoryColumn: params.x,
+    valueColumn: yColumns[0] || '',
+    colorPalette: 'default',
+    yBeginAtZero: true,
+  };
+}
+
+export function exportChartToMarkdown(config: Partial<ChartNodeConfig>): string {
+  const chartType = config.chartType || 'line';
+  const tableName = config.tableName || 'Table';
+  const xColumn = config.xColumn || '';
+  const yColumns = Array.isArray(config.yColumns) && config.yColumns.length > 0
+    ? config.yColumns
+    : [config.valueColumn || 'value'];
+
+  return `@chart(type=${chartType}; table=${tableName}; x=${xColumn}; y=${yColumns.join(',')})`;
+}
+
+export const CHART: ElementTransformer = {
+  dependencies: [ChartNode],
+  export: (node) => {
+    if (!$isChartNode(node)) {
+      return null;
+    }
+    return exportChartToMarkdown(node.getConfig());
+  },
+  regExp: /^@chart\((.*)\)\s?$/s,
+  replace: (parentNode, _children, match, isImport) => {
+    const parsed = parseChartNodeConfig(match[0]);
+    if (!parsed) {
+      return;
+    }
+
+    const chartNode = $createChartNode(parsed);
+    parentNode.replace(chartNode);
+    if (!isImport) {
+      chartNode.selectNext();
+    }
+  },
+  type: "element",
+};
+
 export const ANQL_MARKDOWN_TRANSFORMERS: Array<Transformer> = [
   HR,
   IMAGE,
@@ -502,6 +664,7 @@ export const ANQL_MARKDOWN_TRANSFORMERS: Array<Transformer> = [
   QUOTE,
   UNORDERED_LIST,
   ORDERED_LIST,
+  CHART,
   TABLE,
   ...MULTILINE_ELEMENT_TRANSFORMERS,
   ...TEXT_FORMAT_TRANSFORMERS,

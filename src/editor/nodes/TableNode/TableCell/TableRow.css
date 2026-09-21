@@ -112,7 +112,7 @@
   height: 24px;
   z-index: var(--z-modal);
   border: none;
-  background: var(--surface-color);
+  background: transparent;
   color: var(--text-disabled);
   cursor: grab;
   padding: 2px;
@@ -162,6 +162,11 @@
   background: var(--surface-color);
   box-shadow: 0 0 0 1px var(--primary-color), 0 2px 4px rgba(0,0,0,0.05);
   color: var(--primary-color);
+}
+
+.table-row-handle:focus-visible,
+.table-row-handle--overlay {
+  background: var(--surface-color);
 }
 
 .table-row-handle:active {

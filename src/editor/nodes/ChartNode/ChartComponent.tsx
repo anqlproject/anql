@@ -8,6 +8,8 @@ import { BarChart3, Settings2, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+const CONFIG_WRITE_DEBOUNCE_MS = 180;
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ChartTableValue, useMathVariables } from '@/editor/context/MathVariablesContext';
 import { useThemeStore } from '@/GlobalState/themeStore';
@@ -25,20 +27,32 @@ function withAlpha(color: string, alpha: number): string {
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
-function normalizeConfig(config: ChartNodeConfig, table: Record<string, ChartTableValue[]>): ChartNodeConfig {
+export function normalizeConfig(config: ChartNodeConfig, table: Record<string, ChartTableValue[]>): ChartNodeConfig {
   const columns = Object.keys(table);
-  const xColumn = columns.includes(config.xColumn) ? config.xColumn : columns[0] || '';
+  const safeColumns = columns.filter(column => Array.isArray(table[column]));
+  const xColumn = safeColumns.includes(config.xColumn) ? config.xColumn : safeColumns[0] || '';
   const xIsNumeric = isNumericColumn(table[xColumn] || []);
-  const yColumns = config.yColumns.filter(column => {
-    if (!columns.includes(column)) return false;
-    return xIsNumeric || isNumericColumn(table[column] || []);
-  });
+  const numericColumns = safeColumns.filter(column => isNumericColumn(table[column] || []));
+  const categoryColumns = safeColumns.filter(column => !isNumericColumn(table[column] || []));
+
+  const yColumns = (config.yColumns || []).filter(column => safeColumns.includes(column) && (xIsNumeric || isNumericColumn(table[column] || [])));
+  const fallbackYColumns = numericColumns.filter(column => column !== xColumn);
+  const resolvedYColumns = yColumns.length > 0 ? yColumns : fallbackYColumns;
+
+  const fallbackCategoryColumn = categoryColumns.includes(xColumn) ? xColumn : categoryColumns[0] || xColumn || safeColumns[0] || '';
+  const fallbackValueColumn = numericColumns.find(column => column !== fallbackCategoryColumn) || numericColumns[0] || '';
+  const categoryColumn = safeColumns.includes(config.categoryColumn) ? config.categoryColumn : fallbackCategoryColumn;
+  const valueColumn = safeColumns.includes(config.valueColumn) && isNumericColumn(table[config.valueColumn] || [])
+    ? config.valueColumn
+    : fallbackValueColumn;
 
   return {
     ...config,
     xColumn,
-    yColumns,
-    yAggregation: yColumns.some(column => !isNumericColumn(table[column] || []))
+    yColumns: resolvedYColumns,
+    categoryColumn,
+    valueColumn,
+    yAggregation: resolvedYColumns.some(column => !isNumericColumn(table[column] || []))
       ? 'category'
       : config.yAggregation,
   };
@@ -52,6 +66,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   const { resolvedTheme } = useThemeStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
+  const debounceTimeoutRef = useRef<number | null>(null);
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [draftConfig, setDraftConfig] = useState<ChartNodeConfig | null>(null);
   const [hasSelectedConfigType, setHasSelectedConfigType] = useState(false);
@@ -100,12 +115,25 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     : renderConfig;
 
   const updateConfig = (config: ChartNodeConfig, close = true) => {
-    editor.update(() => {
-      const node = $getNodeByKey(nodeKey);
-      if ($isChartNode(node)) node.updateConfig(config);
-    });
+    if (debounceTimeoutRef.current) {
+      window.clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = window.setTimeout(() => {
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isChartNode(node)) node.updateConfig(config);
+      });
+    }, CONFIG_WRITE_DEBOUNCE_MS);
+
     if (close) setIsConfiguring(false);
   };
+
+  useEffect(() => () => {
+    if (debounceTimeoutRef.current) {
+      window.clearTimeout(debounceTimeoutRef.current);
+    }
+  }, []);
 
   const openConfiguration = () => {
     const initialConfig = safeConfig?.tableName && safeConfig.yColumns.length > 0
@@ -114,10 +142,6 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     setDraftConfig(initialConfig);
     setHasSelectedConfigType(Boolean(safeConfig?.tableName && safeConfig.yColumns.length > 0));
     setIsConfiguring(true);
-  };
-
-  const confirmConfiguration = () => {
-    if (draftConfig) updateConfig(draftConfig);
   };
 
   const createChartWithType = (chartType: ChartType) => {
@@ -130,12 +154,6 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       ? { ...safeConfig, chartType }
       : getDefaultConfig(tables, chartType);
     if (nextConfig.tableName && nextConfig.yColumns.length > 0) updateConfig(nextConfig, false);
-  };
-
-  const clearChartConfiguration = () => {
-    setDraftConfig(getDefaultConfig([]));
-    setHasSelectedConfigType(false);
-    updateConfig(getDefaultConfig([]), false);
   };
 
   const chartData = useMemo(() => {
@@ -291,7 +309,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   if (isConfiguring) {
     return (
       <>
-        <div className="chart-empty-state">{t('CHART.configuring')}</div>
+        <div className={`chart-empty-state${isFocused ? ' focused' : ''}`}>{t('CHART.configuring')}</div>
         {draftConfig && (
           <ChartConfiguration
             chartData={chartData}
@@ -301,19 +319,8 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
               setDraftConfig(config);
               updateConfig(config, false);
             }}
-            onTypeSelect={config => {
-              const nextConfig = config.tableName && config.yColumns.length > 0
-                ? config
-                : getDefaultConfig(tables, config.chartType);
-              setDraftConfig(nextConfig);
-              setHasSelectedConfigType(Boolean(nextConfig.tableName && nextConfig.yColumns.length > 0));
-              updateConfig(nextConfig, false);
-            }}
-            onTypeClear={clearChartConfiguration}
-            onConfirm={confirmConfiguration}
             onCancel={() => setIsConfiguring(false)}
             canvasRef={canvasRef}
-            hasGeneratedChart={Boolean(nodeConfig?.tableName && nodeConfig.yColumns.length > 0)}
             t={t}
           />
         )}
@@ -326,7 +333,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     const canConfigure = !!defaultConfig.tableName;
 
     return (
-      <div className="chart-empty-state">
+      <div className={`chart-empty-state${isFocused ? ' focused' : ''}`}>
         <span>{t('CHART.empty')}</span>
         {canConfigure ? (
           <>
