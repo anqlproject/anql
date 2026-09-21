@@ -26,6 +26,12 @@ import {
 import { $createTextNode, $getRoot, ElementNode, LexicalNode } from "lexical";
 
 import {
+  $createChartNode,
+  $isChartNode,
+  ChartNode,
+  ChartNodeConfig,
+} from "@/editor/nodes/ChartNode/ChartNode";
+import {
   $createDateTimeNode,
   $isDateTimeNode,
   DateTimeNode,
@@ -489,6 +495,93 @@ export const TABLE: MultilineElementTransformer = {
   type: "multiline-element",
 };
 
+function parseChartOptionValue(value: string): string {
+  return value.trim();
+}
+
+export function parseChartNodeConfig(raw: string): Partial<ChartNodeConfig> | null {
+  const trimmed = raw.trim();
+  const match = trimmed.match(/^@chart\((.*)\)$/s);
+  if (!match) {
+    return null;
+  }
+
+  const inner = match[1].trim();
+  if (!inner) {
+    return null;
+  }
+
+  const params: Record<string, string> = {};
+  for (const part of inner.split(';')) {
+    const entry = part.trim();
+    if (!entry || !entry.includes('=')) {
+      continue;
+    }
+    const index = entry.indexOf('=');
+    const key = entry.slice(0, index).trim();
+    const value = parseChartOptionValue(entry.slice(index + 1));
+    if (key) {
+      params[key] = value;
+    }
+  }
+
+  const yValue = params.y ?? '';
+  const yColumns = yValue
+    ? yValue.split(',').map((column) => column.trim()).filter(Boolean)
+    : [];
+
+  if (!params.type || !params.table || !params.x || yColumns.length === 0) {
+    return null;
+  }
+
+  return {
+    chartType: (params.type as ChartNodeConfig['chartType']) || 'line',
+    tableName: params.table,
+    xColumn: params.x,
+    yColumns,
+    yAggregation: 'value',
+    categoryColumn: params.x,
+    valueColumn: yColumns[0] || '',
+    colorPalette: 'default',
+    yBeginAtZero: true,
+  };
+}
+
+export function exportChartToMarkdown(config: Partial<ChartNodeConfig>): string {
+  const chartType = config.chartType || 'line';
+  const tableName = config.tableName || 'Table';
+  const xColumn = config.xColumn || '';
+  const yColumns = Array.isArray(config.yColumns) && config.yColumns.length > 0
+    ? config.yColumns
+    : [config.valueColumn || 'value'];
+
+  return `@chart(type=${chartType}; table=${tableName}; x=${xColumn}; y=${yColumns.join(',')})`;
+}
+
+export const CHART: ElementTransformer = {
+  dependencies: [ChartNode],
+  export: (node) => {
+    if (!$isChartNode(node)) {
+      return null;
+    }
+    return exportChartToMarkdown(node.getConfig());
+  },
+  regExp: /^@chart\((.*)\)\s?$/s,
+  replace: (parentNode, _children, match, isImport) => {
+    const parsed = parseChartNodeConfig(match[0]);
+    if (!parsed) {
+      return;
+    }
+
+    const chartNode = $createChartNode(parsed);
+    parentNode.replace(chartNode);
+    if (!isImport) {
+      chartNode.selectNext();
+    }
+  },
+  type: "element",
+};
+
 export const ANQL_MARKDOWN_TRANSFORMERS: Array<Transformer> = [
   HR,
   IMAGE,
@@ -502,6 +595,7 @@ export const ANQL_MARKDOWN_TRANSFORMERS: Array<Transformer> = [
   QUOTE,
   UNORDERED_LIST,
   ORDERED_LIST,
+  CHART,
   TABLE,
   ...MULTILINE_ELEMENT_TRANSFORMERS,
   ...TEXT_FORMAT_TRANSFORMERS,
