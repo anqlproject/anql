@@ -1,5 +1,6 @@
 import './ChartComponent.css';
 
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import { Chart, registerables } from 'chart.js';
 import { $getNodeByKey, LexicalEditor } from 'lexical';
 import { BarChart3, Settings2, Sparkles } from 'lucide-react';
@@ -44,6 +45,7 @@ function normalizeConfig(config: ChartNodeConfig, table: Record<string, ChartTab
 
 export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nodeKey: string }) {
   const { t } = useTranslation();
+  const isEditable = useLexicalEditable();
   const { chartTableVariables } = useMathVariables();
   const { resolvedTheme } = useThemeStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -356,7 +358,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
 
   return (
     <div className="chart-content">
-      <div className="chart-toolbar">
+      {isEditable && <div className="chart-toolbar">
         {seriesTabColumns.length > 1 && (
           <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.ySeries') as string}>
             <button
@@ -418,7 +420,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
             <Settings2 size={15} aria-hidden="true" />
           </button>
         </div>
-      </div>
+      </div>}
       <div className="chart-canvas-wrapper"><canvas ref={canvasRef} /></div>
     </div>
   );
