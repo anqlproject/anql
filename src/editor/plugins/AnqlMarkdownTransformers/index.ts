@@ -65,6 +65,7 @@ import {
 import {
   $createTableNode,
   $isTableNode,
+  ColumnDataType,
   TableNode,
 } from "@/editor/nodes/TableNode/TableNode";
 import { evaluateAllMathNodes, EvaluationItem } from "@/editor/plugins/MathPlugin/evaluator";
@@ -213,6 +214,54 @@ export const IMAGE: TextMatchTransformer = {
   type: "text-match",
 };
 
+function stripMathNodeResult(rawExpression: string): string {
+  const trimmed = rawExpression.trim();
+  const match = trimmed.match(/^@math\(\((.*)\)\s*=\s*(.*)\)\s*$/s);
+  if (match) {
+    return unescapeMathExpression(match[1]);
+  }
+
+  const bareMatch = trimmed.match(/^@math\((.*)\)\s*$/s);
+  if (bareMatch) {
+    return unescapeMathExpression(bareMatch[1]);
+  }
+
+  const legacyMatch = trimmed.match(/^(.*?)(?:\s*=\s*[^=]+)$/s);
+  if (legacyMatch) {
+    const candidate = legacyMatch[1].trim();
+    if (candidate) {
+      return unescapeMathExpression(candidate);
+    }
+  }
+
+  return unescapeMathExpression(trimmed);
+}
+
+function unescapeMathExpression(expression: string): string {
+  return expression.trim().replace(/\\([_\\])/g, '$1');
+}
+
+export function parseMathNodeExpression(rawExpression: string): string {
+  const trimmed = rawExpression.trim();
+  return stripMathNodeResult(trimmed);
+}
+
+export function exportMathNodeExpression(expression: string, result?: string | null): string {
+  const trimmedExpression = expression.trim();
+  const serializedExpression = `(${trimmedExpression})`;
+
+  if (!result || !result.trim()) {
+    return `@math${serializedExpression}`;
+  }
+
+  const normalizedResult = result.trim();
+  const cleanResult = normalizedResult.startsWith('=')
+    ? normalizedResult.trim().slice(1).trim()
+    : normalizedResult.trim();
+
+  return `@math(${serializedExpression} = ${cleanResult})`;
+}
+
 // Markdown: @math(expression)
 export const MATH: ElementTransformer = {
   dependencies: [MathExpNode],
@@ -267,18 +316,19 @@ export const MATH: ElementTransformer = {
     const expression = exportChildren(node).trim();
 
     if (res && res.result) {
+      const resultText = res.result.trim();
+      const resultValue = resultText.startsWith('=') ? resultText.slice(1).trim() : resultText;
       if (expression.includes('=')) {
-        return res.result;
-      } else {
-        return `${expression} ${res.result}`;
+        return exportMathNodeExpression(expression, resultValue);
       }
+      return exportMathNodeExpression(expression, resultValue);
     }
 
-    return expression;
+    return exportMathNodeExpression(expression);
   },
-  regExp: /^@math\(([^)]*)\)\s?$/,
+  regExp: /^@math\((.*)\)\s?$/s,
   replace: (parentNode, _children, match, isImport) => {
-    const [, expression] = match;
+    const expression = parseMathNodeExpression(match[0]);
     const mathExpNode = $createMathExpNode();
     const textNode = $createTextNode(expression);
     mathExpNode.append(textNode);
@@ -410,6 +460,26 @@ function escapeMarkdownTableCell(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
 
+const TABLE_COLUMN_TYPE_MARKER = /\s+\((text|checkbox|date|number)\)$/;
+
+export function exportTableColumnHeader(column: { header?: string; id?: string; meta?: { type?: ColumnDataType } }): string {
+  const header = escapeMarkdownTableCell(String(column.header ?? column.id ?? ""));
+  const type = column.meta?.type;
+  return type && type !== "text" ? `${header} (${type})` : header;
+}
+
+export function parseTableColumnHeader(cell: string): { header: string; type: ColumnDataType } {
+  const marker = cell.match(TABLE_COLUMN_TYPE_MARKER);
+  if (!marker) {
+    return { header: cell, type: "text" };
+  }
+
+  return {
+    header: cell.replace(TABLE_COLUMN_TYPE_MARKER, "").trim(),
+    type: marker[1] as ColumnDataType,
+  };
+}
+
 function exportTableToMarkdown(node: TableNode): string {
   const { data, columns } = node.exportJSON();
   if (!columns || columns.length === 0) {
@@ -419,11 +489,7 @@ function exportTableToMarkdown(node: TableNode): string {
   const headerRow =
     "| " +
     columns
-      .map((col) =>
-        escapeMarkdownTableCell(
-          String(col.header ?? col.id ?? ""),
-        ),
-      )
+      .map(exportTableColumnHeader)
       .join(" | ") +
     " |";
   const dividerRow = "| " + columns.map(() => "---").join(" | ") + " |";
@@ -469,11 +535,14 @@ export const TABLE: MultilineElementTransformer = {
       return null;
     }
 
-    const columns = headerCells.map((header, index) => ({
+    const columns = headerCells.map((rawHeader, index) => {
+      const { header, type } = parseTableColumnHeader(rawHeader);
+      return {
       header,
-      id: `col_${index}`,
-      meta: { type: "text" as const },
-    }));
+        id: `col_${index}`,
+        meta: { type },
+      };
+    });
 
     const data: Record<string, string>[] = [];
     for (let i = 2; i < tableLines.length; i++) {
