@@ -50,6 +50,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [draftConfig, setDraftConfig] = useState<ChartNodeConfig | null>(null);
   const [hasSelectedConfigType, setHasSelectedConfigType] = useState(false);
+  const [activeSeriesTab, setActiveSeriesTab] = useState<string | null>(null);
 
   const tables = Object.entries(chartTableVariables) as TableEntry[];
   const [nodeConfig, setNodeConfig] = useState<ChartNodeConfig | null>(() => {
@@ -85,6 +86,13 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   const previewConfig = isConfiguring && !hasSelectedConfigType ? null : isConfiguring ? draftConfig : safeConfig;
   const previewTable = previewConfig ? chartTableVariables[previewConfig.tableName] : undefined;
   const renderConfig = previewConfig && previewTable ? normalizeConfig(previewConfig, previewTable) : previewConfig;
+  const polarValueColumns = safeConfig && isPolarChart(safeConfig.chartType)
+    ? Object.keys(table || {}).filter(column => isNumericColumn(table?.[column] || []))
+    : [];
+  const seriesTabColumns = safeConfig && !isPolarChart(safeConfig.chartType) ? safeConfig.yColumns : [];
+  const chartConfigForDisplay = renderConfig && activeSeriesTab && seriesTabColumns.includes(activeSeriesTab)
+    ? { ...renderConfig, yColumns: [activeSeriesTab] }
+    : renderConfig;
 
   const updateConfig = (config: ChartNodeConfig, close = true) => {
     editor.update(() => {
@@ -119,6 +127,8 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   };
 
   const chartData = useMemo(() => {
+    const renderConfig = chartConfigForDisplay;
+    const fullRenderConfig = renderConfig && activeSeriesTab ? safeConfig : renderConfig;
     if (!renderConfig || !previewTable) return null;
 
     const effectiveAggregation = renderConfig.yAggregation === 'value' &&
@@ -159,9 +169,11 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       labels: labels.map(String),
       xIsNumeric,
       yLabels: yCategoryLabels,
-      datasets: renderConfig.yColumns.map((columnName, index) => ({
-        label: columnName,
-        data: isRadar
+      datasets: renderConfig.yColumns.map((columnName, index) => {
+        const colorIndex = fullRenderConfig?.yColumns.indexOf(columnName) ?? index;
+        return {
+          label: columnName,
+          data: isRadar
           ? (previewTable[columnName] || []).map(value => Number(value) || 0)
           : isScatter
             ? effectiveAggregation === 'count'
@@ -197,21 +209,22 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
                   x: xPoints[rowIndex],
                   y: Number(value) || 0,
                 })),
-        borderColor: colors[index % colors.length],
+        borderColor: colors[colorIndex % colors.length],
         borderWidth: 2,
         tension: 0.25,
         fill: isRadar,
         backgroundColor: isRadar
-          ? withAlpha(colors[index % colors.length], 0.3)
-          : colors[index % colors.length],
-        pointBackgroundColor: colors[index % colors.length],
+          ? withAlpha(colors[colorIndex % colors.length], 0.3)
+          : colors[colorIndex % colors.length],
+        pointBackgroundColor: colors[colorIndex % colors.length],
         pointBorderColor: '#ffffff',
         pointBorderWidth: isRadar ? 1 : 0,
         pointRadius: renderConfig.chartType === 'line' || isScatter || isRadar ? 3 : 0,
         pointHoverRadius: renderConfig.chartType === 'line' || isScatter || isRadar ? 5 : 0,
-      })),
+        };
+      }),
     };
-  }, [renderConfig, previewTable]);
+  }, [chartConfigForDisplay, previewTable]);
 
   useEffect(() => {
     if (!canvasRef.current || !chartData || chartData.datasets.length === 0) {
@@ -221,14 +234,14 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     }
 
     chartRef.current?.destroy();
-    const yIsCategory = renderConfig?.yAggregation === 'category' ||
-      (renderConfig?.yAggregation === 'value' && renderConfig.yColumns.some(column => !isNumericColumn(previewTable?.[column] || [])));
+    const yIsCategory = chartConfigForDisplay?.yAggregation === 'category' ||
+      (chartConfigForDisplay?.yAggregation === 'value' && chartConfigForDisplay.yColumns.some(column => !isNumericColumn(previewTable?.[column] || [])));
     const { yLabels, xIsNumeric, ...chartJsData } = chartData;
     const isDark = resolvedTheme === 'dark';
     const textColor = isDark ? '#d4d4d4' : '#4b5563';
     const gridColor = isDark ? 'rgba(212, 212, 212, 0.18)' : 'rgba(75, 85, 99, 0.18)';
     chartRef.current = new Chart(canvasRef.current, {
-      type: renderConfig?.chartType || 'line',
+      type: chartConfigForDisplay?.chartType || 'line',
       data: chartJsData as never,
       options: {
         responsive: true,
@@ -236,9 +249,9 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
         plugins: {
           legend: { display: true, position: 'top', labels: { color: textColor, usePointStyle: true, padding: 18 } },
         },
-        scales: renderConfig?.chartType && isPolarChart(renderConfig.chartType)
+        scales: chartConfigForDisplay?.chartType && isPolarChart(chartConfigForDisplay.chartType)
           ? undefined
-          : renderConfig?.chartType === 'radar'
+          : chartConfigForDisplay?.chartType === 'radar'
             ? {
               r: {
                 beginAtZero: true,
@@ -250,7 +263,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
             }
             : {
               x: { type: xIsNumeric ? 'linear' : 'category', grid: { color: gridColor }, ticks: { color: textColor } },
-              y: { type: yIsCategory ? 'category' : 'linear', labels: yLabels, grid: { color: gridColor }, ticks: { color: textColor }, beginAtZero: renderConfig?.yBeginAtZero ?? true },
+              y: { type: yIsCategory ? 'category' : 'linear', labels: yLabels, grid: { color: gridColor }, ticks: { color: textColor }, beginAtZero: chartConfigForDisplay?.yBeginAtZero ?? true },
             },
       },
     }) as unknown as Chart;
@@ -259,7 +272,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [chartData, renderConfig?.chartType, renderConfig?.yAggregation, previewTable, resolvedTheme]);
+  }, [chartData, chartConfigForDisplay?.chartType, chartConfigForDisplay?.yAggregation, previewTable, resolvedTheme]);
 
   if (isConfiguring) {
     return (
@@ -340,6 +353,47 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
           <Settings2 size={15} aria-hidden="true" />
         </button>
       </div>
+      {seriesTabColumns.length > 1 && (
+        <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.ySeries') as string}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeSeriesTab === null}
+            className={`chart-axis-tab${activeSeriesTab === null ? ' is-active' : ''}`}
+            onClick={() => setActiveSeriesTab(null)}
+          >
+            {t('CHART.allSeries')}
+          </button>
+          {seriesTabColumns.map(column => (
+            <button
+              key={column}
+              type="button"
+              role="tab"
+              aria-selected={activeSeriesTab === column}
+              className={`chart-axis-tab${activeSeriesTab === column ? ' is-active' : ''}`}
+              onClick={() => setActiveSeriesTab(column)}
+            >
+              {column}
+            </button>
+          ))}
+        </div>
+      )}
+      {polarValueColumns.length > 1 && (
+        <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.value') as string}>
+          {polarValueColumns.map(column => (
+            <button
+              key={column}
+              type="button"
+              role="tab"
+              aria-selected={safeConfig?.valueColumn === column}
+              className={`chart-axis-tab${safeConfig?.valueColumn === column ? ' is-active' : ''}`}
+              onClick={() => safeConfig && updateConfig({ ...safeConfig, valueColumn: column }, false)}
+            >
+              {column}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="chart-canvas-wrapper"><canvas ref={canvasRef} /></div>
     </div>
   );

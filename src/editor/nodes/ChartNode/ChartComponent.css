@@ -42,6 +42,39 @@
   margin-bottom: 2px;
 }
 
+.chart-axis-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.chart-axis-tab {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.chart-axis-tab:hover,
+.chart-axis-tab.is-active {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+
+.chart-axis-tab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
 .chart-empty-state {
   position: relative;
   display: flex;

@@ -65,6 +65,7 @@
       "table": "Tableau",
       "xAxis": "Axe X",
       "ySeries": "Séries Y",
+      "allSeries": "Toutes",
       "yCalculation": "Calcul de Y",
       "yBeginAtZero": "Axe Y commence à 0",
       "category": "Catégorie",
