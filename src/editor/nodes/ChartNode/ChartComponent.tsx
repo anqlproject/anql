@@ -116,10 +116,6 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     setIsConfiguring(true);
   };
 
-  const confirmConfiguration = () => {
-    if (draftConfig) updateConfig(draftConfig);
-  };
-
   const createChartWithType = (chartType: ChartType) => {
     const defaultConfig = getDefaultConfig(tables, chartType);
     if (defaultConfig.tableName && defaultConfig.yColumns.length > 0) updateConfig(defaultConfig);
@@ -130,12 +126,6 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       ? { ...safeConfig, chartType }
       : getDefaultConfig(tables, chartType);
     if (nextConfig.tableName && nextConfig.yColumns.length > 0) updateConfig(nextConfig, false);
-  };
-
-  const clearChartConfiguration = () => {
-    setDraftConfig(getDefaultConfig([]));
-    setHasSelectedConfigType(false);
-    updateConfig(getDefaultConfig([]), false);
   };
 
   const chartData = useMemo(() => {
@@ -301,19 +291,8 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
               setDraftConfig(config);
               updateConfig(config, false);
             }}
-            onTypeSelect={config => {
-              const nextConfig = config.tableName && config.yColumns.length > 0
-                ? config
-                : getDefaultConfig(tables, config.chartType);
-              setDraftConfig(nextConfig);
-              setHasSelectedConfigType(Boolean(nextConfig.tableName && nextConfig.yColumns.length > 0));
-              updateConfig(nextConfig, false);
-            }}
-            onTypeClear={clearChartConfiguration}
-            onConfirm={confirmConfiguration}
             onCancel={() => setIsConfiguring(false)}
             canvasRef={canvasRef}
-            hasGeneratedChart={Boolean(nodeConfig?.tableName && nodeConfig.yColumns.length > 0)}
             t={t}
           />
         )}

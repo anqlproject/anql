@@ -1,7 +1,7 @@
 import './ChartConfiguration.css';
 
 import type { TFunction } from 'i18next';
-import { BarChart3, ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
 import type { RefObject } from 'react';
 import { useState } from 'react';
 
@@ -64,31 +64,23 @@ interface ChartConfigurationProps {
   config: ChartNodeConfig;
   tables: TableEntry[];
   onChange: (config: ChartNodeConfig) => void;
-  onTypeSelect: (config: ChartNodeConfig) => void;
-  onTypeClear: () => void;
-  onConfirm: () => void;
   onCancel: () => void;
   canvasRef: RefObject<HTMLCanvasElement | null>;
-  hasGeneratedChart: boolean;
   t: TFunction;
 }
 
-type ConfigSection = 'chart' | 'axesSeries' | 'options' | 'colors';
+type ConfigSection = 'axesSeries' | 'options' | 'colors';
 
 export function ChartConfiguration({
   chartData,
   config,
   tables,
   onChange,
-  onTypeSelect,
-  onTypeClear,
-  onConfirm,
   onCancel,
   canvasRef,
-  hasGeneratedChart,
   t,
 }: ChartConfigurationProps) {
-  const [activeSection, setActiveSection] = useState<ConfigSection>('chart');
+  const [activeSection, setActiveSection] = useState<ConfigSection>('axesSeries');
 
   const handleTableChange = (tableName: string) => {
     onChange({
@@ -118,10 +110,6 @@ export function ChartConfiguration({
         maxHeight: '90vh',
         overflowY: 'auto',
       }}
-      headerButton={{
-        text: t('CHART.ok') as string,
-        onClick: onConfirm,
-      }}
     >
       <div className="chart-dialog-preview">
         {chartData && chartData.datasets.length > 0
@@ -130,10 +118,6 @@ export function ChartConfiguration({
       </div>
       <div className="chart-settings-layout">
         <nav className="chart-settings-sidebar" aria-label={t('CHART.settingsNavigation') as string}>
-          <button type="button" className={activeSection === 'chart' ? 'is-active' : ''} onClick={() => setActiveSection('chart')}>
-            <BarChart3 size={15} />
-            <span>{t('CHART.sections.chart')}</span>
-          </button>
           <button type="button" className={activeSection === 'axesSeries' ? 'is-active' : ''} onClick={() => setActiveSection('axesSeries')}>
             <SlidersHorizontal size={15} />
             <span>{t('CHART.sections.axesSeries')}</span>
@@ -148,7 +132,7 @@ export function ChartConfiguration({
           </button>
         </nav>
         <div className="chart-settings-content">
-          <ChartConfigPanel config={config} tables={tables} onChange={onChange} onTypeSelect={onTypeSelect} onTypeClear={onTypeClear} t={t} section={activeSection} hasGeneratedChart={hasGeneratedChart} />
+          <ChartConfigPanel config={config} tables={tables} onChange={onChange} t={t} section={activeSection} />
         </div>
       </div>
     </ComponentDialog>
@@ -159,20 +143,14 @@ function ChartConfigPanel({
   config,
   tables,
   onChange,
-  onTypeSelect,
-  onTypeClear,
   t,
   section,
-  hasGeneratedChart,
 }: {
   config: ChartNodeConfig;
   tables: TableEntry[];
   onChange: (config: ChartNodeConfig) => void;
-  onTypeSelect: (config: ChartNodeConfig) => void;
-  onTypeClear: () => void;
   t: TFunction;
   section: ConfigSection;
-  hasGeneratedChart: boolean;
 }) {
   const columns = tables.find(([name]) => name === config.tableName)?.[1] || {};
   const columnNames = Object.keys(columns);
@@ -187,23 +165,6 @@ function ChartConfigPanel({
 
   return (
     <div className="chart-config-panel" onClick={event => event.stopPropagation()}>
-      {section === 'chart' && <fieldset className="chart-type-fieldset">
-        <legend>{t('CHART.type')}</legend>
-        <div className="chart-type-grid">
-          {CONFIG_CHART_TYPES.map(chartType => (
-            <button
-              key={chartType || 'none'}
-              type="button"
-              className={`chart-type-option${(chartType === null ? !hasGeneratedChart : hasGeneratedChart && config.chartType === chartType) ? ' is-selected' : ''}`}
-              aria-pressed={chartType === null ? !hasGeneratedChart : hasGeneratedChart && config.chartType === chartType}
-              onClick={() => chartType ? onTypeSelect({ ...config, chartType }) : onTypeClear()}
-            >
-              <ChartTypePreview type={chartType} />
-              <span>{chartType === null ? t('CHART.types.none') : t(`CHART.types.${chartType}`)}</span>
-            </button>
-          ))}
-        </div>
-      </fieldset>}
       {section === 'axesSeries' && (isPolarChart(config.chartType) ? (
         <>
           <label>{t('CHART.category')}
