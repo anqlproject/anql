@@ -98,6 +98,7 @@ export class ChartNode extends DecoratorBlockNode {
   createDOM(): HTMLElement {
     const dom = document.createElement('div');
     dom.className = 'chart-node';
+    dom.dataset.chartNode = 'true';
     return dom;
   }
 
@@ -106,12 +107,23 @@ export class ChartNode extends DecoratorBlockNode {
   }
 
   static importDOM(): DOMConversionMap | null {
-    return { div: () => ({ conversion: convertChartElement, priority: 1 }) };
+    return {
+      div: (node) => {
+        const element = node as HTMLElement;
+        if (element.dataset.chartNode !== 'true') {
+          return null;
+        }
+        return { conversion: convertChartElement, priority: 1 };
+      },
+    };
   }
 
   exportDOM(editor: LexicalEditor): DOMExportOutput {
     const { element } = super.exportDOM(editor);
-    if (element instanceof HTMLElement) element.classList.add('chart-node');
+    if (element instanceof HTMLElement) {
+      element.classList.add('chart-node');
+      element.dataset.chartNode = 'true';
+    }
     return { element };
   }
 
