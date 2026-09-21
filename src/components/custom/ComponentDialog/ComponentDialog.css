@@ -34,6 +34,16 @@
   font-weight: bold;
 }
 
+.component-dialog-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.component-dialog-header-button {
+  padding: 6px 12px;
+}
+
 .component-dialog-close {
   display: flex;
   align-items: center;

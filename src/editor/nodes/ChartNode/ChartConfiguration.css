@@ -51,95 +51,6 @@
   cursor: pointer;
 }
 
-/* --- Select personnalisé --- */
-.chart-custom-select {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  height: 34px;
-  padding: 6px 9px;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  color: var(--text-primary);
-  background: var(--surface-color);
-  font: inherit;
-  font-size: var(--text-xs);
-  cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.chart-custom-select:hover {
-  border-color: var(--primary-color);
-}
-
-.chart-custom-select:focus-visible,
-.chart-custom-select[data-state="open"] {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 1px;
-  border-color: var(--primary-color);
-}
-
-.chart-custom-select-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chart-custom-select-icon {
-  flex-shrink: 0;
-  color: var(--text-secondary);
-  transition: transform 0.2s ease;
-}
-
-.chart-custom-select[data-state="open"] .chart-custom-select-icon {
-  transform: rotate(-180deg);
-}
-
-.chart-custom-select-content {
-  z-index: 9999;
-  min-width: var(--radix-dropdown-menu-trigger-width);
-  max-height: 250px;
-  overflow-y: auto;
-  padding: 4px;
-  background: var(--panel-color);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px color-mix(in srgb, #000 20%, transparent);
-}
-
-.chart-custom-select-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px;
-  font-size: var(--text-xs);
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--text-primary);
-  transition: background-color 0.2s ease;
-}
-
-.chart-custom-select-item:hover,
-.chart-custom-select-item:focus {
-  background: var(--action-hover);
-  outline: none;
-}
-
-.chart-custom-select-item.is-selected {
-  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
-  color: var(--primary-color);
-}
-
-.chart-custom-select-item[data-disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.chart-custom-select-check {
-  color: var(--primary-color);
-}
-
 /* --- Type de graphique --- */
 .chart-type-fieldset,
 .chart-color-fieldset {
@@ -200,6 +111,11 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background: color-mix(in srgb, var(--bg-color) 72%, var(--surface-color));
+}
+
+.chart-type-preview--none {
+  border-style: dashed;
+  opacity: 0.7;
 }
 
 .chart-type-preview--bar {
@@ -284,122 +200,6 @@
   content: '';
 }
 
-/* --- Séries Y (liste multi-sélection) --- */
-.chart-series-list {
-  display: grid;
-  gap: 8px;
-  max-height: 240px;
-  padding: 10px;
-  overflow-y: auto;
-  min-width: var(--radix-dropdown-menu-trigger-width);
-  background: var(--panel-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  z-index: 9999;
-  box-shadow: 0 10px 30px -8px color-mix(in srgb, #000 40%, transparent),
-              0 4px 12px -6px color-mix(in srgb, #000 20%, transparent);
-}
-
-.chart-series-option {
-  display: flex !important;
-  grid-template-columns: none !important;
-  align-items: center;
-  gap: 10px !important;
-  padding: 8px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--surface-color);
-  color: var(--text-primary) !important;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--text-primary) 3%, transparent);
-}
-
-.chart-series-option:hover:not(.is-disabled) {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
-  box-shadow: 0 3px 8px color-mix(in srgb, var(--primary-color) 8%, transparent);
-}
-
-.chart-series-option.is-selected {
-  border-color: var(--primary-color);
-  background: color-mix(in srgb, var(--primary-color) 8%, var(--surface-color));
-}
-
-.chart-series-option.is-disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  background: color-mix(in srgb, var(--surface-color) 50%, transparent);
-  border-color: color-mix(in srgb, var(--border-color) 50%, transparent);
-  box-shadow: none;
-}
-
-.chart-series-option input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  margin: 0;
-}
-
-.chart-series-checkbox-custom {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid var(--text-secondary);
-  border-radius: 4px;
-  background: transparent;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.chart-series-option:hover:not(.is-disabled) .chart-series-checkbox-custom {
-  border-color: var(--primary-color);
-}
-
-.chart-series-option.is-selected .chart-series-checkbox-custom {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.chart-series-checkbox-custom svg {
-  width: 10px;
-  height: 10px;
-  color: #fff;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.chart-series-option.is-selected .chart-series-checkbox-custom svg {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.chart-series-swatch {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
-  border-radius: 4px;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-primary) 10%, transparent);
-  transition: transform 0.2s ease;
-}
-
-.chart-series-option:hover:not(.is-disabled) .chart-series-swatch {
-  transform: scale(1.15);
-}
-
-.chart-series-label-text {
-  font-size: var(--text-xs);
-  font-weight: 500;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* --- En-tête de la dialog (sélecteur de table) --- */
 .chart-dialog-title-control {
   display: inline-flex;
@@ -409,11 +209,6 @@
   color: var(--text-secondary);
   font-size: var(--text-sm);
   font-weight: 500;
-}
-
-.chart-dialog-title-control .chart-custom-select {
-  min-width: 150px;
-  min-height: 30px;
 }
 
 /* --- Aperçu du graphique dans la dialog --- */

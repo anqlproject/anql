@@ -20,6 +20,11 @@ interface ComponentDialogProps {
     onClick: () => void;
     disabled?: boolean;
   };
+  headerButton?: {
+    text: string;
+    onClick: () => void;
+    disabled?: boolean;
+  };
   containerStyle?: React.CSSProperties;
 }
 
@@ -29,6 +34,7 @@ export function ComponentDialog({
   onClose,
   leftButton,
   rightButton,
+  headerButton,
   containerStyle
 }: ComponentDialogProps): JSX.Element {
   return createPortal(
@@ -36,9 +42,20 @@ export function ComponentDialog({
       <div className="component-dialog-container" style={containerStyle} onMouseDown={(e) => e.stopPropagation()}>
         <div className="component-dialog-header">
           <h2 className="component-dialog-title">{title}</h2>
-          <button className="component-dialog-close" onClick={onClose} aria-label="Close">
-            <XIcon size={16} />
-          </button>
+          <div className="component-dialog-header-actions">
+            {headerButton && (
+              <button
+                className="component-dialog-button confirm component-dialog-header-button"
+                onClick={headerButton.onClick}
+                disabled={headerButton.disabled}
+              >
+                {headerButton.text}
+              </button>
+            )}
+            <button className="component-dialog-close" onClick={onClose} aria-label="Close">
+              <XIcon size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="component-dialog-content">

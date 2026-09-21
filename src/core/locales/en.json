@@ -50,6 +50,9 @@
     "CHART": {
       "empty": "Empty chart",
       "configure": "Configure",
+      "dataDetected": "Data detected",
+      "chooseTypeToCreate": "Choose a chart type to create it automatically.",
+      "chooseType": "Choose chart type",
       "configuring": "Configuration in progress...",
       "title": "Configure chart",
       "close": "Close",
@@ -62,6 +65,7 @@
       "table": "Table",
       "xAxis": "X axis",
       "ySeries": "Y series",
+      "allSeries": "All",
       "yCalculation": "Y calculation",
       "yBeginAtZero": "Y axis starts at 0",
       "category": "Category",
@@ -75,6 +79,7 @@
       },
       "textXHint": "Text X: only numeric columns are available for Y.",
       "types": {
+        "none": "None",
         "line": "Line",
         "bar": "Bar",
         "scatter": "Points",

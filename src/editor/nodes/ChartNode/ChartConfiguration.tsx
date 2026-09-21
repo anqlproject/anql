@@ -1,16 +1,17 @@
 import './ChartConfiguration.css';
 
 import type { TFunction } from 'i18next';
-import { BarChart3, Check, ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
+import { BarChart3, ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
 import type { RefObject } from 'react';
 import { useState } from 'react';
 
 import { ComponentDialog } from '@/components/custom/ComponentDialog/ComponentDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DIMENSIONS } from '@/core/global/defaultValues';
 import { ChartTableValue } from '@/editor/context/MathVariablesContext';
 
 import { ChartAggregation, ChartNodeConfig, ChartType } from './ChartNode';
-import { ChartSelect } from './ChartSelect';
+import { ChartSelect, ChartSelectOptionItem } from './ChartSelect';
 
 export const COLOR_PALETTES: Record<string, string[]> = {
   default: ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed'],
@@ -37,7 +38,7 @@ export function getDefaultConfig(tables: TableEntry[], chartType: ChartType = 'l
     chartType,
     tableName,
     xColumn: columnNames[0] || '',
-    yColumns: numericColumns,
+    yColumns: numericColumns.filter(column => column !== columnNames[0]),
     yAggregation: 'value',
     categoryColumn: columnNames.find(column => !isNumericColumn(columns[column])) || columnNames[0] || '',
     valueColumn: numericColumns[0] || '',
@@ -55,16 +56,20 @@ export function isPolarChart(chartType: ChartType): boolean {
   return chartType === 'pie' || chartType === 'doughnut';
 }
 
-const CHART_TYPES: ChartType[] = ['line', 'bar', 'scatter', 'radar', 'pie', 'doughnut'];
+export const CHART_TYPES: ChartType[] = ['line', 'bar', 'scatter', 'radar', 'pie', 'doughnut'];
+export const CONFIG_CHART_TYPES: Array<ChartType | null> = [null, ...CHART_TYPES];
 
 interface ChartConfigurationProps {
   chartData: { datasets: unknown[] } | null;
   config: ChartNodeConfig;
   tables: TableEntry[];
   onChange: (config: ChartNodeConfig) => void;
+  onTypeSelect: (config: ChartNodeConfig) => void;
+  onTypeClear: () => void;
   onConfirm: () => void;
   onCancel: () => void;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  hasGeneratedChart: boolean;
   t: TFunction;
 }
 
@@ -75,9 +80,12 @@ export function ChartConfiguration({
   config,
   tables,
   onChange,
+  onTypeSelect,
+  onTypeClear,
   onConfirm,
   onCancel,
   canvasRef,
+  hasGeneratedChart,
   t,
 }: ChartConfigurationProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('chart');
@@ -104,16 +112,13 @@ export function ChartConfiguration({
       )}
       onClose={onCancel}
       containerStyle={{
-        width: 'min(860px, 92vw)',
-        maxWidth: '860px',
-        maxHeight: '92vh',
+        width: DIMENSIONS.panelWidth,
+        height: DIMENSIONS.panelHeight,
+        maxWidth: '92vw',
+        maxHeight: '90vh',
         overflowY: 'auto',
       }}
-      leftButton={{
-        text: t('CHART.cancel') as string,
-        onClick: onCancel,
-      }}
-      rightButton={{
+      headerButton={{
         text: t('CHART.ok') as string,
         onClick: onConfirm,
       }}
@@ -143,7 +148,7 @@ export function ChartConfiguration({
           </button>
         </nav>
         <div className="chart-settings-content">
-          <ChartConfigPanel config={config} tables={tables} onChange={onChange} t={t} section={activeSection} />
+          <ChartConfigPanel config={config} tables={tables} onChange={onChange} onTypeSelect={onTypeSelect} onTypeClear={onTypeClear} t={t} section={activeSection} hasGeneratedChart={hasGeneratedChart} />
         </div>
       </div>
     </ComponentDialog>
@@ -154,14 +159,20 @@ function ChartConfigPanel({
   config,
   tables,
   onChange,
+  onTypeSelect,
+  onTypeClear,
   t,
   section,
+  hasGeneratedChart,
 }: {
   config: ChartNodeConfig;
   tables: TableEntry[];
   onChange: (config: ChartNodeConfig) => void;
+  onTypeSelect: (config: ChartNodeConfig) => void;
+  onTypeClear: () => void;
   t: TFunction;
   section: ConfigSection;
+  hasGeneratedChart: boolean;
 }) {
   const columns = tables.find(([name]) => name === config.tableName)?.[1] || {};
   const columnNames = Object.keys(columns);
@@ -179,10 +190,16 @@ function ChartConfigPanel({
       {section === 'chart' && <fieldset className="chart-type-fieldset">
         <legend>{t('CHART.type')}</legend>
         <div className="chart-type-grid">
-          {CHART_TYPES.map(chartType => (
-            <button key={chartType} type="button" className={`chart-type-option${config.chartType === chartType ? ' is-selected' : ''}`} aria-pressed={config.chartType === chartType} onClick={() => onChange({ ...config, chartType })}>
+          {CONFIG_CHART_TYPES.map(chartType => (
+            <button
+              key={chartType || 'none'}
+              type="button"
+              className={`chart-type-option${(chartType === null ? !hasGeneratedChart : hasGeneratedChart && config.chartType === chartType) ? ' is-selected' : ''}`}
+              aria-pressed={chartType === null ? !hasGeneratedChart : hasGeneratedChart && config.chartType === chartType}
+              onClick={() => chartType ? onTypeSelect({ ...config, chartType }) : onTypeClear()}
+            >
               <ChartTypePreview type={chartType} />
-              <span>{t(`CHART.types.${chartType}`)}</span>
+              <span>{chartType === null ? t('CHART.types.none') : t(`CHART.types.${chartType}`)}</span>
             </button>
           ))}
         </div>
@@ -213,11 +230,19 @@ function ChartConfigPanel({
                 const xColumn = val;
                 const nextXIsNumeric = isNumericColumn(columns[xColumn] || []);
                 const yColumns = nextXIsNumeric
-                  ? selectedYColumns
+                  ? selectedYColumns.filter(column => column !== xColumn)
                   : selectedYColumns.filter(column => isNumericColumn(columns[column] || []));
                 onChange({ ...config, xColumn, yColumns, yAggregation: getYAggregation(columns, yColumns) });
               }}
-              options={columnNames.map(column => ({ value: column, label: column }))}
+              options={columnNames.map(column => {
+                const seriesIndex = selectedYColumns.indexOf(column);
+                return {
+                  value: column,
+                  label: column,
+                  color: seriesIndex >= 0 ? currentColors[seriesIndex % currentColors.length] : '#d1d5db',
+                  disabled: selectedYColumns.includes(column),
+                };
+              })}
             />
           </label>
           <label>{t('CHART.ySeries')}
@@ -230,25 +255,25 @@ function ChartConfigPanel({
                   <ChevronDown size={14} className="chart-custom-select-icon" />
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="chart-series-list" onCloseAutoFocus={(e) => e.preventDefault()}>
+              <DropdownMenuContent align="start" className="chart-custom-select-content" onCloseAutoFocus={(e) => e.preventDefault()}>
                 {columnNames.map((column) => {
-                  const isDisabled = !xIsNumeric && !isNumericColumn(columns[column] || []);
+                  const isDisabled = column === config.xColumn || (!xIsNumeric && !isNumericColumn(columns[column] || []));
                   const isSelected = selectedYColumns.includes(column);
                   const colorIndex = selectedYColumns.indexOf(column);
+                  const color = isSelected ? currentColors[colorIndex % currentColors.length] : '#d1d5db';
                   return (
-                    <label key={column} className={`chart-series-option${isSelected ? ' is-selected' : ''}${isDisabled ? ' is-disabled' : ''}`} onClick={(e) => e.stopPropagation()}>
-                      <input type="checkbox" checked={isSelected} disabled={isDisabled} onChange={event => {
-                        const yColumns = event.target.checked
-                          ? [...selectedYColumns, column]
-                          : selectedYColumns.filter(selectedColumn => selectedColumn !== column);
+                    <ChartSelectOptionItem
+                      key={column}
+                      option={{ value: column, label: column, color, disabled: isDisabled }}
+                      selected={isSelected}
+                      keepOpen
+                      onSelect={() => {
+                        const yColumns = isSelected
+                          ? selectedYColumns.filter(selectedColumn => selectedColumn !== column)
+                          : [...selectedYColumns, column];
                         onChange({ ...config, yColumns, yAggregation: getYAggregation(columns, yColumns) });
-                      }} />
-                      <div className="chart-series-checkbox-custom">
-                        <Check strokeWidth={3} />
-                      </div>
-                      <span className="chart-series-swatch" style={{ backgroundColor: isSelected ? currentColors[colorIndex % currentColors.length] : '#d1d5db' }} />
-                      <span className="chart-series-label-text">{column}</span>
-                    </label>
+                      }}
+                    />
                   );
                 })}
               </DropdownMenuContent>
@@ -307,7 +332,10 @@ function ChartConfigPanel({
   );
 }
 
-function ChartTypePreview({ type }: { type: ChartType }) {
+export function ChartTypePreview({ type }: { type: ChartType | null }) {
+  if (type === null) {
+    return <span className="chart-type-preview chart-type-preview--none" />;
+  }
   if (type === 'bar') {
     return <span className="chart-type-preview chart-type-preview--bar"><i /><i /><i /><i /></span>;
   }
