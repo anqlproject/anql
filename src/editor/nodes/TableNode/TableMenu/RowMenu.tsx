@@ -12,6 +12,9 @@ interface TableMeta {
   addRowBelow?: (rowId: string) => void;
   nodeKey?: string;
   closeMenus?: () => void;
+  toggleRowHeaders?: () => void;
+  updateRowHeader?: (rowId: string, label: string) => void;
+  showRowHeaders?: boolean;
 }
 
 interface TableOptions {
@@ -21,7 +24,7 @@ interface TableOptions {
 interface TableInstance {
   options: TableOptions;
   getRowModel: () => {
-    rows: { original: { _rowId: string } }[];
+    rows: { original: { _rowId: string; rowHeader?: string } }[];
   };
 }
 
@@ -54,6 +57,14 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
         className="table-menu-item"
       >
         <Plus className="w-4 h-4" /> {t('TABLE.addRowAbove')}
+      </button>
+      <button
+        type="button"
+        onPointerDown={(e) => e.preventDefault()}
+        onClick={() => table.options.meta?.toggleRowHeaders?.()}
+        className="table-menu-item"
+      >
+        <Plus className="w-4 h-4" /> {t(table.options.meta?.showRowHeaders ? 'TABLE.hideRowHeaders' : 'TABLE.showRowHeaders')}
       </button>
       <button
         type="button"

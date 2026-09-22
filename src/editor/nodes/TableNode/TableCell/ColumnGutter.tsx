@@ -109,6 +109,7 @@ interface ColumnGutterRowProps {
   columns: Column<TableRowWithId, unknown>[];
   resizeHandlers: Record<string, (e: React.MouseEvent | React.TouchEvent) => void>;
   showColumnHeaders: boolean;
+  showRowHeaders: boolean;
   table: Table<TableRowWithId>;
   openColMenuIndex: number | null;
   onColMenuOpenChange: (index: number, open: boolean) => void;
@@ -126,12 +127,14 @@ export function ColumnGutterRow({
   columns,
   resizeHandlers,
   showColumnHeaders,
+  showRowHeaders,
   table,
   openColMenuIndex,
   onColMenuOpenChange,
 }: ColumnGutterRowProps) {
   return (
     <div className="table-col-gutter-row" aria-hidden="true">
+      {showRowHeaders && <div className="table-row-header-spacer" aria-hidden="true" />}
       {columns.map((column, index) => (
         <ColGutterSlot
           key={column.id}

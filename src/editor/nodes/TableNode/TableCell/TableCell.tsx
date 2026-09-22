@@ -24,7 +24,7 @@ interface Column {
 
 interface Row {
     index: number;
-    original: { _rowId: string };
+    original: { _rowId: string; rowHeader?: string };
 }
 
 interface TableMeta {

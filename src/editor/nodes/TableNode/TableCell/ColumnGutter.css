@@ -19,6 +19,13 @@
   overflow: visible;
 }
 
+.table-row-header-spacer {
+  flex: 0 0 96px;
+  width: 96px;
+  min-height: 0;
+  height: 0;
+}
+
 /* ── Column handle ── */
 
 .table-col-handle {

@@ -79,6 +79,9 @@ declare module "@tanstack/react-table" {
     ) => void;
     updateColumnHeader: (columnId: string, headerName: string) => void;
     toggleColumnHeaders: () => void;
+    toggleRowHeaders: () => void;
+    updateRowHeader: (rowId: string, label: string) => void;
+    showRowHeaders: boolean;
     deleteColumn: (columnId: string) => void;
     addColumn: () => void;
     addColumnLeft: (columnId: string) => void;
@@ -100,6 +103,7 @@ interface TableComponentProps {
   data: (TableRowData & { _rowId?: string })[];
   columns: (TableColumn & { size?: number; meta?: { type?: ColumnDataType } })[];
   showColumnHeaders: boolean;
+  showRowHeaders: boolean;
   tableName: string;
   format: ElementFormatType | null;
   className: Readonly<{ base: string; focus: string }>;
@@ -110,6 +114,7 @@ export function TableComponent({
   data: initialData,
   columns: initialColumns,
   showColumnHeaders,
+  showRowHeaders,
   tableName,
   format,
   className,
@@ -358,6 +363,7 @@ export function TableComponent({
     closeMenus,
     columnCount,
     tableDataLength: tableData.length,
+    showRowHeaders,
     rowRefs,
     onRowAdded: (rowId) => {
       setNewRowId(rowId);
@@ -553,9 +559,11 @@ export function TableComponent({
     const colIndex = cell.getAttribute("data-column-index");
     if (colIndex !== null) {
       const columnIndex = parseInt(colIndex, 10);
-      const column = table.getAllColumns()[columnIndex];
-      if (column) {
-        columnId = column.id;
+      if (columnIndex >= 0) {
+        const column = table.getAllColumns()[columnIndex];
+        if (column) {
+          columnId = column.id;
+        }
       }
     }
 
@@ -615,6 +623,7 @@ export function TableComponent({
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
           modifiers={modifiers}
+          autoScroll={false}
         >
           <div className="table-grid-wrapper">
             <div
@@ -635,6 +644,7 @@ export function TableComponent({
                     ]),
                   )}
                   showColumnHeaders={showColumnHeaders}
+                  showRowHeaders={showRowHeaders}
                   table={table}
                   openColMenuIndex={openColMenuIndex}
                   onColMenuOpenChange={(index, open) => {
@@ -649,6 +659,7 @@ export function TableComponent({
                 />
                 {showColumnHeaders && <div className="table-row table-row--header">
                   <div className="table-gutter" aria-hidden="true" />
+                  {showRowHeaders && <div className="table-row-header-spacer" aria-hidden="true" />}
                   {table.getHeaderGroups()[0]?.headers.map((header, index) => (
                     <DraggableHeader
                       key={header.id}
@@ -692,6 +703,7 @@ export function TableComponent({
                   suppressMenuClick={isDragging}
                   draggingColumnId={activeColumnId}
                   isNew={row.original._rowId === newRowId}
+                  showRowHeaders={showRowHeaders}
                 />
               ))}
             </SortableContext>
