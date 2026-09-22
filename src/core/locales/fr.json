@@ -339,6 +339,8 @@
       "addColumn": "Ajouter colonne",
       "addRow": "Ajouter une ligne",
       "columnType": "Type de colonne",
+      "showHeaders": "Afficher les en-têtes de colonnes",
+      "hideHeaders": "Masquer les en-têtes de colonnes",
       "text": "Texte",
       "checkbox": "Case à cocher",
       "date": "Date",

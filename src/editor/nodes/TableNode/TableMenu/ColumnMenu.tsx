@@ -13,9 +13,10 @@ interface ColumnMenuProps {
   type: string;
   columnId: string;
   table: Table<TableRowWithId>;
+  showColumnHeaders: boolean;
 }
 
-export function ColumnMenu({ type, columnId, table }: ColumnMenuProps) {
+export function ColumnMenu({ type, columnId, table, showColumnHeaders }: ColumnMenuProps) {
   const { t } = useTranslation();
 
   return (
@@ -27,6 +28,15 @@ export function ColumnMenu({ type, columnId, table }: ColumnMenuProps) {
       onCloseAutoFocus={(e) => e.preventDefault()}
     >
       <div className="table-th-popover-title">{t('TABLE.columnType')}</div>
+      <button
+        type="button"
+        onPointerDown={(e) => e.preventDefault()}
+        onClick={() => table.options.meta?.toggleColumnHeaders()}
+        className="table-menu-item"
+      >
+        <Type className="w-4 h-4" /> {t(showColumnHeaders ? 'TABLE.hideHeaders' : 'TABLE.showHeaders')}
+      </button>
+      <div className="table-menu-divider" />
       <button
         type="button"
         onPointerDown={(e) => e.preventDefault()}

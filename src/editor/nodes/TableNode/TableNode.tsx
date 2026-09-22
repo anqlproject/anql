@@ -44,6 +44,7 @@ export interface TableRowData {
 
 export type SerializedTableNode = Spread<
   {
+    showColumnHeaders?: boolean;
     data: TableRowData[];
     columns: TableColumn[];
     tableName?: string;
@@ -120,6 +121,7 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
 }
 
 export class TableNode extends DecoratorBlockNode {
+  __showColumnHeaders: boolean;
   __data: TableRowData[];
   __columns: TableColumn[];
   __tableName: string;
@@ -139,18 +141,27 @@ export class TableNode extends DecoratorBlockNode {
   }
 
   static clone(node: TableNode): TableNode {
-    return new TableNode(node.__data, node.__columns, node.__tableName, node.__format, node.__key);
+    return new TableNode(node.__data, node.__columns, node.__tableName, node.__format, node.__key, node.__showColumnHeaders);
   }
 
   afterCloneFrom(prevNode: this): void {
     super.afterCloneFrom(prevNode);
+    this.__showColumnHeaders = prevNode.__showColumnHeaders;
     this.__data = prevNode.__data;
     this.__columns = prevNode.__columns;
     this.__tableName = prevNode.__tableName;
   }
 
-  constructor(data: TableRowData[], columns: TableColumn[], tableName?: string, format?: ElementFormatType, key?: NodeKey) {
+  constructor(
+    data: TableRowData[],
+    columns: TableColumn[],
+    tableName?: string,
+    format?: ElementFormatType,
+    key?: NodeKey,
+    showColumnHeaders = false,
+  ) {
     super(format, key);
+    this.__showColumnHeaders = showColumnHeaders;
     this.__data = data || [];
     this.__columns = columns || [];
     this.__tableName = tableName || '';
@@ -159,6 +170,7 @@ export class TableNode extends DecoratorBlockNode {
   exportJSON(): SerializedTableNode {
     return {
       ...super.exportJSON(),
+      showColumnHeaders: this.__showColumnHeaders,
       data: this.__data,
       columns: this.__columns,
       tableName: this.__tableName,
@@ -198,7 +210,12 @@ export class TableNode extends DecoratorBlockNode {
       return migratedRow;
     });
 
-    return $createTableNode(migratedData, migratedColumns, serializedNode.tableName).updateFromJSON(
+    return $createTableNode(
+      migratedData,
+      migratedColumns,
+      serializedNode.tableName,
+      serializedNode.showColumnHeaders ?? false,
+    ).updateFromJSON(
       serializedNode,
     );
   }
@@ -216,6 +233,11 @@ export class TableNode extends DecoratorBlockNode {
   updateTableName(name: string): void {
     const writable = this.getWritable();
     writable.__tableName = name;
+  }
+
+  updateShowColumnHeaders(show: boolean): void {
+    const writable = this.getWritable();
+    writable.__showColumnHeaders = show;
   }
 
   getSearchMatches(query: string): TableSearchMatch[] {
@@ -321,6 +343,7 @@ export class TableNode extends DecoratorBlockNode {
         nodeKey={this.getKey()}
         data={this.__data}
         columns={this.__columns}
+        showColumnHeaders={this.__showColumnHeaders}
         tableName={this.__tableName}
         format={this.__format}
         className={className}
@@ -329,7 +352,12 @@ export class TableNode extends DecoratorBlockNode {
   }
 }
 
-export function $createTableNode(data: TableRowData[], columns: TableColumn[], tableName?: string): TableNode {
+export function $createTableNode(
+  data: TableRowData[],
+  columns: TableColumn[],
+  tableName?: string,
+  showColumnHeaders = false,
+): TableNode {
   let name = tableName;
   if (name === undefined) {
     try {
@@ -358,7 +386,7 @@ export function $createTableNode(data: TableRowData[], columns: TableColumn[], t
   }
 
   const dataWithIds = ensureRowIds(data);
-  return new TableNode(dataWithIds, columns, name);
+  return new TableNode(dataWithIds, columns, name, undefined, undefined, showColumnHeaders);
 }
 
 export function $isTableNode(node: LexicalNode | null | undefined): node is TableNode {

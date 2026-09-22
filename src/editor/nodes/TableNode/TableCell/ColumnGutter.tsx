@@ -21,6 +21,7 @@ interface ColGutterSlotProps {
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
   resizeHandler?: (e: React.MouseEvent | React.TouchEvent) => void;
+  showColumnHeaders: boolean;
 }
 
 /** One handle slot, DnD-sortable, with a click→menu behaviour. */
@@ -31,6 +32,7 @@ function ColGutterSlot({
   menuOpen,
   onMenuOpenChange,
   resizeHandler,
+  showColumnHeaders,
 }: ColGutterSlotProps) {
   const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -81,7 +83,12 @@ function ColGutterSlot({
         )}
         <Popover.Anchor className="table-col-handle-anchor" />
         <Popover.Portal>
-          <ColumnMenu type={type} columnId={column.id} table={table} />
+          <ColumnMenu
+            type={type}
+            columnId={column.id}
+            table={table}
+            showColumnHeaders={showColumnHeaders}
+          />
         </Popover.Portal>
       </Popover.Root>
 
@@ -101,6 +108,7 @@ function ColGutterSlot({
 interface ColumnGutterRowProps {
   columns: Column<TableRowWithId, unknown>[];
   resizeHandlers: Record<string, (e: React.MouseEvent | React.TouchEvent) => void>;
+  showColumnHeaders: boolean;
   table: Table<TableRowWithId>;
   openColMenuIndex: number | null;
   onColMenuOpenChange: (index: number, open: boolean) => void;
@@ -117,6 +125,7 @@ interface ColumnGutterRowProps {
 export function ColumnGutterRow({
   columns,
   resizeHandlers,
+  showColumnHeaders,
   table,
   openColMenuIndex,
   onColMenuOpenChange,
@@ -132,6 +141,7 @@ export function ColumnGutterRow({
           menuOpen={openColMenuIndex === index}
           onMenuOpenChange={(open) => onColMenuOpenChange(index, open)}
           resizeHandler={resizeHandlers[column.id]}
+          showColumnHeaders={showColumnHeaders}
         />
       ))}
     </div>

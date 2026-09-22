@@ -78,6 +78,7 @@ declare module "@tanstack/react-table" {
       type: ColumnDataType,
     ) => void;
     updateColumnHeader: (columnId: string, headerName: string) => void;
+    toggleColumnHeaders: () => void;
     deleteColumn: (columnId: string) => void;
     addColumn: () => void;
     addColumnLeft: (columnId: string) => void;
@@ -98,6 +99,7 @@ interface TableComponentProps {
   nodeKey: NodeKey;
   data: (TableRowData & { _rowId?: string })[];
   columns: (TableColumn & { size?: number; meta?: { type?: ColumnDataType } })[];
+  showColumnHeaders: boolean;
   tableName: string;
   format: ElementFormatType | null;
   className: Readonly<{ base: string; focus: string }>;
@@ -107,6 +109,7 @@ export function TableComponent({
   nodeKey,
   data: initialData,
   columns: initialColumns,
+  showColumnHeaders,
   tableName,
   format,
   className,
@@ -631,6 +634,7 @@ export function TableComponent({
                       header.getResizeHandler(),
                     ]),
                   )}
+                  showColumnHeaders={showColumnHeaders}
                   table={table}
                   openColMenuIndex={openColMenuIndex}
                   onColMenuOpenChange={(index, open) => {
@@ -643,7 +647,7 @@ export function TableComponent({
                     });
                   }}
                 />
-                <div className="table-row table-row--header">
+                {showColumnHeaders && <div className="table-row table-row--header">
                   <div className="table-gutter" aria-hidden="true" />
                   {table.getHeaderGroups()[0]?.headers.map((header, index) => (
                     <DraggableHeader
@@ -658,7 +662,7 @@ export function TableComponent({
                       isNew={header.column.id === newColId}
                     />
                   ))}
-                </div>
+                </div>}
               </SortableContext>
 
             <SortableContext

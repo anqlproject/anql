@@ -118,6 +118,16 @@ export function useTableMeta({
       });
     },
 
+    toggleColumnHeaders: () => {
+      closeMenus();
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isTableNode(node)) {
+          node.updateShowColumnHeaders(!node.__showColumnHeaders);
+        }
+      });
+    },
+
     deleteColumn: (columnId: string) => {
       closeMenus();
       editor.update(() => {

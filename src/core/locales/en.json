@@ -339,6 +339,8 @@
       "addColumn": "Add column",
       "addRow": "Add row",
       "columnType": "Column type",
+      "showHeaders": "Show column headers",
+      "hideHeaders": "Hide column headers",
       "text": "Text",
       "checkbox": "Checkbox",
       "date": "Date",
