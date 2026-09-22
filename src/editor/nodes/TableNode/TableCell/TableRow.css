@@ -23,12 +23,12 @@
 .table-row--header {
   min-height: 34px;
   border-bottom: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-color) 80%, var(--surface-color));
+  background: var(--table-header-bg);
 }
 
 .table-row--header .table-cell--header {
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--table-header-text);
 }
 
 .table-row:hover {

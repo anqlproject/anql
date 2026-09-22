@@ -3,7 +3,8 @@
 /* ── Header cell styles ── */
 
 .table-cell--header {
-  background: transparent;
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
 }
 
 .table-header-inner {
@@ -22,7 +23,7 @@
   padding: 6px 8px;
   font-weight: 500;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--table-header-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
