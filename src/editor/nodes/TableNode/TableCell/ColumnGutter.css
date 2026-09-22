@@ -106,3 +106,48 @@
   height: 0;
   pointer-events: none;
 }
+
+/* ── Column resizer ── */
+
+.table-resizer {
+  position: absolute;
+  right: -5px;
+  top: 0;
+  bottom: -100vh;
+  width: 10px; /* large invisible hit area */
+  cursor: col-resize;
+  touch-action: none;
+  z-index: var(--z-elevated);
+}
+
+.table-resizer::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--primary-color);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.table-resizer-inactive:hover::after,
+.table-resizer-active::after {
+  opacity: 1;
+  transition: opacity 0.1s ease-in 0.1s;
+}
+
+/* Column drop-target indicator */
+.table-cell--drop-target::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 2px;
+  height: 100vh;
+  background: var(--primary-color);
+  z-index: var(--z-elevated);
+  pointer-events: none;
+}

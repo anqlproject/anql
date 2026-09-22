@@ -80,13 +80,6 @@ export default function DraggableHeader({
         />
       </div>
 
-      {header.column.getCanResize() && (
-        <div
-          onMouseDown={header.getResizeHandler()}
-          onTouchStart={header.getResizeHandler()}
-          className={`table-resizer ${header.column.getIsResizing() ? 'table-resizer-active' : 'table-resizer-inactive'}`}
-        />
-      )}
     </div>
   );
 }

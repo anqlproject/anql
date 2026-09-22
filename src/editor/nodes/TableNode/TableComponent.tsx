@@ -44,8 +44,8 @@ import { useTranslation } from "react-i18next";
 import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighlight";
 
 import { TABLE_ROW_NAVIGATE_COMMAND, TABLE_SEARCH_NAVIGATE_COMMAND } from "../../plugins/TablePlugin";
-import EditableCell from "./TableCell/TableCell";
 import { ColumnGutterRow } from "./TableCell/ColumnGutter";
+import EditableCell from "./TableCell/TableCell";
 import DraggableHeader from "./TableCell/TableHeader";
 import { DraggableRow } from "./TableCell/TableRow";
 import { CellMenu } from "./TableMenu/CellMenu";
