@@ -45,6 +45,7 @@ import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighligh
 
 import { TABLE_ROW_NAVIGATE_COMMAND, TABLE_SEARCH_NAVIGATE_COMMAND } from "../../plugins/TablePlugin";
 import EditableCell from "./TableCell/TableCell";
+import { ColumnGutterRow } from "./TableCell/ColumnGutter";
 import DraggableHeader from "./TableCell/TableHeader";
 import { DraggableRow } from "./TableCell/TableRow";
 import { CellMenu } from "./TableMenu/CellMenu";
@@ -162,7 +163,8 @@ export function TableComponent({
   rowRefs.current = rowRefs.current.slice(0, tableData.length);
   columnRefs.current = columnRefs.current.slice(0, initialColumns.length);
 
-  // NOTE : handle column hover logic to display drag handle
+
+  // NOTE: reveal column drag handle when hovering any cell of that column
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
@@ -172,28 +174,31 @@ export function TableComponent({
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const cell = target.closest(".table-cell") as HTMLElement | null;
-
       const colIndex = cell?.getAttribute("data-column-index");
 
       if (colIndex !== currentHoveredColIndex) {
         if (currentHoveredColIndex !== null) {
-          const oldHeader = grid.querySelector(`.table-cell--header[data-column-index="${currentHoveredColIndex}"]`);
-          oldHeader?.classList.remove("table-cell--hovered-col");
+          const oldSlot = grid.querySelector(
+            `.table-col-gutter-slot[data-column-index="${currentHoveredColIndex}"]`
+          );
+          oldSlot?.classList.remove("table-col-gutter-slot--hovered");
         }
-
         if (colIndex != null) {
-          const newHeader = grid.querySelector(`.table-cell--header[data-column-index="${colIndex}"]`);
-          newHeader?.classList.add("table-cell--hovered-col");
+          const newSlot = grid.querySelector(
+            `.table-col-gutter-slot[data-column-index="${colIndex}"]`
+          );
+          newSlot?.classList.add("table-col-gutter-slot--hovered");
         }
-
-        currentHoveredColIndex = colIndex || null;
+        currentHoveredColIndex = colIndex ?? null;
       }
     };
 
     const handleMouseLeave = () => {
       if (currentHoveredColIndex !== null) {
-        const oldHeader = grid.querySelector(`.table-cell--header[data-column-index="${currentHoveredColIndex}"]`);
-        oldHeader?.classList.remove("table-cell--hovered-col");
+        const oldSlot = grid.querySelector(
+          `.table-col-gutter-slot[data-column-index="${currentHoveredColIndex}"]`
+        );
+        oldSlot?.classList.remove("table-col-gutter-slot--hovered");
         currentHoveredColIndex = null;
       }
     };
@@ -208,6 +213,7 @@ export function TableComponent({
   }, []);
 
   // NOTE : desactive scrolling when menu is open
+
   useEffect(() => {
     if (!highlightState.isOpen) return;
     const preventScroll = (e: Event) => e.preventDefault();
@@ -613,37 +619,41 @@ export function TableComponent({
               className="table-grid"
               style={{ minWidth: totalWidth }}
             >
-            <div className="table-row table-row--header">
-              <div className="table-gutter" aria-hidden="true" />
-              <SortableContext
+            <SortableContext
                 items={columnOrder.map(toColDndId)}
                 strategy={horizontalListSortingStrategy}
               >
-                {table.getHeaderGroups()[0]?.headers.map((header, index) => (
-                  <DraggableHeader
-                    key={header.id}
-                    header={header}
-                    table={table}
-                    columnIndex={index}
-                    menuOpen={openColMenuIndex === index}
-                    onMenuOpenChange={(open) => {
-                      setOpenColMenuIndex(open ? index : null);
-                      setOpenRowMenuIndex(null);
-                      setHighlightState({
-                        type: "column",
-                        index,
-                        isOpen: open,
-                      });
-                    }}
-                    columnRef={(el) => {
-                      columnRefs.current[index] = el;
-                    }}
-                    isDropTarget={dragOverColIndex === index}
-                    isNew={header.column.id === newColId}
-                  />
-                ))}
+                <ColumnGutterRow
+                  headers={table.getHeaderGroups()[0]?.headers ?? []}
+                  table={table}
+                  openColMenuIndex={openColMenuIndex}
+                  onColMenuOpenChange={(index, open) => {
+                    setOpenColMenuIndex(open ? index : null);
+                    setOpenRowMenuIndex(null);
+                    setHighlightState({
+                      type: "column",
+                      index,
+                      isOpen: open,
+                    });
+                  }}
+                />
+                <div className="table-row table-row--header">
+                  <div className="table-gutter" aria-hidden="true" />
+                  {table.getHeaderGroups()[0]?.headers.map((header, index) => (
+                    <DraggableHeader
+                      key={header.id}
+                      header={header}
+                      table={table}
+                      columnIndex={index}
+                      columnRef={(el) => {
+                        columnRefs.current[index] = el;
+                      }}
+                      isDropTarget={dragOverColIndex === index}
+                      isNew={header.column.id === newColId}
+                    />
+                  ))}
+                </div>
               </SortableContext>
-            </div>
 
             <SortableContext
               items={tableData.map((r) => toRowDndId(r._rowId))}
