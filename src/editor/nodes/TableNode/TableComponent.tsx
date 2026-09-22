@@ -624,7 +624,13 @@ export function TableComponent({
                 strategy={horizontalListSortingStrategy}
               >
                 <ColumnGutterRow
-                  headers={table.getHeaderGroups()[0]?.headers ?? []}
+                  columns={table.getAllLeafColumns()}
+                  resizeHandlers={Object.fromEntries(
+                    (table.getHeaderGroups()[0]?.headers ?? []).map((header) => [
+                      header.column.id,
+                      header.getResizeHandler(),
+                    ]),
+                  )}
                   table={table}
                   openColMenuIndex={openColMenuIndex}
                   onColMenuOpenChange={(index, open) => {

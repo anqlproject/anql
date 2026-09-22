@@ -3,7 +3,7 @@ import './ColumnGutter.css';
 import { useSortable } from '@dnd-kit/sortable';
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from '@radix-ui/react-popover';
-import { Column, Header, Table } from '@tanstack/react-table';
+import { Column, Table } from '@tanstack/react-table';
 import { GripHorizontal } from 'lucide-react';
 import { useRef } from 'react';
 
@@ -20,10 +20,6 @@ interface ColGutterSlotProps {
   columnIndex: number;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
-  /**
-   * Resize handler extracted from the Header by the parent.
-   * Passed as a plain function so this slot has zero dependency on Header.
-   */
   resizeHandler?: (e: React.MouseEvent | React.TouchEvent) => void;
 }
 
@@ -103,11 +99,8 @@ function ColGutterSlot({
 // ──────────────────────────────────────────────────────────────────────────────
 
 interface ColumnGutterRowProps {
-  /**
-   * Headers are only used here — at the boundary — to extract the column
-   * and the resize handler. They are NOT forwarded into ColGutterSlot.
-   */
-  headers: Header<TableRowWithId, unknown>[];
+  columns: Column<TableRowWithId, unknown>[];
+  resizeHandlers: Record<string, (e: React.MouseEvent | React.TouchEvent) => void>;
   table: Table<TableRowWithId>;
   openColMenuIndex: number | null;
   onColMenuOpenChange: (index: number, open: boolean) => void;
@@ -118,27 +111,27 @@ interface ColumnGutterRowProps {
  * Contains one `ColGutterSlot` per column — exactly like the row gutter
  * rendered to the left of each data row.
  *
- * `Header` objects are consumed here at the boundary: only `column` and
- * the resize handler are passed down, so `ColGutterSlot` stays structurally
- * independent of TanStack's header abstraction.
+ * The gutter consumes columns directly. Labels and header rendering are
+ * intentionally outside this control surface.
  */
 export function ColumnGutterRow({
-  headers,
+  columns,
+  resizeHandlers,
   table,
   openColMenuIndex,
   onColMenuOpenChange,
 }: ColumnGutterRowProps) {
   return (
     <div className="table-col-gutter-row" aria-hidden="true">
-      {headers.map((header, index) => (
+      {columns.map((column, index) => (
         <ColGutterSlot
-          key={header.column.id}
-          column={header.column}
+          key={column.id}
+          column={column}
           table={table}
           columnIndex={index}
           menuOpen={openColMenuIndex === index}
           onMenuOpenChange={(open) => onColMenuOpenChange(index, open)}
-          resizeHandler={header.getResizeHandler()}
+          resizeHandler={resizeHandlers[column.id]}
         />
       ))}
     </div>
