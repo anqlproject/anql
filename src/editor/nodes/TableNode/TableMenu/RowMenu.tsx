@@ -1,7 +1,7 @@
 import './TableMenu.css';
 
 import * as Popover from '@radix-ui/react-popover';
-import { Link2, Plus, Trash2 } from 'lucide-react';
+import { Link2, Plus, Rows, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore } from "@/App/store/useGlobalStore";
@@ -49,6 +49,15 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
     >
       <button
         type="button"
+        onPointerDown={(e) => e.preventDefault()}
+        onClick={() => table.options.meta?.toggleRowHeaders?.()}
+        className="table-menu-item"
+      >
+        <Rows className="w-4 h-4" /> {t(table.options.meta?.showRowHeaders ? 'TABLE.hideRowHeaders' : 'TABLE.showRowHeaders')}
+      </button>
+      <div className="table-menu-divider" />
+      <button
+        type="button"
         onPointerDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -57,14 +66,6 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
         className="table-menu-item"
       >
         <Plus className="w-4 h-4" /> {t('TABLE.addRowAbove')}
-      </button>
-      <button
-        type="button"
-        onPointerDown={(e) => e.preventDefault()}
-        onClick={() => table.options.meta?.toggleRowHeaders?.()}
-        className="table-menu-item"
-      >
-        <Plus className="w-4 h-4" /> {t(table.options.meta?.showRowHeaders ? 'TABLE.hideRowHeaders' : 'TABLE.showRowHeaders')}
       </button>
       <button
         type="button"
