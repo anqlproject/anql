@@ -188,7 +188,6 @@
   margin: 0 4px;
   flex-shrink: 0;
 }
-
 .toolbar-dropdown-content {
   background: var(--surface-color);
   border-radius: 12px;

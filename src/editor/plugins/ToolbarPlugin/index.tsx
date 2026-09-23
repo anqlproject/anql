@@ -98,7 +98,8 @@ function ToolbarDropdown({
   onSelect,
   isOpen,
   onToggle,
-  isFontFamily
+  isFontFamily,
+  trigger,
 }: {
   value: string;
   options: string[];
@@ -106,6 +107,7 @@ function ToolbarDropdown({
   isOpen: boolean;
   onToggle: () => void;
   isFontFamily?: boolean;
+  trigger?: React.ReactNode;
 }) {
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
@@ -121,16 +123,18 @@ function ToolbarDropdown({
 
   return (
     <div className="toolbar-dropdown-container" ref={refs.setReference}>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="popup-item spaced"
-        style={{ display: 'flex', alignItems: 'center', gap: '4px', width: 'auto', padding: '0 8px' }}
-        onMouseDown={handleToggle}
-      >
-        <span className="text">{value}</span>
-        <ChevronDown size={14} />
-      </Button>
+      {trigger ?? (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="popup-item spaced"
+          style={{ display: 'flex', alignItems: 'center', gap: '4px', width: 'auto', padding: '0 8px' }}
+          onMouseDown={handleToggle}
+        >
+          <span className="text">{value}</span>
+          <ChevronDown size={14} />
+        </Button>
+      )}
       {isOpen && (
         <FloatingPortal>
           <div
@@ -170,6 +174,7 @@ const FONT_FAMILY_OPTIONS = [
 ];
 
 const FONT_SIZE_OPTIONS = Array.from({ length: 23 }, (_, i) => `${i + 8}px`);
+const TABLE_OPERATION_OPTIONS = ['sum', 'mean', 'median', 'min', 'max', 'std', 'variance', 'count', 'prod', 'sort'];
 
 interface ToolbarPluginProps {
   anchorElem?: HTMLElement;
@@ -204,7 +209,8 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
   const [fontColor, setFontColor] = useState<string>('#000000');
   const [bgColor, setBgColor] = useState<string>('#ffffff');
 
-  const [activeDropdown, setActiveDropdown] = useState<'fontFamily' | 'fontSize' | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<'fontFamily' | 'fontSize' | 'tableOperations' | null>(null);
+  const [selectedTableColumn, setSelectedTableColumn] = useState<string | null>(null);
   const isDropdownOpenRef = useRef(false);
   const lastSelectionRef = useRef<BaseSelection | null>(null);
 
@@ -220,6 +226,11 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
 
       if ($isRangeSelection(selection) && !selection.isCollapsed()) {
         lastSelectionRef.current = selection.clone();
+        const selectedText = selection.getTextContent().trim();
+        const tableReference = selectedText.match(/^([A-Za-z][A-Za-z0-9_]*)\.([A-Za-z0-9_]+)$/);
+        const isKnownTableColumn = tableReference
+          && tableVariables[tableReference[1]]?.[tableReference[2]] !== undefined;
+        setSelectedTableColumn(isKnownTableColumn ? selectedText : null);
       }
 
       if (!$isRangeSelection(selection) || selection.isCollapsed()) {
@@ -227,6 +238,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
           return;
         }
         setIsOpen(false);
+        setSelectedTableColumn(null);
         return;
       }
 
@@ -236,6 +248,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       if (isInsideCode) {
         if (isDropdownOpenRef.current) return;
         setIsOpen(false);
+        setSelectedTableColumn(null);
         return;
       }
 
@@ -299,7 +312,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
         }
       }
     });
-  }, [editor]);
+  }, [editor, tableVariables]);
 
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
@@ -396,10 +409,29 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
     isDropdownOpenRef.current = false;
   };
 
-  const handleDropdownToggle = (type: 'fontFamily' | 'fontSize') => {
+  const handleDropdownToggle = (type: 'fontFamily' | 'fontSize' | 'tableOperations') => {
     const isOpening = activeDropdown !== type;
     setActiveDropdown(isOpening ? type : null);
     isDropdownOpenRef.current = isOpening;
+  };
+
+  const handleTableOperation = (operation: string) => {
+    if (!selectedTableColumn) return;
+
+    editor.update(() => {
+      let selection = $getSelection();
+      if ((!selection || selection.isCollapsed()) && lastSelectionRef.current) {
+        $setSelection(lastSelectionRef.current.clone());
+        selection = $getSelection();
+      }
+
+      if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+        selection.insertText(`${operation}(${selectedTableColumn})`);
+      }
+    });
+
+    setActiveDropdown(null);
+    isDropdownOpenRef.current = false;
   };
 
   const handleMathCalculate = useCallback(() => {
@@ -431,6 +463,15 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       }
     });
   }, [editor, variables, tableVariables]);
+
+  const handleMathButtonClick = useCallback(() => {
+    if (selectedTableColumn) {
+      handleDropdownToggle('tableOperations');
+      return;
+    }
+
+    handleMathCalculate();
+  }, [handleDropdownToggle, handleMathCalculate, selectedTableColumn]);
 
   return createPortal(
     <>
@@ -496,12 +537,31 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
           <ToolbarButton icon={<Italic size={16} />} label="Italic" isActive={isItalic} onClick={() => toggleFormat('italic')} />
           <ToolbarButton icon={<Underline size={16} />} label="Underline" isActive={isUnderline} onClick={() => toggleFormat('underline')} />
           <ToolbarButton icon={<Strikethrough size={16} />} label="Strikethrough" isActive={isStrikethrough} onClick={() => toggleFormat('strikethrough')} />
-          <ToolbarButton
-            icon={<Calculator size={16} />}
-            label="Calculate Math"
-            isDanger={mathError}
-            onClick={handleMathCalculate}
-          />
+          {selectedTableColumn ? (
+            <ToolbarDropdown
+              value="Table operation"
+              options={TABLE_OPERATION_OPTIONS}
+              isOpen={activeDropdown === 'tableOperations'}
+              onToggle={() => handleDropdownToggle('tableOperations')}
+              onSelect={handleTableOperation}
+              trigger={(
+                <ToolbarButton
+                  icon={<Calculator size={16} />}
+                  label="Table operations"
+                  isActive={activeDropdown === 'tableOperations'}
+                  isDanger={mathError}
+                  onClick={() => handleDropdownToggle('tableOperations')}
+                />
+              )}
+            />
+          ) : (
+            <ToolbarButton
+              icon={<Calculator size={16} />}
+              label="Calculate Math"
+              isDanger={mathError}
+              onClick={handleMathButtonClick}
+            />
+          )}
           <div className="divider" />
           <ToolbarButton icon={<Eraser size={16} />} label="Clear Formatting" onClick={clearFormatting} />
 
