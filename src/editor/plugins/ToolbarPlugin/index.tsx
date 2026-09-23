@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
 
+import { useScrollLock } from '@/App/hooks/useScrollLock';
 import { useGlobalStore } from '@/App/store/useGlobalStore';
 import { Popover } from '@/components/custom/Popover/Popover';
 import { Button } from '@/components/ui/button';
@@ -100,6 +101,7 @@ function ToolbarDropdown({
   onToggle,
   isFontFamily,
   trigger,
+  contentRef,
 }: {
   value: string;
   options: string[];
@@ -108,6 +110,7 @@ function ToolbarDropdown({
   onToggle: () => void;
   isFontFamily?: boolean;
   trigger?: React.ReactNode;
+  contentRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
@@ -138,7 +141,10 @@ function ToolbarDropdown({
       {isOpen && (
         <FloatingPortal>
           <div
-            ref={refs.setFloating}
+            ref={(element) => {
+              refs.setFloating(element);
+              if (contentRef) contentRef.current = element;
+            }}
             style={{
               ...floatingStyles,
               zIndex: 999999,
@@ -192,6 +198,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
   const [virtualRef, setVirtualRef] = useState<VirtualElement | null>(null);
   const isPointerDownRef = useRef(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const dropdownContentRef = useRef<HTMLDivElement>(null);
 
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -213,6 +220,11 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
   const [selectedTableColumn, setSelectedTableColumn] = useState<string | null>(null);
   const isDropdownOpenRef = useRef(false);
   const lastSelectionRef = useRef<BaseSelection | null>(null);
+
+  useScrollLock({
+    enabled: isOpen,
+    allowedRef: dropdownContentRef,
+  });
 
   const updateToolbar = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -513,6 +525,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
                   onToggle={() => handleDropdownToggle('fontFamily')}
                   onSelect={(val) => handleDropdownSelect('fontFamily', val)}
                   isFontFamily={true}
+                  contentRef={dropdownContentRef}
                 />
 
                 <ToolbarDropdown
@@ -521,6 +534,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
                   isOpen={activeDropdown === 'fontSize'}
                   onToggle={() => handleDropdownToggle('fontSize')}
                   onSelect={(val) => handleDropdownSelect('fontSize', val)}
+                  contentRef={dropdownContentRef}
                 />
 
                 <div className="divider" />
@@ -544,6 +558,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
               isOpen={activeDropdown === 'tableOperations'}
               onToggle={() => handleDropdownToggle('tableOperations')}
               onSelect={handleTableOperation}
+              contentRef={dropdownContentRef}
               trigger={(
                 <ToolbarButton
                   icon={<Calculator size={16} />}
