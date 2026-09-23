@@ -81,7 +81,11 @@ export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
   const isEmpty = localName.trim() === '';
 
   return (
-    <div className={`table-title-container ${isEmpty && !isFocused ? 'is-empty' : ''}`}>
+    <div
+      className={`table-title-container ${isEmpty && !isFocused ? 'is-empty' : ''}`}
+      onMouseDownCapture={(event) => event.stopPropagation()}
+      onPointerDownCapture={(event) => event.stopPropagation()}
+    >
       <input
         ref={inputRef}
         className="table-title-input"
@@ -93,10 +97,14 @@ export function TableTitle({ nodeKey, editor, tableName }: TableTitleProps) {
         placeholder={t('TABLE.titlePlaceholder') as string}
         spellCheck={false}
         disabled={!isEditable}
+        onMouseDown={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
       />
       {isEmpty && !isFocused && isEditable && (
         <div
           className="table-title-marker"
+          onMouseDown={(event) => event.stopPropagation()}
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={() => {
             setIsFocused(true);
             setTimeout(() => inputRef.current?.focus(), 0);
