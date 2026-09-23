@@ -28,6 +28,7 @@ import {
 } from "@dnd-kit/sortable";
 import { BlockWithAlignableContents } from "@lexical/react/LexicalBlockWithAlignableContents";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -61,7 +62,6 @@ import {
   toColDndId,
   toRowDndId,
 } from "./tableUtils";
-import { useLexicalTableSelection } from "./useLexicalTableSelection";
 import { useTableMeta } from "./useTableMeta";
 
 type TableRowWithId = TableRowData & { _rowId: string };
@@ -120,13 +120,10 @@ export function TableComponent({
   className,
 }: TableComponentProps) {
   const [editor] = useLexicalComposerContext();
+  useLexicalNodeSelection(nodeKey);
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const { handleContainerMouseDown } = useLexicalTableSelection(
-    nodeKey,
-    containerRef,
-  );
 
   // Table name is managed by the isolated TableTitle component (see TableTitle.tsx).
 
@@ -609,8 +606,6 @@ export function TableComponent({
       <div
         ref={containerRef}
         className="table-container"
-        contentEditable={false}
-        onMouseDown={handleContainerMouseDown}
         onContextMenu={handleContextMenu}
         data-node-key={nodeKey}
       >
