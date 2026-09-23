@@ -30,8 +30,11 @@ export function useLexicalTableSelection(
       ) {
         return;
       }
-      event.preventDefault();
-      selectTableNode();
+      // Only select on double-click or intentional selection, not on every click
+      if (event.detail === 2) {
+        event.preventDefault();
+        selectTableNode();
+      }
     },
     [selectTableNode],
   );
@@ -43,8 +46,9 @@ export function useLexicalTableSelection(
 
     const handleFocusIn = (event: FocusEvent) => {
       const target = event.target as HTMLElement;
+      // Don't auto-select on focus, only on intentional actions
       if (target.closest("input, textarea, button.table-date-btn, .table-add-row-strip, .table-add-col-strip")) {
-        selectTableNode();
+        // Don't select automatically on focus
       }
     };
 
