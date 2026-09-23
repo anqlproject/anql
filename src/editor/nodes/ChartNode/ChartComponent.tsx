@@ -16,6 +16,7 @@ import { useThemeStore } from '@/GlobalState/themeStore';
 
 import { CHART_TYPES, ChartConfiguration, ChartTypePreview, COLOR_PALETTES, getAutoChartProposals, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
 import { $isChartNode, ChartNodeConfig, ChartType } from './ChartNode';
+import { ChartRulesTooltip } from './ChartRulesTooltip';
 
 Chart.register(...registerables);
 
@@ -74,6 +75,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
 
   const tables = Object.entries(chartTableVariables) as TableEntry[];
   const autoChartProposals = getAutoChartProposals(tables);
+
   const [nodeConfig, setNodeConfig] = useState<ChartNodeConfig | null>(() => {
     let initialConfig: ChartNodeConfig | null = null;
     editor.getEditorState().read(() => {
@@ -333,7 +335,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
 
     return (
       <div className={`chart-empty-state${isFocused ? ' focused' : ''}`}>
-        <span>{t('CHART.empty')}</span>
+        {!canConfigure && <span>{t('CHART.empty')}</span>}
         {canConfigure ? (
           <>
             <div className="chart-auto-hint">
@@ -372,7 +374,9 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
               <Settings2 size={14} aria-hidden="true" />
             </button>
           </>
-        ) : <small>{t('CHART.noData')}</small>}
+        ) : (
+          <ChartRulesTooltip id={`chart-rules-tooltip-${nodeKey}`} />
+        )}
       </div>
     );
   }
