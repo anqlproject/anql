@@ -32,11 +32,22 @@ function checkTableIssues(
   const tableNames = Object.keys(tableVariables);
   if (tableNames.length === 0) return null;
 
+  DOT_ACCESS_PATTERN.lastIndex = 0;
+  let valueMatch: RegExpExecArray | null;
+  while ((valueMatch = DOT_ACCESS_PATTERN.exec(expr)) !== null) {
+    const tableName = valueMatch[1];
+    const columnName = valueMatch[2];
+    const column = tableVariables[tableName]?.[columnName];
+    if (column && column.some(value => Number.isNaN(value))) {
+      return `Column '${columnName}' in '${tableName}' contains non-numeric values.`;
+    }
+  }
+
   // Case 1: expression is exactly a known table name → suggest columns as an info "error"
   const exactTable = tableNames.find(name => expr === name);
   if (exactTable) {
     const cols = Object.keys(tableVariables[exactTable]);
-    if (cols.length === 0) return `Table '${exactTable}' has no numeric columns.`;
+    if (cols.length === 0) return `Table '${exactTable}' has no columns.`;
     return `Table '${exactTable}' exists. Use ${exactTable}.ColumnName[index] or sum(${exactTable}.ColumnName). Available columns: ${cols.join(', ')}`;
   }
 

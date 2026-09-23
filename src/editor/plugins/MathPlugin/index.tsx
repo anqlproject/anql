@@ -60,13 +60,21 @@ export default function MathPlugin() {
                 return typeof value === 'number' ? value : String(value ?? '');
               });
             }
-            if (col.meta?.type === 'number') {
-              if (safeHeader) {
-                tableData[safeHeader] = node.__data.map(row => {
-                  const val = row[col.id];
-                  const num = Number(val);
-                  return isNaN(num) ? 0 : num;
-                });
+            if (safeHeader) {
+              const numericValues = node.__data.map(row => {
+                const value = row[col.id];
+                if (typeof value === 'number') {
+                  return Number.isFinite(value) ? value : null;
+                }
+                if (typeof value === 'string' && value.trim() !== '') {
+                  const numberValue = Number(value);
+                  return Number.isFinite(numberValue) ? numberValue : null;
+                }
+                return null;
+              });
+
+              if (numericValues.length > 0 && numericValues.every(value => value !== null)) {
+                tableData[safeHeader] = numericValues as number[];
               }
             }
           });
