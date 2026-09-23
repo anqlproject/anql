@@ -17,6 +17,8 @@
 
   --action-hover: #E8EAED;
   --action-active: #D2E3FC;
+  --table-header-bg: #E2E5E9;
+  --table-header-text: #30343B;
 
   --destructive: #ef4444;
   --destructive-hover: #dc2626;
@@ -49,6 +51,8 @@
 
   --action-hover: #3C4043;
   --action-active: #4A525A;
+  --table-header-bg: #34383D;
+  --table-header-text: #F1F3F4;
 
   --destructive: #ef4444;
   --destructive-hover: #dc2626;

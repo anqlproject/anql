@@ -10,13 +10,15 @@ import type { JSX } from 'react';
 import { useEffect, useState } from 'react';
 
 import { ComponentDialog } from '@/components/custom/ComponentDialog/ComponentDialog';
-import { $createTableNode, TableColumn, TableNode, TableRowData } from '@/editor/nodes/TableNode/TableNode';
+import { $createTableNode, TableColumn, TableRowData } from '@/editor/nodes/TableNode/TableNode';
 import TextInput from '@/editor/ui/TextInput';
 
 export type InsertTablePayload = {
   data: TableRowData[];
   columns: TableColumn[];
   tableName?: string;
+  showColumnHeaders?: boolean;
+  showRowHeaders?: boolean;
 };
 
 export const INSERT_TABLE_COMMAND: LexicalCommand<InsertTablePayload> =
@@ -29,11 +31,6 @@ export default function TablePlugin(): null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    if (!editor.hasNodes([TableNode])) {
-      throw new Error(
-        'TablePlugin: TableNode not registered on editor',
-      );
-    }
 
     const handleSearchNavigate = (e: Event) => {
       const customEvent = e as CustomEvent<{ nodeKey: string; rowIndex: number; columnId: string }>;
@@ -54,7 +51,9 @@ export default function TablePlugin(): null {
         const tableNode = $createTableNode(
           payload.data,
           payload.columns,
-          payload.tableName
+          payload.tableName,
+          payload.showColumnHeaders ?? false,
+          payload.showRowHeaders ?? false
         );
         $insertNodes([tableNode]);
         return true;
@@ -97,16 +96,16 @@ export function InsertTableDialog({
     const rowCount = Number(rows);
     const colCount = Number(columns);
 
-    const generatedColumns: TableColumn[] = Array.from({ length: colCount }).map((_, i) => ({
-      header: `Colonne ${i + 1}`,
-      id: `col_${i}`,
+    const generatedColumns: TableColumn[] = Array.from({ length: colCount }).map(() => ({
+      header: "",
+      id: crypto.randomUUID(),
       meta: { type: 'text' },
     }));
 
     const generatedData = Array.from({ length: rowCount }).map((): TableRowData => {
       const row: TableRowData = {};
       for (let i = 0; i < colCount; i++) {
-        row[`col_${i}`] = '';
+        row[generatedColumns[i].id] = '';
       }
       return row;
     });
@@ -114,6 +113,8 @@ export function InsertTableDialog({
     activeEditor.dispatchCommand(INSERT_TABLE_COMMAND, {
       columns: generatedColumns,
       data: generatedData,
+      showColumnHeaders: false,
+      showRowHeaders: false,
     });
 
     onClose();

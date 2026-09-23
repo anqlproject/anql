@@ -1,0 +1,160 @@
+/* ── Column Gutter Row ── */
+/* Horizontal strip above the header, one slot per column.   */
+/* Mirrors the vertical .table-gutter used for row handles.  */
+
+.table-col-gutter-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 0;          /* collapsed — takes no visual space in layout flow */
+  position: relative;
+  overflow: visible;  /* handles can overflow upward */
+}
+
+/* One slot per column — width is driven inline (matches column width) */
+.table-col-gutter-slot {
+  position: relative;
+  flex-shrink: 0;
+  height: 0;
+  overflow: visible;
+}
+
+.table-row-header-spacer {
+  flex: 0 0 96px;
+  width: 96px;
+  min-height: 0;
+  height: 0;
+}
+
+/* ── Column handle ── */
+
+.table-col-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -8px;              /* floats above the header row */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 14px;
+  z-index: var(--z-modal);
+  border: none;
+  background: transparent;
+  color: var(--text-disabled);
+  cursor: grab;
+  padding: 2px;
+  border-radius: 3px;
+  opacity: 0;
+  touch-action: none;
+  user-select: none;
+  transition: opacity 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+/* Pill indicator (fades when the full icon appears on hover) */
+.table-col-handle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--text-disabled);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.table-col-handle .table-col-handle-icon {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 120ms ease, transform 120ms ease;
+  width: 12px;
+  height: 12px;
+}
+
+.table-col-handle:hover::before {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
+}
+
+.table-col-handle:hover .table-col-handle-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.table-col-handle:hover {
+  background: var(--surface-color);
+  box-shadow: 0 0 0 1px var(--primary-color), 0 2px 4px rgba(0, 0, 0, 0.05);
+  color: var(--primary-color);
+}
+
+.table-col-handle:focus-visible,
+.table-col-handle.is-dragging {
+  background: var(--surface-color);
+}
+
+.table-col-handle:active {
+  cursor: grabbing;
+}
+
+/* Show handle when the slot is hovered (CSS) or when JS marks the column as hovered */
+.table-col-gutter-slot:hover .table-col-handle,
+.table-col-gutter-slot--hovered .table-col-handle,
+.table-col-handle:focus-visible,
+.table-col-handle.is-dragging {
+  opacity: 1;
+}
+
+/* Popover anchor — zero-size, used by Radix */
+.table-col-handle-anchor {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ── Column resizer ── */
+
+.table-resizer {
+  position: absolute;
+  right: -5px;
+  top: 0;
+  bottom: -100vh;
+  width: 10px; /* large invisible hit area */
+  cursor: col-resize;
+  touch-action: none;
+  z-index: var(--z-elevated);
+}
+
+.table-resizer::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--primary-color);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.table-resizer-inactive:hover::after,
+.table-resizer-active::after {
+  opacity: 1;
+  transition: opacity 0.1s ease-in 0.1s;
+}
+
+/* Column drop-target indicator */
+.table-cell--drop-target::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 2px;
+  height: 100vh;
+  background: var(--primary-color);
+  z-index: var(--z-elevated);
+  pointer-events: none;
+}

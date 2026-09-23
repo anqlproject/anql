@@ -28,6 +28,7 @@ import {
 } from "@dnd-kit/sortable";
 import { BlockWithAlignableContents } from "@lexical/react/LexicalBlockWithAlignableContents";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -44,6 +45,7 @@ import { useTranslation } from "react-i18next";
 import { TableHighlight } from "@/App/AppComponents/TableHighlight/TableHighlight";
 
 import { TABLE_ROW_NAVIGATE_COMMAND, TABLE_SEARCH_NAVIGATE_COMMAND } from "../../plugins/TablePlugin";
+import { ColumnGutterRow } from "./TableCell/ColumnGutter";
 import EditableCell from "./TableCell/TableCell";
 import DraggableHeader from "./TableCell/TableHeader";
 import { DraggableRow } from "./TableCell/TableRow";
@@ -60,7 +62,6 @@ import {
   toColDndId,
   toRowDndId,
 } from "./tableUtils";
-import { useLexicalTableSelection } from "./useLexicalTableSelection";
 import { useTableMeta } from "./useTableMeta";
 
 type TableRowWithId = TableRowData & { _rowId: string };
@@ -77,6 +78,10 @@ declare module "@tanstack/react-table" {
       type: ColumnDataType,
     ) => void;
     updateColumnHeader: (columnId: string, headerName: string) => void;
+    toggleColumnHeaders: () => void;
+    toggleRowHeaders: () => void;
+    updateRowHeader: (rowId: string, label: string) => void;
+    showRowHeaders: boolean;
     deleteColumn: (columnId: string) => void;
     addColumn: () => void;
     addColumnLeft: (columnId: string) => void;
@@ -97,6 +102,8 @@ interface TableComponentProps {
   nodeKey: NodeKey;
   data: (TableRowData & { _rowId?: string })[];
   columns: (TableColumn & { size?: number; meta?: { type?: ColumnDataType } })[];
+  showColumnHeaders: boolean;
+  showRowHeaders: boolean;
   tableName: string;
   format: ElementFormatType | null;
   className: Readonly<{ base: string; focus: string }>;
@@ -106,18 +113,17 @@ export function TableComponent({
   nodeKey,
   data: initialData,
   columns: initialColumns,
+  showColumnHeaders,
+  showRowHeaders,
   tableName,
   format,
   className,
 }: TableComponentProps) {
   const [editor] = useLexicalComposerContext();
+  useLexicalNodeSelection(nodeKey);
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const { handleContainerMouseDown } = useLexicalTableSelection(
-    nodeKey,
-    containerRef,
-  );
 
   // Table name is managed by the isolated TableTitle component (see TableTitle.tsx).
 
@@ -162,7 +168,8 @@ export function TableComponent({
   rowRefs.current = rowRefs.current.slice(0, tableData.length);
   columnRefs.current = columnRefs.current.slice(0, initialColumns.length);
 
-  // NOTE : handle column hover logic to display drag handle
+
+  // NOTE: reveal column drag handle when hovering any cell of that column
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
@@ -172,28 +179,31 @@ export function TableComponent({
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const cell = target.closest(".table-cell") as HTMLElement | null;
-
       const colIndex = cell?.getAttribute("data-column-index");
 
       if (colIndex !== currentHoveredColIndex) {
         if (currentHoveredColIndex !== null) {
-          const oldHeader = grid.querySelector(`.table-cell--header[data-column-index="${currentHoveredColIndex}"]`);
-          oldHeader?.classList.remove("table-cell--hovered-col");
+          const oldSlot = grid.querySelector(
+            `.table-col-gutter-slot[data-column-index="${currentHoveredColIndex}"]`
+          );
+          oldSlot?.classList.remove("table-col-gutter-slot--hovered");
         }
-
         if (colIndex != null) {
-          const newHeader = grid.querySelector(`.table-cell--header[data-column-index="${colIndex}"]`);
-          newHeader?.classList.add("table-cell--hovered-col");
+          const newSlot = grid.querySelector(
+            `.table-col-gutter-slot[data-column-index="${colIndex}"]`
+          );
+          newSlot?.classList.add("table-col-gutter-slot--hovered");
         }
-
-        currentHoveredColIndex = colIndex || null;
+        currentHoveredColIndex = colIndex ?? null;
       }
     };
 
     const handleMouseLeave = () => {
       if (currentHoveredColIndex !== null) {
-        const oldHeader = grid.querySelector(`.table-cell--header[data-column-index="${currentHoveredColIndex}"]`);
-        oldHeader?.classList.remove("table-cell--hovered-col");
+        const oldSlot = grid.querySelector(
+          `.table-col-gutter-slot[data-column-index="${currentHoveredColIndex}"]`
+        );
+        oldSlot?.classList.remove("table-col-gutter-slot--hovered");
         currentHoveredColIndex = null;
       }
     };
@@ -208,6 +218,7 @@ export function TableComponent({
   }, []);
 
   // NOTE : desactive scrolling when menu is open
+
   useEffect(() => {
     if (!highlightState.isOpen) return;
     const preventScroll = (e: Event) => e.preventDefault();
@@ -349,6 +360,7 @@ export function TableComponent({
     closeMenus,
     columnCount,
     tableDataLength: tableData.length,
+    showRowHeaders,
     rowRefs,
     onRowAdded: (rowId) => {
       setNewRowId(rowId);
@@ -544,9 +556,11 @@ export function TableComponent({
     const colIndex = cell.getAttribute("data-column-index");
     if (colIndex !== null) {
       const columnIndex = parseInt(colIndex, 10);
-      const column = table.getAllColumns()[columnIndex];
-      if (column) {
-        columnId = column.id;
+      if (columnIndex >= 0) {
+        const column = table.getAllColumns()[columnIndex];
+        if (column) {
+          columnId = column.id;
+        }
       }
     }
 
@@ -592,8 +606,6 @@ export function TableComponent({
       <div
         ref={containerRef}
         className="table-container"
-        contentEditable={false}
-        onMouseDown={handleContainerMouseDown}
         onContextMenu={handleContextMenu}
         data-node-key={nodeKey}
       >
@@ -606,6 +618,7 @@ export function TableComponent({
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
           modifiers={modifiers}
+          autoScroll={false}
         >
           <div className="table-grid-wrapper">
             <div
@@ -613,37 +626,50 @@ export function TableComponent({
               className="table-grid"
               style={{ minWidth: totalWidth }}
             >
-            <div className="table-row table-row--header">
-              <div className="table-gutter" aria-hidden="true" />
-              <SortableContext
+            <SortableContext
                 items={columnOrder.map(toColDndId)}
                 strategy={horizontalListSortingStrategy}
               >
-                {table.getHeaderGroups()[0]?.headers.map((header, index) => (
-                  <DraggableHeader
-                    key={header.id}
-                    header={header}
-                    table={table}
-                    columnIndex={index}
-                    menuOpen={openColMenuIndex === index}
-                    onMenuOpenChange={(open) => {
-                      setOpenColMenuIndex(open ? index : null);
-                      setOpenRowMenuIndex(null);
-                      setHighlightState({
-                        type: "column",
-                        index,
-                        isOpen: open,
-                      });
-                    }}
-                    columnRef={(el) => {
-                      columnRefs.current[index] = el;
-                    }}
-                    isDropTarget={dragOverColIndex === index}
-                    isNew={header.column.id === newColId}
-                  />
-                ))}
+                <ColumnGutterRow
+                  columns={table.getAllLeafColumns()}
+                  resizeHandlers={Object.fromEntries(
+                    (table.getHeaderGroups()[0]?.headers ?? []).map((header) => [
+                      header.column.id,
+                      header.getResizeHandler(),
+                    ]),
+                  )}
+                  showColumnHeaders={showColumnHeaders}
+                  showRowHeaders={showRowHeaders}
+                  table={table}
+                  openColMenuIndex={openColMenuIndex}
+                  onColMenuOpenChange={(index, open) => {
+                    setOpenColMenuIndex(open ? index : null);
+                    setOpenRowMenuIndex(null);
+                    setHighlightState({
+                      type: "column",
+                      index,
+                      isOpen: open,
+                    });
+                  }}
+                />
+                {showColumnHeaders && <div className="table-row table-row--header">
+                  <div className="table-gutter" aria-hidden="true" />
+                  {showRowHeaders && <div className="table-row-header-spacer" aria-hidden="true" />}
+                  {table.getHeaderGroups()[0]?.headers.map((header, index) => (
+                    <DraggableHeader
+                      key={header.id}
+                      header={header}
+                      table={table}
+                      columnIndex={index}
+                      columnRef={(el) => {
+                        columnRefs.current[index] = el;
+                      }}
+                      isDropTarget={dragOverColIndex === index}
+                      isNew={header.column.id === newColId}
+                    />
+                  ))}
+                </div>}
               </SortableContext>
-            </div>
 
             <SortableContext
               items={tableData.map((r) => toRowDndId(r._rowId))}
@@ -672,6 +698,7 @@ export function TableComponent({
                   suppressMenuClick={isDragging}
                   draggingColumnId={activeColumnId}
                   isNew={row.original._rowId === newRowId}
+                  showRowHeaders={showRowHeaders}
                 />
               ))}
             </SortableContext>

@@ -10,8 +10,14 @@ import { CSSProperties, useRef } from "react";
 import { RowMenu } from "../TableMenu/RowMenu";
 import { TableRowData } from "../TableNode";
 import { toRowDndId } from "../tableUtils";
+import EditableCell from "./TableCell";
 
 type TableRowWithId = TableRowData & { _rowId: string };
+
+const rowHeaderColumn = {
+  id: "__row_header__",
+  columnDef: { meta: { type: "text" as const } },
+};
 
 interface DraggableRowProps {
   row: ReturnType<Table<TableRowWithId>["getRowModel"]>["rows"][number];
@@ -24,6 +30,7 @@ interface DraggableRowProps {
   suppressMenuClick?: boolean;
   draggingColumnId?: string | null;
   isNew?: boolean;
+  showRowHeaders: boolean;
 }
 
 export function DraggableRow({
@@ -37,6 +44,7 @@ export function DraggableRow({
   suppressMenuClick,
   draggingColumnId,
   isNew,
+  showRowHeaders,
 }: DraggableRowProps) {
   const isEditable = useLexicalEditable();
   const pointerOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -113,6 +121,40 @@ export function DraggableRow({
           <RowMenu rowIndex={rowIndex} table={table} />
         </Popover.Portal>
       </Popover.Root>
+
+      {showRowHeaders && (
+        <div
+          className="table-cell table-cell--data table-row-header-cell"
+          data-column-index="-1"
+          aria-label={`Row ${rowIndex + 1}`}
+          style={{ flex: "0 0 96px", width: 96 }}
+        >
+          <EditableCell
+            getValue={() => row.original.rowHeader || String(rowIndex + 1)}
+            row={{ index: rowIndex, original: row.original }}
+            column={rowHeaderColumn}
+            table={{
+              options: {
+                meta: {
+                  ...table.options.meta,
+                  updateData: (
+                    rowId: string,
+                    _columnId: string,
+                    value: unknown,
+                  ) => {
+                    const label = String(value ?? "").trim();
+                    // If the user hasn't really changed it from the auto-number, or cleared it,
+                    // save it as empty so it continues to auto-renumber when rows are dragged.
+                    const finalLabel = label === String(rowIndex + 1) ? "" : label;
+                    table.options.meta?.updateRowHeader?.(rowId, finalLabel);
+                  },
+                  getColumnIndex: () => -1,
+                },
+              },
+            }}
+          />
+        </div>
+      )}
 
       {row.getVisibleCells().map((cell, index) => (
         <div

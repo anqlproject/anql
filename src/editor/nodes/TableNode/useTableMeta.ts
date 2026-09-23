@@ -12,6 +12,7 @@ interface UseTableMetaOptions {
   closeMenus: () => void;
   columnCount: number;
   tableDataLength: number;
+  showRowHeaders: boolean;
   rowRefs: React.RefObject<(HTMLElement | null)[]>;
   onRowAdded?: (rowId: string) => void;
   onColumnAdded?: (colId: string) => void;
@@ -56,6 +57,7 @@ export function useTableMeta({
   closeMenus,
   columnCount,
   tableDataLength,
+  showRowHeaders,
   rowRefs,
   onRowAdded,
   onColumnAdded,
@@ -114,6 +116,39 @@ export function useTableMeta({
                 : c,
             ),
           );
+        }
+      });
+    },
+
+    toggleColumnHeaders: () => {
+      closeMenus();
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isTableNode(node)) {
+          node.updateShowColumnHeaders(!node.__showColumnHeaders);
+        }
+      });
+    },
+
+    toggleRowHeaders: () => {
+      closeMenus();
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isTableNode(node)) {
+          node.updateShowRowHeaders(!showRowHeaders);
+        }
+      });
+    },
+
+    showRowHeaders,
+
+    updateRowHeader: (rowId: string, label: string) => {
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isTableNode(node)) {
+          node.updateData(node.__data.map((row) =>
+            row._rowId === rowId ? { ...row, rowHeader: label } : row,
+          ));
         }
       });
     },

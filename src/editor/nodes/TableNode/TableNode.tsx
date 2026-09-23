@@ -40,10 +40,13 @@ export interface TableColumn {
 export interface TableRowData {
   [key: string]: string | number | boolean | null | undefined;
   _rowId?: string;
+  rowHeader?: string;
 }
 
 export type SerializedTableNode = Spread<
   {
+    showColumnHeaders?: boolean;
+    showRowHeaders?: boolean;
     data: TableRowData[];
     columns: TableColumn[];
     tableName?: string;
@@ -120,6 +123,8 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
 }
 
 export class TableNode extends DecoratorBlockNode {
+  __showColumnHeaders: boolean;
+  __showRowHeaders: boolean;
   __data: TableRowData[];
   __columns: TableColumn[];
   __tableName: string;
@@ -139,18 +144,30 @@ export class TableNode extends DecoratorBlockNode {
   }
 
   static clone(node: TableNode): TableNode {
-    return new TableNode(node.__data, node.__columns, node.__tableName, node.__format, node.__key);
+    return new TableNode(node.__data, node.__columns, node.__tableName, node.__format, node.__key, node.__showColumnHeaders, node.__showRowHeaders);
   }
 
   afterCloneFrom(prevNode: this): void {
     super.afterCloneFrom(prevNode);
+    this.__showColumnHeaders = prevNode.__showColumnHeaders;
+    this.__showRowHeaders = prevNode.__showRowHeaders;
     this.__data = prevNode.__data;
     this.__columns = prevNode.__columns;
     this.__tableName = prevNode.__tableName;
   }
 
-  constructor(data: TableRowData[], columns: TableColumn[], tableName?: string, format?: ElementFormatType, key?: NodeKey) {
+  constructor(
+    data: TableRowData[],
+    columns: TableColumn[],
+    tableName?: string,
+    format?: ElementFormatType,
+    key?: NodeKey,
+    showColumnHeaders = false,
+    showRowHeaders = false,
+  ) {
     super(format, key);
+    this.__showColumnHeaders = showColumnHeaders;
+    this.__showRowHeaders = showRowHeaders;
     this.__data = data || [];
     this.__columns = columns || [];
     this.__tableName = tableName || '';
@@ -159,6 +176,8 @@ export class TableNode extends DecoratorBlockNode {
   exportJSON(): SerializedTableNode {
     return {
       ...super.exportJSON(),
+      showColumnHeaders: this.__showColumnHeaders,
+      showRowHeaders: this.__showRowHeaders,
       data: this.__data,
       columns: this.__columns,
       tableName: this.__tableName,
@@ -195,10 +214,19 @@ export class TableNode extends DecoratorBlockNode {
       if (row._rowId) {
         migratedRow._rowId = row._rowId;
       }
+      if (row.rowHeader) {
+        migratedRow.rowHeader = row.rowHeader;
+      }
       return migratedRow;
     });
 
-    return $createTableNode(migratedData, migratedColumns, serializedNode.tableName).updateFromJSON(
+    return $createTableNode(
+      migratedData,
+      migratedColumns,
+      serializedNode.tableName,
+      serializedNode.showColumnHeaders ?? false,
+      serializedNode.showRowHeaders ?? false,
+    ).updateFromJSON(
       serializedNode,
     );
   }
@@ -216,6 +244,16 @@ export class TableNode extends DecoratorBlockNode {
   updateTableName(name: string): void {
     const writable = this.getWritable();
     writable.__tableName = name;
+  }
+
+  updateShowColumnHeaders(show: boolean): void {
+    const writable = this.getWritable();
+    writable.__showColumnHeaders = show;
+  }
+
+  updateShowRowHeaders(show: boolean): void {
+    const writable = this.getWritable();
+    writable.__showRowHeaders = show;
   }
 
   getSearchMatches(query: string): TableSearchMatch[] {
@@ -321,6 +359,8 @@ export class TableNode extends DecoratorBlockNode {
         nodeKey={this.getKey()}
         data={this.__data}
         columns={this.__columns}
+        showColumnHeaders={this.__showColumnHeaders}
+        showRowHeaders={this.__showRowHeaders}
         tableName={this.__tableName}
         format={this.__format}
         className={className}
@@ -329,7 +369,13 @@ export class TableNode extends DecoratorBlockNode {
   }
 }
 
-export function $createTableNode(data: TableRowData[], columns: TableColumn[], tableName?: string): TableNode {
+export function $createTableNode(
+  data: TableRowData[],
+  columns: TableColumn[],
+  tableName?: string,
+  showColumnHeaders = false,
+  showRowHeaders = false,
+): TableNode {
   let name = tableName;
   if (name === undefined) {
     try {
@@ -358,7 +404,7 @@ export function $createTableNode(data: TableRowData[], columns: TableColumn[], t
   }
 
   const dataWithIds = ensureRowIds(data);
-  return new TableNode(dataWithIds, columns, name);
+  return new TableNode(dataWithIds, columns, name, undefined, undefined, showColumnHeaders, showRowHeaders);
 }
 
 export function $isTableNode(node: LexicalNode | null | undefined): node is TableNode {

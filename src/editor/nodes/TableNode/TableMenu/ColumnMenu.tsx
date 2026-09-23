@@ -2,7 +2,7 @@ import './TableMenu.css';
 
 import * as Popover from '@radix-ui/react-popover';
 import type { Table } from '@tanstack/react-table';
-import { Calendar, CheckSquare, Hash, Plus, Trash2, Type } from 'lucide-react';
+import { Calendar, CheckSquare, Columns, Hash, Plus, Trash2, Type } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { TableRowData } from '../TableNode';
@@ -13,9 +13,10 @@ interface ColumnMenuProps {
   type: string;
   columnId: string;
   table: Table<TableRowWithId>;
+  showColumnHeaders: boolean;
 }
 
-export function ColumnMenu({ type, columnId, table }: ColumnMenuProps) {
+export function ColumnMenu({ type, columnId, table, showColumnHeaders }: ColumnMenuProps) {
   const { t } = useTranslation();
 
   return (
@@ -27,6 +28,15 @@ export function ColumnMenu({ type, columnId, table }: ColumnMenuProps) {
       onCloseAutoFocus={(e) => e.preventDefault()}
     >
       <div className="table-th-popover-title">{t('TABLE.columnType')}</div>
+      <button
+        type="button"
+        onPointerDown={(e) => e.preventDefault()}
+        onClick={() => table.options.meta?.toggleColumnHeaders()}
+        className="table-menu-item"
+      >
+        <Columns className="w-4 h-4" /> {t(showColumnHeaders ? 'TABLE.hideHeaders' : 'TABLE.showHeaders')}
+      </button>
+      <div className="table-menu-divider" />
       <button
         type="button"
         onPointerDown={(e) => e.preventDefault()}

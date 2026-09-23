@@ -1,0 +1,65 @@
+.chart-rules-help {
+  position: relative;
+  display: inline-flex;
+}
+
+.chart-no-data-trigger {
+  padding: 2px 4px;
+  border: 0;
+  border-bottom: 1px dashed var(--text-secondary);
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: help;
+  font: inherit;
+}
+
+.chart-no-data-trigger:hover,
+.chart-no-data-trigger:focus-visible {
+  color: var(--text-primary);
+}
+
+.chart-no-data-trigger:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.chart-rules-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 2;
+  width: min(320px, 80vw);
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  background: var(--panel-color);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--text-primary) 18%, transparent);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  text-align: left;
+  transform: translateX(-50%);
+}
+
+.chart-rules-tooltip::after {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--panel-color);
+  content: '';
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.chart-rules-tooltip strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+}
+
+.chart-rules-tooltip p {
+  margin: 0 0 6px;
+}
