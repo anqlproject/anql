@@ -156,6 +156,94 @@
   gap: 6px;
 }
 
+.chart-proposal-list {
+  display: grid;
+  width: min(100%, 560px);
+  max-height: 220px;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.chart-proposal {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  background: var(--panel-color);
+  text-align: left;
+  transition: border-color 0.15s ease;
+}
+
+.chart-proposal:hover {
+  border-color: var(--primary-color);
+}
+
+.chart-proposal-details {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.chart-proposal-details strong,
+.chart-proposal-details span,
+.chart-proposal-details small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-proposal-details span {
+  color: var(--primary-color);
+  font-size: var(--text-xs);
+}
+
+.chart-proposal-details small {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.chart-proposal-types {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(58px, 1fr));
+  gap: 5px;
+}
+
+.chart-proposal-type {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 3px;
+  padding: 5px 3px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.chart-proposal-type:hover,
+.chart-proposal-type.is-recommended {
+  border-color: var(--primary-color);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+
+.chart-proposal-type:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.chart-proposal-type .chart-type-preview {
+  width: 36px;
+  height: 23px;
+}
+
 .chart-auto-hint {
   display: flex;
   align-items: center;

@@ -24,6 +24,11 @@ export const COLORS = COLOR_PALETTES.default;
 export type ChartTable = Record<string, ChartTableValue[]>;
 export type TableEntry = [string, ChartTable];
 
+export interface AutoChartProposal {
+  tableName: string;
+  config: ChartNodeConfig;
+}
+
 export function isNumericColumn(values: ChartTableValue[]): boolean {
   const populatedValues = values.filter(value => String(value).trim() !== '');
   return populatedValues.length > 0 && populatedValues.every(value => Number.isFinite(Number(value)));
@@ -45,6 +50,46 @@ export function getDefaultConfig(tables: TableEntry[], chartType: ChartType = 'l
     colorPalette: 'default',
     yBeginAtZero: true,
   };
+}
+
+export function getAutoChartProposal([tableName, columns]: TableEntry): AutoChartProposal | null {
+  const columnNames = Object.keys(columns).filter(column => !column.startsWith('_'));
+  if (columnNames.length < 2) return null;
+
+  const numericColumns = columnNames.filter(column => isNumericColumn(columns[column]));
+  const categoryColumn = columnNames.find(column => !isNumericColumn(columns[column]));
+  const xColumn = categoryColumn || columnNames[0];
+  const yColumns = numericColumns.filter(column => column !== xColumn);
+
+  if (yColumns.length === 0) return null;
+
+  const xValues = columns[xColumn].filter(value => String(value).trim() !== '');
+  const distinctXValues = new Set(xValues.map(String)).size;
+  const xIsNumeric = isNumericColumn(columns[xColumn]);
+  const chartType: ChartType = xIsNumeric
+    ? 'scatter'
+    : yColumns.length === 1 && distinctXValues <= 12
+      ? 'bar'
+      : 'line';
+
+  return {
+    tableName,
+    config: {
+      ...getDefaultConfig([[tableName, columns]], chartType),
+      tableName,
+      xColumn,
+      yColumns,
+      chartType,
+      categoryColumn: categoryColumn || xColumn,
+      valueColumn: yColumns[0],
+    },
+  };
+}
+
+export function getAutoChartProposals(tables: TableEntry[]): AutoChartProposal[] {
+  return tables
+    .map(getAutoChartProposal)
+    .filter((proposal): proposal is AutoChartProposal => proposal !== null);
 }
 
 export function getYAggregation(columns: ChartTable, yColumns: string[]): ChartAggregation {

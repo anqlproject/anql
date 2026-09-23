@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ChartTableValue, useMathVariables } from '@/editor/context/MathVariablesContext';
 import { useThemeStore } from '@/GlobalState/themeStore';
 
-import { CHART_TYPES, ChartConfiguration, ChartTypePreview, COLOR_PALETTES, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
+import { CHART_TYPES, ChartConfiguration, ChartTypePreview, COLOR_PALETTES, getAutoChartProposals, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
 import { $isChartNode, ChartNodeConfig, ChartType } from './ChartNode';
 
 Chart.register(...registerables);
@@ -73,6 +73,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   const [activeSeriesTab, setActiveSeriesTab] = useState<string | null>(null);
 
   const tables = Object.entries(chartTableVariables) as TableEntry[];
+  const autoChartProposals = getAutoChartProposals(tables);
   const [nodeConfig, setNodeConfig] = useState<ChartNodeConfig | null>(() => {
     let initialConfig: ChartNodeConfig | null = null;
     editor.getEditorState().read(() => {
@@ -144,9 +145,8 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     setIsConfiguring(true);
   };
 
-  const createChartWithType = (chartType: ChartType) => {
-    const defaultConfig = getDefaultConfig(tables, chartType);
-    if (defaultConfig.tableName && defaultConfig.yColumns.length > 0) updateConfig(defaultConfig);
+  const createChartFromProposal = (config: ChartNodeConfig, chartType: ChartType) => {
+    updateConfig({ ...config, chartType });
   };
 
   const changeChartType = (chartType: ChartType) => {
@@ -329,8 +329,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   }
 
   if (!nodeConfig?.tableName || !chartData || chartData.datasets.length === 0) {
-    const defaultConfig = getDefaultConfig(tables);
-    const canConfigure = !!defaultConfig.tableName;
+    const canConfigure = autoChartProposals.length > 0;
 
     return (
       <div className={`chart-empty-state${isFocused ? ' focused' : ''}`}>
@@ -344,18 +343,29 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
               </span>
               <span className="chart-auto-hint-text">{t('CHART.chooseTypeToCreate')}</span>
             </div>
-            <div className="chart-type-picker" role="group" aria-label={t('CHART.chooseType') as string}>
-              {CHART_TYPES.map(chartType => (
-                <button
-                  key={chartType}
-                  type="button"
-                  className="chart-type-picker-button"
-                  onClick={() => createChartWithType(chartType)}
-                  title={t(`CHART.types.${chartType}`) as string}
-                  aria-label={t(`CHART.types.${chartType}`) as string}
-                >
-                  <ChartTypePreview type={chartType} />
-                </button>
+            <div className="chart-proposal-list" role="list" aria-label={t('CHART.availableTables') as string}>
+              {autoChartProposals.map(({ tableName, config }) => (
+                <div key={tableName} className="chart-proposal" role="listitem">
+                  <div className="chart-proposal-details">
+                    <strong>{tableName}</strong>
+                    <small>{config.xColumn} → {config.yColumns.join(', ')}</small>
+                  </div>
+                  <div className="chart-proposal-types" role="group" aria-label={t('CHART.chooseTypeForTable', { table: tableName }) as string}>
+                    {CHART_TYPES.map(chartType => (
+                      <button
+                        key={chartType}
+                        type="button"
+                        className={`chart-proposal-type${chartType === config.chartType ? ' is-recommended' : ''}`}
+                        onClick={() => createChartFromProposal(config, chartType)}
+                        title={t('CHART.createFromTable', { table: tableName, type: t(`CHART.types.${chartType}`) }) as string}
+                        aria-label={t('CHART.createFromTable', { table: tableName, type: t(`CHART.types.${chartType}`) }) as string}
+                      >
+                        <ChartTypePreview type={chartType} />
+                        <span>{t(`CHART.types.${chartType}`)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
             <button type="button" className="chart-configure-button" onClick={openConfiguration} title={t('CHART.configure') as string} aria-label={t('CHART.configure') as string}>
