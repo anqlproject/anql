@@ -168,9 +168,12 @@ export default function CreateNodeMenu({
       icon: <TableIcon size={ICON_SIZES.default} />,
       title: t('NODES.table') as string,
       onClick: () => {
+        const colId = crypto.randomUUID();
         editor.dispatchCommand(INSERT_TABLE_COMMAND, {
-          columns: [{ header: "", id: "a" }],
-          data: [{ a: "" }],
+          columns: [{ header: "", id: colId }],
+          data: [{ [colId]: "" }],
+          showColumnHeaders: false,
+          showRowHeaders: false,
         });
         setIsMenuOpen(false);
       },
