@@ -71,7 +71,6 @@ We're excited to announce v0.3.0 of ANQL, featuring major enhancements to the ma
 - **Better Typography** - Improved spacing and visual consistency
 - **Cleaner Math Panel** - Restyled variable UI for better readability
 - **Global Search Enhancement** - Mark documents in trash during search
-- **QuickStart Guide** - Added comprehensive QuickStart guide with GIF demos
 
 ### 📚 Documentation & Project
 - **Code of Conduct** - Added Contributor Covenant 2.1 based Code of Conduct

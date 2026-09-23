@@ -5,18 +5,18 @@
 <h1 align="center">ANQL</h1>
 
 <p align="center">
-  <strong>A fast and minimalist workspace.</strong>
+  <strong>Write freely. Structure when needed.</strong>
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.3.1-blue" style="pointer-events: none;" />
+  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/anqlproject/anql?color=blue" style="pointer-events: none;" />
   <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange" style="pointer-events: none;" />
   <img alt="Platform" src="https://img.shields.io/badge/platform-macOS-lightgrey" style="pointer-events: none;" />
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-green" style="pointer-events: none;" />
+  <img alt="GitHub License" src="https://img.shields.io/github/license/anqlproject/anql?color=green" style="pointer-events: none;" />
 </p>
 
 <p align="center">
-  <a href="#why-anql">Why ANQL?</a> |
+  <a href="#about-anql">About ANQL</a> |
   <a href="#features">Features</a> |
   <a href="#getting-started">Getting Started</a> |
   <a href="#technical-details">Technical Details</a> |
@@ -30,58 +30,46 @@
 
 ---
 
-## See it in action
+## About ANQL
 
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <strong>Create seamlessly</strong><br/><br/>
-      <img src="assets/create new document.gif" alt="Create new document" />
-    </td>
-    <td align="center" width="50%">
-      <strong>Smart block creation</strong><br/><br/>
-      <img src="assets/smart creation heading.gif" alt="Smart creation" />
-    </td>
-  </tr>
-</table>
+### Core Principles
 
-<p align="center">
-  <a href="QuickStart.md">→ See full Quick Start guide</a>
-</p>
+The product is built around three principles:
 
----
+- **Start simple:** writing should never require a database model or a setup step.
+- **Add complexity only when needed:** tables, calculations, and charts appear when they help the thought in front of you.
+- **Keep context together:** assumptions, decisions, data, results, and visualizations stay in the same document.
 
-## Why ANQL?
+### Who Is ANQL For?
 
-ANQL is built to solve a specific problem: **working and organizing at the same time**, without friction. 
+ANQL is for people who want to think clearly without being forced into a spreadsheet, a heavy database, or a coding environment.
 
-It looks like a simple notepad to keep you focused. But when you need to calculate numbers or build tables, powerful tools appear instantly (just try to type `math` and press `TAB`).
+- Students and researchers: Take lecture notes naturally, organize data in tables, calculate with Math blocks, and visualize results with charts in one document.
+- Anyone working with data and calculations: Analysts, merchants, freelancers, financial analysts, project managers, and more can organize information, perform calculations, and visualize results in one document.
 
-You get the simplicity of a distraction-free notepad, with the power of a complete workspace available precisely when you need it. 
+### Why ANQL?
+
+- **Excel** is excellent for advanced analysis.
+- **Notion** is excellent for collaboration and shared databases.
+- **Jupyter Notebook** is excellent for code-driven computation.
+
+ANQL is built for the space before, or between, those tools.
+ANQL offers the freedom of simple notes, with more power available exactly when you need it.
 
 ---
 
 ## Features
 
-### ✍️ Fluid Writing Experience
-Write without friction. ANQL combines the simplicity of plain text with powerful formatting.
-- **Markdown Friendly**: Use familiar shortcuts like `#` for headings or `-` for lists.
+- **Easy Writing**: Write, format with Markdown shortcuts, style by selecting text.
 - **Smart Creation**: Type "table" or "h2" on a new line and press `TAB` to create it instantly.
-- **Quick Formatting**: Select any text to style it without reaching for complicated menus.
-
-### 🗄️ Local & Private (Offline-First)
-Your data stays on your machine — always. No internet required.
 - **Local SQLite Database**: Lightning-fast, reliable data persistence.
 - **Full-text search**: Instantly find any thought across all your documents.
-- **Asset management**: Easily embed images and files that are safely stored locally.
+- **Offline-First**: Your data stays on your machine — always. No internet required.
+- **Tables, Math & Charts**: Combine structured data, calculations, and visualizations in one document.
 
-### ⚡️ Lightning Fast
-Built with Tauri and React, ANQL is designed to be lightweight, responsive, and incredibly fast to launch and navigate.
-
-### 🌙 Light & Dark Mode
-Carefully crafted themes to keep you comfortable in any environment, at any hour.
-
-
+<p align="center">
+  <img src="assets/demo.gif" alt="Using tables, Math, and charts in ANQL" />
+</p>
 
 ---
 
@@ -91,7 +79,7 @@ Carefully crafted themes to keep you comfortable in any environment, at any hour
 
 ANQL is currently available for **macOS**.
 
-👉 [Download the latest release (v0.3.1)](https://github.com/anqlproject/anql/releases/tag/0.3.1)
+👉 [Download the latest release](https://github.com/anqlproject/anql/releases/latest)
 
 ### Build from source
 
@@ -157,6 +145,14 @@ We're actively building. Here's what's on the roadmap:
 
 ---
 
+## Contributing
+
+We welcome contributions! Whether it's reporting a bug, proposing a new feature, or submitting a pull request, your help is appreciated. 
+
+Please see our [Contributing Guidelines](CONTRIBUTING.md) to learn how you can help build ANQL.
+
+---
+
 ## Community
 
 Got feedback? Found a bug? Have an idea?
@@ -165,7 +161,7 @@ Got feedback? Found a bug? Have an idea?
 
 🐛 [Report a bug or request a feature](https://github.com/anqlproject/anql/issues)
 
- Follow us on [X / Twitter](https://x.com/anqlproject) for updates.
+Follow us on [X / Twitter](https://x.com/anqlproject) for updates.
 
 ---
 
