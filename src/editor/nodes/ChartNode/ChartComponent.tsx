@@ -15,7 +15,7 @@ import { ChartTableValue, useMathVariables } from '@/editor/context/MathVariable
 import { useThemeStore } from '@/GlobalState/themeStore';
 
 import { CHART_TYPES, ChartConfiguration, ChartTypePreview, COLOR_PALETTES, getAutoChartProposals, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
-import { $isChartNode, ChartNodeConfig, ChartType } from './ChartNode';
+import { $isChartNode, ChartNode, ChartNodeConfig, ChartType } from './ChartNode';
 import { ChartRulesTooltip } from './ChartRulesTooltip';
 
 Chart.register(...registerables);
@@ -59,6 +59,14 @@ export function normalizeConfig(config: ChartNodeConfig, table: Record<string, C
   };
 }
 
+function useDeepMemo<T>(value: T): T {
+  const ref = useRef<T>(value);
+  if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
+    ref.current = value;
+  }
+  return ref.current;
+}
+
 export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nodeKey: string }) {
   const { t } = useTranslation();
   const isEditable = useLexicalEditable();
@@ -88,34 +96,42 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   });
 
   useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        const node = $getNodeByKey(nodeKey);
-        if ($isChartNode(node)) {
-          const newConfig = node.getConfig();
-          setNodeConfig(prev => {
-            if (JSON.stringify(prev) !== JSON.stringify(newConfig)) {
-              return newConfig;
-            }
-            return prev;
-          });
-        }
-      });
+    return editor.registerMutationListener(ChartNode, (mutations) => {
+      if (mutations.has(nodeKey)) {
+        editor.getEditorState().read(() => {
+          const node = $getNodeByKey(nodeKey);
+          if ($isChartNode(node)) {
+            const newConfig = node.getConfig();
+            setNodeConfig(prev => {
+              if (JSON.stringify(prev) !== JSON.stringify(newConfig)) {
+                return newConfig;
+              }
+              return prev;
+            });
+          }
+        });
+      }
     });
   }, [editor, nodeKey]);
 
-  const table = nodeConfig ? chartTableVariables[nodeConfig.tableName] : undefined;
-  const safeConfig = nodeConfig && table ? normalizeConfig(nodeConfig, table) : nodeConfig;
+  const rawTable = nodeConfig ? chartTableVariables[nodeConfig.tableName] : undefined;
+  const table = useDeepMemo(rawTable);
+  const safeConfig = useMemo(() => nodeConfig && table ? normalizeConfig(nodeConfig, table) : nodeConfig, [nodeConfig, table]);
+
   const previewConfig = isConfiguring && !hasSelectedConfigType ? null : isConfiguring ? draftConfig : safeConfig;
-  const previewTable = previewConfig ? chartTableVariables[previewConfig.tableName] : undefined;
-  const renderConfig = previewConfig && previewTable ? normalizeConfig(previewConfig, previewTable) : previewConfig;
-  const polarValueColumns = safeConfig && isPolarChart(safeConfig.chartType)
+  const rawPreviewTable = previewConfig ? chartTableVariables[previewConfig.tableName] : undefined;
+  const previewTable = useDeepMemo(rawPreviewTable);
+  const renderConfig = useMemo(() => previewConfig && previewTable ? normalizeConfig(previewConfig, previewTable) : previewConfig, [previewConfig, previewTable]);
+
+  const polarValueColumns = useMemo(() => safeConfig && isPolarChart(safeConfig.chartType)
     ? Object.keys(table || {}).filter(column => isNumericColumn(table?.[column] || []))
-    : [];
-  const seriesTabColumns = safeConfig && !isPolarChart(safeConfig.chartType) ? safeConfig.yColumns : [];
-  const chartConfigForDisplay = renderConfig && activeSeriesTab && seriesTabColumns.includes(activeSeriesTab)
+    : [], [safeConfig, table]);
+
+  const seriesTabColumns = useMemo(() => safeConfig && !isPolarChart(safeConfig.chartType) ? safeConfig.yColumns : [], [safeConfig]);
+
+  const chartConfigForDisplay = useMemo(() => renderConfig && activeSeriesTab && seriesTabColumns.includes(activeSeriesTab)
     ? { ...renderConfig, yColumns: [activeSeriesTab] }
-    : renderConfig;
+    : renderConfig, [renderConfig, activeSeriesTab, seriesTabColumns]);
 
   const updateConfig = (config: ChartNodeConfig, close = true) => {
     if (debounceTimeoutRef.current) {
@@ -206,53 +222,53 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
         return {
           label: columnName,
           data: isRadar
-          ? (previewTable[columnName] || []).map(value => Number(value) || 0)
-          : isScatter
-            ? effectiveAggregation === 'count'
-              ? labels.map(label => ({
-                x: label,
-                y: xValues.reduce<number>((count, xValue, rowIndex) => (
-                  String(xValue) === label && String(previewTable[columnName]?.[rowIndex] ?? '').trim() !== ''
-                    ? count + 1
-                    : count
-                ), 0),
-              }))
-              : (previewTable[columnName] || []).map((value, rowIndex) => ({
-                x: xPoints[rowIndex],
-                y: effectiveAggregation === 'category'
-                  ? yCategoryLabels?.indexOf(String(value)) ?? -1
-                  : Number(value) || 0,
-              }))
-            : effectiveAggregation === 'count'
-              ? labels.map(label => ({
-                x: label,
-                y: xValues.reduce<number>((count, xValue, rowIndex) => (
-                  String(xValue) === label && String(previewTable[columnName]?.[rowIndex] ?? '').trim() !== ''
-                    ? count + 1
-                    : count
-                ), 0),
-              }))
-              : effectiveAggregation === 'category'
-                ? (previewTable[columnName] || []).map((value, rowIndex) => ({
-                  x: xPoints[rowIndex],
-                  y: yCategoryLabels?.indexOf(String(value)) ?? -1,
+            ? (previewTable[columnName] || []).map(value => Number(value) || 0)
+            : isScatter
+              ? effectiveAggregation === 'count'
+                ? labels.map(label => ({
+                  x: label,
+                  y: xValues.reduce<number>((count, xValue, rowIndex) => (
+                    String(xValue) === label && String(previewTable[columnName]?.[rowIndex] ?? '').trim() !== ''
+                      ? count + 1
+                      : count
+                  ), 0),
                 }))
                 : (previewTable[columnName] || []).map((value, rowIndex) => ({
                   x: xPoints[rowIndex],
-                  y: Number(value) || 0,
-                })),
-        borderColor: colors[colorIndex % colors.length],
-        borderWidth: 2,
-        tension: 0.25,
-        fill: isRadar,
-        backgroundColor: isRadar
-          ? withAlpha(colors[colorIndex % colors.length], 0.3)
-          : colors[colorIndex % colors.length],
-        pointBackgroundColor: colors[colorIndex % colors.length],
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: isRadar ? 1 : 0,
-        pointRadius: renderConfig.chartType === 'line' || isScatter || isRadar ? 3 : 0,
-        pointHoverRadius: renderConfig.chartType === 'line' || isScatter || isRadar ? 5 : 0,
+                  y: effectiveAggregation === 'category'
+                    ? yCategoryLabels?.indexOf(String(value)) ?? -1
+                    : Number(value) || 0,
+                }))
+              : effectiveAggregation === 'count'
+                ? labels.map(label => ({
+                  x: label,
+                  y: xValues.reduce<number>((count, xValue, rowIndex) => (
+                    String(xValue) === label && String(previewTable[columnName]?.[rowIndex] ?? '').trim() !== ''
+                      ? count + 1
+                      : count
+                  ), 0),
+                }))
+                : effectiveAggregation === 'category'
+                  ? (previewTable[columnName] || []).map((value, rowIndex) => ({
+                    x: xPoints[rowIndex],
+                    y: yCategoryLabels?.indexOf(String(value)) ?? -1,
+                  }))
+                  : (previewTable[columnName] || []).map((value, rowIndex) => ({
+                    x: xPoints[rowIndex],
+                    y: Number(value) || 0,
+                  })),
+          borderColor: colors[colorIndex % colors.length],
+          borderWidth: 2,
+          tension: 0.25,
+          fill: isRadar,
+          backgroundColor: isRadar
+            ? withAlpha(colors[colorIndex % colors.length], 0.3)
+            : colors[colorIndex % colors.length],
+          pointBackgroundColor: colors[colorIndex % colors.length],
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: isRadar ? 1 : 0,
+          pointRadius: renderConfig.chartType === 'line' || isScatter || isRadar ? 3 : 0,
+          pointHoverRadius: renderConfig.chartType === 'line' || isScatter || isRadar ? 5 : 0,
         };
       }),
     };

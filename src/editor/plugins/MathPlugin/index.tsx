@@ -3,6 +3,7 @@ import { $setBlocksType } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
 import {
   $createParagraphNode,
+  $getNodeByKey,
   $getRoot,
   $getSelection,
   $isNodeSelection,
@@ -93,19 +94,45 @@ export default function MathPlugin() {
       });
 
       const { results, variables, scopes } = evaluateAllMathNodes(evaluationItems);
-      setScopes(scopes);
-      setResults(results);
-      setVariables(variables);
-      setTableVariables(tableVariables);
-      setChartTableVariables(chartTableVariables);
+
+      setScopes(prev => JSON.stringify(prev) === JSON.stringify(scopes) ? prev : scopes);
+      setResults(prev => JSON.stringify(prev) === JSON.stringify(results) ? prev : results);
+      setVariables(prev => JSON.stringify(prev) === JSON.stringify(variables) ? prev : variables);
+      setTableVariables(prev => JSON.stringify(prev) === JSON.stringify(tableVariables) ? prev : tableVariables);
+      setChartTableVariables(prev => JSON.stringify(prev) === JSON.stringify(chartTableVariables) ? prev : chartTableVariables);
     });
   }, [editor, setResults, setVariables, setScopes, setTableVariables, setChartTableVariables]);
 
   useEffect(() => {
     return mergeRegister(
       // Re-evaluate on any document change
-      editor.registerUpdateListener(({ dirtyElements, dirtyLeaves, editorState }) => {
+      editor.registerUpdateListener(({ dirtyElements, dirtyLeaves, prevEditorState, editorState }) => {
+        let shouldEvaluate = false;
+
         if (dirtyElements.size > 0 || dirtyLeaves.size > 0) {
+          const checkDirtyNodes = (state: typeof editorState) => {
+            let found = false;
+            state.read(() => {
+              for (const key of dirtyElements.keys()) {
+                const node = $getNodeByKey(key);
+                if (node && (node.getType() === 'table' || node.getType() === 'mathexp')) {
+                  found = true; return;
+                }
+              }
+              for (const key of dirtyLeaves.keys()) {
+                const node = $getNodeByKey(key);
+                if (node && (node.getType() === 'table' || node.getType() === 'mathexp')) {
+                  found = true; return;
+                }
+              }
+            });
+            return found;
+          };
+
+          shouldEvaluate = checkDirtyNodes(editorState) || checkDirtyNodes(prevEditorState);
+        }
+
+        if (shouldEvaluate) {
           evaluateTree();
         }
 
