@@ -29,7 +29,7 @@
     "src",
     "docs",
     "tests"
-, "__tests__/markdown/AnqlMarkdownTransformers.test.ts"  ],
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"
