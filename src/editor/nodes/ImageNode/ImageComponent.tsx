@@ -463,7 +463,16 @@ export default function ImageComponent({
               onError={() => setIsLoadError(true)}
             />
           ) : (
-            <div style={{ display: 'inline-block', width: width || 100, height: height || 100, background: '#eee' }}>Loading...</div>
+            <div
+              style={{
+                display: 'inline-block',
+                width: typeof width === 'number' ? width : 300,
+                height: typeof height === 'number' ? height : 200,
+                maxWidth,
+                background: 'var(--surface-secondary, #f0f0f0)',
+                borderRadius: 4,
+              }}
+            />
           )}
           {resizable && isInNodeSelection && isFocused && (
             <ImageResizer
