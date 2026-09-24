@@ -21,10 +21,9 @@ import {
   $applyNodeReplacement,
   DecoratorNode,
 } from 'lexical';
-import type {JSX} from 'react';
-import * as React from 'react';
+import type { JSX } from 'react';
 
-const ImageComponent = React.lazy(() => import('./ImageComponent'));
+import ImageComponent from './ImageComponent';
 
 export interface ImagePayload {
   altText: string;
@@ -49,9 +48,9 @@ function $convertImageElement(domNode: Node): null | DOMConversionOutput {
   if (img.src.startsWith('file:///') || isGoogleDocCheckboxImg(img)) {
     return null;
   }
-  const {alt: altText, src, width, height} = img;
-  const node = $createImageNode({altText, height, src, width});
-  return {node};
+  const { alt: altText, src, width, height } = img;
+  const node = $createImageNode({ altText, height, src, width });
+  return { node };
 }
 
 export type SerializedImageNode = Spread<
@@ -92,7 +91,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const {altText, height, width, maxWidth, src} = serializedNode;
+    const { altText, height, width, maxWidth, src } = serializedNode;
     return $createImageNode({
       altText,
       height,
@@ -113,7 +112,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     element.setAttribute('alt', this.__altText);
     element.setAttribute('width', this.__width.toString());
     element.setAttribute('height', this.__height.toString());
-    return {element};
+    return { element };
   }
 
   static importDOM(): DOMConversionMap | null {

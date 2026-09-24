@@ -438,8 +438,26 @@ export default function ImageComponent({
   const draggable = isInNodeSelection && !isResizing;
   const isFocused = (isSelected || isResizing) && isEditable;
   
+  // Skeleton dimensions: use known node dimensions to reserve layout space
+  const skeletonWidth = typeof width === 'number' && width > 0 ? width : 300;
+  const skeletonHeight = typeof height === 'number' && height > 0 ? height : 200;
+
+  const imageSkeleton = (
+    <div
+      style={{
+        display: 'inline-block',
+        width: skeletonWidth,
+        height: skeletonHeight,
+        maxWidth,
+        background: 'var(--surface-secondary, #f0f0f0)',
+        borderRadius: 4,
+        flexShrink: 0,
+      }}
+    />
+  );
+
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={imageSkeleton}>
       <>
         <div 
           draggable={draggable}
@@ -463,16 +481,7 @@ export default function ImageComponent({
               onError={() => setIsLoadError(true)}
             />
           ) : (
-            <div
-              style={{
-                display: 'inline-block',
-                width: typeof width === 'number' ? width : 300,
-                height: typeof height === 'number' ? height : 200,
-                maxWidth,
-                background: 'var(--surface-secondary, #f0f0f0)',
-                borderRadius: 4,
-              }}
-            />
+            imageSkeleton
           )}
           {resizable && isInNodeSelection && isFocused && (
             <ImageResizer

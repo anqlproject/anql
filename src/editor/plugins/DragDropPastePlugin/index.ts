@@ -12,7 +12,7 @@ import { isMimeType, mediaFileReader } from '@lexical/utils';
 import { COMMAND_PRIORITY_LOW } from 'lexical';
 import { useEffect } from 'react';
 
-import { INSERT_IMAGE_COMMAND, uploadImageIfNeeded } from '@/editor/plugins/ImagesPlugin';
+import { getImageNaturalDimensions, INSERT_IMAGE_COMMAND, uploadImageIfNeeded } from '@/editor/plugins/ImagesPlugin';
 
 const ACCEPTABLE_IMAGE_TYPES = [
   'image/',
@@ -31,10 +31,10 @@ export default function DragDropPaste(): null {
         (async () => {
           try {
             // Filter files to only process image files
-            const imageFiles = Array.from(files).filter(file => 
+            const imageFiles = Array.from(files).filter(file =>
               isMimeType(file, ACCEPTABLE_IMAGE_TYPES)
             );
-            
+
             if (imageFiles.length === 0) {
               return; // No image files to process
             }
@@ -45,10 +45,12 @@ export default function DragDropPaste(): null {
             );
             for (const { file, result } of filesResult) {
               if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
+                const dims = await getImageNaturalDimensions(result);
                 const finalSrc = await uploadImageIfNeeded(result, file.name);
                 editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
                   altText: file.name,
                   src: finalSrc,
+                  ...(dims && { width: dims.width, height: dims.height }),
                 });
               }
             }

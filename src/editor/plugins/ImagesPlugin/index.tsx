@@ -54,6 +54,21 @@ export async function uploadImageIfNeeded(src: string, altText: string): Promise
   return uploadAssetIfNeeded(src, altText || 'uploaded_image', 'image/png');
 }
 
+/**
+ * Returns the natural pixel dimensions of an image given its URL/object-URL.
+ * Never throws — returns undefined on error so callers can fall back gracefully.
+ */
+export function getImageNaturalDimensions(
+  src: string,
+): Promise<{ width: number; height: number } | undefined> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => resolve(undefined);
+    img.src = src;
+  });
+}
+
 export async function insertImageFromFile(editor: LexicalEditor): Promise<void> {
   try {
     const selectedPath = await open({
@@ -79,15 +94,18 @@ export async function insertImageFromFile(editor: LexicalEditor): Promise<void> 
     
     const blob = new Blob([bytes], { type: mime });
     const objectUrl = URL.createObjectURL(blob);
-    
+
+    // Measure natural dimensions BEFORE revoking the object URL
+    const dims = await getImageNaturalDimensions(objectUrl);
     const finalSrc = await uploadImageIfNeeded(objectUrl, fileName);
     URL.revokeObjectURL(objectUrl);
-    
-    // Insert the image directly within an editor update to avoid node reference issues
+
+    // Insert the image with known dimensions to prevent layout shift
     editor.update(() => {
-      const imageNode = $createImageNode({ 
-        altText: fileName, 
-        src: finalSrc 
+      const imageNode = $createImageNode({
+        altText: fileName,
+        src: finalSrc,
+        ...(dims && { width: dims.width, height: dims.height }),
       });
       $insertNodes([imageNode]);
       $setSelection(null);
