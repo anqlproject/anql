@@ -12,6 +12,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+        ],
+        "docs/*": [
+          "./docs/*"
       ]
     },
     "moduleResolution": "bundler",
