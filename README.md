@@ -45,7 +45,7 @@ The product is built around three principles:
 ANQL is for people who want to think clearly without being forced into a spreadsheet, a heavy database, or a coding environment.
 
 - Students and researchers: Take lecture notes naturally, organize data in tables, calculate with Math blocks, and visualize results with charts in one document.
-- Anyone working with data and calculations: Analysts, merchants, freelancers, financial analysts, project managers, and more can organize information, perform calculations, and visualize results in one document.
+- Anyone working with data and calculations: merchants, freelancers, financial analysts, and more...
 
 ### Why ANQL?
 
