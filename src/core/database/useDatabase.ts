@@ -1,7 +1,7 @@
 // src/hooks/useDatabase.ts
 import { invoke } from '@tauri-apps/api/core';
 
-const isTauri = typeof window !== 'undefined' && 'isTauri' in window;
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 export const initDatabase = async (dbPath: string) => {
   try {
     // Check if we're in a Tauri environment

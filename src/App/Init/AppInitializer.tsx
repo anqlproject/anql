@@ -32,23 +32,36 @@ interface AppInitializerProps {
 }
 
 const templateResources = new Map([
-  ['nodes', 'templates/nodes.anql'],
-  ['math_node_demonstration', 'templates/math_node_demonstration.anql'],
+  ['Overviews', 'templates/Overviews.anql'],
+  ['Budget_management', 'templates/Budget_management.anql'],
+  ['Physics_exercise', 'templates/Physics_exercise.anql'],
 ]);
 
-async function importTemplateDocuments(): Promise<void> {
-  const templateUrls = new Map<string, string>();
-  const existingDocuments = await getDocumentsByWorkspaceId('default');
-  const existingTitles = new Set(existingDocuments.map((document) => document.title));
+let templateImportPromise: Promise<void> | null = null;
 
-  for (const [name, resourcePath] of templateResources) {
-    if (existingTitles.has(name)) continue;
-    templateUrls.set(name, await resolveResource(resourcePath));
-  }
+function importTemplateDocuments(): Promise<void> {
+  if (templateImportPromise) return templateImportPromise;
 
-  for (const templateUrl of templateUrls.values()) {
-    await importAnqlDocument(templateUrl);
-  }
+  templateImportPromise = (async () => {
+    const templateUrls = new Map<string, string>();
+    const existingDocuments = await getDocumentsByWorkspaceId('default');
+    const normalizeTitle = (title: string) => title.replace(/_/g, ' ').trim().toLowerCase();
+    const existingTitles = new Set(existingDocuments.map((document) => normalizeTitle(document.title)));
+
+    for (const [name, resourcePath] of templateResources) {
+      if (existingTitles.has(normalizeTitle(name))) continue;
+      templateUrls.set(name, await resolveResource(resourcePath));
+    }
+
+    for (const templateUrl of templateUrls.values()) {
+      await importAnqlDocument(templateUrl);
+    }
+  })().catch((error) => {
+    templateImportPromise = null;
+    throw error;
+  });
+
+  return templateImportPromise;
 }
 
 export function AppInitializer({ children }: AppInitializerProps): JSX.Element {

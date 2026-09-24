@@ -2,16 +2,18 @@ use crate::database_manager::database::Database;
 use anyhow::Result;
 use std::sync::Arc;
 use tauri::State;
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 
 pub struct AppState {
     pub db: RwLock<Option<Arc<Database>>>,
+    pub init_lock: Mutex<()>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
             db: RwLock::new(None),
+            init_lock: Mutex::new(()),
         }
     }
 }
@@ -27,6 +29,12 @@ pub async fn get_db(state: &AppState) -> Result<Arc<Database>, String> {
 
 #[tauri::command]
 pub async fn init_db(state: State<'_, AppState>, db_path: String) -> Result<(), String> {
+    let _init_guard = state.init_lock.lock().await;
+
+    if state.db.read().await.is_some() {
+        return Ok(());
+    }
+
     let db = Database::new(&db_path)
         .await
         .map_err(|e| format!("{e:#}"))?;
