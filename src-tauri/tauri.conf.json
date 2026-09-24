@@ -35,7 +35,7 @@
       "endpoints": [
         "https://github.com/anqlproject/anql/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQzNkMwMkY2MDI0NERBMQpSV1NoVFNSZ0w4QTJEWGkyUWVObm05T042RFNmRFUvTUhSczl2NU13OVYydlJhSzNGNHQyekZKMAo="
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEExNENCMjQzRkI5RjU3QkYKUldTL1Y1LzdRN0pNb1RUU0kvak10ZG9tQklyRW9WdVNobmlCR0d2bnEyNXlCcXFxclByNFBMeWQK"
     }
   },
   "bundle": {
