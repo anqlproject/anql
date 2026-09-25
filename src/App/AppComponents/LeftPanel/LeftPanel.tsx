@@ -193,12 +193,30 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
     e.stopPropagation();
     isDraggingRef.current = true;
     dragStartXRef.current = e.clientX;
-    setIsResizing(true);
+  };
+
+  const handleMouseUp = (clientX: number) => {
+    if (!isDraggingRef.current) return;
+
+    const hasMoved = Math.abs(clientX - dragStartXRef.current) > 5;
+    if (!hasMoved) {
+      toggleSidebar();
+    }
+    isDraggingRef.current = false;
+    setIsResizing(false);
+    if (animationFrameIdRef.current !== null) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+      animationFrameIdRef.current = null;
+    }
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingRef.current) {
+        const hasMoved = Math.abs(e.clientX - dragStartXRef.current) > 5;
+        if (!hasMoved) return;
+
+        setIsResizing(true);
         if (animationFrameIdRef.current !== null) {
           cancelAnimationFrame(animationFrameIdRef.current);
         }
@@ -212,25 +230,16 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
       }
     };
 
-    const handleMouseUp = (e: MouseEvent) => {
-      const hasMoved = Math.abs(e.clientX - dragStartXRef.current) > 5;
-      if (!hasMoved) {
-        toggleSidebar();
-      }
-      isDraggingRef.current = false;
-      setIsResizing(false);
-      if (animationFrameIdRef.current !== null) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-        animationFrameIdRef.current = null;
-      }
+    const handleDocumentMouseUp = (e: MouseEvent) => {
+      handleMouseUp(e.clientX);
     };
 
     document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mouseup", handleDocumentMouseUp);
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mouseup", handleDocumentMouseUp);
       if (animationFrameIdRef.current !== null) {
         cancelAnimationFrame(animationFrameIdRef.current);
       }
@@ -259,6 +268,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
               width: DIMENSIONS.sidebarWrapperWidth,
             }}
             onMouseDown={handleMouseDown}
+            onMouseUp={(e) => handleMouseUp(e.clientX)}
           ></div>
         }
         <SidebarHeader>
