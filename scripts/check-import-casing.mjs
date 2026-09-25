@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import process from "node:process";
 
+const normalizePath = (file) => file.replaceAll("\\", "/");
+
 const trackedFiles = execFileSync("git", ["ls-files", "-z", "--", "src"], {
   encoding: "utf8",
 })
@@ -44,9 +46,11 @@ for (const file of sourceFiles) {
       continue;
     }
 
-    const base = specifier.startsWith("@/")
-      ? join("src", specifier.slice(2))
-      : join(dirname(file), specifier);
+    const base = normalizePath(
+      specifier.startsWith("@/")
+        ? join("src", specifier.slice(2))
+        : join(dirname(file), specifier),
+    );
     const candidates = extensions.map((extension) => `${base}${extension}`);
     const exactMatch = candidates.find((candidate) => trackedFiles.includes(candidate));
     if (exactMatch) continue;
