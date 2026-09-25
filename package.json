@@ -1,7 +1,7 @@
 {
   "name": "ANQL",
   "private": true,
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "ANQL: A modern text editor application",
   "author": "Anql Project",
   "license": "MIT",

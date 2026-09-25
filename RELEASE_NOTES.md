@@ -1,107 +1,78 @@
-# ANQL v0.3.1 Release Notes
+# 🎉 Release Notes - Version 0.4.0
 
-## What's New
+This major update brings a wealth of new features, including a brand-new chart integration, a massive overhaul of the table node, advanced math calculations, and significant UI improvements with the adoption of native system menus.
 
-### Table Improvements
-- Centralized column IDs and row ID generation for better data consistency
-- Fixed autosave problems in table cells
-- Added debounced autosave to prevent performance issues
-- Migrated data mutations to use stable rowId instead of index
-- Simplified dragoverlay for better drag-and-drop experience
+### ✨ New Features
 
-### Editor Fixes
-- Resolved LinkNode type conflict with @lexical/link
-- Prevented aggressive editor reset on markdown paste
-- Modernized math result typography and visibility
+*   **📊 Chart Integration:**
+    *   Generate charts directly from your table data.
+    *   Advanced chart configuration: axis selection, color palette customization, and series isolation tabs.
+    *   Dynamic chart type proposals tailored to each table's content.
+    *   Markdown import/export support for charts via the `@chart` syntax.
+*   **📐 Table Overhaul:**
+    *   **Inline Editing:** Cells now display cleanly and switch to edit mode on click.
+    *   **Data Types:** Introduced column data typing (`ColumnDataType`).
+    *   **Improved Ergonomics:** Smooth slide-in animations for quick-add strips (rows/columns), revamped drag-and-drop handles, and better vertical column resizing.
+    *   Added Zebra striping for better row readability.
+*   **🧮 Math & Calculations:**
+    *   Support for **inline math calculations**.
+    *   Support for **user-defined functions** and **units** in variable assignments.
+    *   Table column operations are now directly accessible from the math button (column statistics, cell references).
+*   **🧩 Default Templates:** 
+    *   Automatic injection of default templates (like a math demonstration document) on first launch.
+*   **🔄 Automatic Updates:** 
+    *   Integrated Tauri Updater to receive future versions directly within the app.
 
-### UX/UI Improvements
-- Improved CreateNode button with better accessibility and modern design
-- Smart date display in HomePage - shows relevant date based on current sort
-- Enhanced button interactions with proper focus states
-- Better document card hover effects and transitions
-- Improved accessibility with larger touch targets and keyboard navigation
+### 💅 UI & UX Improvements
 
----
+*   **🖥️ Native Menus:** Transitioned the Document Menu, Context Menu, Node Menu, and Footer Menu to use native macOS/Tauri system menus for a more polished and native feel.
+*   **⌨️ Shortcuts:** Added `Cmd+,` keyboard shortcut to open the settings overlay.
+*   **🖌️ Styling & Animations:**
+    *   Improved overall typography and editor theme consistency.
+    *   Refined sidebar interactions, highlights, and theme colors.
+    *   Added animations for the toolbar's horizontal collapse and table add buttons.
+    *   Made the horizontal table scrollbar thinner and less intrusive.
+    *   Action menus for code blocks now appear only on hover.
 
-# ANQL v0.3.0 Release Notes
+### 🐛 Bug Fixes & Stability
 
-We're excited to announce v0.3.0 of ANQL, featuring major enhancements to the math system with table integration, improved markdown support, and comprehensive documentation!
+*   **Editor & Core Interactions:**
+    *   Fixed a major issue where the `Space` key stopped working when popovers were open.
+    *   Prevented scrolling while overlays, context menus, and custom menus are open.
+    *   Fixed incorrect block positions in the database after drag-and-drop operations.
+    *   Fixed macOS autoscroll functionality when dragging blocks.
+    *   Resolved list copy-paste errors and selection gaps.
+    *   Addressed multiple bugs regarding menu overlaps (e.g., hiding the floating toolbar when the context menu is open).
+    *   Fixed the block formatting state and quote block transformation inside the node menu.
+    *   Fixed a bug preventing the first node replacement when pressing `Enter` in the title.
+    *   Properly toggled read/write modes in the document menu.
+*   **Tables:**
+    *   Stabilized HTML export, row IDs generation, and cell sizing.
+    *   Preserved cell text color and placed the caret at the end of cell content properly.
+    *   Fixed row/column menu toggling, drag handle layering, and drag states remaining after copying a row link.
+    *   Fixed context menus appearing when a cell was not explicitly selected.
+    *   Fixed highlight selections not appearing on right-click within a cell.
+    *   Resolved an `InvalidStateError` regarding number input selections in cells.
+*   **Charts & Math:**
+    *   Prevented unnecessary re-renders for chart and math nodes.
+    *   Fixed syncing issues with curve colors and the y-axis menu.
+    *   Stabilized chart configuration normalization and debounced database writes.
+    *   Ensured only numeric table columns are exposed for math calculations.
+    *   Aligned table variables with proper scope principles and respected scope ordering for math autocomplete variables.
+    *   Resolved `setState()` errors during render cycles for math autocomplete menus.
+    *   Prevented autocomplete activation inside nodes containing links.
+*   **Search & Highlighting:**
+    *   Preserved local search highlights while actively editing text.
+    *   Cleaned up search highlights appropriately when the search field is closed.
+    *   Fixed local search autofocus issues and UI shifting after autoscrolling.
+    *   Resolved highlight mismatches when searching across multiple tables.
+*   **Images & Media:**
+    *   Prevented image layout shifts during lazy loading and document initialization.
+    *   Improved image resizing, scrolling, and wrapping behaviors.
+*   **Build & System:**
+    *   Stabilized database initialization and template loading.
+    *   Resolved docs JSON imports in TypeScript and removed deprecated `baseUrl` usage.
 
-## 🚀 What's New in v0.3.0
+***
 
-### 🧮 Advanced Math System with Table Integration
-- **Table Variable System** - Reference table data directly in math expressions
-  - Access entire columns as matrices: `Table1.column`
-  - Reference specific cells: `Table1.column[1]`
-  - Automatic column aggregations (sum, mean, etc.)
-  - Table data included in math variable scope
-- **Smart Math Autocomplete** - Context-aware suggestions as you type
-  - Shows variables, table columns, and math functions
-  - Filters table names from variable suggestions
-  - Only appears when typing for cleaner UI
-  - Fixed autoscroll issues in autocomplete menu
-- **Enhanced Math Results Display**
-  - Copy button in math result dialog for easy copying
-  - Double-click to copy math results to clipboard
-  - Improved result positioning that syncs with nodes
-  - Migrated to React Portals and Floating UI for better performance
-- **Better Error Handling** - Clear error messages for table-related math issues
-- **Improved Variable UI** - Italic styling for variables in autocomplete and panel
-
-### 📊 Table Improvements
-- **Table Titles** - Add descriptive titles to your tables
-  - Minimized when empty for cleaner UI
-  - Placeholder and tooltip support
-  - Improved number input UI and title alignment
-- **Better Cell Interaction** - Ctrl+A now works properly in table cells
-- **Enhanced Number Input** - Improved UI for number cells in tables
-
-### 📝 Enhanced Markdown Support
-- **Restructured Markdown Plugin** - Better organization and maintainability
-- **Math Block Shortcuts** - Type `$$` for instant math block creation
-- **Smart Backspace/Delete** - Convert math blocks to paragraphs when empty
-- **Comprehensive Documentation** - Added markdown support documentation
-
-### ⚙️ Settings & Theme System
-- **Zustand Migration** - Replaced React Context with Zustand for better state management
-- **Auto-Save Settings** - Settings save immediately on change (no save button needed)
-- **Fixed Persistence** - Sidebar parameters now properly persist
-
-### 🎨 UI/UX Improvements
-- **Better Typography** - Improved spacing and visual consistency
-- **Cleaner Math Panel** - Restyled variable UI for better readability
-- **Global Search Enhancement** - Mark documents in trash during search
-
-### 📚 Documentation & Project
-- **Code of Conduct** - Added Contributor Covenant 2.1 based Code of Conduct
-- **Improved README** - Better structure with contributing guide, troubleshooting, and license section
-- **Contributing Guidelines** - Enhanced with locale-specific guidelines
-- **Project Metadata** - Setup open source guidelines and project structure
-
-### 🔧 Code Quality & Refactoring
-- **Math Plugin Restructuring** - Decomposed monolithic MathPlugin into specialized modules
-- **Node Menu Cleanup** - Removed deprecated copy math result option
-- **File Reorganization** - Improved code structure and maintainability
-- **TypeScript Improvements** - Better type safety across components
-
-### 🐛 Bug Fixes
-- **Math Result Positioning** - Fixed sync issues between results and nodes
-- **Autocomplete Filtering** - Better filtering of suggestions
-- **Table Cell Selection** - Fixed Ctrl+A behavior in table inputs
-- **Settings Persistence** - Fixed sidebar parameters not saving
-- **Node Menu** - Removed deprecated copy math result feature
-
----
-
-## 🔄 Upgrade Notes
-
-### Breaking Changes
-- None - This release maintains backward compatibility
-
-### Migration Guide
-- No migration required - all changes are backward compatible
-- Table variable system is opt-in and works with existing math expressions
-
----
-
-## 🙏 Thank You
+*Made with ❤️*
