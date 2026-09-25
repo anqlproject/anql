@@ -45,6 +45,13 @@ jobs:
       - name: install frontend dependencies
         run: npm ci
 
+      - name: get release notes
+        id: release_notes
+        run: |
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,7 +60,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'ANQL v__VERSION__'
-          releaseBody: 'Voir les changements de cette version.'
+          releaseBody: ${{ steps.release_notes.outputs.body }}
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
