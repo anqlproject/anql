@@ -22,6 +22,8 @@ This major update brings a wealth of new features, including a brand-new chart i
     *   Automatic injection of default templates (like a math demonstration document) on first launch.
 *   **🔄 Automatic Updates:** 
     *   Integrated Tauri Updater to receive future versions directly within the app.
+*   **🖥️ Cross-Platform Desktop Support:**
+    *   ANQL is now available for Windows and Linux, alongside macOS.
 
 ### 💅 UI & UX Improvements
 
