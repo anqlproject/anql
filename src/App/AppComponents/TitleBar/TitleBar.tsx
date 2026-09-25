@@ -55,7 +55,7 @@ export default function TitleBar(): JSX.Element {
           size="lg"
           className="sidebar-trigger"
           style={{
-            marginLeft: isMac ? "90px" : "1rem",
+            marginLeft: isMac ? "90px" : 0,
             marginRight: "0.5rem"
           }}
           onClick={() => {

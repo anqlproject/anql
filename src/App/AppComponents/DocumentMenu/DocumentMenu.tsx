@@ -355,7 +355,7 @@ export const DocumentMenu = () => {
           ref={triggerRef}
           onMouseDown={(e) => e.stopPropagation()}
           style={{
-            right: isMac ? "1rem" : "120px",
+            right: isMac ? "1rem" : 0,
           }}
           onClick={() => {
             const rect = triggerRef.current?.getBoundingClientRect();
