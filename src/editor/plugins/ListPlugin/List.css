@@ -40,11 +40,14 @@
 }
 
 .list-bullet::before {
-  content: '•';
+  content: '';
   position: absolute;
-  left: 10px;
-  top: 0;
-  font-size: 1.2em;
+  left: 9px;
+  top: 0.65em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
   color: inherit;
 }
 
