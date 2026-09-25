@@ -1,5 +1,5 @@
-import "@/core/Global/Themes.css";
-import "@/core/Global/Typography.css";
+import "@/core/global/Themes.css";
+import "@/core/global/Typography.css";
 import "@/core/logger/ConsoleManager";
 
 import { invoke } from "@tauri-apps/api/core";
