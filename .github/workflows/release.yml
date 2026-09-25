@@ -22,7 +22,7 @@ jobs:
           - platform: windows-latest
             args: ""
             rust_target: x86_64-pc-windows-msvc
-          - platform: ubuntu-22.04
+          - platform: ubuntu-24.04
             args: ""
             rust_target: x86_64-unknown-linux-gnu
 
@@ -47,13 +47,22 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libwebkit2gtk-4.0-dev \
-            libappindicator3-dev \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
             librsvg2-dev \
+            libssl-dev \
+            libxdo-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
             patchelf
 
       - name: Install frontend dependencies
         run: npm ci
+
+      - name: Validate source imports
+        run: npm run check:imports
 
       - name: Read release notes
         id: release_notes
