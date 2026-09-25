@@ -166,6 +166,23 @@ export function useFile() {
     return ees;
   }
 
+  const focusAtStart = useCallback(() => {
+    // Place cursor at start of first node, then reset scroll so the
+    // CSS padding-top is respected and content appears centered.
+    setTimeout(() => {
+      editor.update(() => {
+        const firstChild = $getRoot().getFirstChild();
+        if (firstChild) {
+          firstChild.selectStart();
+        }
+      });
+      const container = editorContainerRef.current;
+      if (container) {
+        container.scrollTop = 0;
+      }
+    }, 150);
+  }, [editor, editorContainerRef]);
+
   const openEditor = useCallback(async (document: DocumentsJson) => {
     try {
       let editorState = await reconstruction(document.id);
@@ -233,15 +250,12 @@ export function useFile() {
       }
       setModified(emptyChanges);
 
-      // Force focus to editor content, not title
-      setTimeout(() => {
-        editor.focus();
-      }, 0);
+      focusAtStart();
     } catch (error) {
       console.error("reading file error : ", error);
       throw error;
     }
-  }, [editor, navigateTo, setCurrentDocument, setModified]);
+  }, [editor, navigateTo, setCurrentDocument, setModified, focusAtStart]);
 
   const handleNewFile = useCallback(async (title?: string): Promise<void> => {
     // TASK : personalize add workspace_id, add path on creation
@@ -293,11 +307,8 @@ export function useFile() {
       navigatingEditors.delete(editor);
     }
 
-    // Force focus to editor content, not title
-    setTimeout(() => {
-      editor.focus();
-    }, 0);
-  }, [editor, navigateTo, setCurrentDocument, setModified, dynamicState]);
+    focusAtStart();
+  }, [editor, navigateTo, setCurrentDocument, setModified, dynamicState, focusAtStart]);
 
   const writeFile = async (filePath: string, contents: string) => {
     await invoke("write_file", { path: filePath, contents: contents });

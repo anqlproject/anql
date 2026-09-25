@@ -18,7 +18,6 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import { CAN_USE_DOM } from "@lexical/utils";
-import { $getRoot, $getSelection, $isRangeSelection } from "lexical";
 import type { JSX } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useShallow } from 'zustand/react/shallow';
@@ -88,23 +87,6 @@ export default function Editor(): JSX.Element {
       window.removeEventListener("resize", updateViewPortWidth);
     };
   }, [isSmallWidthViewport]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      editor.update(() => {
-        const root = $getRoot();
-        const firstChild = root.getFirstChild();
-        if (firstChild) {
-          const selection = $getSelection();
-          if (!$isRangeSelection(selection)) {
-            firstChild.selectStart();
-          } else {
-            editor.focus();
-          }
-        }
-      });
-    }, 50);
-  }, [editor]);
 
   const { editorShellRef, editorContainerRef, editorRef, focusHighlight } = useGlobalStore(useShallow((state) => ({ editorShellRef: state.editorShellRef, editorContainerRef: state.editorContainerRef, editorRef: state.editorRef, focusHighlight: state.focusHighlight })));
 
