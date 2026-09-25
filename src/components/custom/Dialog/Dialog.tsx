@@ -1,4 +1,4 @@
-import "./dialog.css";
+import "./Dialog.css";
 
 import { XIcon } from "lucide-react";
 import React , { useEffect, useRef, useState } from "react";
