@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="GitHub Release" src="https://img.shields.io/github/v/release/anqlproject/anql?color=blue" style="pointer-events: none;" />
   <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange" style="pointer-events: none;" />
-  <img alt="Platform" src="https://img.shields.io/badge/platform-macOS-lightgrey" style="pointer-events: none;" />
+  <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" style="pointer-events: none;" />
   <img alt="GitHub License" src="https://img.shields.io/github/license/anqlproject/anql?color=green" style="pointer-events: none;" />
 </p>
 
@@ -79,16 +79,32 @@ ANQL offers the freedom of simple notes, with more power available exactly when 
 
 ### Download
 
-ANQL is currently available for **macOS**.
+ANQL is available for **macOS, Windows, and Linux**.
 
 👉 [Download the latest release](https://github.com/anqlproject/anql/releases/latest)
+
+### macOS Security Warning
+
+Because ANQL is not currently signed and notarized with an Apple Developer certificate, macOS may block the downloaded application. If you trust the download source:
+
+1. Open the downloaded `.dmg` or application in Finder.
+2. Right-click **ANQL** and select **Open**.
+3. Confirm by clicking **Open** in the warning dialog.
+
+If macOS still blocks the application, remove the quarantine attribute from the downloaded app in Terminal:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/ANQL.app"
+```
+
+Then open ANQL normally from **Applications**. Only run this command for an application obtained from a source you trust.
 
 ### Build from source
 
 **Prerequisites**
 - Node.js 18+ and npm
 - Rust and Cargo (for Tauri)
-- macOS 11+ (Big Sur) or later
+- macOS 11+ (Big Sur), Windows 10+, or a recent Linux distribution
 
 ```bash
 # Clone the repository
@@ -134,14 +150,13 @@ For more help, check our [GitHub Issues](https://github.com/anqlproject/anql/iss
 | Platform | Status |
 |---|---|
 | macOS | ✅ Supported |
-| Windows | 🚧 Coming soon |
-| Linux | 🚧 Coming soon |
+| Windows | ✅ Supported |
+| Linux | ✅ Supported |
 
 ### Roadmap
 
 We're actively building. Here's what's on the roadmap:
 
-- 🪟 **Windows & Linux support**
 - 🔗 **More export formats**
 - 📊 **Advanced visualizations**
 
