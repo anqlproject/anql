@@ -1,9 +1,7 @@
 import "./TableHighlight.css";
 
 import { useCallback, useEffect, useState } from "react";
-import { useShallow } from 'zustand/react/shallow';
-
-import { useGlobalStore } from "@/App/store/useGlobalStore";
+import { createPortal } from "react-dom";
 
 interface TableHighlightProps {
   highlightType?: "row" | "column" | null;
@@ -22,15 +20,7 @@ export function TableHighlight({
   columnRefs,
   scrollContainerRef,
 }: TableHighlightProps) {
-  const { editorRef } = useGlobalStore(useShallow((state) => ({ editorRef: state.editorRef })));
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
-
-  const [editorShellDimensions, setEditorShellDimensions] = useState({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  });
 
   const updateHighlightRect = useCallback(() => {
     if (
@@ -48,11 +38,14 @@ export function TableHighlight({
         setHighlightRect(null);
         return;
       }
-      setHighlightRect(targetRow.getBoundingClientRect());
+      setHighlightRect(getVisibleRect(targetRow.getBoundingClientRect(), scrollContainerRef?.current));
       return;
     }
 
-    const targetHeaderCell = columnRefs?.current?.[targetIndex];
+    const targetHeaderCell = columnRefs?.current?.[targetIndex]
+      ?? scrollContainerRef?.current?.querySelector<HTMLElement>(
+        `.table-col-gutter-slot[data-column-index="${targetIndex}"]`,
+      );
     if (!targetHeaderCell) {
       setHighlightRect(null);
       return;
@@ -72,34 +65,27 @@ export function TableHighlight({
       maxBottom = Math.max(maxBottom, cellRect.bottom);
     });
 
-    setHighlightRect(
+    setHighlightRect(getVisibleRect(
       new DOMRect(
         headerRect.left,
         minTop,
         headerRect.width,
         maxBottom - minTop,
       ),
-    );
-  }, [highlightType, targetIndex, rowRefs, columnRefs]);
+      scrollContainerRef?.current,
+    ));
+  }, [highlightType, targetIndex, rowRefs, columnRefs, scrollContainerRef]);
 
   useEffect(() => {
-    function handleResize() {
-      const editorShellRect = editorRef.current?.getBoundingClientRect();
-      if (editorShellRect) {
-        setEditorShellDimensions({
-          x: editorShellRect.left,
-          y: editorShellRect.top,
-          width: editorShellRect.width,
-          height: editorShellRect.height,
-        });
-      }
-      if (isOpen) updateHighlightRect();
-    }
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [editorRef, isOpen, updateHighlightRect]);
+    if (!isOpen) return;
+    updateHighlightRect();
+    window.addEventListener("resize", updateHighlightRect);
+    window.addEventListener("scroll", updateHighlightRect, true);
+    return () => {
+      window.removeEventListener("resize", updateHighlightRect);
+      window.removeEventListener("scroll", updateHighlightRect, true);
+    };
+  }, [isOpen, updateHighlightRect]);
 
   useEffect(() => {
     if (isOpen) updateHighlightRect();
@@ -120,27 +106,21 @@ export function TableHighlight({
     const observer = new ResizeObserver(() => updateHighlightRect());
     rowRefs?.current?.forEach((row) => row && observer.observe(row));
     columnRefs?.current?.forEach((cell) => cell && observer.observe(cell));
+    if (scrollContainerRef?.current) observer.observe(scrollContainerRef.current);
     return () => observer.disconnect();
-  }, [isOpen, rowRefs, columnRefs, updateHighlightRect]);
+  }, [isOpen, rowRefs, columnRefs, scrollContainerRef, updateHighlightRect]);
 
-  const isVisible =
-    isOpen &&
-    highlightRect &&
-    !Number.isNaN(editorShellDimensions.x) &&
-    !Number.isNaN(highlightRect.top);
+  if (!isOpen || !highlightRect) return null;
 
-  if (!isVisible || !highlightRect) return null;
-
-  return (
+  return createPortal(
     <div
       className="table-highlight-container"
       style={{
         position: "fixed",
-        top: editorShellDimensions.y,
-        left: editorShellDimensions.x,
-        width: editorShellDimensions.width,
-        height: editorShellDimensions.height,
-        overflow: "hidden",
+        top: highlightRect.top,
+        left: highlightRect.left,
+        width: highlightRect.width,
+        height: highlightRect.height,
         zIndex: "var(--z-elevated)",
         pointerEvents: "none",
       }}
@@ -149,12 +129,23 @@ export function TableHighlight({
         className={`table-highlight-border table-highlight-border--${highlightType}`}
         style={{
           position: "absolute",
-          top: highlightRect.top - editorShellDimensions.y - 1,
-          left: highlightRect.left - editorShellDimensions.x - 1,
-          width: highlightRect.width + 2,
-          height: highlightRect.height + 2,
+          inset: -1,
         }}
       />
-    </div>
+    </div>,
+    document.body,
   );
+}
+
+function getVisibleRect(rect: DOMRect, container: HTMLElement | null | undefined): DOMRect | null {
+  if (!container) return rect;
+
+  const containerRect = container.getBoundingClientRect();
+  const left = Math.max(rect.left, containerRect.left + container.clientLeft);
+  const top = Math.max(rect.top, containerRect.top + container.clientTop);
+  const right = Math.min(rect.right, containerRect.left + container.clientLeft + container.clientWidth);
+  const bottom = Math.min(rect.bottom, containerRect.top + container.clientTop + container.clientHeight);
+
+  if (right <= left || bottom <= top) return null;
+  return new DOMRect(left, top, right - left, bottom - top);
 }
