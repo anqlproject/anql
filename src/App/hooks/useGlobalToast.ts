@@ -17,11 +17,12 @@ let updateTrigger: (() => void) | null = null;
 export function useGlobalToast() {
   const showToast = (message: ReactNode, type: ToastType = 'success', duration: number = 3000, persistent: boolean = false): string => {
     const id = Date.now().toString();
-    const newToast: Toast = { id, message, type, duration, persistent };
+    const shouldPersist = type === 'error' || persistent;
+    const newToast: Toast = { id, message, type, duration, persistent: shouldPersist };
     globalToasts = [...globalToasts, newToast];
     updateTrigger?.();
 
-    if (!persistent) {
+    if (!shouldPersist) {
       setTimeout(() => {
         globalToasts = globalToasts.filter(t => t.id !== id);
         updateTrigger?.();
