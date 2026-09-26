@@ -322,7 +322,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [chartData, chartConfigForDisplay?.chartType, chartConfigForDisplay?.yAggregation, previewTable, resolvedTheme]);
+  }, [chartData, chartConfigForDisplay?.chartType, chartConfigForDisplay?.yAggregation, previewTable, resolvedTheme, isConfiguring]);
 
   if (isConfiguring) {
     return (
