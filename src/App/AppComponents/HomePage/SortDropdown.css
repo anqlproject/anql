@@ -1,6 +1,6 @@
 .sortButton {
   transition: all 0.2s ease;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   background-color: var(--surface-color);
   border-color: var(--border-color);
 }
@@ -45,7 +45,7 @@
   cursor: pointer;
   user-select: none;
   outline: none;
-  color: var(--text-primary);
+  color: var(--text-secondary);
 }
 
 .sort-dropdown__item:hover,

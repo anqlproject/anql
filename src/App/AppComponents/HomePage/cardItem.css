@@ -149,7 +149,10 @@
   flex-direction: column;
   gap: 10px;
   min-height: 90px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
 }
 
 .document-card--grid:hover {
