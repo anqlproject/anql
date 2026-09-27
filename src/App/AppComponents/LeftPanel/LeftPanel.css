@@ -35,7 +35,7 @@
 
 .sidebar [data-slot="sidebar-footer"] {
   border-top: 1px solid var(--border-color);
-  padding: 8px 8px 8px 8px;
+  padding: 2px 4px;
 }
 
 .sidebar [data-slot="sidebar-header"] {

@@ -83,11 +83,6 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
     setOpenSettings(() => setSettingsOverlayOpen(true));
   }, [setOpenSettings, setSettingsOverlayOpen]);
 
-  const toggleSidebar = () => {
-    setOpen(!open);
-    editor.blur();
-  };
-
   const menuItems = [
     {
       title: t('SIDEBAR.home') as string,
@@ -130,6 +125,11 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
 
   const { setOpen, open, setSidebarWidth, setIsResizing, sidebarWidth } = useSidebar();
   const currentPage = useNavigationStore((state) => state.currentPage);
+
+  const toggleSidebar = () => {
+    setOpen(!open);
+    editor.blur();
+  };
 
   const [isHovered, setIsHovered] = useState(false);
   const isInitialLoadRef = useRef(true);
@@ -294,7 +294,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
                     )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                {item.id === "home"}
+
               </React.Fragment>
             ))}
           </SidebarMenu>
