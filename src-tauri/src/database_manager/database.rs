@@ -6,8 +6,8 @@ use crate::database_manager::recent_documents::recent_documents_operations::Rece
 use crate::database_manager::search::search_operations::SearchOperations;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::SqlitePool;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use std::path::Path;
 use std::str::FromStr;
 
@@ -255,7 +255,10 @@ impl Database {
             .fetch_one(&self.pool)
             .await?;
         if result.to_lowercase() != "ok" {
-            return Err(anyhow::anyhow!("Database integrity check failed: {}", result));
+            return Err(anyhow::anyhow!(
+                "Database integrity check failed: {}",
+                result
+            ));
         }
         Ok(())
     }

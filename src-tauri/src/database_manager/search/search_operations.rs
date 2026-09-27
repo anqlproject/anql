@@ -319,30 +319,53 @@ impl SearchOperations {
             indexes_recreated = true;
         }
 
-        // Check FTS data integrity
-        let nodes_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM nodes")
-            .fetch_one(&self.pool)
-            .await?;
+        // Step 1: Check FTS internal structure integrity using the official FTS5 command.
+        // This detects corrupted inverted indexes (nodes_fts_idx, nodes_fts_data)
+        // that COUNT(*) comparisons cannot detect.
+        let fts_integrity_ok = sqlx::query("INSERT INTO nodes_fts(nodes_fts) VALUES('integrity-check')")
+            .execute(&self.pool)
+            .await
+            .is_ok();
 
-        let fts_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM nodes_fts")
-            .fetch_one(&self.pool)
-            .await?;
+        if !fts_integrity_ok {
+            // Full rebuild is the only fix for internal FTS5 structural corruption.
+            // This is expensive (O(n)) but unavoidable — runs in background task.
+            sqlx::query("INSERT INTO nodes_fts(nodes_fts) VALUES('rebuild')")
+                .execute(&self.pool)
+                .await?;
+            indexes_recreated = true;
+        } else {
+            // Step 2: Integrity is fine but check row count mismatch as a secondary signal.
+            // Use targeted sync instead of full rebuild — much cheaper for large databases.
+            let nodes_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM nodes")
+                .fetch_one(&self.pool)
+                .await?;
 
-        // If counts don't match, rebuild FTS index
-        if nodes_count != fts_count {
-            sqlx::query("DELETE FROM nodes_fts")
+            let fts_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM nodes_fts")
+                .fetch_one(&self.pool)
+                .await?;
+
+            if nodes_count != fts_count {
+                // Insert only missing rows (in nodes but not in nodes_fts)
+                sqlx::query(
+                    r#"
+                    INSERT INTO nodes_fts(id, full_text)
+                    SELECT id, full_text FROM nodes
+                    WHERE id NOT IN (SELECT id FROM nodes_fts)
+                    "#,
+                )
                 .execute(&self.pool)
                 .await?;
 
-            sqlx::query(
-                r#"
-                INSERT INTO nodes_fts(id, full_text)
-                SELECT id, full_text FROM nodes
-                "#,
-            )
-            .execute(&self.pool)
-            .await?;
-            indexes_recreated = true;
+                // Remove orphan rows (in nodes_fts but node deleted from nodes)
+                sqlx::query(
+                    "DELETE FROM nodes_fts WHERE id NOT IN (SELECT id FROM nodes)",
+                )
+                .execute(&self.pool)
+                .await?;
+
+                indexes_recreated = true;
+            }
         }
 
         // Check index on documents.title
