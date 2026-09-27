@@ -24,10 +24,11 @@ interface ToolbarButtonProps {
   label: string;
   isActive?: boolean;
   isDanger?: boolean;
+  isSuccess?: boolean;
   onClick: () => void;
 }
 
-function ToolbarButton({ icon, label, isActive, isDanger, onClick }: ToolbarButtonProps) {
+function ToolbarButton({ icon, label, isActive, isDanger, isSuccess, onClick }: ToolbarButtonProps) {
   return (
     <button
       type="button"
@@ -36,7 +37,17 @@ function ToolbarButton({ icon, label, isActive, isDanger, onClick }: ToolbarButt
       }}
       onClick={onClick}
       className={`popup-item spaced ${isActive ? 'active' : ''}`}
-      style={isDanger ? { backgroundColor: '#ef4444', color: 'white' } : undefined}
+      style={isDanger
+        ? {
+          backgroundColor: 'color-mix(in srgb, var(--destructive) 24%, transparent)',
+          color: 'color-mix(in srgb, var(--destructive) 76%, var(--text-primary))',
+        }
+        : isSuccess
+          ? {
+            backgroundColor: 'color-mix(in srgb, var(--primary-green) 24%, transparent)',
+            color: 'color-mix(in srgb, var(--primary-green) 72%, var(--text-primary))',
+          }
+          : undefined}
       title={label}
       aria-label={label}
     >
@@ -193,6 +204,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
   );
   const { variables, tableVariables } = useMathVariables();
   const [mathError, setMathError] = useState(false);
+  const [isMathValid, setIsMathValid] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [virtualRef, setVirtualRef] = useState<VirtualElement | null>(null);
@@ -246,6 +258,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       }
 
       if (!$isRangeSelection(selection) || selection.isCollapsed()) {
+        setIsMathValid(false);
         if (isDropdownOpenRef.current) {
           return;
         }
@@ -258,6 +271,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       const isInsideCode = $isCodeNode(anchorNode) || anchorNode.getParents().some($isCodeNode);
 
       if (isInsideCode) {
+        setIsMathValid(false);
         if (isDropdownOpenRef.current) return;
         setIsOpen(false);
         setSelectedTableColumn(null);
@@ -274,6 +288,15 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       setIsLowercase(selection.hasFormat('lowercase'));
       setIsCapitalize(selection.hasFormat('capitalize'));
       setIsHighlight(selection.hasFormat('highlight'));
+
+      const selectedText = selection.getTextContent().trim();
+      try {
+        if (!selectedText) throw new Error('Empty expression');
+        const value = evaluate(selectedText, { ...variables, ...tableVariables });
+        setIsMathValid(!(typeof value === 'number' && !isFinite(value)));
+      } catch {
+        setIsMathValid(false);
+      }
 
       setFontFamily(
         $getSelectionStyleValueForProperty(selection, 'font-family', 'Arial'),
@@ -324,7 +347,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
         }
       }
     });
-  }, [editor, tableVariables]);
+  }, [editor, variables, tableVariables]);
 
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
@@ -574,6 +597,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
               icon={<Calculator size={16} />}
               label="Calculate Math"
               isDanger={mathError}
+              isSuccess={isMathValid && !selectedTableColumn && !mathError}
               onClick={handleMathButtonClick}
             />
           )}
