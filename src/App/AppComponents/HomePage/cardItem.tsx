@@ -1,16 +1,16 @@
 import './cardItem.css';
 
 import { Calendar, Check, Clock, MoreVertical, Square } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { duplicateDocument } from '@/App/AppComponents/duplicateDocument';
-import { useExportDocument } from "@/App/AppComponents/ImportExport/exportDocument";
+import { useExportDocument } from '@/App/AppComponents/ImportExport/exportDocument';
 import { useFile } from '@/App/hooks/FileHooks';
 import { useGlobalToast } from '@/App/hooks/useGlobalToast';
 import { Button } from '@/components/ui/button';
 import { getNodesByDocumentId } from '@/core/database/useBlocDatabase';
-import { DocumentsJson, updateDocumentPath } from '@/core/database/useDocumentDatabase';
+import { DocumentMetadataKey, DocumentsJson, getDocumentMetadataField, updateDocumentPath } from '@/core/database/useDocumentDatabase';
 import { TOAST_DURATION } from '@/core/global/defaultValues';
 import { MoveToTrash } from '@/core/TrashSystem/TrashSystem';
 
@@ -33,7 +33,20 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
   const { exportDocument } = useExportDocument();
   const documentRef = useRef<DocumentsJson>(null);
   const isNativeMenuOpening = useRef(false);
+  const [readMode, setReadMode] = useState(false);
   documentRef.current = document;
+
+  useEffect(() => {
+    const loadReadMode = async () => {
+      try {
+        const isReadMode = await getDocumentMetadataField(document.id, DocumentMetadataKey.readMode);
+        setReadMode(isReadMode === true);
+      } catch (error) {
+        console.error('Failed to load read mode:', error);
+      }
+    };
+    loadReadMode();
+  }, [document.id]);
 
   const handleDelete = () => {
     if (document.id !== "home-page") {
@@ -106,7 +119,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
       await duplicateDocument(
         document,
         nodes,
-        `${document.title || t('HOME_PAGE.untitled')} (copy)`,
+        `${document.title || t('HOME_PAGE.untitled') || 'Untitled'} (copy)`,
       );
     } catch (error) {
       console.error('Failed to duplicate document:', error);
@@ -185,7 +198,13 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
       )}
 
       <div className="document-card__main">
-        <span className="document-card__title">{document.title || t('HOME_PAGE.untitled')}</span>
+        <span
+          className="document-card__title"
+          title={document.title || t('HOME_PAGE.untitled') || undefined}
+        >
+          {document.title || t('HOME_PAGE.untitled')}
+        </span>
+        {readMode && <span className="document-card__read-mode-badge" title="Read mode" />}
       </div>
 
       <div className="document-card__details">
@@ -198,8 +217,8 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
           <span
             className="document-card__date"
             title={isModifiedDate
-              ? `${t('HOME_PAGE.updatedAt')}: ${new Date(document.updated_at).toLocaleString()}`
-              : `${t('HOME_PAGE.createdAt')}: ${new Date(document.created_at).toLocaleString()}`
+              ? `${t('HOME_PAGE.updatedAt') || 'Updated at'}: ${new Date(document.updated_at).toLocaleString()}`
+              : `${t('HOME_PAGE.createdAt') || 'Created at'}: ${new Date(document.created_at).toLocaleString()}`
             }
           >
             {formatDate(displayDate)}

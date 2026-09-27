@@ -3,6 +3,8 @@
    ============================================ */
 
 .document-card {
+  min-width: 0;
+  box-sizing: border-box;
   cursor: pointer;
   transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -106,6 +108,9 @@
 }
 
 .document-card--list .document-card__title {
+  display: block;
+  flex: 1;
+  min-width: 0;
   font-size: var(--ui-text-sm);
   font-weight: var(--font-normal);
   overflow: hidden;
@@ -153,6 +158,9 @@
     background-color 0.16s ease,
     box-shadow 0.16s ease,
     transform 0.16s ease;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .document-card--grid:hover {
@@ -165,6 +173,8 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
   padding-left: 0;
 }
 
@@ -173,13 +183,17 @@
 }
 
 .document-card--grid .document-card__title {
+  display: block;
   font-size: var(--ui-text-sm);
   font-weight: var(--font-normal);
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
+  flex: 0 1 75%;
+  width: 75%;
+  min-width: 0;
+  max-width: 75%;
 }
 
 .document-card--grid .document-card__details {
@@ -362,4 +376,15 @@
   font-size: 11px;
   opacity: 0.9;
   white-space: nowrap;
+}
+
+/* ── Read mode badge ───────────────────────────── */
+.document-card__read-mode-badge {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: var(--primary-green);
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
 }

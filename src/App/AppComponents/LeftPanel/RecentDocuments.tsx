@@ -7,7 +7,7 @@ import { navigationUtils } from "@/App/AppComponents/navigationUtils";
 import { useFile } from "@/App/hooks/FileHooks";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { Dialog } from "@/components/custom/Dialog/Dialog";
-import { getDocumentById } from "@/core/database/useDocumentDatabase";
+import { getDocumentById, parseDocumentMetadata } from "@/core/database/useDocumentDatabase";
 import { DocumentsJson } from "@/core/database/useDocumentDatabase";
 import { clearRecentDocuments, getRecentDocuments, removeRecentDocument } from "@/core/database/useRecentDocumentsDatabase";
 import { DATABASE_PATH } from "@/core/global/defaultSettings";
@@ -21,7 +21,7 @@ const RecentDocuments: React.FC = () => {
   const { openEditor } = useFile();
   const { goHome } = navigationUtils();
 
-  const [documents, setDocuments] = useState<DocumentsJson[]>([]);
+  const [documents, setDocuments] = useState<(DocumentsJson & { readMode?: boolean })[]>([]);
   const [openClearDialog, setOpenClearDialog] = useState(false);
   const recentShouldRefresh = useRecentDocumentsStore((state) => state.shouldRefresh);
   const documentsShouldRefresh = useDocumentsStore((state) => state.shouldRefresh);
@@ -61,13 +61,17 @@ const RecentDocuments: React.FC = () => {
                 return null;
               }
 
-              return doc;
+              if (!doc) return null;
+
+              // Parse metadata to check read mode
+              const metadata = parseDocumentMetadata(doc.metadata || null);
+              return { ...doc, readMode: metadata.readMode };
             } catch {
               return null;
             }
           })
         );
-        setDocuments(docDetails.filter((d): d is DocumentsJson => d !== null));
+        setDocuments(docDetails.filter((d) => d !== null) as (DocumentsJson & { readMode?: boolean })[]);
       } catch (error) {
         console.error("Failed to load recent documents:", error);
       }
@@ -78,7 +82,7 @@ const RecentDocuments: React.FC = () => {
     return () => {
       // Cleanup if needed
     };
-  }, [recentShouldRefresh, documentsShouldRefresh]);
+  }, [recentShouldRefresh, documentsShouldRefresh, currentDocument.id]);
 
   return (
     <div className="history-list" ref={historyListRef} >
@@ -95,13 +99,13 @@ const RecentDocuments: React.FC = () => {
           {documents.map((document) => (
             <li
               key={document.id}
-              className={`history-item ${document.id === currentDocument.id ? "active" : ""
-                }`}
+              className={`history-item ${document.id === currentDocument.id ? "active" : ""}`}
               onClick={() => {
                 openEditor(document);
               }}
             >
               <span className="history-item-name">{document.title || t('SIDEBAR.untitled')}</span>
+              {(document as DocumentsJson & { readMode?: boolean }).readMode && <span className="history-item__read-mode-badge" />}
               <button
                 className="history-item-close"
                 onClick={(e) => handleRemoveItem(e, document.id)}

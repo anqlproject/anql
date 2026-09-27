@@ -176,7 +176,7 @@ export default function Editor(): JSX.Element {
             <RichTextPlugin
               contentEditable={
                 <div className="editor-scroller">
-                  <div className="editor" ref={setFusedRef}>
+                  <div className={`editor${!isEditable ? ' read-mode' : ''}`} ref={setFusedRef}>
                     <TitlePlugin />
                     <ContentEditable />
                   </div>

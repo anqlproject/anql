@@ -28,6 +28,7 @@ import { logger } from "@/core/logger";
 import { MoveToTrash } from "@/core/TrashSystem/TrashSystem";
 import { ANQL_MARKDOWN_TRANSFORMERS } from "@/editor/plugins/AnqlMarkdownTransformers";
 import { useNavigationStore } from "@/GlobalState/navigationStore";
+import { useRecentDocumentsStore } from "@/GlobalState/recentDocumentsStore";
 
 export const DocumentMenu = () => {
   const { t } = useTranslation();
@@ -36,6 +37,7 @@ export const DocumentMenu = () => {
   );
   const { goHome } = navigationUtils();
   const currentPage = useNavigationStore((state) => state.currentPage);
+  const refreshRecentDocuments = useRecentDocumentsStore((state) => state.refreshRecentDocuments);
   const [editor] = useLexicalComposerContext();
   const { showToast, dismissToast } = useGlobalToast();
   const { handleNewFile } = useFile();
@@ -119,6 +121,7 @@ export const DocumentMenu = () => {
         if (docId) {
           try {
             await updateDocumentMetadataField(docId, DocumentMetadataKey.readMode, !newEditableState);
+            refreshRecentDocuments();
           } catch (err) {
             logger.warn('Failed to persist readMode metadata:', err);
           }
@@ -367,20 +370,6 @@ export const DocumentMenu = () => {
         >
           <button style={{ position: "relative" }}>
             <MenuIcon size={ICON_SIZES.lg} />
-            {!isEditable && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "-2px",
-                  right: "-2px",
-                  width: "8px",
-                  height: "8px",
-                  backgroundColor: "#22c55e",
-                  borderRadius: "50%",
-                  border: "1px solid white",
-                }}
-              />
-            )}
           </button>
 
           {isLocalSearchOpen && <LocalSearch onClose={closeLocalSearch} />}

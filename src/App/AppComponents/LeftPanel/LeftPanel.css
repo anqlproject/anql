@@ -230,8 +230,20 @@
   opacity: 1;
 }
 
+.history-item__read-mode-badge {
+  width: 6px;
+  height: 6px;
+  background-color: var(--primary-green);
+  border-radius: 50%;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
 .history-item-name {
-  flex: 1;
+  flex: 0 1 75%;
+  width: 75%;
+  min-width: 0;
+  max-width: 75%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
