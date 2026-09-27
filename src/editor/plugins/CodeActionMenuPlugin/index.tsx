@@ -1,6 +1,5 @@
 import './index.css';
 
-import { useScrollLock } from '@/App/hooks/useScrollLock';
 import { autoUpdate, FloatingPortal, offset, useFloating } from '@floating-ui/react';
 import {
   $isCodeNode,
@@ -12,6 +11,7 @@ import { $getNearestNodeFromDOMNode, $getNodeByKey, $nodesOfType } from 'lexical
 import { ChevronDown } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 
+import { useScrollLock } from '@/App/hooks/useScrollLock';
 import { Button } from '@/components/ui/button';
 
 import { CODE_LANGUAGES, CODE_THEMES } from '../CodeHighlightShikiPlugin';
@@ -67,6 +67,9 @@ function CodeMenuDropdown({
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [isOpen, refs]);
 
+  const activeOption = options.find(o => o.value === value);
+  const displayLabel = activeOption ? activeOption.label : value;
+
   return (
     <>
       <Button
@@ -80,7 +83,7 @@ function CodeMenuDropdown({
           setIsOpen((prev) => !prev);
         }}
       >
-        <span>{value}</span>
+        <span>{displayLabel}</span>
         <ChevronDown size={12} className="opacity-70" />
       </Button>
 
@@ -105,7 +108,7 @@ function CodeMenuDropdown({
                   onChange(opt.value);
                   setIsOpen(false);
                 }}
-                className={`code-action-menu-item ${value === opt.label ? 'active' : ''}`}
+                className={`code-action-menu-item ${value === opt.value ? 'active' : ''}`}
               >
                 {opt.label}
               </div>
@@ -212,8 +215,6 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
 
   if (!codeElement) return null;
 
-  const codeFriendlyName = getLanguageFriendlyName(lang);
-
   return (
     <div
       ref={refs.setFloating}
@@ -230,7 +231,7 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
       onMouseLeave={() => setIsHoveringMenu(false)}
     >
       <CodeMenuDropdown
-        value={codeFriendlyName || 'Plain Text'}
+        value={lang}
         options={CODE_LANGUAGES.map((language) => ({
           value: language,
           label: language ? getLanguageFriendlyName(language) : 'Plain Text',

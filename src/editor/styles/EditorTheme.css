@@ -178,7 +178,7 @@
   background-color: var(--surface-color);
   font-family: var(--font-mono);
   display: block;
-  padding: 45px 8px 8px 52px;
+  padding: 38px 8px 8px 52px;
   line-height: var(--leading-relaxed);
   font-size: var(--text-sm);
   margin: 0;
