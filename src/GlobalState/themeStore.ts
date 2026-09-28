@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark' | 'system' | 'terminal';
 
 interface ThemeStore {
   theme: Theme;
@@ -15,17 +15,20 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
 
   setTheme: (theme) => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
+    root.classList.remove('light', 'dark', 'terminal');
 
     let currentResolvedTheme: 'light' | 'dark' = 'light';
 
     if (theme === 'system') {
       currentResolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else if (theme === 'terminal') {
+      currentResolvedTheme = 'dark';
     } else {
       currentResolvedTheme = theme as 'light' | 'dark';
     }
 
     root.classList.add(currentResolvedTheme);
+    if (theme === 'terminal') root.classList.add('terminal');
     localStorage.setItem('app-theme', theme);
 
     set({ theme, resolvedTheme: currentResolvedTheme });

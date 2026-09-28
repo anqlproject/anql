@@ -65,3 +65,35 @@
   --search-match-bg: rgba(255, 212, 0, 0.3);
   --search-match-active-bg: rgba(255, 140, 0, 0.5);
 }
+
+:root.terminal {
+  color-scheme: dark;
+  --bg-color: #080d0a;
+  --surface-color: #101813;
+  --panel-color: #0b120e;
+
+  --primary-color: #8cff9b;
+  --primary-green: #54f58b;
+  --primary-white: #e2ffe8;
+  --primary-container: #193321;
+
+  --text-primary: #d8f5de;
+  --text-secondary: #8db99a;
+  --text-disabled: #52695a;
+
+  --border-color: #294333;
+  --divider-color: #1b2b20;
+
+  --action-hover: #1b3022;
+  --action-active: #244a30;
+  --table-header-bg: #19291e;
+  --table-header-text: #c8f4d1;
+
+  --gradient-primary: linear-gradient(135deg, #31c96b 0%, #54d6a1 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #26a955 0%, #39b88a 100%);
+  --gradient-primary-color: #31c96b;
+
+  --search-match-bg: rgba(255, 212, 0, 0.3);
+  --search-match-active-bg: rgba(255, 140, 0, 0.5);
+  --font-sans: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}

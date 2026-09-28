@@ -245,10 +245,11 @@
       "privacyTab": "Privacy and diagnostics",
       "appearance": {
         "theme": "Application theme",
-        "themeDescription": "Choose the application appearance (Light, Dark or System).",
+        "themeDescription": "Choose the application appearance.",
         "system": "System (Auto)",
         "light": "Light",
         "dark": "Dark",
+        "terminal": "Terminal",
         "sidebarWidth": "Sidebar width (rem)",
         "sidebarWidthDescription": "Adjust the application sidebar width.",
         "titlebarHeight": "Title bar height (px)",

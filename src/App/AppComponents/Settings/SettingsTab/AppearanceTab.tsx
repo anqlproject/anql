@@ -25,6 +25,7 @@ export default function AppearanceTab({ settings, updateSetting }: AppearanceTab
           <option value="system">{t('SETTINGS.appearance.system')}</option>
           <option value="light">{t('SETTINGS.appearance.light')}</option>
           <option value="dark">{t('SETTINGS.appearance.dark')}</option>
+          <option value="terminal">{t('SETTINGS.appearance.terminal')}</option>
         </select>
       </SettingsItem>
       <SettingsItem

@@ -11,7 +11,7 @@ import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { Button } from '@/components/ui/button';
 import { DIMENSIONS } from '@/core/global/defaultValues';
 import { logger } from '@/core/logger';
-import { useThemeStore } from '@/GlobalState/themeStore';
+import { type Theme,useThemeStore } from '@/GlobalState/themeStore';
 
 import AppearanceTab from './SettingsTab/AppearanceTab';
 import EditorTab from './SettingsTab/EditorTab';
@@ -45,7 +45,7 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
 
     // Apply theme change immediately
     if (newConfig.appearance.theme !== storeTheme) {
-      setStoreTheme(newConfig.appearance.theme as 'light' | 'dark' | 'system');
+      setStoreTheme(newConfig.appearance.theme as Theme);
     }
 
     // Apply language change immediately

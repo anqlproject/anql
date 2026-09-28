@@ -245,10 +245,11 @@
       "privacyTab": "Confidentialité et diagnostic",
       "appearance": {
         "theme": "Thème de l'application",
-        "themeDescription": "Choisissez l'apparence de l'application (Clair, Sombre ou Système).",
+        "themeDescription": "Choisissez l'apparence de l'application.",
         "system": "Système (Auto)",
         "light": "Clair",
         "dark": "Sombre",
+        "terminal": "Terminal",
         "sidebarWidth": "Largeur de la barre latérale (rem)",
         "sidebarWidthDescription": "Ajustez la largeur de la barre latérale de l'application.",
         "titlebarHeight": "Hauteur de la barre de titre (px)",
