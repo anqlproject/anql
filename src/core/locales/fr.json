@@ -253,6 +253,7 @@
         "monochrome": "Plan monochrome",
         "softOrange": "Orange doux",
         "softGreen": "Vert doux",
+        "manuscript": "Manuscrit",
         "sidebarWidth": "Largeur de la barre latérale (rem)",
         "sidebarWidthDescription": "Ajustez la largeur de la barre latérale de l'application.",
         "titlebarHeight": "Hauteur de la barre de titre (px)",

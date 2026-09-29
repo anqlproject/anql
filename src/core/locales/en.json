@@ -253,6 +253,7 @@
         "monochrome": "Monochrome plan",
         "softOrange": "Soft orange",
         "softGreen": "Soft green",
+        "manuscript": "Manuscript",
         "sidebarWidth": "Sidebar width (rem)",
         "sidebarWidthDescription": "Adjust the application sidebar width.",
         "titlebarHeight": "Title bar height (px)",

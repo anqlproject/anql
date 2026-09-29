@@ -29,6 +29,7 @@ export default function AppearanceTab({ settings, updateSetting }: AppearanceTab
           <option value="monochrome">{t('SETTINGS.appearance.monochrome')}</option>
           <option value="soft-orange">{t('SETTINGS.appearance.softOrange')}</option>
           <option value="soft-green">{t('SETTINGS.appearance.softGreen')}</option>
+          <option value="manuscript">{t('SETTINGS.appearance.manuscript')}</option>
         </select>
       </SettingsItem>
       <SettingsItem

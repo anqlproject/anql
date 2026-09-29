@@ -198,3 +198,40 @@
   --search-match-bg: rgba(207, 226, 132, 0.38);
   --search-match-active-bg: rgba(143, 201, 160, 0.5);
 }
+
+:root.manuscript {
+  color-scheme: light;
+  --bg-color: #f4f1ea;
+  --surface-color: #fdfcf8;
+  --panel-color: #f0ece1;
+
+  --primary-color: #1d3a5f;
+  --primary-green: #2b593f;
+  --primary-white: #fdfcf8;
+  --primary-container: #e6e1d6;
+
+  --text-primary: #2c2a29;
+  --text-secondary: #5e5c5a;
+  --text-disabled: #999593;
+
+  --border-color: #d1c9b8;
+  --divider-color: #e3ded6;
+
+  --action-hover: #ebe6de;
+  --action-active: #e0dacd;
+  --table-header-bg: #e6e1d6;
+  --table-header-text: #2c2a29;
+
+  --destructive: #8f2b2b;
+  --destructive-hover: #6b1f1f;
+  --destructive-container: rgba(143, 43, 43, 0.08);
+
+  --gradient-primary: linear-gradient(135deg, #2b593f 0%, #1d3a5f 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #1f422e 0%, #132742 100%);
+  --gradient-primary-color: #1d3a5f;
+
+  --search-match-bg: rgba(29, 58, 95, 0.15);
+  --search-match-active-bg: rgba(29, 58, 95, 0.3);
+  
+  --font-sans: 'Caveat', 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
+}
