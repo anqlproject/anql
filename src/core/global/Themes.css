@@ -163,3 +163,38 @@
   --search-match-bg: rgba(255, 194, 92, 0.35);
   --search-match-active-bg: rgba(232, 132, 70, 0.45);
 }
+
+:root.apple-green {
+  color-scheme: light;
+  --bg-color: #f3faf5;
+  --surface-color: #fcfffd;
+  --panel-color: #e9f4ed;
+
+  --primary-color: #548b68;
+  --primary-green: #8fc9a0;
+  --primary-white: #f8fff9;
+  --primary-container: #d8eee0;
+
+  --text-primary: #26372c;
+  --text-secondary: #62786a;
+  --text-disabled: #9aaea0;
+
+  --border-color: #cfe3d5;
+  --divider-color: #e2eee5;
+
+  --action-hover: #e5f2e9;
+  --action-active: #d5eadb;
+  --table-header-bg: #e7f1e9;
+  --table-header-text: #344b3b;
+
+  --destructive: #c84d42;
+  --destructive-hover: #aa3e35;
+  --destructive-container: rgba(200, 77, 66, 0.08);
+
+  --gradient-primary: linear-gradient(135deg, #92c9a2 0%, #b8dec2 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #70ad83 0%, #98c9a6 100%);
+  --gradient-primary-color: #76b489;
+
+  --search-match-bg: rgba(207, 226, 132, 0.38);
+  --search-match-active-bg: rgba(143, 201, 160, 0.5);
+}

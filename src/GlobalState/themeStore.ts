@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type Theme = 'light' | 'dark' | 'system' | 'terminal' | 'monochrome' | 'soft-orange';
+export type Theme = 'light' | 'dark' | 'system' | 'terminal' | 'monochrome' | 'soft-orange' | 'apple-green';
 
 interface ThemeStore {
   theme: Theme;
@@ -15,7 +15,7 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
 
   setTheme: (theme) => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark', 'terminal', 'monochrome', 'soft-orange');
+    root.classList.remove('light', 'dark', 'terminal', 'monochrome', 'soft-orange', 'apple-green');
 
     let currentResolvedTheme: 'light' | 'dark' = 'light';
 
@@ -25,12 +25,14 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
       currentResolvedTheme = 'dark';
     } else if (theme === 'soft-orange') {
       currentResolvedTheme = 'light';
+    } else if (theme === 'apple-green') {
+      currentResolvedTheme = 'light';
     } else {
       currentResolvedTheme = theme as 'light' | 'dark';
     }
 
     root.classList.add(currentResolvedTheme);
-    if (theme === 'terminal' || theme === 'monochrome' || theme === 'soft-orange') root.classList.add(theme);
+    if (theme === 'terminal' || theme === 'monochrome' || theme === 'soft-orange' || theme === 'apple-green') root.classList.add(theme);
     localStorage.setItem('app-theme', theme);
 
     set({ theme, resolvedTheme: currentResolvedTheme });
