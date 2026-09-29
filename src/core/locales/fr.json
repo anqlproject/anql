@@ -250,6 +250,7 @@
         "light": "Clair",
         "dark": "Sombre",
         "terminal": "Terminal",
+        "monochrome": "Plan monochrome",
         "sidebarWidth": "Largeur de la barre latérale (rem)",
         "sidebarWidthDescription": "Ajustez la largeur de la barre latérale de l'application.",
         "titlebarHeight": "Hauteur de la barre de titre (px)",

@@ -72,7 +72,7 @@
   --surface-color: #101813;
   --panel-color: #0b120e;
 
-  --primary-color: #8cff9b;
+  --primary-color: #3d8360;
   --primary-green: #54f58b;
   --primary-white: #e2ffe8;
   --primary-container: #193321;
@@ -96,4 +96,35 @@
   --search-match-bg: rgba(255, 212, 0, 0.3);
   --search-match-active-bg: rgba(255, 140, 0, 0.5);
   --font-sans: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+
+:root.monochrome {
+  color-scheme: dark;
+  --bg-color: #000000;
+  --surface-color: #050505;
+  --panel-color: #000000;
+
+  --primary-color: #616060;
+  --primary-green: #ffffff;
+  --primary-white: #ffffff;
+  --primary-container: #242424;
+
+  --text-primary: #ffffff;
+  --text-secondary: #d0d0d0;
+  --text-disabled: #777777;
+
+  --border-color: #ffffff;
+  --divider-color: #777777;
+
+  --action-hover: #222222;
+  --action-active: #383838;
+  --table-header-bg: #171717;
+  --table-header-text: #ffffff;
+
+  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #bdbdbd 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #d8d8d8 0%, #999999 100%);
+  --gradient-primary-color: #ffffff;
+
+  --search-match-bg: rgba(255, 255, 255, 0.28);
+  --search-match-active-bg: rgba(255, 255, 255, 0.5);
 }
