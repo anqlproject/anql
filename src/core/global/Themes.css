@@ -164,7 +164,7 @@
   --search-match-active-bg: rgba(232, 132, 70, 0.45);
 }
 
-:root.apple-green {
+:root.soft-green {
   color-scheme: light;
   --bg-color: #f3faf5;
   --surface-color: #fcfffd;

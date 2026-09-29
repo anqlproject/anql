@@ -252,7 +252,7 @@
         "terminal": "Terminal",
         "monochrome": "Monochrome plan",
         "softOrange": "Soft orange",
-        "appleGreen": "Green glass",
+        "softGreen": "Soft green",
         "sidebarWidth": "Sidebar width (rem)",
         "sidebarWidthDescription": "Adjust the application sidebar width.",
         "titlebarHeight": "Title bar height (px)",
