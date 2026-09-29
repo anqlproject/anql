@@ -128,3 +128,38 @@
   --search-match-bg: rgba(255, 255, 255, 0.28);
   --search-match-active-bg: rgba(255, 255, 255, 0.5);
 }
+
+:root.soft-orange {
+  color-scheme: light;
+  --bg-color: #fff8f2;
+  --surface-color: #fffdfb;
+  --panel-color: #f8eee6;
+
+  --primary-color: #c66b3d;
+  --primary-green: #6d9a72;
+  --primary-white: #fffaf6;
+  --primary-container: #f1d9c8;
+
+  --text-primary: #382a24;
+  --text-secondary: #78675e;
+  --text-disabled: #a9988e;
+
+  --border-color: #e8d7ca;
+  --divider-color: #f1e5dc;
+
+  --action-hover: #f8e9dd;
+  --action-active: #f0d6c3;
+  --table-header-bg: #f2e5db;
+  --table-header-text: #49372e;
+
+  --destructive: #c84d42;
+  --destructive-hover: #aa3e35;
+  --destructive-container: rgba(200, 77, 66, 0.08);
+
+  --gradient-primary: linear-gradient(135deg, #d9875e 0%, #e8a477 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #c66b3d 0%, #d9875e 100%);
+  --gradient-primary-color: #c66b3d;
+
+  --search-match-bg: rgba(255, 194, 92, 0.35);
+  --search-match-active-bg: rgba(232, 132, 70, 0.45);
+}
