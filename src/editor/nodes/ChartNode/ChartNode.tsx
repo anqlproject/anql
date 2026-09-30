@@ -3,6 +3,8 @@ import type { EditorConfig } from 'lexical';
 import { DOMConversionMap, DOMConversionOutput, DOMExportOutput, LexicalEditor, LexicalNode, NodeKey, Spread } from 'lexical';
 import React from 'react';
 
+import type { ChartTableValue } from '@/editor/context/MathVariablesContext';
+
 import { ChartComponent } from './ChartComponent.tsx';
 
 export type ChartType = 'bar' | 'line' | 'pie' | 'doughnut' | 'radar' | 'scatter';
@@ -10,7 +12,9 @@ export type ChartAggregation = 'value' | 'category' | 'count';
 
 export interface ChartNodeConfig {
   chartType: ChartType;
+  dataSource?: 'table' | 'inline';
   tableName: string;
+  inlineTable?: Record<string, ChartTableValue[]>;
   xColumn: string;
   yColumns: string[];
   yAggregation: ChartAggregation;
@@ -28,7 +32,9 @@ function convertChartElement(): DOMConversionOutput {
 
 export class ChartNode extends DecoratorBlockNode {
   __chartType: ChartType;
+  __dataSource: 'table' | 'inline';
   __tableName: string;
+  __inlineTable: Record<string, ChartTableValue[]>;
   __xColumn: string;
   __yColumns: string[];
   __yAggregation: ChartAggregation;
@@ -49,7 +55,11 @@ export class ChartNode extends DecoratorBlockNode {
     super(format, key);
     const legacyConfig = config as Partial<ChartNodeConfig> & { labelColumn?: string; dataColumns?: string[] };
     this.__chartType = config.chartType || 'line';
+    this.__dataSource = config.dataSource || 'table';
     this.__tableName = config.tableName || '';
+    this.__inlineTable = Object.fromEntries(
+      Object.entries(config.inlineTable || {}).map(([column, values]) => [column, [...values]]),
+    );
     this.__xColumn = config.xColumn || legacyConfig.labelColumn || '';
     this.__yColumns = config.yColumns || legacyConfig.dataColumns || [];
     this.__yAggregation = config.yAggregation || 'value';
@@ -62,7 +72,11 @@ export class ChartNode extends DecoratorBlockNode {
   getConfig(): ChartNodeConfig {
     return {
       chartType: this.__chartType,
+      dataSource: this.__dataSource,
       tableName: this.__tableName,
+      inlineTable: Object.fromEntries(
+        Object.entries(this.__inlineTable).map(([column, values]) => [column, [...values]]),
+      ),
       xColumn: this.__xColumn,
       yColumns: [...this.__yColumns],
       yAggregation: this.__yAggregation,
@@ -76,7 +90,11 @@ export class ChartNode extends DecoratorBlockNode {
   updateConfig(config: ChartNodeConfig): void {
     const writable = this.getWritable();
     writable.__chartType = config.chartType;
+    writable.__dataSource = config.dataSource || 'table';
     writable.__tableName = config.tableName;
+    writable.__inlineTable = Object.fromEntries(
+      Object.entries(config.inlineTable || {}).map(([column, values]) => [column, [...values]]),
+    );
     writable.__xColumn = config.xColumn;
     writable.__yColumns = [...config.yColumns];
     writable.__yAggregation = config.yAggregation;

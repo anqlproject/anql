@@ -4,7 +4,7 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { Chart, registerables } from 'chart.js';
 import { $getNodeByKey, LexicalEditor } from 'lexical';
-import { BarChart3, Settings2, Sparkles } from 'lucide-react';
+import { BarChart3, Settings2, Sparkles, Table2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ChartTableValue, useMathVariables } from '@/editor/context/MathVariablesContext';
 import { useThemeStore } from '@/GlobalState/themeStore';
 
-import { CHART_TYPES, ChartConfiguration, ChartTypePreview, COLOR_PALETTES, getAutoChartProposals, getDefaultConfig, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
+import { CHART_TYPES, ChartConfiguration, ChartTypePreview, COLOR_PALETTES, getAutoChartProposals, getDefaultConfig, INLINE_CHART_TABLE_KEY, isNumericColumn, isPolarChart, TableEntry } from './ChartConfiguration';
 import { $isChartNode, ChartNode, ChartNodeConfig, ChartType } from './ChartNode';
 import { ChartRulesTooltip } from './ChartRulesTooltip';
 
@@ -114,12 +114,16 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     });
   }, [editor, nodeKey]);
 
-  const rawTable = nodeConfig ? chartTableVariables[nodeConfig.tableName] : undefined;
+  const rawTable = nodeConfig?.dataSource === 'inline'
+    ? nodeConfig.inlineTable
+    : nodeConfig ? chartTableVariables[nodeConfig.tableName] : undefined;
   const table = useDeepMemo(rawTable);
   const safeConfig = useMemo(() => nodeConfig && table ? normalizeConfig(nodeConfig, table) : nodeConfig, [nodeConfig, table]);
 
   const previewConfig = isConfiguring && !hasSelectedConfigType ? null : isConfiguring ? draftConfig : safeConfig;
-  const rawPreviewTable = previewConfig ? chartTableVariables[previewConfig.tableName] : undefined;
+  const rawPreviewTable = previewConfig?.dataSource === 'inline'
+    ? previewConfig.inlineTable
+    : previewConfig ? chartTableVariables[previewConfig.tableName] : undefined;
   const previewTable = useDeepMemo(rawPreviewTable);
   const renderConfig = useMemo(() => previewConfig && previewTable ? normalizeConfig(previewConfig, previewTable) : previewConfig, [previewConfig, previewTable]);
 
@@ -160,6 +164,19 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
       : getDefaultConfig(tables);
     setDraftConfig(initialConfig);
     setHasSelectedConfigType(Boolean(safeConfig?.tableName && safeConfig.yColumns.length > 0));
+    setIsConfiguring(true);
+  };
+
+  const createMiniTableChart = () => {
+    const inlineTable = { Category: ['A', 'B', 'C'], Value: [1, 2, 3] };
+    const config: ChartNodeConfig = {
+      ...getDefaultConfig([[INLINE_CHART_TABLE_KEY, inlineTable]]),
+      dataSource: 'inline',
+      tableName: INLINE_CHART_TABLE_KEY,
+      inlineTable,
+    };
+    setDraftConfig(config);
+    setHasSelectedConfigType(true);
     setIsConfiguring(true);
   };
 
@@ -333,11 +350,11 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
             chartData={chartData}
             config={draftConfig}
             tables={tables}
-            onChange={config => {
-              setDraftConfig(config);
-              updateConfig(config, false);
+            onChange={setDraftConfig}
+            onCancel={() => {
+              if (draftConfig) updateConfig(draftConfig, false);
+              setIsConfiguring(false);
             }}
-            onCancel={() => setIsConfiguring(false)}
             canvasRef={canvasRef}
             t={t}
           />
@@ -389,9 +406,19 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
             <button type="button" className="chart-configure-button" onClick={openConfiguration} title={t('CHART.configure') as string} aria-label={t('CHART.configure') as string}>
               <Settings2 size={14} aria-hidden="true" />
             </button>
+            <button type="button" className="chart-mini-table-button" onClick={createMiniTableChart}>
+              <Table2 size={14} aria-hidden="true" />
+              <span>{t('CHART.createMiniTable')}</span>
+            </button>
           </>
         ) : (
-          <ChartRulesTooltip id={`chart-rules-tooltip-${nodeKey}`} />
+          <>
+            <ChartRulesTooltip id={`chart-rules-tooltip-${nodeKey}`} />
+            <button type="button" className="chart-mini-table-button" onClick={createMiniTableChart}>
+              <Table2 size={14} aria-hidden="true" />
+              <span>{t('CHART.createMiniTable')}</span>
+            </button>
+          </>
         )}
       </div>
     );

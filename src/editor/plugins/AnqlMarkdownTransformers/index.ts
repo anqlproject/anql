@@ -599,13 +599,30 @@ export function parseChartNodeConfig(raw: string): Partial<ChartNodeConfig> | nu
     ? yValue.split(',').map((column) => column.trim()).filter(Boolean)
     : [];
 
+  let inlineTable: ChartNodeConfig['inlineTable'];
+  if (params.source === 'inline' && params.data) {
+    try {
+      const parsedData: unknown = JSON.parse(decodeURIComponent(params.data));
+      if (parsedData && typeof parsedData === 'object' && !Array.isArray(parsedData)) {
+        const entries = Object.entries(parsedData);
+        if (entries.every(([, values]) => Array.isArray(values) && values.every(value => typeof value === 'string' || (typeof value === 'number' && Number.isFinite(value))))) {
+          inlineTable = parsedData as ChartNodeConfig['inlineTable'];
+        }
+      }
+    } catch {
+      return null;
+    }
+  }
+
   if (!params.type || !params.table || !params.x || yColumns.length === 0) {
     return null;
   }
 
   return {
     chartType: (params.type as ChartNodeConfig['chartType']) || 'line',
+    dataSource: params.source === 'inline' && inlineTable ? 'inline' : 'table',
     tableName: params.table,
+    inlineTable,
     xColumn: params.x,
     yColumns,
     yAggregation: 'value',
@@ -624,7 +641,11 @@ export function exportChartToMarkdown(config: Partial<ChartNodeConfig>): string 
     ? config.yColumns
     : [config.valueColumn || 'value'];
 
-  return `@chart(type=${chartType}; table=${tableName}; x=${xColumn}; y=${yColumns.join(',')})`;
+  const dataOptions = config.dataSource === 'inline' && config.inlineTable
+    ? `; source=inline; data=${encodeURIComponent(JSON.stringify(config.inlineTable))}`
+    : '';
+
+  return `@chart(type=${chartType}; table=${tableName}; x=${xColumn}; y=${yColumns.join(',')}${dataOptions})`;
 }
 
 export const CHART: ElementTransformer = {

@@ -1,7 +1,7 @@
 import './ChartConfiguration.css';
 
 import type { TFunction } from 'i18next';
-import { ChevronDown, Palette, Settings2, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, Palette, Settings2, SlidersHorizontal, Table2 } from 'lucide-react';
 import type { RefObject } from 'react';
 import { useState } from 'react';
 
@@ -12,6 +12,7 @@ import { ChartTableValue } from '@/editor/context/MathVariablesContext';
 
 import { ChartAggregation, ChartNodeConfig, ChartType } from './ChartNode';
 import { ChartSelect, ChartSelectOptionItem } from './ChartSelect';
+import { MiniChartTableEditor } from './MiniChartTableEditor';
 
 export const COLOR_PALETTES: Record<string, string[]> = {
   default: ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed'],
@@ -23,6 +24,7 @@ export const COLORS = COLOR_PALETTES.default;
 
 export type ChartTable = Record<string, ChartTableValue[]>;
 export type TableEntry = [string, ChartTable];
+export const INLINE_CHART_TABLE_KEY = '__inline_chart_table__';
 
 export interface AutoChartProposal {
   tableName: string;
@@ -33,7 +35,6 @@ export function isNumericColumn(values: ChartTableValue[]): boolean {
   const populatedValues = values.filter(value => String(value).trim() !== '');
   return populatedValues.length > 0 && populatedValues.every(value => Number.isFinite(Number(value)));
 }
-
 export function getDefaultConfig(tables: TableEntry[], chartType: ChartType = 'line'): ChartNodeConfig {
   const [tableName, columns] = tables[0] || ['', {}];
   const columnNames = Object.keys(columns);
@@ -41,6 +42,7 @@ export function getDefaultConfig(tables: TableEntry[], chartType: ChartType = 'l
 
   return {
     chartType,
+    dataSource: 'table',
     tableName,
     xColumn: columnNames[0] || '',
     yColumns: numericColumns.filter(column => column !== columnNames[0]),
@@ -114,7 +116,7 @@ interface ChartConfigurationProps {
   t: TFunction;
 }
 
-type ConfigSection = 'axesSeries' | 'options' | 'colors';
+type ConfigSection = 'data' | 'axesSeries' | 'options' | 'colors';
 
 export function ChartConfiguration({
   chartData,
@@ -125,14 +127,30 @@ export function ChartConfiguration({
   canvasRef,
   t,
 }: ChartConfigurationProps) {
-  const [activeSection, setActiveSection] = useState<ConfigSection>('axesSeries');
+  const [activeSection, setActiveSection] = useState<ConfigSection>(config.dataSource === 'inline' ? 'data' : 'axesSeries');
 
   const handleTableChange = (tableName: string) => {
+    if (tableName === INLINE_CHART_TABLE_KEY) {
+      const inlineTable = config.inlineTable || { Category: ['A', 'B', 'C'], Value: [1, 2, 3] };
+      setActiveSection('data');
+      onChange({
+        ...getDefaultConfig([[INLINE_CHART_TABLE_KEY, inlineTable]], config.chartType),
+        dataSource: 'inline',
+        tableName: INLINE_CHART_TABLE_KEY,
+        inlineTable,
+      });
+      return;
+    }
+
+    if (tableName === config.tableName && config.dataSource === 'table') return;
     onChange({
       ...getDefaultConfig(tables.filter(([name]) => name === tableName), config.chartType),
+      dataSource: 'table',
       tableName,
     });
   };
+
+  const selectedTable = config.dataSource === 'inline' ? INLINE_CHART_TABLE_KEY : config.tableName;
 
   return (
     <ComponentDialog
@@ -140,9 +158,12 @@ export function ChartConfiguration({
         <label className="chart-dialog-title-control">
           <span>{t('CHART.table')}</span>
           <ChartSelect
-            value={config.tableName}
+            value={selectedTable}
             onChange={handleTableChange}
-            options={tables.map(([name]) => ({ value: name, label: name }))}
+            options={[
+              { value: INLINE_CHART_TABLE_KEY, label: t('CHART.miniTable') as string },
+              ...tables.map(([name]) => ({ value: name, label: name })),
+            ]}
             ariaLabel={t('CHART.table') as string}
           />
         </label>
@@ -163,6 +184,12 @@ export function ChartConfiguration({
       </div>
       <div className="chart-settings-layout">
         <nav className="chart-settings-sidebar" aria-label={t('CHART.settingsNavigation') as string}>
+          {config.dataSource === 'inline' && (
+            <button type="button" className={activeSection === 'data' ? 'is-active' : ''} onClick={() => setActiveSection('data')}>
+              <Table2 size={15} />
+              <span>{t('CHART.miniTable')}</span>
+            </button>
+          )}
           <button type="button" className={activeSection === 'axesSeries' ? 'is-active' : ''} onClick={() => setActiveSection('axesSeries')}>
             <SlidersHorizontal size={15} />
             <span>{t('CHART.sections.axesSeries')}</span>
@@ -197,7 +224,9 @@ function ChartConfigPanel({
   t: TFunction;
   section: ConfigSection;
 }) {
-  const columns = tables.find(([name]) => name === config.tableName)?.[1] || {};
+  const columns = config.dataSource === 'inline'
+    ? config.inlineTable || {}
+    : tables.find(([name]) => name === config.tableName)?.[1] || {};
   const columnNames = Object.keys(columns);
   const numericColumns = columnNames.filter(column => isNumericColumn(columns[column]));
   const xIsNumeric = isNumericColumn(columns[config.xColumn] || []);
@@ -210,6 +239,9 @@ function ChartConfigPanel({
 
   return (
     <div className="chart-config-panel" onClick={event => event.stopPropagation()}>
+      {section === 'data' && config.dataSource === 'inline' && (
+        <MiniChartTableEditor config={config} onChange={onChange} />
+      )}
       {section === 'axesSeries' && (isPolarChart(config.chartType) ? (
         <>
           <label>{t('CHART.category')}

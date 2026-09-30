@@ -145,6 +145,26 @@
   font-size: var(--text-sm);
 }
 
+.chart-mini-table-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  background: var(--surface-color);
+  cursor: pointer;
+  font-size: var(--text-xs);
+}
+
+.chart-mini-table-button:hover {
+  border-color: var(--primary-color);
+  background: var(--action-hover);
+}
+
 .chart-empty-state.focused {
   outline: 2px solid var(--primary-color);
   border-radius: 6px;
