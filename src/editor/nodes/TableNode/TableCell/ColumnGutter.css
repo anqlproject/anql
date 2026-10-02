@@ -42,7 +42,7 @@
   border: none;
   background: transparent;
   color: var(--text-disabled);
-  cursor: pointer;
+  cursor: grab;
   padding: 2px;
   border-radius: 3px;
   opacity: 0;
@@ -81,7 +81,8 @@
   background: var(--surface-color);
 }
 
-.table-col-handle:active {
+.table-col-handle:active,
+.table-col-handle.is-dragging {
   cursor: grabbing;
 }
 

@@ -130,7 +130,7 @@
   border: none;
   background: transparent;
   color: var(--text-disabled);
-  cursor: pointer;
+  cursor: grab;
   padding: 2px;
   border-radius: 3px;
   opacity: 0;

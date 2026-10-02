@@ -18,14 +18,14 @@
   width: 18px;
   height: 18px;
   opacity: 0.3;
-  cursor: grabbing;
+  cursor: grab;
 }
 
 .draggable-block-menu .drag-handle {
   width: 18px;
   height: 18px;
   opacity: 0.3;
-  cursor: grabbing;
+  cursor: grab;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,10 +33,23 @@
   background: transparent;
   padding: 0;
   color: inherit;
+  transition: opacity 160ms ease, transform 160ms ease;
 }
 
 .draggable-block-menu .drag-handle:hover {
   opacity: 0.8;
+}
+
+.draggable-block-menu .drag-handle:active {
+  cursor: grabbing;
+}
+
+.draggable-block-menu .drag-handle svg {
+  transition: transform 160ms ease;
+}
+
+.draggable-block-menu .drag-handle:hover svg {
+  transform: scale(1.08) translateY(-1px);
 }
 
 
