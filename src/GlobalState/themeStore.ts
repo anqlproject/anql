@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 
-export type Theme = 'light' | 'dark' | 'system' | 'terminal' | 'monochrome' | 'soft-orange' | 'soft-green' | 'manuscript';
+export type Theme = 'light' | 'dark' | 'system';
+
+export const normalizeTheme = (theme: unknown): Theme =>
+  theme === 'light' || theme === 'dark' || theme === 'system' ? theme : 'system';
 
 interface ThemeStore {
   theme: Theme;
@@ -10,33 +13,19 @@ interface ThemeStore {
 }
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
-  theme: (localStorage.getItem('app-theme') === 'apple-green'
-    ? 'soft-green'
-    : localStorage.getItem('app-theme') as Theme) || 'system',
+  theme: normalizeTheme(localStorage.getItem('app-theme')),
   resolvedTheme: 'light',
 
-  setTheme: (theme) => {
+  setTheme: (preference) => {
+    const theme = normalizeTheme(preference);
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark', 'terminal', 'monochrome', 'soft-orange', 'soft-green', 'manuscript');
 
-    let currentResolvedTheme: 'light' | 'dark' = 'light';
-
-    if (theme === 'system') {
-      currentResolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    } else if (theme === 'terminal' || theme === 'monochrome') {
-      currentResolvedTheme = 'dark';
-    } else if (theme === 'soft-orange') {
-      currentResolvedTheme = 'light';
-    } else if (theme === 'soft-green') {
-      currentResolvedTheme = 'light';
-    } else if (theme === 'manuscript') {
-      currentResolvedTheme = 'light';
-    } else {
-      currentResolvedTheme = theme as 'light' | 'dark';
-    }
+    const currentResolvedTheme = theme === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      : theme;
 
     root.classList.add(currentResolvedTheme);
-    if (theme === 'terminal' || theme === 'monochrome' || theme === 'soft-orange' || theme === 'soft-green' || theme === 'manuscript') root.classList.add(theme);
     localStorage.setItem('app-theme', theme);
 
     set({ theme, resolvedTheme: currentResolvedTheme });

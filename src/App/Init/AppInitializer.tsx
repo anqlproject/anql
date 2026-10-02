@@ -26,6 +26,7 @@ import {
 import { getDocumentsByWorkspaceId } from '@/core/database/useDocumentDatabase';
 import { APP_PATH, DEFAULT_SETTINGS } from '@/core/global/defaultSettings';
 import { logger, logStorage } from '@/core/logger';
+import { normalizeTheme, useThemeStore } from '@/GlobalState/themeStore';
 
 interface AppInitializerProps {
   children: React.ReactNode;
@@ -106,6 +107,8 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
         } else {
           await loadSettings(getFileFromDocument, setConfig);
         }
+
+        useThemeStore.getState().setTheme(normalizeTheme(useGlobalStore.getState().config.appearance.theme));
 
         if (!databasePath) throw new Error("Database path not found");
 

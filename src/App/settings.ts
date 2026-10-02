@@ -64,7 +64,13 @@ export const removeUnexpectedKeys = (
 export const mergeWithDefaults = (saved: Partial<AppConfig>): AppConfig => ({
   ...DEFAULT_SETTINGS,
   ...saved,
-  appearance: { ...DEFAULT_SETTINGS.appearance, ...saved.appearance },
+  appearance: {
+    ...DEFAULT_SETTINGS.appearance,
+    ...saved.appearance,
+    theme: saved.appearance?.theme === 'light' || saved.appearance?.theme === 'dark' || saved.appearance?.theme === 'system'
+      ? saved.appearance.theme
+      : 'system',
+  },
   editor: { ...DEFAULT_SETTINGS.editor, ...saved.editor },
   sidebar: { ...DEFAULT_SETTINGS.sidebar, ...saved.sidebar },
   homePage: {
