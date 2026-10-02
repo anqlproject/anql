@@ -57,13 +57,14 @@
   color: var(--text-secondary) !important;
   padding: 0 !important;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .home-selectionButton:hover {
   background-color: var(--action-hover) !important;
   color: var(--text-primary) !important;
-  transform: scale(1.05);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .home-selectionButton:focus-visible {
@@ -80,6 +81,12 @@
 .home-selectionIcon {
   width: 14px;
   height: 14px;
+  transition: transform 0.18s ease;
+}
+
+.home-selectionButton:hover .home-selectionIcon,
+.home-viewButton:hover .home-viewIcon {
+  transform: scale(1.08);
 }
 
 /* Delete button */
@@ -127,13 +134,14 @@
   color: var(--text-secondary) !important;
   padding: 0 !important;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .home-viewButton:hover {
   background-color: var(--action-hover) !important;
   color: var(--text-primary) !important;
-  transform: scale(1.05);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .home-viewButton:focus-visible {
@@ -144,6 +152,7 @@
 .home-viewIcon {
   width: 14px;
   height: 14px;
+  transition: transform 0.18s ease;
 }
 
 /* ── Documents list ──────────────────────────── */
