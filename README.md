@@ -142,8 +142,11 @@ For more help, check our [GitHub Issues](https://github.com/anqlproject/anql/iss
 |---|---|
 | Desktop framework | [Tauri](https://tauri.app/) |
 | UI | [React](https://react.dev/) |
+| State management | [Zustand](https://zustand-demo.pmnd.rs/) |
 | Editor engine | [Lexical](https://lexical.dev/) |
 | Math engine | [mathjs](https://mathjs.org/) |
+| Charting | [Chart.js](https://www.chartjs.org/) |
+| Database | [SQLite](https://www.sqlite.org/) |
 
 ### Platform Support
 
