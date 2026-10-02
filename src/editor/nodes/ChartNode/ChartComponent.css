@@ -6,10 +6,10 @@
   width: 100%;
   min-height: 240px;
   margin: 12px 0;
-  padding: 0;
+  padding: 8px 0 0;
   border: 0;
   border-radius: 0;
-  background: var(--bg-color);
+  background: transparent;
   box-shadow: none;
   color: var(--text-primary);
 }
@@ -17,14 +17,26 @@
 .chart-canvas-wrapper {
   position: relative;
   height: 300px;
+  padding: 10px;
+  border-radius: 6px;
+  background: transparent;
+  box-sizing: border-box;
 }
 
 .chart-content {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: transparent;
 }
 
 .chart-content.focused {
   outline: 2px solid var(--primary-color);
+  outline-offset: 0;
   user-select: none;
 }
 
@@ -34,7 +46,8 @@
   justify-content: space-between;
   gap: 12px;
   min-height: 24px;
-  margin-bottom: 2px;
+  padding: 2px 2px 0;
+  margin-bottom: 0;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
