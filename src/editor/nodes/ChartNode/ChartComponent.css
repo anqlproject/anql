@@ -67,14 +67,11 @@
 }
 
 .chart-toolbar-actions button svg {
-  transform: translateY(0) scale(1);
-  transition: opacity 0.18s ease, transform 0.18s ease, color 0.18s ease;
+  transition: color 0.15s ease;
 }
 
 .chart-toolbar-actions button:hover svg,
 .chart-toolbar-actions button:focus-visible svg {
-  opacity: 1;
-  transform: scale(1.08) translateY(-1px);
   color: var(--text-primary);
 }
 
@@ -97,6 +94,12 @@
   color: var(--text-primary);
   background: var(--action-hover);
   opacity: 1;
+}
+
+.chart-type-menu-button:focus-visible,
+.chart-configure-button:focus-visible {
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 1px;
 }
 
 .chart-type-menu-content {
@@ -366,8 +369,7 @@
 }
 
 .chart-configure-button:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 1px;
+  color: var(--text-primary);
   opacity: 1;
 }
 

@@ -14,7 +14,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--sidebar-foreground, currentColor);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
   outline: none;
@@ -24,9 +24,11 @@
 .footer-icon-button:hover,
 .footer-icon-button--open {
   background-color: var(--action-hover);
+  color: var(--text-primary);
 }
 
 .footer-icon-button:focus-visible {
-  outline: 2px solid var(--ring, currentColor);
+  color: var(--text-primary);
+  outline: 2px solid var(--text-secondary);
   outline-offset: 2px;
 }

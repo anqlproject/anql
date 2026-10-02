@@ -3,15 +3,28 @@
   top: 2px;
   z-index: var(--z-modal);
   user-select: none;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   border-radius: 6px;
   padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .documentMenu:hover,
 .documentMenu--open {
   background-color: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.documentMenu > button {
+  cursor: pointer;
+}
+
+.documentMenu > button:focus-visible {
+  color: var(--text-primary);
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 2px;
 }
