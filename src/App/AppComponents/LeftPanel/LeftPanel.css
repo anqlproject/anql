@@ -76,15 +76,15 @@
 
 .sidebar button[data-slot="sidebar-menu-button"].active span,
 .sidebar button[data-slot="sidebar-menu-button"][data-active="true"] span {
-  font-weight: var(--font-semibold) !important;
-  font-size: calc(var(--ui-text-sm) + 0.02rem) !important;
-  color: var(--text-primary) !important;
+  font-weight: var(--font-semibold);
+  font-size: calc(var(--ui-text-sm) + 0.02rem);
+  color: var(--text-primary);
 }
 
 .sidebar button[data-slot="sidebar-menu-button"].active svg,
 .sidebar button[data-slot="sidebar-menu-button"][data-active="true"] svg {
-  opacity: 1 !important;
-  color: var(--text-primary) !important;
+  opacity: 1;
+  color: var(--text-primary);
 }
 
 .sidebar [data-slot="sidebar-menu-button"] svg {

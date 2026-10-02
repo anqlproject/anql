@@ -14,9 +14,7 @@
 
 .sidebar-trigger {
   position: relative;
-  background-color: var(--surface-color);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
   border-radius: 6px;
   transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
   z-index: var(--z-elevated);
@@ -24,7 +22,6 @@
 
 .sidebar-trigger:hover {
   background-color: var(--action-hover);
-  border-color: var(--primary-color);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }

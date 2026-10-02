@@ -284,8 +284,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
                     }}
                   >
                     <item.icon
-                      size={ICON_SIZES.md}
-                      style={{ color: item.id === "home" && currentPage === "home" ? "var(--primary-color)" : undefined }} />
+                      size={ICON_SIZES.md} />
                     <span>{item.title}</span>
                     {item.id === "search" && globalSearchCount > 0 && (
                       <span className="search-count-badge">
