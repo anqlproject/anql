@@ -38,7 +38,7 @@ The product is built around three principles:
 
 - **Start simple:** writing should never require a database model or a setup step.
 - **Add complexity only when needed:** tables, calculations, and charts appear when they help the thought in front of you.
-- **Keep context together:** assumptions, decisions, data, results, and visualizations stay in the same document.
+- **Keep the reasoning with the data:** write your notes, calculations, and visualizations together in one local document.
 
 ### Who Is ANQL For?
 
