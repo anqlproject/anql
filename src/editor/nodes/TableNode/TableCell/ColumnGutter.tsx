@@ -4,7 +4,6 @@ import { useSortable } from '@dnd-kit/sortable';
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as Popover from '@radix-ui/react-popover';
 import { Column, Table } from '@tanstack/react-table';
-import { GripHorizontal } from 'lucide-react';
 import { useRef } from 'react';
 
 import { ColumnMenu } from '../TableMenu/ColumnMenu';
@@ -78,7 +77,6 @@ function ColGutterSlot({
             onPointerUp={(e) => openMenuIfClick(e.clientX, e.clientY)}
             onPointerCancel={() => { pointerOrigin.current = null; }}
           >
-            <GripHorizontal className="table-col-handle-icon" />
           </button>
         )}
         <Popover.Anchor className="table-col-handle-anchor" />

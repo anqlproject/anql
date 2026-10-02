@@ -4,7 +4,6 @@ import { useSortable } from "@dnd-kit/sortable";
 import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import * as Popover from "@radix-ui/react-popover";
 import { flexRender, Table } from "@tanstack/react-table";
-import { GripVertical } from "lucide-react";
 import { CSSProperties, useRef } from "react";
 
 import { RowMenu } from "../TableMenu/RowMenu";
@@ -112,7 +111,6 @@ export function DraggableRow({
                 pointerOrigin.current = null;
               }}
             >
-              <GripVertical className="table-handle-icon" />
             </button>
           )}
         </div>

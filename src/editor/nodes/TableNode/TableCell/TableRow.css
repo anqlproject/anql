@@ -136,7 +136,7 @@
   opacity: 0;
   touch-action: none;
   user-select: none;
-  transition: opacity 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+  transition: opacity 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .table-row-handle::before {
@@ -152,20 +152,8 @@
   transition: opacity 120ms ease, transform 120ms ease;
 }
 
-.table-row-handle .table-handle-icon {
-  opacity: 0;
-  transform: scale(0.5);
-  transition: opacity 120ms ease, transform 120ms ease;
-}
-
 .table-row-handle:hover::before {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.5);
-}
-
-.table-row-handle:hover .table-handle-icon {
-  opacity: 1;
-  transform: scale(1);
+  transform: translate(-50%, -50%) scaleY(1.2);
 }
 
 .table-row:hover .table-row-handle,
@@ -178,6 +166,7 @@
   background: var(--surface-color);
   box-shadow: 0 0 0 1px var(--primary-color), 0 2px 4px rgba(0,0,0,0.05);
   color: var(--primary-color);
+  transform: translateY(-50%) translateX(-1px);
 }
 
 .table-row-handle:focus-visible,
@@ -187,11 +176,6 @@
 
 .table-row-handle:active {
   cursor: grabbing;
-}
-
-.table-handle-icon {
-  width: 12px;
-  height: 12px;
 }
 
 .table-row-handle-anchor {
