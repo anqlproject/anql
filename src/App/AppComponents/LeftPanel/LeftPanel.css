@@ -288,6 +288,15 @@
   color: var(--destructive);
 }
 
+.history-item-close svg {
+  transform: scale(0.85);
+  transition: transform 0.16s ease;
+}
+
+.history-item-close:hover svg {
+  transform: scale(1.1);
+}
+
 .history-empty {
   text-align: center;
   padding: 32px 16px;
