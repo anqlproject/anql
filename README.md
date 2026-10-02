@@ -65,7 +65,7 @@ ANQL offers the freedom of simple notes, with more power available exactly when 
 - **Local SQLite Database**: Lightning-fast, reliable data persistence.
 - **Full-text search**: Instantly find any thought across all your documents.
 - **Offline-First**: Your data stays on your machine — always. No internet required.
-- **Multiple Themes**: Switch between themes (light, dark, terminal, monochrome, soft-orange, soft-green, manuscript) to match your environment or preference.
+- **Light, dark, or system appearance**: Choose a fixed light or dark mode, or follow your operating system's appearance setting.
 - **Import & Export**: Open and save documents as Markdown, or as the native `.anql` format — a ZIP archive containing the document JSON and all embedded assets.
 - **Tables, Math & Charts**: Combine structured data, calculations, and visualizations in one document.
 
