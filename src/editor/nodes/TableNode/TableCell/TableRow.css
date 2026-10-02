@@ -130,7 +130,7 @@
   border: none;
   background: transparent;
   color: var(--text-disabled);
-  cursor: grab;
+  cursor: pointer;
   padding: 2px;
   border-radius: 3px;
   opacity: 0;
@@ -153,7 +153,7 @@
 }
 
 .table-row-handle:hover::before {
-  transform: translate(-50%, -50%) scaleY(1.2);
+  transform: translate(-50%, -50%) scaleY(1.08);
 }
 
 .table-row:hover .table-row-handle,

@@ -84,7 +84,7 @@
   opacity: 0;
   user-select: none;
   touch-action: manipulation;
-  transition: color 120ms ease, background-color 120ms ease, opacity 120ms ease;
+  transition: color 180ms ease, background-color 180ms ease, opacity 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .chart-inline-table-handle::before {
@@ -92,8 +92,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 16px;
-  height: 4px;
+  width: 12px;
+  height: 3px;
   border-radius: 2px;
   background: var(--text-disabled);
   transform: translate(-50%, -50%);
@@ -101,14 +101,14 @@
 }
 
 .chart-inline-table-handle--row::before {
-  width: 4px;
-  height: 16px;
+  width: 3px;
+  height: 12px;
 }
 
 .chart-inline-table-handle--row {
   width: 14px;
   height: 24px;
-  left: -8px;
+  left: -6px;
   align-self: center;
   justify-self: start;
 }
@@ -116,24 +116,46 @@
 .chart-inline-table-handle--column {
   width: 24px;
   height: 14px;
-  top: -8px;
+  top: -6px;
   align-self: start;
   justify-self: center;
 }
 
-.chart-inline-table-handle.is-visible,
+.chart-inline-table-handle.is-visible {
+  opacity: 1;
+}
+
 .chart-inline-table-handle:hover,
 .chart-inline-table-handle:focus-visible,
 .chart-inline-table-handle[aria-expanded='true'] {
   color: var(--primary-color);
+  background: var(--surface-color);
+  box-shadow: 0 0 0 1px var(--primary-color), 0 2px 4px rgba(0, 0, 0, 0.05);
   opacity: 1;
 }
 
-.chart-inline-table-handle.is-visible::before,
-.chart-inline-table-handle:hover::before,
-.chart-inline-table-handle:focus-visible::before,
-.chart-inline-table-handle[aria-expanded='true']::before {
-  background: var(--primary-color);
+.chart-inline-table-handle--row:hover::before,
+.chart-inline-table-handle--row:focus-visible::before,
+.chart-inline-table-handle--row[aria-expanded='true']::before {
+  transform: translate(-50%, -50%) scaleY(1.08);
+}
+
+.chart-inline-table-handle--column:hover::before,
+.chart-inline-table-handle--column:focus-visible::before,
+.chart-inline-table-handle--column[aria-expanded='true']::before {
+  transform: translate(-50%, -50%) scaleX(1.08);
+}
+
+.chart-inline-table-handle--row:hover,
+.chart-inline-table-handle--row:focus-visible,
+.chart-inline-table-handle--row[aria-expanded='true'] {
+  transform: translateX(-1px);
+}
+
+.chart-inline-table-handle--column:hover,
+.chart-inline-table-handle--column:focus-visible,
+.chart-inline-table-handle--column[aria-expanded='true'] {
+  transform: translateY(-1px);
 }
 
 .chart-inline-table-handle:focus-visible {

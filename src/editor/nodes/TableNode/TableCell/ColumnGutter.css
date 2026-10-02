@@ -42,7 +42,7 @@
   border: none;
   background: transparent;
   color: var(--text-disabled);
-  cursor: grab;
+  cursor: pointer;
   padding: 2px;
   border-radius: 3px;
   opacity: 0;
@@ -66,7 +66,7 @@
 }
 
 .table-col-handle:hover::before {
-  transform: translate(-50%, -50%) scaleX(1.2);
+  transform: translate(-50%, -50%) scaleX(1.08);
 }
 
 .table-col-handle:hover {
