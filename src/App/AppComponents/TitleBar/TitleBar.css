@@ -18,10 +18,27 @@
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
   z-index: var(--z-elevated);
 }
 
 .sidebar-trigger:hover {
   background-color: var(--action-hover);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-trigger:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.sidebar-trigger svg {
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.sidebar-trigger:hover svg {
+  transform: scale(1.08);
+  opacity: 1;
 }

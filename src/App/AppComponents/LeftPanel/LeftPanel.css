@@ -61,7 +61,7 @@
   line-height: var(--leading-snug);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
   width: 100%;
   border: none;
   background: none;
@@ -71,26 +71,33 @@
 
 .sidebar [data-slot="sidebar-menu-button"]:hover {
   background-color: var(--action-hover);
+  transform: translateX(1px);
 }
 
 .sidebar button[data-slot="sidebar-menu-button"].active span,
 .sidebar button[data-slot="sidebar-menu-button"][data-active="true"] span {
   font-weight: var(--font-semibold) !important;
+  font-size: calc(var(--ui-text-sm) + 0.02rem) !important;
+  color: var(--text-primary) !important;
 }
 
 .sidebar button[data-slot="sidebar-menu-button"].active svg,
 .sidebar button[data-slot="sidebar-menu-button"][data-active="true"] svg {
   opacity: 1 !important;
+  color: var(--text-primary) !important;
 }
 
 .sidebar [data-slot="sidebar-menu-button"] svg {
   flex-shrink: 0;
-  opacity: 0.6;
-  transition: opacity 0.15s ease;
+  opacity: 0.7;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.18s ease, transform 0.18s ease, color 0.18s ease;
 }
 
 .sidebar [data-slot="sidebar-menu-button"]:hover svg {
-  opacity: 0.9;
+  opacity: 1;
+  transform: scale(1.08) translateY(-1px);
+  color: var(--text-primary);
 }
 
 /* ── Search count badge ───────────────────── */
