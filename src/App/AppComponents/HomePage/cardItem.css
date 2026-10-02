@@ -75,10 +75,10 @@
 .document-card--list {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  gap: 10px;
+  padding: 10px 14px;
+  gap: 12px;
   border-bottom: 1px solid var(--border-color);
-  border-radius: 0;
+  border-radius: 8px;
 }
 
 .document-card--list:first-child {
@@ -149,11 +149,11 @@
   border: 1px solid var(--border-color);
   border-radius: 10px;
   background-color: var(--surface-color);
-  padding: 16px;
+  padding: 18px 16px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-height: 90px;
+  gap: 12px;
+  min-height: 96px;
   transition:
     background-color 0.16s ease,
     box-shadow 0.16s ease,
