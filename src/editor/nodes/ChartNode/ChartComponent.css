@@ -66,6 +66,18 @@
   margin-left: auto;
 }
 
+.chart-toolbar-actions button svg {
+  transform: translateY(0) scale(1);
+  transition: opacity 0.18s ease, transform 0.18s ease, color 0.18s ease;
+}
+
+.chart-toolbar-actions button:hover svg,
+.chart-toolbar-actions button:focus-visible svg {
+  opacity: 1;
+  transform: scale(1.08) translateY(-1px);
+  color: var(--text-primary);
+}
+
 .chart-type-menu-button {
   display: inline-flex;
   width: 24px;
