@@ -292,6 +292,10 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   }, [chartConfigForDisplay, previewTable]);
 
   const isFocused = isNodeSelected && isEditable;
+  const preventChartContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
 
   useEffect(() => {
     if (!canvasRef.current || !chartData || chartData.datasets.length === 0) {
@@ -344,7 +348,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   if (isConfiguring) {
     return (
       <>
-        <div className={`chart-empty-state${isFocused ? ' focused' : ''}`}>{t('CHART.configuring')}</div>
+        <div className={`chart-empty-state${isFocused ? ' focused' : ''}`} onContextMenuCapture={preventChartContextMenu}>{t('CHART.configuring')}</div>
         {draftConfig && (
           <ChartConfiguration
             chartData={chartData}
@@ -367,7 +371,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
     const canConfigure = autoChartProposals.length > 0;
 
     return (
-      <div className={`chart-empty-state${isFocused ? ' focused' : ''}`}>
+      <div className={`chart-empty-state${isFocused ? ' focused' : ''}`} onContextMenuCapture={preventChartContextMenu}>
         {!canConfigure && <span>{t('CHART.empty')}</span>}
         {canConfigure ? (
           <>
@@ -425,7 +429,7 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   }
 
   return (
-    <div className={`chart-content${isFocused ? ' focused' : ''}`}>
+    <div className={`chart-content${isFocused ? ' focused' : ''}`} onContextMenuCapture={preventChartContextMenu}>
       {isEditable && <div className="chart-toolbar">
         {seriesTabColumns.length > 1 && (
           <div className="chart-axis-tabs" role="tablist" aria-label={t('CHART.ySeries') as string}>
