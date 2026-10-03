@@ -159,6 +159,13 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   }, []);
 
   const openConfiguration = () => {
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isChartNode(node)) {
+        node.selectEnd();
+      }
+    });
+
     const initialConfig = safeConfig?.tableName && safeConfig.yColumns.length > 0
       ? safeConfig
       : getDefaultConfig(tables);
@@ -168,6 +175,13 @@ export function ChartComponent({ editor, nodeKey }: { editor: LexicalEditor; nod
   };
 
   const createMiniTableChart = () => {
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isChartNode(node)) {
+        node.selectEnd();
+      }
+    });
+
     const inlineTable = { Category: ['A', 'B', 'C'], Value: [1, 2, 3] };
     const config: ChartNodeConfig = {
       ...getDefaultConfig([[INLINE_CHART_TABLE_KEY, inlineTable]]),
