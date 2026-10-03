@@ -126,12 +126,18 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
     }
   };
 
-  const handleMenuOpen = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMenuOpen = async (
+    e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>,
+    openAtPointer = false,
+  ) => {
     e.stopPropagation();
     if (isNativeMenuOpening.current) return;
 
     isNativeMenuOpening.current = true;
     const rect = e.currentTarget.getBoundingClientRect();
+    const position = openAtPointer
+      ? { x: e.clientX, y: e.clientY }
+      : { x: rect.left, y: rect.bottom };
 
     try {
       const [{ Menu }, { LogicalPosition }] = await Promise.all([
@@ -159,7 +165,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
       ];
 
       const nativeMenu = await Menu.new({ items: menuItems });
-      await nativeMenu.popup(new LogicalPosition(rect.left, rect.bottom));
+      await nativeMenu.popup(new LogicalPosition(position.x, position.y));
     } catch (error) {
       console.error("Failed to show native document card menu", error);
     } finally {
@@ -189,7 +195,14 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
   const isModifiedDate = !shouldShowCreatedDate;
 
   return (
-    <div className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''}`} onClick={handleOpen}>
+    <div
+      className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''}`}
+      onClick={handleOpen}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        void handleMenuOpen(event, true);
+      }}
+    >
 
       {selectionMode && (
         <div className="document-card__checkbox" onClick={handleCheckboxClick}>
