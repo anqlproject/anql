@@ -90,7 +90,7 @@ export default function LocalSearch({ onClose }: SearchPluginProps) {
         <div className="search-plugin-divider"></div>
         <button onClick={() => {
           onClose();
-          editor.focus();
+          editor.blur();
         }} title={t('LOCAL_SEARCH.close') as string}>
           <X size={16} />
         </button>
