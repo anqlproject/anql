@@ -1,4 +1,35 @@
-# 🎉 Release Notes - Version 0.4.0
+# Release Notes
+
+## Version 0.4.1
+
+This release adds a self-contained chart data workflow, refines the interface, and includes fixes across the editor, tables, and database.
+
+### Features
+
+- Create and edit an embedded data table directly in chart configuration, then use it as the chart's data source.
+- Open document actions from a Home card with right-click.
+- Show a read-mode indicator on documents.
+
+### Interface Improvements
+
+- Refine chart controls and align row/column menu handles in chart tables with the table editor.
+- Polish sidebar and Home interactions, including list/grid transitions, control spacing, and hover feedback.
+- Improve table drag handles and row/column menu highlighting.
+- Compact the code action menu and improve its active theme state.
+- Refine math feedback colors and sidebar footer sizing.
+
+### Fixes And Maintenance
+
+- Prevent unwanted editor scrolling when opening chart settings or closing local search.
+- Disable the editor context menu on chart nodes while preserving chart configuration menus.
+- Keep charts visible while opening their settings and prevent Home grid cards from clipping on hover.
+- Fix sidebar toggle initialization and table row/column menu highlight behavior.
+- Improve database full-text search index repair and keep error notifications visible until dismissed.
+- Remove unused editor components.
+
+---
+
+## Version 0.4.0
 
 This major update brings a wealth of new features, including a brand-new chart integration, a massive overhaul of the table node, advanced math calculations, and significant UI improvements with the adoption of native system menus.
 
