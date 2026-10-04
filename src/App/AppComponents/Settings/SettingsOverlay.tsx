@@ -44,7 +44,7 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
     await saveSettings(getFileFromDocument, newConfig);
 
     // Apply theme change immediately
-    if (newConfig.appearance.theme !== storeTheme) {
+    if (newConfig.appearance?.theme && newConfig.appearance.theme !== storeTheme) {
       setStoreTheme(newConfig.appearance.theme as Theme);
     }
 

@@ -13,7 +13,7 @@ interface ThemeStore {
 }
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
-  theme: normalizeTheme(localStorage.getItem('app-theme')),
+  theme: 'system',
   resolvedTheme: 'light',
 
   setTheme: (preference) => {
@@ -26,8 +26,6 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
       : theme;
 
     root.classList.add(currentResolvedTheme);
-    localStorage.setItem('app-theme', theme);
-
     set({ theme, resolvedTheme: currentResolvedTheme });
   },
 
@@ -53,10 +51,4 @@ if (typeof window !== 'undefined') {
   };
 
   mediaQuery.addEventListener('change', handleChange);
-}
-
-// Initialize theme on load
-if (typeof window !== 'undefined') {
-  const { theme, setTheme } = useThemeStore.getState();
-  setTheme(theme);
 }

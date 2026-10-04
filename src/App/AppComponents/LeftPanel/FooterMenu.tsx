@@ -7,6 +7,9 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from "react-i18next";
 
+import { useSettingsFile } from '@/App/hooks/useSettingsFile';
+import { saveSettings } from '@/App/settings';
+import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { ICON_SIZES } from "@/core/global/defaultValues";
 import { useThemeStore } from "@/GlobalState/themeStore";
 
@@ -25,6 +28,8 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
 }) => {
     const { t } = useTranslation();
     const { toggleTheme, resolvedTheme } = useThemeStore();
+    const { patchConfig } = useGlobalStore();
+    const { getFileFromDocument } = useSettingsFile();
     const [isOpen, setIsOpen] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const isNativeMenuOpening = React.useRef(false);
@@ -44,7 +49,12 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
             text: `${themeIcon}  ${(resolvedTheme === 'dark' ? t('FOOTER_MENU.switchToLightMode') : t('FOOTER_MENU.switchToDarkMode')) as string}`,
             action: () => {
                 setIsOpen(false);
+                const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
                 toggleTheme();
+                patchConfig('appearance', { theme: newTheme });
+                // Lire le state mis à jour depuis le store puis sauvegarder
+                const updatedConfig = useGlobalStore.getState().config;
+                saveSettings(getFileFromDocument, updatedConfig).catch(console.error);
             },
         },
         {

@@ -108,6 +108,7 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
           await loadSettings(getFileFromDocument, setConfig);
         }
 
+        // Apply theme from config (config.json is the single source of truth)
         useThemeStore.getState().setTheme(normalizeTheme(useGlobalStore.getState().config.appearance.theme));
 
         if (!databasePath) throw new Error("Database path not found");
