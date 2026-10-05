@@ -29,8 +29,10 @@ function MathResultOverlay({
 
   const { refs, x, y } = useFloating({
     placement: 'bottom-start',
-    whileElementsMounted: (reference, floating, update) =>
-      autoUpdate(reference, floating, update, { animationFrame: true }),
+    // animationFrame:true would poll at 60fps for every overlay — unnecessary
+    // since math nodes don't move while typing. Default autoUpdate (scroll +
+    // resize observers) is sufficient.
+    whileElementsMounted: autoUpdate,
     middleware: [
       // Move up by 24px (into the node's padding-bottom) and right by 8px
       offset({ mainAxis: -24, crossAxis: 8 }),
@@ -167,7 +169,26 @@ export function MathResultDisplay() {
     };
 
     updateNodes();
-    return editor.registerUpdateListener(() => updateNodes());
+    return editor.registerUpdateListener(({ dirtyElements, editorState, prevEditorState }) => {
+      // Only rebuild the node list when a mathexp element is actually dirty
+      // (added, removed, or mutated). Avoids a re-render on every keystroke
+      // typed anywhere else in the document.
+      //
+      // We check BOTH the current and previous state because on deletion the
+      // node is already absent from editorState._nodeMap — prevEditorState is
+      // the only place where we can confirm the dirty key was a mathexp node.
+      let hasDirtyMath = false;
+      for (const key of dirtyElements.keys()) {
+        const node =
+          editorState._nodeMap.get(key) ??
+          prevEditorState._nodeMap.get(key);
+        if (node && node.__type === 'mathexp') {
+          hasDirtyMath = true;
+          break;
+        }
+      }
+      if (hasDirtyMath) updateNodes();
+    });
   }, [editor]);
 
   // 2. Handle simple "is-empty" class for the placeholder (Lexical safe)
