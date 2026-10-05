@@ -333,10 +333,75 @@ export function useFile() {
     [openEditor],
   );
 
+  /**
+   * Helper: find the DOM element for `targetId`, scroll to it and show the
+   * focus highlight.  Safe to call right after a Lexical commit because it
+   * defers the actual DOM read to the next animation frame.
+   */
+  const scrollToNodeById = useCallback(
+    (targetId: string) => {
+      // Resolve the Lexical node key from our dynamic-state map.
+      let nodeKey: string | null = null;
+      for (const [key, value] of dynamicState.current.entries()) {
+        if (value.id === targetId) {
+          nodeKey = key;
+          break;
+        }
+      }
+
+      if (!nodeKey) return;
+
+      // Place the cursor on the node.
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey!);
+        if (node) node.selectEnd();
+      });
+
+      // Wait for the browser to paint the updated DOM, then scroll.
+      requestAnimationFrame(() => {
+        const element = editor.getElementByKey(nodeKey!);
+        if (!element) return;
+
+        const scrollContainer = editorContainerRef.current;
+        if (!scrollContainer) return;
+
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        const scrollTop =
+          elementRect.top -
+          containerRect.top -
+          containerRect.height / 2 +
+          elementRect.height / 2;
+
+        scrollContainer.scrollTo({ top: scrollContainer.scrollTop + scrollTop, behavior: 'smooth' });
+
+        // Show focus highlight after scroll animation completes.
+        setTimeout(() => {
+          if (editorRef.current) {
+            const editorRect = editorRef.current.getBoundingClientRect();
+            setFocusHighlight({
+              element,
+              elementRect: element.getBoundingClientRect(),
+              editorRect: {
+                x: editorRect.left,
+                y: editorRect.top,
+                width: editorRect.width,
+                height: editorRect.height,
+              },
+            });
+          }
+        }, 300);
+      });
+    },
+    [dynamicState, editor, editorContainerRef, editorRef, setFocusHighlight],
+  );
+
   const openEditorWUFocusOnNode = useCallback(
     async (document: DocumentsJson, targetId: string) => {
       const currentDoc = useGlobalStore.getState().currentDocument;
-      if (!currentDoc || currentDoc.id !== document.id) {
+      const isNewDocument = !currentDoc || currentDoc.id !== document.id;
+
+      if (isNewDocument) {
         await openEditor(document);
       }
 
@@ -347,63 +412,25 @@ export function useFile() {
         console.error("Failed to add to recent documents:", error);
       }
 
-      // Find the node key from the node id
-      let nodeKey: string | null = null;
-      for (const [key, value] of dynamicState.current.entries()) {
-        if (value.id === targetId) {
-          nodeKey = key;
-          break;
-        }
+      if (isNewDocument) {
+        // openEditor calls loadEditorState which calls editor.update() then
+        // buildDynamicStateMap() — both synchronous.  However the Lexical DOM
+        // commit (and the mutation observers / layout effects that follow) only
+        // run after the JS task queue drains.  We therefore register a
+        // one-shot update listener: it fires exactly once on the next Lexical
+        // commit, at which point the DOM is guaranteed to reflect the new
+        // document content.
+        await new Promise<void>((resolve) => {
+          const unregister = editor.registerUpdateListener(() => {
+            unregister();
+            resolve();
+          });
+        });
       }
 
-      editor.update(() => {
-        if (nodeKey) {
-          const node = $getNodeByKey(nodeKey);
-          if (node) {
-            node.selectEnd();
-          }
-        }
-      });
-
-      // Scroll to center after DOM update
-      requestAnimationFrame(() => {
-        if (nodeKey) {
-          const element = editor.getElementByKey(nodeKey);
-          if (element) {
-            // Find the scrollable container (editor-scroller)
-            const scrollContainer = editorContainerRef.current;
-            if (scrollContainer) {
-              const containerRect = scrollContainer.getBoundingClientRect();
-              const elementRect = element.getBoundingClientRect();
-              const scrollTop = elementRect.top - containerRect.top - (containerRect.height / 2) + (elementRect.height / 2);
-              scrollContainer.scrollTo({
-                top: scrollContainer.scrollTop + scrollTop,
-                behavior: 'smooth'
-              });
-
-              // Show focus highlight for 500ms after scroll completes
-              setTimeout(() => {
-                if (editorRef.current) {
-                  const editorRect = editorRef.current.getBoundingClientRect();
-                  const updatedElementRect = element.getBoundingClientRect();
-                  setFocusHighlight({
-                    element: element,
-                    elementRect: updatedElementRect,
-                    editorRect: {
-                      x: editorRect.left,
-                      y: editorRect.top,
-                      width: editorRect.width,
-                      height: editorRect.height,
-                    }
-                  });
-                }
-              }, 300); // Wait for smooth scroll to complete
-            }
-          }
-        }
-      });
+      scrollToNodeById(targetId);
     },
-    [openEditor, dynamicState, editor, editorContainerRef, editorRef, setFocusHighlight],
+    [openEditor, scrollToNodeById],
   );
 
   const openEditorWFocusOnRow = useCallback(
