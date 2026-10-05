@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { importAnqlDocument } from '@/App/AppComponents/ImportExport/importDocument';
-import { useGlobalToast } from '@/App/hooks/useGlobalToast';
 import { useSettingsFile } from '@/App/hooks/useSettingsFile';
 import { getUnexpectedKeys, loadSettings, removeUnexpectedKeys } from '@/App/settings';
 import { useGlobalStore } from '@/App/store/useGlobalStore';
@@ -71,7 +70,6 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
     config: state.config
   })));
   const { getFileFromDocument } = useSettingsFile();
-  const { showToast } = useGlobalToast();
 
   const [isDbLoading, setIsDbLoading] = useState(true);
 
@@ -147,7 +145,6 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
               logger.info('Database integrity check completed');
             } catch (dbError) {
               logger.error('Database integrity check failed', dbError instanceof Error ? dbError : new Error(String(dbError)));
-              showToast(`Database Integrity Check Failed: ${dbError}`, 'error', 10000);
             }
           },
           'Checking database integrity...'
