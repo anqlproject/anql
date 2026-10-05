@@ -127,74 +127,83 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
           await importTemplateDocuments();
         }
 
-        cleanupOldPendingDeletions(24 * 60 * 60).catch(console.error);
-
         if (isMounted) {
           setIsDbLoading(false);
           console.log("Database initialized from path:", databasePath);
         }
 
-        // Run heavy checks in background without visual indicator
+        // Run heavy maintenance checks sequentially in a single background task
+        // to prevent SQLite concurrency issues (e.g. PRAGMA quick_check failing
+        // because another task is running a massive DELETE).
         const { run } = useBackgroundTaskRunner.getState();
 
         run(
           async () => {
-            logger.info('Starting database integrity check...');
+            logger.info('Starting background database maintenance...');
+
+            // 1. Cleanup old pending deletions
+            try {
+              await cleanupOldPendingDeletions(24 * 60 * 60);
+              logger.info('Pending deletions cleanup completed');
+            } catch (e) {
+              logger.error('Failed to cleanup old pending deletions', e instanceof Error ? e : new Error(String(e)));
+            }
+
+            // 2. Integrity check
             try {
               await quickCheckDb();
               logger.info('Database integrity check completed');
             } catch (dbError) {
               logger.error('Database integrity check failed', dbError instanceof Error ? dbError : new Error(String(dbError)));
             }
-          },
-          'Checking database integrity...'
-        );
 
-        run(
-          async () => {
-            logger.info('Checking for unauthorized tables...');
-            const unauthorized = await checkUnauthorizedTables();
-            if (unauthorized.length > 0) {
-              logger.info(`Cleaning up ${unauthorized.length} unauthorized tables...`);
-              await cleanupDatabase(unauthorized);
-            } else {
-              logger.info('Unauthorized tables check completed: none found');
-            }
-          },
-          'Checking for unauthorized tables...'
-        );
-
-        run(
-          async () => {
-            logger.info('Checking for unused assets...');
-            const unused = await getUnusedAssets();
-            if (unused.length > 0) {
-              logger.info(`Cleaning up ${unused.length} unused assets...`);
-              await cleanupUnusedAssets();
-            } else {
-              logger.info('Unused assets check completed: none found');
-            }
-          },
-          'Checking for unused assets...'
-        );
-
-        run(
-          async () => {
-            const assetsPath = await getFileFromDocument(APP_PATH.ASSETS_DIR);
-            if (assetsPath) {
-              logger.info('Checking for orphan assets...');
-              const orphans = await checkOrphanAssets(assetsPath);
-              if (orphans.length > 0) {
-                logger.info(`Cleaning up ${orphans.length} orphan assets...`);
-                await cleanupOrphanAssets(orphans);
+            // 3. Unauthorized tables check
+            try {
+              const unauthorized = await checkUnauthorizedTables();
+              if (unauthorized.length > 0) {
+                logger.info(`Cleaning up ${unauthorized.length} unauthorized tables...`);
+                await cleanupDatabase(unauthorized);
               } else {
-                logger.info('Orphan assets check completed: none found');
+                logger.info('Unauthorized tables check completed: none found');
               }
-            } else {
-              logger.warn('Assets path not found, skipping orphan assets check');
+            } catch (e) {
+              logger.error('Unauthorized tables check failed', e instanceof Error ? e : new Error(String(e)));
             }
+
+            // 4. Unused assets check
+            try {
+              const unused = await getUnusedAssets();
+              if (unused.length > 0) {
+                logger.info(`Cleaning up ${unused.length} unused assets...`);
+                await cleanupUnusedAssets();
+              } else {
+                logger.info('Unused assets check completed: none found');
+              }
+            } catch (e) {
+              logger.error('Unused assets check failed', e instanceof Error ? e : new Error(String(e)));
+            }
+
+            // 5. Orphan assets check
+            try {
+              const assetsPath = await getFileFromDocument(APP_PATH.ASSETS_DIR);
+              if (assetsPath) {
+                const orphans = await checkOrphanAssets(assetsPath);
+                if (orphans.length > 0) {
+                  logger.info(`Cleaning up ${orphans.length} orphan assets...`);
+                  await cleanupOrphanAssets(orphans);
+                } else {
+                  logger.info('Orphan assets check completed: none found');
+                }
+              } else {
+                logger.warn('Assets path not found, skipping orphan assets check');
+              }
+            } catch (e) {
+              logger.error('Orphan assets check failed', e instanceof Error ? e : new Error(String(e)));
+            }
+
+            logger.info('Background database maintenance finished.');
           },
-          'Checking for orphan assets...'
+          'Database maintenance'
         );
       } catch (error) {
         if (isMounted) {
