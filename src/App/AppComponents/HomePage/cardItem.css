@@ -189,7 +189,7 @@
   gap: 8px;
   width: 100%;
   min-width: 0;
-  padding-left: 28px;
+  padding: 0 30px 0 28px;
 }
 
 .document-card--grid .document-card__title {
@@ -200,10 +200,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 0 1 75%;
-  width: 75%;
+  flex: 1 1 auto;
+  width: auto;
   min-width: 0;
-  max-width: 75%;
+  max-width: none;
 }
 
 .document-card--grid .document-card__details {
@@ -393,8 +393,9 @@
   display: inline-block;
   width: 6px;
   height: 6px;
+  flex: 0 0 6px;
   background-color: var(--primary-green);
   border-radius: 50%;
-  margin-left: 6px;
+  margin: 3px 0 0 0;
   vertical-align: middle;
 }
