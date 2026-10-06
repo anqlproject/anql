@@ -68,6 +68,9 @@
 /* Buttons inside the expansion sections get the same hover/active styles */
 .toolbar-expansion-left button.popup-item,
 .toolbar-expansion-right button.popup-item {
+  box-sizing: border-box;
+  height: 34px;
+  min-height: 34px;
   border: 1px solid transparent;
   display: flex;
   background: transparent;
@@ -83,6 +86,7 @@
 .toolbar-expansion-left button.popup-item:hover,
 .toolbar-expansion-right button.popup-item:hover {
   background-color: var(--action-hover);
+  transform: scale(1.06);
 }
 
 .toolbar-expansion-left button.popup-item.active,
@@ -110,6 +114,9 @@
 }
 
 .floating-text-format-popup button.popup-item {
+  box-sizing: border-box;
+  height: 34px;
+  min-height: 34px;
   border: 1px solid transparent;
   display: flex;
   background: transparent;
@@ -134,6 +141,7 @@
 
 .floating-text-format-popup button.popup-item svg {
   opacity: 0.8;
+  transition: transform 0.18s ease, opacity 0.18s ease;
 }
 
 .floating-text-format-popup button.popup-item.active {
@@ -146,9 +154,15 @@
 
 .floating-text-format-popup .popup-item:hover:not([disabled]) {
   background-color: var(--action-hover);
+  transform: scale(1.06);
+}
+
+.floating-text-format-popup .popup-item:hover:not([disabled]) svg {
+  transform: scale(1.08);
 }
 
 .floating-text-format-popup .toolbar-item {
+  box-sizing: border-box;
   border: 1px solid transparent;
   display: flex;
   align-items: center;
@@ -160,7 +174,8 @@
   vertical-align: middle;
   font-size: var(--text-sm);
   min-width: 50px;
-  height: 28px;
+  height: 34px;
+  min-height: 34px;
   margin-right: 4px;
   color: var(--text-primary);
   font-weight: var(--font-medium);
@@ -169,6 +184,7 @@
 
 .floating-text-format-popup .toolbar-item:hover {
   background-color: var(--action-hover);
+  transform: translateY(-1px);
 }
 
 .floating-text-format-popup .toolbar-item:disabled {
@@ -214,6 +230,10 @@
   background-color: var(--action-hover);
 }
 
+.toolbar-dropdown-content [role="menuitem"]:hover {
+  transform: translateX(2px);
+}
+
 .toolbar-dropdown-content input[type="text"] {
   color: var(--text-primary);
   font-size: var(--text-sm);
@@ -223,4 +243,26 @@
 
 .toolbar-dropdown-content input[type="text"]:focus {
   box-shadow: 0 0 0 2px var(--primary-container);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar-expansion-left button.popup-item,
+  .toolbar-expansion-right button.popup-item,
+  .floating-text-format-popup .popup-item,
+  .floating-text-format-popup .toolbar-item,
+  .toolbar-dropdown-content [role="menuitem"] {
+    transition: none;
+  }
+
+  .toolbar-expansion-left button.popup-item:hover,
+  .toolbar-expansion-right button.popup-item:hover,
+  .floating-text-format-popup .popup-item:hover:not([disabled]),
+  .floating-text-format-popup .toolbar-item:hover,
+  .toolbar-dropdown-content [role="menuitem"]:hover {
+    transform: none;
+  }
+
+  .floating-text-format-popup .popup-item:hover:not([disabled]) svg {
+    transform: none;
+  }
 }
