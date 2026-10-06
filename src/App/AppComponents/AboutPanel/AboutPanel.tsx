@@ -1,7 +1,9 @@
 import './AboutPanel.css';
 
+import { getVersion } from '@tauri-apps/api/app';
 import aboutInfo from 'docs/About/aboutInfo.json';
 import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { DIMENSIONS } from '@/core/global/defaultValues';
@@ -12,6 +14,25 @@ interface AboutDialogProps {
 }
 
 export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let cancelled = false;
+    getVersion()
+      .then((version) => {
+        if (!cancelled) setAppVersion(version);
+      })
+      .catch(() => {
+        if (!cancelled) setAppVersion('Unavailable');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -85,7 +106,7 @@ export function AboutDialog({ isOpen, onClose }: AboutDialogProps) {
                 fontWeight: '600',
                 marginBottom: '16px'
               }}>
-                Version {aboutInfo.version}
+                Version {appVersion ?? '…'}
               </div>
               
               <h3 style={{ marginTop: 0, marginBottom: '16px', fontSize: '18px', fontWeight: '600' }}>
