@@ -10,7 +10,7 @@
   display: flex;
   gap: 6px;
   transition:
-    transform 140ms ease-in-out,
+    transform 190ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 160ms ease-in-out;
 }
 
@@ -62,4 +62,14 @@
   top: 0;
   opacity: 0;
   will-change: transform;
+  transition:
+    transform 110ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 100ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draggable-block-menu,
+  .draggable-block-target-line {
+    transition: none;
+  }
 }
