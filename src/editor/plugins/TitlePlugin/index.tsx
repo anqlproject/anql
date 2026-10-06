@@ -119,13 +119,6 @@ const TitlePlugin = () => {
     }, 100);
   };
 
-  const handlePaste = (event: React.ClipboardEvent<HTMLHeadingElement>) => {
-    if (!Array.from(event.clipboardData.types).includes("text/html")) return;
-
-    event.preventDefault();
-    document.execCommand("insertText", false, event.clipboardData.getData("text/plain"));
-  };
-
   // Focus on title on mount
   /*useEffect(() => {
     if (titleRef.current) {
@@ -248,14 +241,13 @@ const TitlePlugin = () => {
     <h1
       ref={titleRef}
       className={`title-plugin`}
-      contentEditable={isEditable}
+      contentEditable={isEditable ? 'plaintext-only' : false}
       suppressContentEditableWarning
       spellCheck={config.editor.spellCheck}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
       onMouseUp={handleMouseUp}
       onInput={handleInput}
-      onPaste={handlePaste}
       onBlur={handleTitleBlur}
       data-placeholder="Enter title..."
     />
