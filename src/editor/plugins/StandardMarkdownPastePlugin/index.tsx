@@ -68,16 +68,23 @@ function standardMarkdownPastePluginHasRawMarkdown(plain: string): boolean {
 }
 
 /**
- * If the HTML clipboard already contains semantic elements produced by a
- * browser rendering Markdown (e.g. ChatGPT, GitHub), let Lexical's built-in
- * HTML paste handler do the work — it will already produce the right nodes.
+ * If the HTML clipboard already contains rendered semantic or styled content,
+ * let Lexical's built-in HTML paste handler preserve that representation.
  */
 function standardMarkdownPastePluginHtmlAlreadyRendered(html: string): boolean {
-  return (
-    /<h[1-6][s>]/i.test(html) ||
-    /<blockquote[s>]/i.test(html) ||
-    /<strong[s>]/i.test(html)
-  );
+  if (!html.trim()) return false;
+
+  const parsedHtml = new DOMParser().parseFromString(html, 'text/html');
+  const renderedContentSelector = [
+    'h1, h2, h3, h4, h5, h6',
+    'blockquote, ul, ol, li',
+    'table, thead, tbody, tr, th, td',
+    'pre, code, hr, img, a',
+    'strong, b, em, i, u, del, s, strike, mark, sub, sup',
+    '[style]'
+  ].join(', ');
+
+  return parsedHtml.body.querySelector(renderedContentSelector) !== null;
 }
 
 // ---------------------------------------------------------------------------
