@@ -93,7 +93,9 @@
 }
 
 .document-card--list .document-card__checkbox {
-  margin-right: 8px;
+  position: absolute;
+  top: calc(50% - 12px);
+  left: 14px;
 }
 
 .document-card--grid .document-card__checkbox {
@@ -136,6 +138,7 @@
   gap: 8px;
   flex: 1;
   min-width: 0;
+  padding-left: 28px;
 }
 
 .document-card--list .document-card__title {
