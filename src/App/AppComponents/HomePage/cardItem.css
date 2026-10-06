@@ -33,11 +33,12 @@
   flex-shrink: 0;
   opacity: 0;
   pointer-events: none;
+  transform: scale(0.78) translateY(2px);
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.16s ease, transform 0.16s ease, background-color 0.16s ease;
   border-radius: 6px;
 }
 
@@ -46,17 +47,33 @@
 .document-card.selected .document-card__checkbox {
   opacity: 1;
   pointer-events: auto;
+  transform: scale(1) translateY(0);
 }
 
 @media (hover: none) {
   .document-card__checkbox {
     opacity: 1;
     pointer-events: auto;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .document-card__checkbox {
+    transition: none;
+  }
+
+  .document-card:hover .document-card__checkbox:hover {
+    transform: scale(1) translateY(0);
   }
 }
 
 .document-card__checkbox:hover {
   background-color: var(--action-hover);
+}
+
+.document-card:hover .document-card__checkbox:hover {
+  transform: scale(1.12) translateY(0);
 }
 
 .document-card__checkbox:focus-visible {
