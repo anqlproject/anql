@@ -332,6 +332,8 @@
       "deleteSelected": "Supprimer la sélection",
       "enterSelectionMode": "Mode sélection",
       "exitSelectionMode": "Quitter le mode sélection",
+      "selectAll": "Tout sélectionner",
+      "deselectAll": "Tout désélectionner",
       "listView": "Vue liste",
       "gridView": "Vue grille",
       "sort": "Trier",

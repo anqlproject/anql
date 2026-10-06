@@ -1,6 +1,6 @@
 import './HomePage.css';
 
-import { CheckSquare, FileText, LayoutGrid, List, Square, Trash2 } from 'lucide-react';
+import { CheckCheck, CheckSquare, FileText, LayoutGrid, List, Square, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
@@ -127,6 +127,17 @@ export default function Home() {
     showToast(t('FEEDBACK.movedToTrash'), 'success', TOAST_DURATION);
   };
 
+  const selectableDocs = documents.filter(doc => doc.id !== 'home-page');
+  const isAllSelected = selectableDocs.length > 0 && selectedDocuments.size === selectableDocs.length;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedDocuments(new Set());
+    } else {
+      setSelectedDocuments(new Set(selectableDocs.map(doc => doc.id)));
+    }
+  };
+
   const sortedDocuments = useMemo(() => {
     const sorted = [...documents];
     const { field, direction } = sortBy;
@@ -238,6 +249,17 @@ export default function Home() {
             >
               <Trash2 className="home-deleteIcon" />
               <span>{selectedDocuments.size}</span>
+            </Button>
+          )}
+          {selectionMode && (
+            <Button
+              variant="outline"
+              size="sm"
+              className={`home-selectionButton ${isAllSelected ? 'active' : ''}`}
+              onClick={toggleSelectAll}
+              title={isAllSelected ? t('HOME_PAGE.deselectAll') as string : t('HOME_PAGE.selectAll') as string}
+            >
+              <CheckCheck className="home-selectionIcon" />
             </Button>
           )}
           <Button

@@ -332,6 +332,8 @@
       "deleteSelected": "Delete selected",
       "enterSelectionMode": "Selection mode",
       "exitSelectionMode": "Exit selection mode",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
       "listView": "List view",
       "gridView": "Grid view",
       "sort": "Sort",
