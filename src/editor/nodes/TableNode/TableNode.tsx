@@ -59,38 +59,27 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
   const columns: TableColumn[] = [];
   const data: TableRowData[] = [];
 
-  // Parse Headers
-  const thead = table.tHead;
-  const headerCells = thead ? Array.from(thead.rows[0]?.cells || []) : [];
-  const firstRow = table.rows[0];
+  const headerRow = table.tHead?.rows[0] ?? Array.from(table.rows).find((row) =>
+    Array.from(row.cells).some((cell) => cell.tagName === 'TH'),
+  );
+  const headerCells = headerRow ? Array.from(headerRow.cells) : [];
+  const hasHeaderRow = headerCells.length > 0;
+  const columnCount = hasHeaderRow
+    ? headerCells.length
+    : Array.from(table.rows).reduce((max, row) => Math.max(max, row.cells.length), 0);
 
-  if (headerCells.length === 0 && firstRow) {
-    const cells = Array.from(firstRow.cells);
-    cells.forEach((cell, i) => {
-      columns.push({
-        header: cell.textContent || `Col ${i + 1}`,
-        id: `col_${i}`,
-        meta: { type: 'text' }
-      });
-    });
-  } else {
-    headerCells.forEach((cell, i) => {
-      columns.push({
-        header: cell.textContent || `Col ${i + 1}`,
-        id: `col_${i}`,
-        meta: { type: 'text' }
-      });
+  for (let index = 0; index < columnCount; index++) {
+    columns.push({
+      header: hasHeaderRow ? headerCells[index]?.textContent?.trim() || '' : '',
+      id: `col_${index}`,
+      meta: { type: 'text' },
     });
   }
 
-  // Parse Body Rows
+  // Keep every row as data unless the source table explicitly marks a header.
   const rows = Array.from(table.rows);
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    if (row.parentElement?.tagName === 'THEAD') continue;
-    // Skip the first row if we used it as header and there is no thead
-    if (!thead && i === 0 && rows.length > 1) continue;
-
+  for (const row of rows) {
+    if (row === headerRow) continue;
     const cells = Array.from(row.cells);
     const rowData: TableRowData = {};
 
@@ -102,20 +91,7 @@ function convertTableElement(domNode: HTMLElement): DOMConversionOutput | null {
     data.push(rowData);
   }
 
-  // Fallback if no columns
-  if (columns.length === 0) {
-    let maxCols = 0;
-    rows.forEach(r => maxCols = Math.max(maxCols, r.cells.length));
-    for (let i = 0; i < maxCols; i++) {
-      columns.push({
-        header: `Col ${i + 1}`,
-        id: `col_${i}`,
-        meta: { type: 'text' }
-      });
-    }
-  }
-
-  const tableNode = $createTableNode(data, columns);
+  const tableNode = $createTableNode(data, columns, undefined, hasHeaderRow);
   return {
     node: tableNode,
     after: () => []
@@ -224,7 +200,7 @@ export class TableNode extends DecoratorBlockNode {
       migratedData,
       migratedColumns,
       serializedNode.tableName,
-      serializedNode.showColumnHeaders ?? false,
+      serializedNode.showColumnHeaders ?? migratedColumns.some((column) => column.header.trim().length > 0),
       serializedNode.showRowHeaders ?? false,
     ).updateFromJSON(
       serializedNode,
@@ -373,7 +349,7 @@ export function $createTableNode(
   data: TableRowData[],
   columns: TableColumn[],
   tableName?: string,
-  showColumnHeaders = false,
+  showColumnHeaders?: boolean,
   showRowHeaders = false,
 ): TableNode {
   let name = tableName;
@@ -404,7 +380,10 @@ export function $createTableNode(
   }
 
   const dataWithIds = ensureRowIds(data);
-  return new TableNode(dataWithIds, columns, name, undefined, undefined, showColumnHeaders, showRowHeaders);
+  const shouldShowColumnHeaders = showColumnHeaders ?? columns.some(
+    (column) => column.header.trim().length > 0,
+  );
+  return new TableNode(dataWithIds, columns, name, undefined, undefined, shouldShowColumnHeaders, showRowHeaders);
 }
 
 export function $isTableNode(node: LexicalNode | null | undefined): node is TableNode {
