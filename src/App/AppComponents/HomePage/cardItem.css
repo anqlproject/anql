@@ -10,11 +10,6 @@
   position: relative;
 }
 
-/* Selection mode */
-.document-card.selection-mode {
-  cursor: pointer;
-}
-
 .document-card.selected {
   background-color: var(--action-hover);
   border-color: var(--text-primary);
@@ -36,9 +31,28 @@
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 6px;
+}
+
+.document-card:hover .document-card__checkbox,
+.document-card:focus-within .document-card__checkbox,
+.document-card.selected .document-card__checkbox {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .document-card__checkbox {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .document-card__checkbox:hover {
@@ -175,11 +189,7 @@
   gap: 8px;
   width: 100%;
   min-width: 0;
-  padding-left: 0;
-}
-
-.document-card--grid.selection-mode .document-card__main {
-  padding-left: 18px;
+  padding-left: 28px;
 }
 
 .document-card--grid .document-card__title {

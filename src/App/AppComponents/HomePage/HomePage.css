@@ -201,11 +201,6 @@
   gap: 0;
 }
 
-/* Selection mode */
-.home-documents-container.selection-mode {
-  user-select: none;
-}
-
 /* ── Empty state ─────────────────────────────── */
 .home-emptyState {
   display: flex;

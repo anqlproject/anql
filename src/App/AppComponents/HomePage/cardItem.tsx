@@ -20,13 +20,12 @@ interface DocumentItemProps {
   document: DocumentsJson;
   formatDate: (timestamp: number) => string;
   viewMode: ViewMode;
-  selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelection?: (documentId: string) => void;
   sortBy?: { field: 'title' | 'created_at' | 'updated_at'; direction: 'asc' | 'desc' };
 }
 
-export default function DocumentItem({ document, formatDate, viewMode, selectionMode = false, isSelected = false, onToggleSelection, sortBy }: DocumentItemProps) {
+export default function DocumentItem({ document, formatDate, viewMode, isSelected = false, onToggleSelection, sortBy }: DocumentItemProps) {
   const { t } = useTranslation();
   const { openEditorWithUpdate } = useFile();
   const { showToast, dismissToast } = useGlobalToast();
@@ -175,11 +174,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
 
 
   const handleOpen = () => {
-    if (selectionMode && onToggleSelection) {
-      onToggleSelection(document.id);
-    } else {
-      openEditorWithUpdate(document);
-    }
+    openEditorWithUpdate(document);
   };
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
@@ -196,7 +191,7 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
 
   return (
     <div
-      className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''} ${selectionMode ? 'selection-mode' : ''}`}
+      className={`document-card document-card--${viewMode} ${isSelected ? 'selected' : ''}`}
       onClick={handleOpen}
       onContextMenu={(event) => {
         event.preventDefault();
@@ -204,11 +199,18 @@ export default function DocumentItem({ document, formatDate, viewMode, selection
       }}
     >
 
-      {selectionMode && (
-        <div className="document-card__checkbox" onClick={handleCheckboxClick}>
-          {isSelected ? <Check className="checkbox-icon" /> : <Square className="checkbox-icon" />}
-        </div>
-      )}
+      <button
+        type="button"
+        className="document-card__checkbox"
+        onClick={handleCheckboxClick}
+        onMouseDown={(event) => event.stopPropagation()}
+        aria-label={String(document.title || t('HOME_PAGE.untitled'))}
+        aria-pressed={isSelected}
+        tabIndex={0}
+        title={String(document.title || t('HOME_PAGE.untitled'))}
+      >
+        {isSelected ? <Check className="checkbox-icon" /> : <Square className="checkbox-icon" />}
+      </button>
 
       <div className="document-card__main">
         <span

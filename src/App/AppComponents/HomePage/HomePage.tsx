@@ -1,6 +1,6 @@
 import './HomePage.css';
 
-import { CheckCheck, CheckSquare, FileText, LayoutGrid, List, Square, Trash2 } from 'lucide-react';
+import { CheckCheck, FileText, LayoutGrid, List, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
@@ -29,7 +29,6 @@ export default function Home() {
   const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
-  const [selectionMode, setSelectionMode] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const { documents,
     setDocument,
@@ -98,10 +97,18 @@ export default function Home() {
   const { handleNewFile } = useFile();
   const { showToast } = useGlobalToast();
 
-  const toggleSelectionMode = () => {
-    setSelectionMode(!selectionMode);
-    setSelectedDocuments(new Set());
-  };
+  useEffect(() => {
+    if (selectedDocuments.size === 0) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) {
+        setSelectedDocuments(new Set());
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [selectedDocuments.size]);
 
   const toggleDocumentSelection = (documentId: string) => {
     setSelectedDocuments(prev => {
@@ -123,7 +130,6 @@ export default function Home() {
       }
     });
     setSelectedDocuments(new Set());
-    setSelectionMode(false);
     showToast(t('FEEDBACK.movedToTrash'), 'success', TOAST_DURATION);
   };
 
@@ -239,7 +245,7 @@ export default function Home() {
       <div className="home-header">
         <h1 className="home-title">{t('HOME_PAGE.documents')}</h1>
         <div className="home-headerActions">
-          {selectionMode && selectedDocuments.size > 0 && (
+          {selectedDocuments.size > 0 && (
             <Button
               variant="destructive"
               size="sm"
@@ -251,7 +257,7 @@ export default function Home() {
               <span>{selectedDocuments.size}</span>
             </Button>
           )}
-          {selectionMode && (
+          {selectedDocuments.size > 0 && (
             <Button
               variant="outline"
               size="sm"
@@ -265,15 +271,6 @@ export default function Home() {
           <Button
             variant="outline"
             size="sm"
-            className={`home-selectionButton ${selectionMode ? 'active' : ''}`}
-            onClick={toggleSelectionMode}
-            title={selectionMode ? t('HOME_PAGE.exitSelectionMode') as string : t('HOME_PAGE.enterSelectionMode') as string}
-          >
-            {selectionMode ? <CheckSquare className="home-selectionIcon" /> : <Square className="home-selectionIcon" />}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             className="home-viewButton"
             onClick={() => patchConfig('homePage', { viewMode: viewMode === 'grid' ? 'list' : 'grid' })}
             title={viewMode === 'grid' ? t('HOME_PAGE.listView') as string : t('HOME_PAGE.gridView') as string}
@@ -284,14 +281,13 @@ export default function Home() {
 
         </div>
       </div>
-      <div className={`home-documents-container ${viewMode === 'grid' ? 'grid-view' : 'list-view'} ${selectionMode ? 'selection-mode' : ''}`}>
+      <div className={`home-documents-container ${viewMode === 'grid' ? 'grid-view' : 'list-view'}`}>
         {sortedDocuments.map((document, index) => (
           <DocumentItem 
             key={index} 
             document={document} 
             formatDate={formatDate} 
             viewMode={viewMode} 
-            selectionMode={selectionMode}
             isSelected={selectedDocuments.has(document.id)}
             onToggleSelection={toggleDocumentSelection}
             sortBy={sortBy}
