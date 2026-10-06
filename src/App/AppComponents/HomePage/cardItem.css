@@ -42,7 +42,7 @@
 }
 
 .document-card:hover .document-card__checkbox,
-.document-card:focus-within .document-card__checkbox,
+.document-card__checkbox:focus-visible,
 .document-card.selected .document-card__checkbox {
   opacity: 1;
   pointer-events: auto;
