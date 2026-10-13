@@ -1,10 +1,33 @@
+@keyframes componentDialogFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes componentDialogScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .component-dialog-overlay {
+  animation: componentDialogFadeIn 0.15s ease-out both;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,6 +35,8 @@
 }
 
 .component-dialog-container {
+  animation: componentDialogScaleIn 0.2s ease-out both;
+  transform-origin: center center;
   background-color: var(--panel-color);
   color: var(--text-primary);
   padding: 24px;
