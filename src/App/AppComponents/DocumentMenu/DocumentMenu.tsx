@@ -109,26 +109,6 @@ export const DocumentMenu = () => {
       },
     },
     {
-      text: t(
-        isEditable
-          ? "DOCUMENT_MENU.switchToReadMode"
-          : "DOCUMENT_MENU.switchToWriteMode",
-      ) as string,
-      action: async () => {
-        const newEditableState = !editor.isEditable();
-        editor.setEditable(newEditableState);
-        const docId = currentDocumentRef.current?.id;
-        if (docId) {
-          try {
-            await updateDocumentMetadataField(docId, DocumentMetadataKey.readMode, !newEditableState);
-            refreshRecentDocuments();
-          } catch (err) {
-            logger.warn('Failed to persist readMode metadata:', err);
-          }
-        }
-      },
-    },
-    {
       text: t("DOCUMENT_MENU.duplicateDocument") as string,
       action: async () => {
         const doc = currentDocumentRef.current;
@@ -242,7 +222,7 @@ export const DocumentMenu = () => {
 
     const showNativeMenu = async () => {
       try {
-        const [{ Menu, Submenu }, { LogicalPosition }] = await Promise.all([
+        const [{ Menu, Submenu, CheckMenuItem }, { LogicalPosition }] = await Promise.all([
           import("@tauri-apps/api/menu"),
           import("@tauri-apps/api/dpi"),
         ]);
@@ -299,8 +279,27 @@ export const DocumentMenu = () => {
           ],
         });
 
+        const readModeItem = await CheckMenuItem.new({
+          text: t("DOCUMENT_MENU.readMode") as string,
+          checked: !isEditable,
+          action: async () => {
+            const newEditableState = !editor.isEditable();
+            editor.setEditable(newEditableState);
+            const docId = currentDocumentRef.current?.id;
+            if (docId) {
+              try {
+                await updateDocumentMetadataField(docId, DocumentMetadataKey.readMode, !newEditableState);
+                refreshRecentDocuments();
+              } catch (err) {
+                logger.warn('Failed to persist readMode metadata:', err);
+              }
+            }
+          },
+        });
+
         const measuredMenuItems = [
           ...menuItems,
+          { text: t("DOCUMENT_MENU.readMode") as string },
           { text: t("DOCUMENT_MENU.exportDocument") as string },
         ];
 
@@ -323,7 +322,13 @@ export const DocumentMenu = () => {
         );
 
         const nativeMenu = await Menu.new({
-          items: [...menuItems, exportSubmenu],
+          items: [
+            menuItems[0],
+            menuItems[1],
+            readModeItem,
+            ...menuItems.slice(2),
+            exportSubmenu,
+          ],
         });
         await nativeMenu.popup(
           new LogicalPosition(
@@ -346,7 +351,7 @@ export const DocumentMenu = () => {
     };
 
     void showNativeMenu();
-  }, [isMenuOpen, menuItems, menuPosition, setIsMenuOpen]);
+  }, [isMenuOpen, menuItems, menuPosition, isEditable, setIsMenuOpen]);
 
   const triggerRef = useRef<HTMLDivElement>(null);
 

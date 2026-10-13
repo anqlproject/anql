@@ -182,6 +182,7 @@
       "deleteDocument": "Placer dans la corbeille",
       "copyDocumentId": "Copier l'ID",
       "duplicateDocument": "Dupliquer",
+      "readMode": "Mode lecture",
       "switchToReadMode": "Passer au mode lecture",
       "switchToWriteMode": "Passer au mode écriture",
       "searchInDocument": "Rechercher dans le document"

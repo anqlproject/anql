@@ -182,6 +182,7 @@
       "deleteDocument": "Move to trash",
       "copyDocumentId": "Copy ID",
       "duplicateDocument": "Duplicate",
+      "readMode": "Read mode",
       "switchToReadMode": "Switch to read mode",
       "switchToWriteMode": "Switch to write mode",
       "searchInDocument": "Find in document"
