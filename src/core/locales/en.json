@@ -403,6 +403,7 @@
     },
     "FOOTER_MENU": {
       "generalSettings": "App settings",
+      "darkMode": "Dark mode",
       "switchToLightMode": "Switch to light mode",
       "switchToDarkMode": "Switch to dark mode",
       "openTrash": "Open trash",

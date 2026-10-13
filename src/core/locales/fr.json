@@ -403,6 +403,7 @@
     },
     "FOOTER_MENU": {
       "generalSettings": "Paramètres de l'application",
+      "darkMode": "Mode sombre",
       "switchToLightMode": "Passer au mode clair",
       "switchToDarkMode": "Passer au mode sombre",
       "openTrash": "Ouvrir la corbeille",

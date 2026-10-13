@@ -34,55 +34,6 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const isNativeMenuOpening = React.useRef(false);
 
-    const themeIcon = resolvedTheme === 'dark' ? '☀' : '☾';
-
-    const menuItems: any[] = [
-        {
-            text: `   ${t('FOOTER_MENU.generalSettings') as string}`,
-            action: () => {
-                setIsOpen(false);
-                setSettingsOverlayOpen(true);
-            },
-            accelerator: 'CmdOrCtrl+,',
-        },
-        {
-            text: `${themeIcon}  ${(resolvedTheme === 'dark' ? t('FOOTER_MENU.switchToLightMode') : t('FOOTER_MENU.switchToDarkMode')) as string}`,
-            action: () => {
-                setIsOpen(false);
-                const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
-                toggleTheme();
-                patchConfig('appearance', { theme: newTheme });
-                // Lire le state mis à jour depuis le store puis sauvegarder
-                const updatedConfig = useGlobalStore.getState().config;
-                saveSettings(getFileFromDocument, updatedConfig).catch(console.error);
-            },
-        },
-        {
-            text: `   ${t('FOOTER_MENU.openTrash') as string}`,
-            action: () => {
-                setIsOpen(false);
-                onOpenTrash?.();
-            },
-        },
-        {
-            item: "Separator",
-        },
-        {
-            text: `   ${t('FOOTER_MENU.getHelp') as string}`,
-            action: () => {
-                setIsOpen(false);
-                setIsHelpOpen(true);
-            },
-        },
-        {
-            text: `   ${t('FOOTER_MENU.about') as string}`,
-            action: () => {
-                setIsOpen(false);
-                onOpenAbout?.();
-            },
-        },
-    ];
-
     const [editor] = useLexicalComposerContext();
 
     React.useEffect(() => {
@@ -91,10 +42,68 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
 
         const showNativeMenu = async () => {
             try {
-                const [{ Menu }, { LogicalPosition }] = await Promise.all([
+                const [{ Menu, CheckMenuItem }, { LogicalPosition }] = await Promise.all([
                     import("@tauri-apps/api/menu"),
                     import("@tauri-apps/api/dpi"),
                 ]);
+
+                const darkModeItem = await CheckMenuItem.new({
+                    text: t('FOOTER_MENU.darkMode') as string,
+                    checked: resolvedTheme === 'dark',
+                    action: () => {
+                        setIsOpen(false);
+                        const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+                        toggleTheme();
+                        patchConfig('appearance', { theme: newTheme });
+                        // Lire le state mis à jour depuis le store puis sauvegarder
+                        const updatedConfig = useGlobalStore.getState().config;
+                        saveSettings(getFileFromDocument, updatedConfig).catch(console.error);
+                    },
+                });
+
+                const menuItems: any[] = [
+                    {
+                        text: t('FOOTER_MENU.generalSettings') as string,
+                        action: () => {
+                            setIsOpen(false);
+                            setSettingsOverlayOpen(true);
+                        },
+                        accelerator: 'CmdOrCtrl+,',
+                    },
+                    darkModeItem,
+                    {
+                        text: t('FOOTER_MENU.openTrash') as string,
+                        action: () => {
+                            setIsOpen(false);
+                            onOpenTrash?.();
+                        },
+                    },
+                    {
+                        item: "Separator",
+                    },
+                    {
+                        text: t('FOOTER_MENU.getHelp') as string,
+                        action: () => {
+                            setIsOpen(false);
+                            setIsHelpOpen(true);
+                        },
+                    },
+                    {
+                        text: t('FOOTER_MENU.about') as string,
+                        action: () => {
+                            setIsOpen(false);
+                            onOpenAbout?.();
+                        },
+                    },
+                ];
+
+                const measuredTexts = [
+                    t('FOOTER_MENU.generalSettings') as string,
+                    t('FOOTER_MENU.darkMode') as string,
+                    t('FOOTER_MENU.openTrash') as string,
+                    t('FOOTER_MENU.getHelp') as string,
+                    t('FOOTER_MENU.about') as string,
+                ];
 
                 const canvas = document.createElement("canvas");
                 const context = canvas.getContext("2d");
@@ -103,10 +112,8 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
                 }
 
                 const menuWidth = Math.max(
-                    ...menuItems.map((item) =>
-                        item.item === "Separator"
-                            ? 0
-                            : (context?.measureText(item.text ?? "").width ?? 0) + 48,
+                    ...measuredTexts.map((itemText) =>
+                        (context?.measureText(itemText ?? "").width ?? 0) + 48,
                     ),
                 );
                 const menuHeight = menuItems.reduce(
@@ -136,7 +143,7 @@ export const FooterMenu: React.FC<FooterMenuProps> = ({
         };
 
         void showNativeMenu();
-    }, [isOpen, menuItems, menuPosition]);
+    }, [isOpen, menuPosition, resolvedTheme, t, setSettingsOverlayOpen, onOpenTrash, setIsHelpOpen, onOpenAbout, toggleTheme, patchConfig, getFileFromDocument]);
 
     return (
         <div className="footer-menu-wrapper">
