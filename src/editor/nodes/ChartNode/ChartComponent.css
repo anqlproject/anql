@@ -75,25 +75,30 @@
   color: var(--text-primary);
 }
 
-.chart-type-menu-button {
+.chart-type-menu-button,
+.chart-configure-button {
   display: inline-flex;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   align-items: center;
   justify-content: center;
   padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
   opacity: 1;
   pointer-events: auto;
-  transition: color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .chart-type-menu-button:hover,
-.chart-type-menu-button:focus-visible {
+.chart-type-menu-button:focus-visible,
+.chart-configure-button:hover,
+.chart-configure-button:focus-visible {
   color: var(--text-primary);
   background: var(--action-hover);
-  opacity: 1;
 }
 
 .chart-type-menu-button:focus-visible,
@@ -346,32 +351,6 @@
   outline-offset: 1px;
 }
 
-.chart-configure-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  color: var(--text-secondary);
-  background: transparent;
-  cursor: pointer;
-  opacity: 0.65;
-  transition: color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
-}
-
-.chart-configure-button:hover {
-  color: var(--text-primary);
-  background: var(--action-hover);
-  opacity: 1;
-}
-
-.chart-configure-button:focus-visible {
-  color: var(--text-primary);
-  opacity: 1;
-}
 
 .chart-empty-state > .chart-configure-button {
   position: absolute;
