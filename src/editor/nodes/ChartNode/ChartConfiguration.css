@@ -1,8 +1,8 @@
 /* ============================================================
-   ChartConfiguration.css — Styles du panneau de configuration
+   ChartConfiguration.css — Configuration panel styles
    ============================================================ */
 
-/* --- Panel grille --- */
+/* --- Grid panel --- */
 .chart-config-panel {
   display: grid;
   grid-template-columns: repeat(2, minmax(120px, 1fr));
@@ -51,7 +51,7 @@
   cursor: pointer;
 }
 
-/* --- Type de graphique --- */
+/* --- Chart type --- */
 .chart-type-fieldset,
 .chart-color-fieldset {
   grid-column: 1 / -1;
@@ -101,7 +101,7 @@
   outline-offset: 1px;
 }
 
-/* --- Aperçu miniature des types --- */
+/* --- Types thumbnail preview --- */
 .chart-type-preview {
   position: relative;
   display: block;
@@ -200,7 +200,7 @@
   content: '';
 }
 
-/* --- En-tête de la dialog (sélecteur de table) --- */
+/* --- Dialog header (table selector) --- */
 .chart-dialog-title-control {
   display: inline-flex;
   align-items: center;
@@ -211,7 +211,7 @@
   font-weight: 500;
 }
 
-/* --- Aperçu du graphique dans la dialog --- */
+/* --- Chart preview in dialog --- */
 .chart-dialog-preview {
   min-height: 280px;
   padding: 4px 0 16px;
@@ -228,7 +228,7 @@
   color: var(--text-secondary);
 }
 
-/* --- Layout sidebar + contenu --- */
+/* --- Sidebar + content layout --- */
 .chart-settings-layout {
   display: grid;
   grid-template-columns: 132px minmax(0, 1fr);
@@ -287,7 +287,7 @@
   box-shadow: none;
 }
 
-/* --- Bouton save (inline) --- */
+/* --- Save button (inline) --- */
 .chart-save-button {
   display: inline-flex;
   grid-column: 1 / -1;
@@ -329,7 +329,7 @@
   }
 }
 
-/* --- Palette de couleurs --- */
+/* --- Color palette --- */
 .chart-palette-grid {
   display: flex;
   gap: 8px;
