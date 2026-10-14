@@ -11,6 +11,7 @@ import { $createMathExpNode } from "@/editor/nodes/MathNode/MathExpNode";
 import { $createTableNode } from "@/editor/nodes/TableNode/TableNode";
 import { INSERT_CHART_COMMAND } from "@/editor/plugins/ChartPlugin";
 import { insertImageFromFile } from "@/editor/plugins/ImagesPlugin";
+import { insertTableFromCsv } from "@/editor/plugins/TablePlugin/insertTableFromCsv";
 
 import { OptionName } from "./index";
 
@@ -30,6 +31,12 @@ export default function SelectNodeManager({ editor, optionName, clearOption }: S
         if (optionName === "Image") {
             clearOption();
             insertImageFromFile(editor);
+            return;
+        }
+
+        if (optionName === "Import CSV") {
+            clearOption();
+            insertTableFromCsv(editor);
             return;
         }
 

@@ -15,6 +15,7 @@ import {
   BarChart3,
   Calculator,
   Code2Icon,
+  FileSpreadsheetIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -40,6 +41,7 @@ import { $createListNode, $isListNode, } from "@/editor/nodes/ListNode";
 import { INSERT_CHART_COMMAND } from "@/editor/plugins/ChartPlugin";
 import { insertImageFromFile } from "@/editor/plugins/ImagesPlugin";
 import { INSERT_MATH_COMMAND } from "@/editor/plugins/MathPlugin";
+import { insertTableFromCsv } from "@/editor/plugins/TablePlugin/insertTableFromCsv";
 
 import { INSERT_TABLE_COMMAND } from "../../../editor/plugins/TablePlugin";
 
@@ -175,6 +177,14 @@ export default function CreateNodeMenu({
           showColumnHeaders: false,
           showRowHeaders: false,
         });
+        setIsMenuOpen(false);
+      },
+    },
+    {
+      icon: <FileSpreadsheetIcon size={ICON_SIZES.default} />,
+      title: t('NODES.importCsv') as string,
+      onClick: () => {
+        insertTableFromCsv(editor);
         setIsMenuOpen(false);
       },
     },

@@ -45,6 +45,7 @@
       "image": "Image",
       "line": "Line",
       "math": "Math expression (type @ for options)",
+      "importCsv": "Import CSV",
       "emptyPlaceholder": "Write or type node name"
     },
     "CHART": {

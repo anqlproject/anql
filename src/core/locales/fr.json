@@ -45,6 +45,7 @@
       "image": "Image",
       "line": "Ligne",
       "math": "Expression mathématique (tapez @ pour les possibilités)",
+      "importCsv": "Importer CSV",
       "emptyPlaceholder": "Écrivez ou tapez le nom du nœud"
     },
     "CHART": {

@@ -12,9 +12,9 @@
     "paths": {
       "@/*": [
         "./src/*"
-        ],
-        "docs/*": [
-          "./docs/*"
+      ],
+      "docs/*": [
+        "./docs/*"
       ]
     },
     "moduleResolution": "bundler",
@@ -32,7 +32,8 @@
   "include": [
     "src",
     "docs",
-    "tests"
+    "tests",
+    "__tests__/future test/tests/TablePlugin/csvToTable.test.ts"
   ],
   "references": [
     {
