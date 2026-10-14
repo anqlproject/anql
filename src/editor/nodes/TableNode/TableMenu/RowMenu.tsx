@@ -42,7 +42,8 @@ export function RowMenu({ rowIndex, table }: RowMenuProps) {
       className="table-row-popover-content"
       align="end"
       alignOffset={12}
-      avoidCollisions={false}
+      avoidCollisions
+      collisionPadding={8}
       sideOffset={4}
       onOpenAutoFocus={(e) => e.preventDefault()}
       onCloseAutoFocus={(e) => e.preventDefault()}
