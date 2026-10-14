@@ -9,7 +9,9 @@
 </p>
 
 <p align="center">
-  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/anqlproject/anql?color=blue" style="pointer-events: none;" />
+  <a href="https://github.com/anqlproject/anql/releases/latest">
+    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/anqlproject/anql?color=blue" />
+  </a>
   <img alt="Status" src="https://img.shields.io/badge/status-active__development-orange" style="pointer-events: none;" />
   <img alt="Platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" style="pointer-events: none;" />
   <img alt="GitHub License" src="https://img.shields.io/github/license/anqlproject/anql?color=green" style="pointer-events: none;" />
@@ -18,9 +20,9 @@
 <p align="center">
   <a href="#about-anql">About ANQL</a> |
   <a href="#features">Features</a> |
+  <a href="#download"><strong>Download</strong></a> |
   <a href="#getting-started">Getting Started</a> |
   <a href="#technical-details">Technical Details</a> |
-  <a href="CONTRIBUTING.md">Contributing</a> |
   <a href="#community">Community</a>
 </p>
 
@@ -80,9 +82,15 @@ ANQL offers the freedom of simple notes, with more power available exactly when 
 
 ### Download
 
-ANQL is available for **macOS, Windows, and Linux**.
+ANQL is available as a standalone desktop application for **macOS, Windows, and Linux**.
 
-👉 [Download the latest release](https://github.com/anqlproject/anql/releases/latest)
+| Platform | Format / Architecture | Direct Download |
+|---|---|---|
+| **macOS** | Apple Silicon (`.dmg`)<br>Intel (`.dmg`) | [**Download for macOS (Apple Silicon)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_aarch64.dmg)<br>[**Download for macOS (Intel)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_x64.dmg) |
+| **Windows** | 64-bit Installer (`.exe`)<br>Windows MSI (`.msi`) | [**Download for Windows (.exe)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_x64-setup.exe)<br>[**Download for Windows (.msi)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_x64_en-US.msi) |
+| **Linux** | Universal AppImage (`.AppImage`)<br>Debian / Ubuntu (`.deb`) | [**Download for Linux (.AppImage)**](https://github.com/anqlproject/anql/releases/latest/download/anql_0.4.2_amd64.AppImage)<br>[**Download for Linux (.deb)**](https://github.com/anqlproject/anql/releases/latest/download/anql_0.4.2_amd64.deb) |
+
+*Looking for previous versions or checksums? View all [Release Assets on GitHub](https://github.com/anqlproject/anql/releases/latest).*
 
 ### macOS Security Warning
 
@@ -148,24 +156,6 @@ For more help, check our [GitHub Issues](https://github.com/anqlproject/anql/iss
 | Math engine | [mathjs](https://mathjs.org/) |
 | Charting | [Chart.js](https://www.chartjs.org/) |
 | Database | [SQLite](https://www.sqlite.org/) |
-
-### Platform Support
-
-| Platform | Status |
-|---|---|
-| macOS | ✅ Supported |
-| Windows | ✅ Supported |
-| Linux | ✅ Supported |
-
----
-
-## Contributing
-
-We welcome contributions! Whether it's reporting a bug, proposing a new feature, or submitting a pull request, your help is appreciated. 
-
-Please see our [Contributing Guidelines](CONTRIBUTING.md) to learn how you can help build ANQL.
-
----
 
 ## Community
 
