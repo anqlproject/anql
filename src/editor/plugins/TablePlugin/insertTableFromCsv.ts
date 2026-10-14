@@ -23,6 +23,10 @@ export async function insertTableFromCsv(editor: LexicalEditor): Promise<void> {
 
     if (!selectedPath || typeof selectedPath !== 'string') return;
 
+    // Derive the table name from the CSV filename (without extension).
+    const basename = selectedPath.split(/[\\/]/).pop() ?? 'table';
+    const tableName = basename.replace(/\.csv$/i, '');
+
     const content = await readTextFile(selectedPath);
     const tableData = parseCsvToTable(content);
 
@@ -35,7 +39,7 @@ export async function insertTableFromCsv(editor: LexicalEditor): Promise<void> {
       const tableNode = $createTableNode(
         tableData.data,
         tableData.columns,
-        undefined,
+        tableName,
         true,  // showColumnHeaders — first CSV row becomes headers
         false, // showRowHeaders
       );
