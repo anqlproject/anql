@@ -41,6 +41,27 @@
   width: fit-content;
 }
 
+/* Bottom boundary indicator — centered gradient pill, fades on both sides */
+.table-grid-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border-color) 30%,
+    var(--border-color) 70%,
+    transparent
+  );
+  border-radius: 2px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .table-grid {
   display: flex;
   flex-direction: column;
