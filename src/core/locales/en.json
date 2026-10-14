@@ -29,7 +29,8 @@
       "bulletList": "Bullet List",
       "checkList": "Check List",
       "copyCode": "Copy Code",
-      "copyMathResult": "Copy result"
+      "copyMathResult": "Copy result",
+      "exportCsv": "Export CSV"
     },
     "NODES": {
       "paragraph": "Paragraph",
@@ -377,7 +378,9 @@
       "copyLink": "Copy link",
       "placeholderText": "Enter text...",
       "placeholderNumber": "Number...",
-      "chooseDate": "Choose..."
+      "chooseDate": "Choose...",
+      "exportSuccess": "Table exported to CSV successfully",
+      "exportFailed": "Failed to export table to CSV"
     },
     "FEEDBACK": {
       "restore": "Restore",

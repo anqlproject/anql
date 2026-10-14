@@ -232,6 +232,26 @@ export class TableNode extends DecoratorBlockNode {
     writable.__showRowHeaders = show;
   }
 
+  getData(): TableRowData[] {
+    return this.__data;
+  }
+
+  getColumns(): TableColumn[] {
+    return this.__columns;
+  }
+
+  getTableName(): string {
+    return this.__tableName;
+  }
+
+  getShowColumnHeaders(): boolean {
+    return this.__showColumnHeaders;
+  }
+
+  getShowRowHeaders(): boolean {
+    return this.__showRowHeaders;
+  }
+
   getSearchMatches(query: string): TableSearchMatch[] {
     return searchInTableData(this.__data, this.__columns, query);
   }

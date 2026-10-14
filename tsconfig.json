@@ -32,8 +32,7 @@
   "include": [
     "src",
     "docs",
-    "tests",
-    "__tests__/future test/tests/TablePlugin/csvToTable.test.ts"
+    "tests"
   ],
   "references": [
     {

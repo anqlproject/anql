@@ -29,7 +29,8 @@
       "bulletList": "Liste à puces",
       "checkList": "Liste de tâches",
       "copyCode": "Copier le code",
-      "copyMathResult": "Copier résultat"
+      "copyMathResult": "Copier résultat",
+      "exportCsv": "Exporter en CSV"
     },
     "NODES": {
       "paragraph": "Paragraphe",
@@ -377,7 +378,9 @@
       "copyLink": "Copier le lien",
       "placeholderText": "Saisir du texte...",
       "placeholderNumber": "Nombre...",
-      "chooseDate": "Choisir..."
+      "chooseDate": "Choisir...",
+      "exportSuccess": "Tableau exporté en CSV avec succès",
+      "exportFailed": "Échec de l'exportation du tableau en CSV"
     },
     "FEEDBACK": {
       "restore": "Restaurer",

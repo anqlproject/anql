@@ -24,7 +24,9 @@ import { TOAST_DURATION } from "@/core/global/defaultValues";
 import { $isImageNode } from "@/editor/nodes/ImageNode/ImageNode";
 import { $createListNode, $isListNode } from "@/editor/nodes/ListNode";
 import { $isPdfNode } from "@/editor/nodes/PdfNode/PdfNode";
+import { $isTableNode, TableNode } from "@/editor/nodes/TableNode/TableNode";
 import { safeWriteText } from "@/editor/plugins/ContextMenuPlugin/contextMenuActions";
+import { exportTableToCsv } from "@/editor/plugins/TablePlugin/exportTableToCsv";
 import { EDITOR_SHORTCUTS } from "@/GlobalState/shortcutStore";
 
 type NativeMenuItem = {
@@ -61,6 +63,7 @@ export default function NodeMenu({
   const nodeRef = useRef<LexicalNode>(null);
   const [canTransform, setCanTransform] = useState(false);
   const [isCodeNode, setIsCodeNode] = useState(false);
+  const [isTableNode, setIsTableNode] = useState(false);
   const [activeFormat, setActiveFormat] = useState<string | null>(null);
   const [isMenuReady, setIsMenuReady] = useState(false);
   const isNativeMenuOpening = useRef(false);
@@ -145,6 +148,10 @@ export default function NodeMenu({
           );
           setCanTransform(allAllowed);
           setIsCodeNode(topLevelNodes.some((n) => n.getType() === "code"));
+          setIsTableNode(
+            topLevelNodes.some((n) => $isTableNode(n)) ||
+            (nodeRef.current ? $isTableNode(nodeRef.current) : false),
+          );
 
           let format: string | null = null;
           if (topLevelNodes.length > 0) {
@@ -179,6 +186,7 @@ export default function NodeMenu({
           console.error("node not found");
           setCanTransform(false);
           setIsCodeNode(false);
+          setIsTableNode(false);
           setActiveFormat(null);
           setIsMenuReady(false);
         }
@@ -472,6 +480,46 @@ export default function NodeMenu({
         },
       ]
       : []),
+    ...(isTableNode
+      ? [
+        {
+          text: t("NODE_MENU.exportCsv") as string,
+          action: async () => {
+            const tableData = editor.read(() => {
+              const topLevelNodes = getSelectedTopLevelNodes();
+              const tableNode = (topLevelNodes.find($isTableNode) ||
+                (nodeRef.current && $isTableNode(nodeRef.current) ? nodeRef.current : null)) as TableNode | null;
+
+              if (tableNode) {
+                return {
+                  columns: tableNode.getColumns ? tableNode.getColumns() : tableNode.__columns,
+                  data: tableNode.getData ? tableNode.getData() : tableNode.__data,
+                  tableName: tableNode.getTableName ? tableNode.getTableName() : tableNode.__tableName,
+                  showColumnHeaders: tableNode.getShowColumnHeaders ? tableNode.getShowColumnHeaders() : tableNode.__showColumnHeaders,
+                  showRowHeaders: tableNode.getShowRowHeaders ? tableNode.getShowRowHeaders() : tableNode.__showRowHeaders,
+                };
+              }
+              return null;
+            });
+
+            setIsMenuOpen(false);
+
+            if (tableData) {
+              await exportTableToCsv({
+                ...tableData,
+                includeHeaders: tableData.showColumnHeaders ?? true,
+                onSuccess: () => {
+                  showToast(t("TABLE.exportSuccess") as string, "success", TOAST_DURATION);
+                },
+                onError: () => {
+                  showToast(t("TABLE.exportFailed") as string, "error", TOAST_DURATION);
+                },
+              });
+            }
+          },
+        },
+      ]
+      : []),
     {
       text: t("NODE_MENU.duplicate") as string,
       action: () => {
@@ -536,7 +584,7 @@ export default function NodeMenu({
         });
       },
     },
-  ], [activeFormat, canTransform, dynamicState, editor, insertParagraph, isCodeNode, setIsMenuOpen, showToast, t]);
+  ], [activeFormat, canTransform, dynamicState, editor, insertParagraph, isCodeNode, isTableNode, setIsMenuOpen, showToast, t]);
 
   useEffect(() => {
     if (!isMenuOpen || !isMenuReady || isNativeMenuOpening.current) return;
