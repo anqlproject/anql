@@ -61,7 +61,8 @@ ANQL offers the freedom of simple notes, with more power available exactly when 
 ## Features
 
 - **Easy Writing**: Write, format with Markdown shortcuts, style by selecting text.
-- **Smart Creation**: Type "table" or "h2" on a new line and press `TAB` to create it instantly.
+- **Smart Creation**: Type "table", "csv", or "h2" on a new line and press `TAB` to create it instantly.
+- **CSV Import & Export**: Easily import `.csv` files into structured tables, and export any table back to CSV with one click.
 - **Local SQLite Database**: Lightning-fast, reliable data persistence.
 - **Full-text search**: Instantly find any thought across all your documents.
 - **Offline-First**: Your data stays on your machine — always. No internet required.
