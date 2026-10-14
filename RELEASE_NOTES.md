@@ -1,110 +1,40 @@
 # Release Notes
 
-## Version 0.4.1
+## Version 0.4.2
 
-This release adds a self-contained chart data workflow, refines the interface, and includes fixes across the editor, tables, and database.
+This release introduces CSV import and export for tables, several editor and interface refinements, and fixes across tables, the Home screen, and the clipboard.
 
 ### Features
 
-- Create and edit an embedded data table directly in chart configuration, then use it as the chart's data source.
-- Open document actions from a Home card with right-click.
-- Show a read-mode indicator on documents.
+- Import a CSV file directly into the editor as a table — the filename becomes the table name automatically.
+- Export any table to CSV from its node menu, with the table name pre-filled as the default filename.
 
 ### Interface Improvements
 
-- Refine chart controls and align row/column menu handles in chart tables with the table editor.
-- Polish sidebar and Home interactions, including list/grid transitions, control spacing, and hover feedback.
-- Improve table drag handles and row/column menu highlighting.
-- Compact the code action menu and improve its active theme state.
-- Refine math feedback colors and sidebar footer sizing.
+- Add a subtle gradient pill indicator at the bottom of tables to mark their boundary.
+- Animate the draggable block handle and drop indicator in the editor.
+- Animate toolbar hover states with consistent sizing.
+- Redesign the Home sort dropdown to a compact icon-only button with a refined active state.
+- Add smooth scale-in and fade-in animation to the component dialog.
+- Apply smooth animation to Home card checkboxes.
+- Display the installed app version in the About panel.
+- Select all or deselect all documents at once in Home selection mode.
 
 ### Fixes And Maintenance
 
-- Prevent unwanted editor scrolling when opening chart settings or closing local search.
-- Disable the editor context menu on chart nodes while preserving chart configuration menus.
-- Keep charts visible while opening their settings and prevent Home grid cards from clipping on hover.
-- Fix sidebar toggle initialization and table row/column menu highlight behavior.
-- Improve database full-text search index repair and keep error notifications visible until dismissed.
-- Remove unused editor components.
-
----
-
-## Version 0.4.0
-
-This major update brings a wealth of new features, including a brand-new chart integration, a massive overhaul of the table node, advanced math calculations, and significant UI improvements with the adoption of native system menus.
-
-### ✨ New Features
-
-*   **📊 Chart Integration:**
-    *   Generate charts directly from your table data.
-    *   Advanced chart configuration: axis selection, color palette customization, and series isolation tabs.
-    *   Dynamic chart type proposals tailored to each table's content.
-    *   Markdown import/export support for charts via the `@chart` syntax.
-*   **📐 Table Overhaul:**
-    *   **Inline Editing:** Cells now display cleanly and switch to edit mode on click.
-    *   **Data Types:** Introduced column data typing (`ColumnDataType`).
-    *   **Improved Ergonomics:** Smooth slide-in animations for quick-add strips (rows/columns), revamped drag-and-drop handles, and better vertical column resizing.
-    *   Added Zebra striping for better row readability.
-*   **🧮 Math & Calculations:**
-    *   Support for **inline math calculations**.
-    *   Support for **user-defined functions** and **units** in variable assignments.
-    *   Table column operations are now directly accessible from the math button (column statistics, cell references).
-*   **🧩 Default Templates:** 
-    *   Automatic injection of default templates (like a math demonstration document) on first launch.
-*   **🔄 Automatic Updates:** 
-    *   Integrated Tauri Updater to receive future versions directly within the app.
-*   **🖥️ Cross-Platform Desktop Support:**
-    *   ANQL is now available for Windows and Linux, alongside macOS.
-
-### 💅 UI & UX Improvements
-
-*   **🖥️ Native Menus:** Transitioned the Document Menu, Context Menu, Node Menu, and Footer Menu to use native macOS/Tauri system menus for a more polished and native feel.
-*   **⌨️ Shortcuts:** Added `Cmd+,` keyboard shortcut to open the settings overlay.
-*   **🖌️ Styling & Animations:**
-    *   Improved overall typography and editor theme consistency.
-    *   Refined sidebar interactions, highlights, and theme colors.
-    *   Added animations for the toolbar's horizontal collapse and table add buttons.
-    *   Made the horizontal table scrollbar thinner and less intrusive.
-    *   Action menus for code blocks now appear only on hover.
-
-### 🐛 Bug Fixes & Stability
-
-*   **Editor & Core Interactions:**
-    *   Fixed a major issue where the `Space` key stopped working when popovers were open.
-    *   Prevented scrolling while overlays, context menus, and custom menus are open.
-    *   Fixed incorrect block positions in the database after drag-and-drop operations.
-    *   Fixed macOS autoscroll functionality when dragging blocks.
-    *   Resolved list copy-paste errors and selection gaps.
-    *   Addressed multiple bugs regarding menu overlaps (e.g., hiding the floating toolbar when the context menu is open).
-    *   Fixed the block formatting state and quote block transformation inside the node menu.
-    *   Fixed a bug preventing the first node replacement when pressing `Enter` in the title.
-    *   Properly toggled read/write modes in the document menu.
-*   **Tables:**
-    *   Stabilized HTML export, row IDs generation, and cell sizing.
-    *   Preserved cell text color and placed the caret at the end of cell content properly.
-    *   Fixed row/column menu toggling, drag handle layering, and drag states remaining after copying a row link.
-    *   Fixed context menus appearing when a cell was not explicitly selected.
-    *   Fixed highlight selections not appearing on right-click within a cell.
-    *   Resolved an `InvalidStateError` regarding number input selections in cells.
-*   **Charts & Math:**
-    *   Prevented unnecessary re-renders for chart and math nodes.
-    *   Fixed syncing issues with curve colors and the y-axis menu.
-    *   Stabilized chart configuration normalization and debounced database writes.
-    *   Ensured only numeric table columns are exposed for math calculations.
-    *   Aligned table variables with proper scope principles and respected scope ordering for math autocomplete variables.
-    *   Resolved `setState()` errors during render cycles for math autocomplete menus.
-    *   Prevented autocomplete activation inside nodes containing links.
-*   **Search & Highlighting:**
-    *   Preserved local search highlights while actively editing text.
-    *   Cleaned up search highlights appropriately when the search field is closed.
-    *   Fixed local search autofocus issues and UI shifting after autoscrolling.
-    *   Resolved highlight mismatches when searching across multiple tables.
-*   **Images & Media:**
-    *   Prevented image layout shifts during lazy loading and document initialization.
-    *   Improved image resizing, scrolling, and wrapping behaviors.
-*   **Build & System:**
-    *   Stabilized database initialization and template loading.
-    *   Resolved docs JSON imports in TypeScript and removed deprecated `baseUrl` usage.
+- Preserve table rows and detect column headers correctly when pasting.
+- Preserve rich HTML content when pasting Markdown into the editor.
+- Paste clipboard content as plain text in the document title.
+- Fix row menu popover collision avoidance.
+- Fix Home selection checkbox position in list view.
+- Hide the Home read-mode badge to prevent overlap with the card menu.
+- Fix Home checkbox visibility after mouse focus leaves.
+- Fix bulk action alignment in Home document selection.
+- Group background database maintenance tasks to prevent SQLite concurrency errors.
+- Remove noisy toast on intermittent DB integrity check failure.
+- Avoid unnecessary re-renders in math result display.
+- Fix search result scrolling to wait for Lexical DOM commit.
+- Use native check item for read mode and theme selection in menus.
 
 ***
 

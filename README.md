@@ -157,13 +157,6 @@ For more help, check our [GitHub Issues](https://github.com/anqlproject/anql/iss
 | Windows | ✅ Supported |
 | Linux | ✅ Supported |
 
-### Roadmap
-
-We're actively building. Here's what's on the roadmap:
-
-- 🔗 **More export formats**
-- 📊 **Advanced visualizations**
-
 ---
 
 ## Contributing
