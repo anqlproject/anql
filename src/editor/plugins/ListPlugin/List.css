@@ -58,16 +58,12 @@
   top: 4px;
   width: 16px;
   height: 16px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--text-primary);
   border-radius: 4px;
   cursor: pointer;
   background-color: transparent;
   box-sizing: border-box;
   transition: all 0.2s ease-in-out;
-}
-
-.list-check:hover::before {
-  border-color: var(--text-secondary);
 }
 
 .list-check.list-checked::before {
@@ -81,5 +77,5 @@
 
 .list-check.list-checked {
   text-decoration: line-through;
-  opacity: 0.6;
+  opacity: 1;
 }
