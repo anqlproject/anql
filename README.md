@@ -5,10 +5,6 @@
 <h1 align="center">ANQL</h1>
 
 <p align="center">
-  <strong>Write freely. Structure when needed.</strong>
-</p>
-
-<p align="center">
   <a href="https://github.com/anqlproject/anql/releases/latest">
     <img alt="GitHub Release" src="https://img.shields.io/github/v/release/anqlproject/anql?color=blue" />
   </a>
