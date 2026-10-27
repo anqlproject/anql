@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { check, Update } from '@tauri-apps/plugin-updater';
 import { CheckCircle, Download, Loader2, RefreshCw,Rocket } from 'lucide-react';
@@ -137,6 +138,7 @@ function UpdateToastContent({
 
 export default function UpdateDialog() {
   const { showToast, dismissToast } = useGlobalToast();
+  const [isDebug, setIsDebug] = useState<boolean | null>(null);
 
   // Track which version we already showed a toast for (persists across intervals)
   const shownVersionRef = useRef<string | null>(null);
@@ -146,6 +148,22 @@ export default function UpdateDialog() {
   const skippedVersionRef = useRef<string | null>(null);
   // Track if we already showed an error toast (avoid spam every 24h)
   const errorShownRef = useRef(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    invoke<boolean>('is_debug_mode')
+      .then((result) => {
+        if (mounted) setIsDebug(result);
+      })
+      .catch((error: unknown) => {
+        console.error('[Updater] failed to determine debug mode:', error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const showUpdateToast = useCallback(
     (update: Update) => {
@@ -174,6 +192,8 @@ export default function UpdateDialog() {
   );
 
   useEffect(() => {
+    if (isDebug !== false) return;
+
     let mounted = true;
 
     const checkForUpdate = async () => {
@@ -206,7 +226,7 @@ export default function UpdateDialog() {
       mounted = false;
       clearInterval(interval);
     };
-  }, [showUpdateToast, showToast, dismissToast]);
+  }, [isDebug, showUpdateToast, showToast, dismissToast]);
 
   return null;
 }
