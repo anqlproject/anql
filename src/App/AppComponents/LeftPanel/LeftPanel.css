@@ -166,11 +166,12 @@
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
   opacity: 0;
+  width: 3px;
 }
 
 .sidebar-resize-handle:hover {
   background-color: var(--primary-color);
-  opacity: 0.5;
+  opacity: 1;
   transition: opacity 0.1s ease-in 0.1s, background-color 0.1s ease-in 0.1s;
 }
 
@@ -198,18 +199,19 @@ without changing the visual width (3px).
   left: 0;
   opacity: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 0 6px 0 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.1s, background-color 0.1s;
+  transition: opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .left-sidebar-trigger.visible {
-  background-color: var(--primary-color);
-  opacity: 0.7;
-  transition: opacity 0.1s ease-in 0.1s, background-color 0.1s ease-in 0.1s;
+  background-color: var(--surface-color);
+  border: 1px solid var(--text-disabled);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.12);
+  opacity: 1;
 }
 
 /*

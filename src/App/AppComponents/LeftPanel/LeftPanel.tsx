@@ -264,9 +264,6 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
           // sidebar resize handle
           <div
             className="sidebar-resize-handle"
-            style={{
-              width: DIMENSIONS.sidebarWrapperWidth,
-            }}
             onMouseDown={handleMouseDown}
             onMouseUp={(e) => handleMouseUp(e.clientX)}
           ></div>
