@@ -1,5 +1,9 @@
 import { newNode,NodeJson } from '@/core/database/useBlocDatabase';
-import { DocumentsJson, newDocument } from '@/core/database/useDocumentDatabase';
+import {
+  DocumentsJson,
+  getDocumentMetadata,
+  newDocument,
+} from '@/core/database/useDocumentDatabase';
 import { addRecentDocument } from '@/core/database/useRecentDocumentsDatabase';
 
 export async function duplicateDocument(
@@ -8,10 +12,12 @@ export async function duplicateDocument(
   title: string,
 ): Promise<DocumentsJson> {
   const timestamp = Date.now();
+  const metadata = await getDocumentMetadata(document.id);
   const duplicatedDocument: DocumentsJson = {
     ...document,
     id: crypto.randomUUID(),
     title,
+    metadata,
     created_at: timestamp,
     updated_at: timestamp,
   };
