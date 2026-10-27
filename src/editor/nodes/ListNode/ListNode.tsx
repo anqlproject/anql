@@ -210,7 +210,7 @@ export class ListNode extends ElementNode {
   }
 
   insertNewAfter(
-    _selection: RangeSelection,
+    selection: RangeSelection,
     restoreSelection?: boolean,
   ): ParagraphNode | ListNode | null {
     if (this.isEmpty()) {
@@ -219,7 +219,18 @@ export class ListNode extends ElementNode {
       return paragraph;
     }
 
-    const newElement = $createListNode(this.__listType, false);
+    const moveCheckedState =
+      this.__listType === "check" &&
+      this.getChecked() === true &&
+      selection.isCollapsed() &&
+      selection.anchor.offset === 0;
+    const newElement = $createListNode(
+      this.__listType,
+      moveCheckedState ? true : false,
+    );
+    if (moveCheckedState) {
+      this.setChecked(false);
+    }
     const direction = this.getDirection();
     newElement.setDirection(direction);
     newElement.setFormat(this.getFormatType());
