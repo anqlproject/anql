@@ -69,14 +69,13 @@
   opacity: 0.9;
 }
 
-.history-item:hover {
+.history-item:not(.active):hover {
   background-color: var(--action-hover);
   opacity: 1;
 }
 
 .history-item.active {
-  border: 1px solid color-mix(in srgb, var(--primary-color) 50%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--primary-color) 50%, transparent);
+  background-color: var(--action-active);
   border-radius: 6px;
   opacity: 1;
 }
