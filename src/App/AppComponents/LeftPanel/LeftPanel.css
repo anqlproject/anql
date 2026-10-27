@@ -97,7 +97,6 @@
 .sidebar [data-slot="sidebar-menu-button"]:hover svg {
   opacity: 1;
   transform: scale(1.08) translateY(-1px);
-  color: var(--text-primary);
 }
 
 /* ── Search count badge ───────────────────── */
