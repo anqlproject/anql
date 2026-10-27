@@ -40,7 +40,7 @@ export const DocumentMenu = () => {
   const refreshRecentDocuments = useRecentDocumentsStore((state) => state.refreshRecentDocuments);
   const [editor] = useLexicalComposerContext();
   const { showToast, dismissToast } = useGlobalToast();
-  const { handleNewFile } = useFile();
+  const { openEditorWithUpdate } = useFile();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isLocalSearchOpen = useGlobalShortcut(
@@ -149,7 +149,7 @@ export const DocumentMenu = () => {
               `${doc.title} (copy)`,
             );
 
-            handleNewFile(newDocumentItem.title);
+            await openEditorWithUpdate(newDocumentItem);
           });
         }
       },
