@@ -65,7 +65,7 @@
   cursor: pointer;
   transition: background-color 0.12s ease;
   font-size: var(--ui-text-sm);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   opacity: 0.9;
 }
 
@@ -77,6 +77,7 @@
 .history-item.active {
   background-color: var(--action-active);
   border-radius: 6px;
+  color: var(--text-primary);
   opacity: 1;
 }
 
