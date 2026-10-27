@@ -198,13 +198,19 @@ without changing the visual width (3px).
   position: relative;
   left: 0;
   opacity: 0;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 0 6px 0 12px;
+  transform: translateX(-6px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .left-sidebar-trigger.visible {
@@ -212,6 +218,7 @@ without changing the visual width (3px).
   border: 1px solid var(--text-disabled);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.12);
   opacity: 1;
+  transform: translateX(0);
 }
 
 /*
