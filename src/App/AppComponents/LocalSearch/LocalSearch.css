@@ -63,9 +63,14 @@
   transition: all 0.2s;
 }
 
-.search-plugin-actions button:hover {
+.search-plugin-actions button:not(:disabled):hover {
   background-color: var(--action-hover);
   color: var(--text-primary);
+}
+
+.search-plugin-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .search-plugin-divider {

@@ -33,6 +33,7 @@ export default function LocalSearch({ onClose }: SearchPluginProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [editor] = useLexicalComposerContext();
+  const canNavigate = query.trim().length > 0 && resultsCount > 0;
 
   useEffect(() => {
     editor.blur();
@@ -49,6 +50,8 @@ export default function LocalSearch({ onClose }: SearchPluginProps) {
     if (e.key === 'Escape') {
       onClose();
     } else if (e.key === 'Enter') {
+      if (!canNavigate) return;
+
       if (e.shiftKey) {
         prevResult();
       } else {
@@ -81,10 +84,10 @@ export default function LocalSearch({ onClose }: SearchPluginProps) {
       )}
 
       <div className="search-plugin-actions">
-        <button onClick={prevResult} title={t('LOCAL_SEARCH.previous') as string}>
+        <button disabled={!canNavigate} onClick={prevResult} title={t('LOCAL_SEARCH.previous') as string}>
           <ChevronUp size={16} />
         </button>
-        <button onClick={nextResult} title={t('LOCAL_SEARCH.next') as string}>
+        <button disabled={!canNavigate} onClick={nextResult} title={t('LOCAL_SEARCH.next') as string}>
           <ChevronDown size={16} />
         </button>
         <div className="search-plugin-divider"></div>
