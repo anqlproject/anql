@@ -11,13 +11,13 @@ import './ContentEditable.css';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { $setBlocksType } from '@lexical/selection';
-import { Calculator, ListCheckIcon, TableIcon } from 'lucide-react';
 import {
   $getRoot,
   $getSelection,
   $isParagraphNode,
   $isRangeSelection,
 } from 'lexical';
+import { Calculator, ListCheckIcon, TableIcon } from 'lucide-react';
 import type { JSX } from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
