@@ -8,7 +8,6 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useFile } from '@/App/hooks/FileHooks';
-import { Dialog } from '@/components/custom/Dialog/Dialog';
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
 import { getReferenceUsages, ReferenceUsageJson } from '@/core/database/useDocumentDatabase';
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
@@ -71,11 +70,12 @@ function ReferenceImageThumbnail({ src, name }: { src: string; name: string }) {
 interface ReferencesPanelProps {
   panelRef: React.Ref<HTMLDivElement>;
   onClose: () => void;
+  onRequestDelete: (reference: ReferenceJson) => void;
 }
 
-export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelProps) {
+export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: ReferencesPanelProps) {
   const { t } = useTranslation();
-  const { references, isLoaded, loadReferences, addReference, editReference, removeReference } = useReferenceStore();
+  const { references, isLoaded, loadReferences, addReference, editReference } = useReferenceStore();
   const { openEditorWUFocusOnNode } = useFile();
 
   const [search, setSearch] = useState('');
@@ -86,9 +86,6 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
   const [isLoadingUsages, setIsLoadingUsages] = useState(false);
   const [usageError, setUsageError] = useState('');
   const [openingUsageId, setOpeningUsageId] = useState<string | null>(null);
-  const [referenceToDelete, setReferenceToDelete] = useState<ReferenceJson | null>(null);
-  const [isDeletingReference, setIsDeletingReference] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
 
   // New-reference form state
   const [newName, setNewName] = useState('');
@@ -284,24 +281,6 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
     }
   };
 
-  const confirmDeleteReference = async () => {
-    if (!referenceToDelete?.id) return;
-
-    setIsDeletingReference(true);
-    setDeleteError('');
-    try {
-      await removeReference(referenceToDelete.id);
-      setReferenceToDelete(null);
-    } catch (error) {
-      logger.error('Failed to delete reference', error as Error, {
-        referenceId: referenceToDelete.id,
-      });
-      setDeleteError(t('REFERENCE_PANEL.deleteFailed') as string);
-    } finally {
-      setIsDeletingReference(false);
-    }
-  };
-
   return (
     <>
       <div
@@ -438,10 +417,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                   <button
                     type="button"
                     className="ref-item__action-btn ref-item__action-btn--delete"
-                    onClick={() => {
-                      setDeleteError('');
-                      setReferenceToDelete(ref);
-                    }}
+                    onClick={() => onRequestDelete(ref)}
                     aria-label={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
                     title={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
                   >
@@ -618,39 +594,6 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
         </div>,
         document.body,
       )}
-      <Dialog
-        isOpen={referenceToDelete !== null}
-        onClose={() => {
-          if (!isDeletingReference) {
-            setReferenceToDelete(null);
-            setDeleteError('');
-          }
-        }}
-        title={t('REFERENCE_PANEL.deleteTitle') as string}
-        description={
-          <div>
-            <p>{t('REFERENCE_PANEL.confirmDelete', { name: referenceToDelete?.name ?? '' })}</p>
-            {deleteError && <p role="alert">{deleteError}</p>}
-          </div>
-        }
-        mode="urgent"
-        leftButton={{
-          text: t('REFERENCE_PANEL.cancel') as string,
-          onClick: () => {
-            setReferenceToDelete(null);
-            setDeleteError('');
-          },
-          disabled: isDeletingReference,
-        }}
-        rightButton={{
-          text: isDeletingReference
-            ? t('REFERENCE_PANEL.deleting') as string
-            : t('DIALOG.delete') as string,
-          onClick: confirmDeleteReference,
-          variant: 'danger',
-          disabled: isDeletingReference,
-        }}
-      />
     </>
   );
 }
