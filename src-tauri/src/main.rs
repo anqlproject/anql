@@ -13,7 +13,8 @@ use database_manager::nodes::nodes_operations_tauri::{
 
 use database_manager::documents::documents_operations_tauri::{
     delete_document, get_document_by_id, get_document_metadata, get_documents_by_path,
-    get_documents_by_workspace_id, new_document, remove_document_metadata, set_document_metadata,
+    get_documents_by_workspace_id, get_reference_usages, new_document,
+    remove_document_metadata, set_document_metadata,
     update_document, update_document_path, update_document_timestamp, update_document_title,
     update_document_workspace_id,
 };
@@ -109,6 +110,7 @@ fn main() {
             delete_document,
             get_documents_by_path,
             get_documents_by_workspace_id,
+            get_reference_usages,
             get_document_by_id,
             get_document_metadata,
             set_document_metadata,

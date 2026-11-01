@@ -23,6 +23,17 @@ pub struct DocumentsJson {
     pub updated_at: i64,
 }
 
+#[derive(sqlx::FromRow, serde::Serialize)]
+pub struct ReferenceUsageJson {
+    pub id: String,
+    pub path: String,
+    pub workspace_id: String,
+    pub title: String,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub node_id: String,
+}
+
 #[derive(sqlx::FromRow, serde::Deserialize, serde::Serialize)]
 pub struct NodeJson {
     pub id: Option<String>,

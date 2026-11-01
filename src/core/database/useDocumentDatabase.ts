@@ -19,6 +19,10 @@ export interface DocumentsJson {
   updated_at: number,
 }
 
+export interface ReferenceUsageJson extends DocumentsJson {
+  node_id: string;
+}
+
 
 export const updateDynamically = () => {
   emitDatabaseChange();
@@ -117,6 +121,15 @@ export const getDocumentsByWorkspaceId = async (workspaceId: string): Promise<Do
     return documents;
   } catch (error) {
     console.error('getDocumentsByWorkspaceId Failed:', error);
+    throw error;
+  }
+}
+
+export const getReferenceUsages = async (referenceId: string): Promise<ReferenceUsageJson[]> => {
+  try {
+    return await invoke('get_reference_usages', { referenceId }) as ReferenceUsageJson[];
+  } catch (error) {
+    console.error('Failed to get reference usages:', error);
     throw error;
   }
 }

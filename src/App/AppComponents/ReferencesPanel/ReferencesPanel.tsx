@@ -2,12 +2,16 @@ import './ReferencesPanel.css';
 
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
-import { Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
+import { FileSearch, Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
+import { useFile } from '@/App/hooks/FileHooks';
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
+import { getReferenceUsages, ReferenceUsageJson } from '@/core/database/useDocumentDatabase';
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
+import { DIMENSIONS } from '@/core/global/defaultValues';
 import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 
@@ -70,10 +74,16 @@ interface ReferencesPanelProps {
 export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelProps) {
   const { t } = useTranslation();
   const { references, isLoaded, loadReferences, addReference, editReference, removeReference } = useReferenceStore();
+  const { openEditorWUFocusOnNode } = useFile();
 
   const [search, setSearch] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [usageReference, setUsageReference] = useState<ReferenceJson | null>(null);
+  const [usages, setUsages] = useState<ReferenceUsageJson[]>([]);
+  const [isLoadingUsages, setIsLoadingUsages] = useState(false);
+  const [usageError, setUsageError] = useState('');
+  const [openingUsageId, setOpeningUsageId] = useState<string | null>(null);
 
   // New-reference form state
   const [newName, setNewName] = useState('');
@@ -97,6 +107,32 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
   useEffect(() => {
     if (!isLoaded) loadReferences();
   }, [isLoaded, loadReferences]);
+
+  useEffect(() => {
+    if (!usageReference?.id) return;
+
+    let isMounted = true;
+    setUsages([]);
+    setIsLoadingUsages(true);
+    setUsageError('');
+    getReferenceUsages(usageReference.id)
+      .then((result) => {
+        if (isMounted) setUsages(result);
+      })
+      .catch((error: unknown) => {
+        logger.error('Failed to load reference usages', error as Error, {
+          referenceId: usageReference.id,
+        });
+        if (isMounted) setUsageError(t('REFERENCE_PANEL.usagesFailed') as string);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingUsages(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [usageReference, t]);
 
   useEffect(() => {
     if (isAdding) newNameRef.current?.focus();
@@ -208,13 +244,32 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
     if (e.key === 'Escape') { setIsAdding(false); cancelEdit(); }
   };
 
+  const openUsage = async (usage: ReferenceUsageJson) => {
+    setOpeningUsageId(usage.node_id);
+    setUsageError('');
+    try {
+      await openEditorWUFocusOnNode(usage, usage.node_id);
+      setUsageReference(null);
+      onClose();
+    } catch (error) {
+      logger.error('Failed to open reference usage', error as Error, {
+        documentId: usage.id,
+        nodeId: usage.node_id,
+      });
+      setUsageError(t('REFERENCE_PANEL.openUsageFailed') as string);
+    } finally {
+      setOpeningUsageId(null);
+    }
+  };
+
   return (
-    <div
-      ref={panelRef}
-      className="ref-panel"
-      onClick={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
-    >
+    <>
+      <div
+        ref={panelRef}
+        className="ref-panel"
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
       {/* ── Header ── */}
       <div className="ref-panel__header">
         <span className="ref-panel__title">{t('REFERENCE_PANEL.title')}</span>
@@ -331,6 +386,15 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                   <Pencil size={12} />
                 </button>
                 <button
+                  className="ref-item__btn ref-item__btn--usages"
+                  onClick={() => setUsageReference(ref)}
+                  aria-label={t('REFERENCE_PANEL.viewUsages', { name: ref.name }) as string}
+                  title={t('REFERENCE_PANEL.viewUsages', { name: ref.name }) as string}
+                  disabled={!ref.id}
+                >
+                  <FileSearch size={12} />
+                </button>
+                <button
                   className="ref-item__btn ref-item__btn--delete"
                   onClick={() => removeReference(ref.id!)}
                   aria-label={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
@@ -418,6 +482,77 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
           {t('REFERENCE_PANEL.newReference')}
         </button>
       </div>
-    </div>
+      </div>
+      {usageReference && createPortal(
+        <div
+          className="ref-usages-overlay"
+          style={{ paddingTop: DIMENSIONS.overlayTopOffset }}
+          onClick={() => setUsageReference(null)}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          <div className="ref-usages-backdrop" />
+          <section
+            className="ref-usages-panel"
+            style={{
+              width: DIMENSIONS.panelWidth_medium,
+              height: DIMENSIONS.panelHeight_medium,
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ref-usages-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="ref-usages-header">
+              <h2 id="ref-usages-title">
+                {t('REFERENCE_PANEL.usagesTitle', { name: usageReference.name })}
+                {!isLoadingUsages && !usageError ? ` (${usages.length})` : ''}
+              </h2>
+              <button
+                type="button"
+                className="ref-panel__close"
+                onClick={() => setUsageReference(null)}
+                aria-label={t('REFERENCE_PANEL.close') as string}
+              >
+                <X size={14} />
+              </button>
+            </header>
+            <div className="ref-usages-list">
+              {isLoadingUsages ? (
+                <p className="ref-usages-message">{t('REFERENCE_PANEL.loadingUsages')}</p>
+              ) : usageError ? (
+                <p className="ref-usages-message ref-usages-message--error" role="alert">{usageError}</p>
+              ) : usages.length === 0 ? (
+                <p className="ref-usages-message">{t('REFERENCE_PANEL.noUsages')}</p>
+              ) : usages.map((usage, index) => {
+                const blockNumber = usages
+                  .slice(0, index + 1)
+                  .filter((item) => item.id === usage.id).length;
+                return (
+                  <button
+                    key={`${usage.id}-${usage.node_id}`}
+                    type="button"
+                    className="ref-usages-item"
+                    onClick={() => openUsage(usage)}
+                    disabled={openingUsageId !== null}
+                  >
+                    <FileSearch size={15} />
+                    <span className="ref-usages-item__text">
+                      <strong>{usage.title || t('SIDEBAR.untitled')}</strong>
+                      <small>
+                        {usage.path}
+                        {usage.path ? ' · ' : ''}
+                        {t('REFERENCE_PANEL.usageBlock', { number: blockNumber })}
+                      </small>
+                    </span>
+                    {openingUsageId === usage.node_id && <span>{t('REFERENCE_PANEL.openingUsage')}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </div>,
+        document.body,
+      )}
+    </>
   );
 }

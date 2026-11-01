@@ -1,4 +1,4 @@
-use crate::database_manager::database::{extract_asset_ids, DocumentsJson};
+use crate::database_manager::database::{extract_asset_ids, DocumentsJson, ReferenceUsageJson};
 use anyhow::{Ok, Result};
 use sqlx::Row;
 
@@ -218,6 +218,31 @@ impl DocumentsOperations {
         .await?;
 
         Ok(documents)
+    }
+
+    pub async fn get_reference_usages(
+        &self,
+        reference_id: String,
+    ) -> Result<Vec<ReferenceUsageJson>> {
+        let usages = sqlx::query_as::<_, ReferenceUsageJson>(
+            r#"SELECT d.id, d.path, d.workspace_id, d.title, d.created_at, d.updated_at,
+                      n.id AS node_id
+               FROM documents d
+               JOIN nodes n ON n.document_id = d.id
+               WHERE d.path NOT LIKE 'trash/%'
+                 AND EXISTS (
+                     SELECT 1
+                     FROM json_tree(n.content) AS node_value
+                     WHERE node_value.key = 'referenceId'
+                       AND node_value.value = ?
+                 )
+               ORDER BY d.title COLLATE NOCASE, n.position"#,
+        )
+        .bind(reference_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(usages)
     }
 
     pub async fn get_document_by_id(&self, document_id: String) -> Result<DocumentsJson> {
