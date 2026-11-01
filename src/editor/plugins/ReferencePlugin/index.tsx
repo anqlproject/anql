@@ -125,7 +125,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
   });
 
   const options = useMemo(() => {
-    if (queryString === null) return [];
+    if (queryString === null || !isLoaded) return [];
     const q = queryString.toLowerCase().trim();
 
     const filtered = q
@@ -153,7 +153,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
     }
 
     return items;
-  }, [queryString, references]);
+  }, [queryString, references, isLoaded]);
 
   const onSelectOption = useCallback(
     async (
@@ -168,6 +168,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
 
       if (selectedOption.isCreateAction && selectedOption.createName) {
         const nodeKey = nodeToReplace.getKey();
+        const originalText = nodeToReplace.getTextContent();
         try {
           const reference = await useReferenceStore.getState().addReference(
             selectedOption.createName,
@@ -176,7 +177,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           );
           editor.update(() => {
             const currentNode = $getNodeByKey(nodeKey);
-            if (!$isTextNode(currentNode)) return;
+            if (!$isTextNode(currentNode) || currentNode.getTextContent() !== originalText) return;
             const textNode = new TextNode(`@${reference.name}`);
             currentNode.replace(textNode);
             textNode.select();

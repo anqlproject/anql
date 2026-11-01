@@ -16,6 +16,9 @@ function now(): number {
   return Math.floor(Date.now() / 1000);
 }
 
+let referencesLoadPromise: Promise<void> | null = null;
+const pendingReferenceCreations = new Map<string, Promise<ReferenceJson>>();
+
 interface ReferenceStore {
   references: ReferenceJson[];
   isLoaded: boolean;
@@ -35,48 +38,71 @@ export const useReferenceStore = create<ReferenceStore>((set, get) => ({
   isLoaded: false,
 
   loadReferences: async () => {
-    const refs = await getAllReferences();
-    set({ references: refs, isLoaded: true });
+    if (get().isLoaded) return;
+    if (!referencesLoadPromise) {
+      referencesLoadPromise = getAllReferences()
+        .then((references) => {
+          set({ references, isLoaded: true });
+        })
+        .finally(() => {
+          referencesLoadPromise = null;
+        });
+    }
+    await referencesLoadPromise;
   },
 
   addReference: async (name, ref_type, value) => {
     const normalizedName = name.trim().replace(/\s+/g, '_');
-    const existing = get().references.find(
-      (reference) => reference.name.toLowerCase() === normalizedName.toLowerCase(),
-    );
-    if (existing) return existing;
+    const key = normalizedName.toLowerCase();
+    const pending = pendingReferenceCreations.get(key);
+    if (pending) return pending;
 
-    const ts = now();
-    const ref: ReferenceJson = {
-      id: generateId(),
-      name: normalizedName,
-      ref_type,
-      value,
-      created_at: ts,
-      updated_at: ts,
-    };
+    const creation = (async () => {
+      if (!get().isLoaded) await get().loadReferences();
 
-    try {
-      await newReference(ref);
-    } catch (error) {
-      const references = await getAllReferences();
-      set({ references, isLoaded: true });
-
-      const duplicate = references.find(
-        (reference) => reference.name.toLowerCase() === normalizedName.toLowerCase(),
+      const existing = get().references.find(
+        (reference) => reference.name.toLowerCase() === key,
       );
-      if (duplicate) return duplicate;
-      throw error;
-    }
+      if (existing) return existing;
 
-    // Optimistic update
-    set((state) => ({
-      references: [...state.references.filter(
-        (reference) => reference.name.toLowerCase() !== normalizedName.toLowerCase(),
-      ), ref].sort((a, b) => a.name.localeCompare(b.name)),
-      isLoaded: true,
-    }));
-    return ref;
+      const ts = now();
+      const ref: ReferenceJson = {
+        id: generateId(),
+        name: normalizedName,
+        ref_type,
+        value,
+        created_at: ts,
+        updated_at: ts,
+      };
+
+      try {
+        await newReference(ref);
+      } catch (error) {
+        const references = await getAllReferences();
+        set({ references, isLoaded: true });
+
+        const duplicate = references.find(
+          (reference) => reference.name.toLowerCase() === key,
+        );
+        if (duplicate) return duplicate;
+        throw error;
+      }
+
+      set((state) => ({
+        references: [...state.references.filter(
+          (reference) => reference.name.toLowerCase() !== key,
+        ), ref].sort((a, b) => a.name.localeCompare(b.name)),
+        isLoaded: true,
+      }));
+      return ref;
+    })();
+
+    pendingReferenceCreations.set(key, creation);
+    try {
+      return await creation;
+    } finally {
+      pendingReferenceCreations.delete(key);
+    }
   },
 
   editReference: async (id, updates) => {
