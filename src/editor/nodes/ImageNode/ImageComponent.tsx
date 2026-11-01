@@ -38,6 +38,8 @@ import {
 } from 'react';
 
 import { resolveAssetUrl } from '@/core/database/useAssetDatabase';
+import { logger } from '@/core/logger';
+import { useReferenceStore } from '@/core/references/useReferenceStore';
 
 import { $isImageNode } from './ImageNode';
 import ImageResizer from './ImageResizer';
@@ -207,6 +209,7 @@ function noop() { }
 
 export default function ImageComponent({
   src,
+  referenceId,
   altText,
   nodeKey,
   width,
@@ -219,9 +222,23 @@ export default function ImageComponent({
   maxWidth: number;
   nodeKey: NodeKey;
   resizable: boolean;
+  referenceId?: string;
   src: string;
   width: 'inherit' | number;
 }): JSX.Element {
+  const linkedReference = useReferenceStore((state) =>
+    referenceId
+      ? state.references.find((reference) => reference.id === referenceId)
+      : undefined,
+  );
+  const referencesLoaded = useReferenceStore((state) => state.isLoaded);
+  const loadReferences = useReferenceStore((state) => state.loadReferences);
+  const currentSrc =
+    linkedReference?.ref_type === 'image' && linkedReference.value
+      ? linkedReference.value
+      : src;
+  const currentAltText =
+    linkedReference?.ref_type === 'image' ? linkedReference.name : altText;
   const imageRef = useRef<null | HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [isSelected, setSelected, clearSelection] =
@@ -231,26 +248,44 @@ export default function ImageComponent({
   const activeEditorRef = useRef<LexicalEditor | null>(null);
   const [isLoadError, setIsLoadError] = useState<boolean>(false);
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(
-    src.startsWith('asset://') ? null : src
+    currentSrc.startsWith('asset://') ? null : currentSrc
   );
   const isEditable = useLexicalEditable();
 
   useEffect(() => {
-    if (src.startsWith('asset://')) {
-      let isMounted = true;
+    if (referenceId && !referencesLoaded) {
+      loadReferences().catch((error: unknown) => {
+        logger.error('Failed to load reference for linked image', error as Error, {
+          referenceId,
+        });
+      });
+    }
+  }, [referenceId, referencesLoaded, loadReferences]);
 
-      resolveAssetUrl(src)
+  useEffect(() => {
+    let isMounted = true;
+    let objectUrl: string | null = null;
+    setIsLoadError(false);
+
+    if (currentSrc.startsWith('asset://')) {
+      setResolvedSrc(null);
+      resolveAssetUrl(currentSrc)
         .then((url) => {
+          if (url?.startsWith('blob:')) objectUrl = url;
           if (isMounted) {
             if (url) {
               setResolvedSrc(url);
             } else {
               setIsLoadError(true);
             }
+          } else if (objectUrl) {
+            URL.revokeObjectURL(objectUrl);
           }
         })
         .catch((err: unknown) => {
-          console.error('Failed to load asset:', err);
+          logger.error('Failed to load image asset', err as Error, {
+            src: currentSrc,
+          });
           if (isMounted) {
             setIsLoadError(true);
           }
@@ -258,11 +293,15 @@ export default function ImageComponent({
 
       return () => {
         isMounted = false;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
       };
     } else {
-      setResolvedSrc(src);
+      setResolvedSrc(currentSrc);
+      return () => {
+        isMounted = false;
+      };
     }
-  }, [src]);
+  }, [currentSrc]);
 
 
   const isInNodeSelection = useMemo(
@@ -459,12 +498,41 @@ export default function ImageComponent({
   return (
     <Suspense fallback={imageSkeleton}>
       <>
-        <div 
+        <div
           draggable={draggable}
+          className={referenceId ? 'image-reference-wrapper' : undefined}
           style={{ position: 'relative', display: 'inline-block' }}
         >
+          {referenceId && (
+            <span
+              className="image-reference-indicator"
+              title={`@${currentAltText}`}
+              aria-label={`Image liée à @${currentAltText}`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="7" r="4" />
+                <circle cx="4" cy="19" r="2" />
+                <circle cx="12" cy="19" r="2" />
+                <circle cx="20" cy="19" r="2" />
+                <path d="M8 7a4 4 0 0 0-4 4v6" />
+                <path d="M12 11v6" />
+                <path d="M16 7a4 4 0 0 1 4 4v6" />
+              </svg>
+            </span>
+          )}
           {isLoadError ? (
-            <BrokenImage src={src} />
+            <BrokenImage src={currentSrc} />
           ) : resolvedSrc ? (
             <LazyImage
               className={
@@ -473,7 +541,7 @@ export default function ImageComponent({
                   : null
               }
               src={resolvedSrc}
-              altText={altText}
+              altText={currentAltText}
               imageRef={imageRef}
               width={width}
               height={height}

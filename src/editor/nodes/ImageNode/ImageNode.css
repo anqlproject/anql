@@ -43,6 +43,29 @@
   touch-action: none;
 }
 
+.image-reference-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface-color) 85%, transparent);
+  color: var(--primary-color);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.image-reference-wrapper:hover .image-reference-indicator,
+.image-reference-wrapper:focus-within .image-reference-indicator {
+  opacity: 1;
+}
+
 .image-resizer {
   display: block;
   width: 7px;

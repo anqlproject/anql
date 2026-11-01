@@ -30,6 +30,7 @@ export interface ImagePayload {
   height?: number;
   key?: NodeKey;
   maxWidth?: number;
+  referenceId?: string;
   src: string;
   width?: number;
 }
@@ -58,6 +59,7 @@ export type SerializedImageNode = Spread<
     altText: string;
     height?: number;
     maxWidth: number;
+    referenceId?: string;
     src: string;
     width?: number;
   },
@@ -70,6 +72,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   __width: 'inherit' | number;
   __height: 'inherit' | number;
   __maxWidth: number;
+  __referenceId?: string;
 
   static getType(): string {
     return 'image';
@@ -87,15 +90,17 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       node.__width,
       node.__height,
       node.__key,
+      node.__referenceId,
     );
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const { altText, height, width, maxWidth, src } = serializedNode;
+    const { altText, height, width, maxWidth, referenceId, src } = serializedNode;
     return $createImageNode({
       altText,
       height,
       maxWidth,
+      referenceId,
       src,
       width,
     }).updateFromJSON(serializedNode);
@@ -131,6 +136,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     width?: 'inherit' | number,
     height?: 'inherit' | number,
     key?: NodeKey,
+    referenceId?: string,
   ) {
     super(key);
     this.__src = src;
@@ -138,6 +144,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     this.__maxWidth = maxWidth;
     this.__width = width || 'inherit';
     this.__height = height || 'inherit';
+    this.__referenceId = referenceId;
   }
 
   exportJSON(): SerializedImageNode {
@@ -146,6 +153,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       altText: this.getAltText(),
       height: this.__height === 'inherit' ? 0 : this.__height,
       maxWidth: this.__maxWidth,
+      ...(this.__referenceId ? { referenceId: this.__referenceId } : {}),
       src: this.getSrc(),
       width: this.__width === 'inherit' ? 0 : this.__width,
     };
@@ -193,6 +201,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         height={this.__height}
         maxWidth={this.__maxWidth}
         nodeKey={this.getKey()}
+        referenceId={this.__referenceId}
         resizable={true}
       />
     );
@@ -203,6 +212,7 @@ export function $createImageNode({
   altText,
   height,
   maxWidth = 500,
+  referenceId,
   src,
   width,
   key,
@@ -215,6 +225,7 @@ export function $createImageNode({
       width,
       height,
       key,
+      referenceId,
     ),
   );
 }

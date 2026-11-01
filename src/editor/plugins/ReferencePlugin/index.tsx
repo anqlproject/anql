@@ -205,6 +205,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
             src: ref.value,
             altText: ref.name,
             maxWidth: 600,
+            referenceId: ref.id ?? undefined,
           });
 
           if (parentBlock.getTextContent().trim() === '') {
