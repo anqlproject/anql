@@ -116,20 +116,25 @@ function LazyImage({
 
   // Calculate final dimensions with proper scaling
   const calculateDimensions = () => {
+    const sourceWidth = typeof width === 'number' && width > 0
+      ? width
+      : status.width;
+    const sourceHeight = typeof height === 'number' && height > 0
+      ? height
+      : status.height;
+
     if (!isSVGImage) {
       return {
-        height,
+        aspectRatio: `${sourceWidth} / ${sourceHeight}`,
+        height: 'auto' as const,
         maxWidth,
         width,
       };
     }
 
     // Use natural dimensions if available, otherwise fallback to defaults
-    const naturalWidth = status.width;
-    const naturalHeight = status.height;
-
-    let finalWidth = naturalWidth;
-    let finalHeight = naturalHeight;
+    let finalWidth = sourceWidth;
+    let finalHeight = sourceHeight;
 
     // Scale down if width exceeds maxWidth while maintaining aspect ratio
     if (finalWidth > maxWidth) {
@@ -147,7 +152,8 @@ function LazyImage({
     }
 
     return {
-      height: finalHeight,
+      aspectRatio: `${finalWidth} / ${finalHeight}`,
+      height: 'auto' as const,
       maxWidth,
       width: finalWidth,
     };
