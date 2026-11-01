@@ -304,3 +304,161 @@ async fn test_delete_asset() {
 
     let _ = std::fs::remove_dir_all(dir);
 }
+
+#[tokio::test]
+async fn reference_image_assets_survive_document_and_unused_asset_cleanup() {
+    use crate::database_manager::database::AssetJson;
+
+    let dir = std::env::temp_dir().join(format!(
+        "anql_reference_asset_{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir_all(&dir).unwrap();
+    let db = Database::new(dir.join("test.db").to_str().unwrap())
+        .await
+        .unwrap();
+
+    let asset_id = "44444444-4444-4444-4444-444444444444";
+    let asset_path = db.assets_dir.join(format!("{asset_id}.png"));
+    std::fs::write(&asset_path, b"image").unwrap();
+    db.assets_operations
+        .create_asset(&AssetJson {
+            id: asset_id.to_string(),
+            name: "reference.png".to_string(),
+            mime_type: Some("image/png".to_string()),
+            file_path: asset_path.to_string_lossy().to_string(),
+            created_at: 0,
+        })
+        .await
+        .unwrap();
+
+    db.documents_operations
+        .new_document(&make_doc("reference_doc"))
+        .await
+        .unwrap();
+    let mut node = make_node("reference_node", "reference_doc", &[]);
+    node.content = format!(r#"{{"src":"asset://{asset_id}"}}"#);
+    db.nodes_operations.new_node(&node).await.unwrap();
+
+    sqlx::query(
+        r#"INSERT INTO "references" (id, name, ref_type, value, created_at, updated_at)
+           VALUES ('reference_id', 'logo', 'image', ?, 0, 0)"#,
+    )
+    .bind(format!("asset://{asset_id}"))
+    .execute(db.pool())
+    .await
+    .unwrap();
+
+    db.documents_operations
+        .delete_document("reference_doc".to_string())
+        .await
+        .unwrap();
+
+    assert!(asset_path.exists(), "document deletion must preserve referenced image");
+    assert!(
+        db.assets_operations
+            .get_unused_assets()
+            .await
+            .unwrap()
+            .is_empty(),
+        "unused-asset cleanup must preserve referenced image"
+    );
+    assert!(
+        !db.assets_operations
+            .delete_asset(asset_id.to_string())
+            .await
+            .unwrap(),
+        "direct asset deletion must preserve referenced image"
+    );
+    assert!(asset_path.exists(), "referenced image file must remain on disk");
+
+    sqlx::query(r#"DELETE FROM "references" WHERE id = 'reference_id'"#)
+        .execute(db.pool())
+        .await
+        .unwrap();
+    assert_eq!(
+        db.assets_operations
+            .get_unused_assets()
+            .await
+            .unwrap()
+            .len(),
+        1,
+        "image becomes unused after its reference is removed"
+    );
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[tokio::test]
+async fn pending_deletion_preserves_asset_used_by_another_document() {
+    use crate::database_manager::database::AssetJson;
+
+    let dir = std::env::temp_dir().join(format!(
+        "anql_shared_asset_{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir_all(&dir).unwrap();
+    let db = Database::new(dir.join("test.db").to_str().unwrap())
+        .await
+        .unwrap();
+
+    let asset_id = "55555555-5555-5555-5555-555555555555";
+    let asset_path = db.assets_dir.join(format!("{asset_id}.png"));
+    std::fs::write(&asset_path, b"shared image").unwrap();
+    db.assets_operations
+        .create_asset(&AssetJson {
+            id: asset_id.to_string(),
+            name: "shared.png".to_string(),
+            mime_type: Some("image/png".to_string()),
+            file_path: asset_path.to_string_lossy().to_string(),
+            created_at: 0,
+        })
+        .await
+        .unwrap();
+
+    db.documents_operations
+        .new_document(&make_doc("deleted_doc"))
+        .await
+        .unwrap();
+    db.documents_operations
+        .new_document(&make_doc("remaining_doc"))
+        .await
+        .unwrap();
+    let mut node = make_node("remaining_node", "remaining_doc", &[]);
+    node.content = format!(r#"{{"src":"asset://{asset_id}"}}"#);
+    db.nodes_operations.new_node(&node).await.unwrap();
+
+    db.assets_operations
+        .add_pending_deletion(asset_id.to_string(), "deleted_doc".to_string())
+        .await
+        .unwrap();
+    assert!(
+        !db.assets_operations
+            .delete_asset(asset_id.to_string())
+            .await
+            .unwrap(),
+        "pending deletion from one document must not remove an asset used by another"
+    );
+    assert!(asset_path.exists(), "shared asset file must remain on disk");
+
+    db.nodes_operations
+        .delete_node("remaining_node".to_string())
+        .await
+        .unwrap();
+    assert!(
+        db.assets_operations
+            .delete_asset(asset_id.to_string())
+            .await
+            .unwrap(),
+        "asset can be deleted after its final node reference is removed"
+    );
+    assert!(!asset_path.exists(), "unused asset file should be removed");
+
+    let _ = std::fs::remove_dir_all(dir);
+}

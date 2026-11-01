@@ -7,3 +7,4 @@ pub mod documents;
 pub mod recent_documents;
 pub mod search;
 pub mod assets;
+pub mod references;

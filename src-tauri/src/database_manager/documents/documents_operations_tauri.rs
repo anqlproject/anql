@@ -1,4 +1,4 @@
-use crate::database_manager::database::DocumentsJson;
+use crate::database_manager::database::{DocumentsJson, ReferenceUsageJson};
 use crate::database_manager::database_tauri::AppState;
 use anyhow::Result;
 
@@ -120,6 +120,19 @@ pub async fn get_documents_by_workspace_id(
 
     db.documents_operations
         .get_documents_by_workspace_id(workspace_id)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn get_reference_usages(
+    state: tauri::State<'_, AppState>,
+    reference_id: String,
+) -> Result<Vec<ReferenceUsageJson>, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.documents_operations
+        .get_reference_usages(reference_id)
         .await
         .map_err(|e| e.to_string())
 }

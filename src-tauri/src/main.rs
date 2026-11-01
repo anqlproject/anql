@@ -13,13 +13,14 @@ use database_manager::nodes::nodes_operations_tauri::{
 
 use database_manager::documents::documents_operations_tauri::{
     delete_document, get_document_by_id, get_document_metadata, get_documents_by_path,
-    get_documents_by_workspace_id, new_document, remove_document_metadata, set_document_metadata,
+    get_documents_by_workspace_id, get_reference_usages, new_document,
+    remove_document_metadata, set_document_metadata,
     update_document, update_document_path, update_document_timestamp, update_document_title,
     update_document_workspace_id,
 };
 
 use database_manager::search::search_operations_tauri::{
-    fuzzy_search_nodes, fuzzy_search_nodes_with_snippets, search_nodes_fts,
+    fuzzy_search_nodes, fuzzy_search_nodes_with_snippets, search_nodes_by_type, search_nodes_fts,
     search_nodes_fts_with_snippets, similarity_search_nodes, verify_and_recreate_indexes,
 };
 
@@ -32,6 +33,10 @@ use database_manager::assets::assets_operations_tauri::{
     add_pending_asset_deletion, cleanup_old_pending_deletions, cleanup_unused_assets,
     clear_pending_asset_deletions, create_asset, delete_asset, get_asset,
     get_pending_asset_deletions, get_unused_assets, remove_pending_asset_deletion,
+};
+
+use database_manager::references::references_operations_tauri::{
+    new_reference, update_reference, delete_reference, get_all_references, get_reference_by_name,
 };
 
 use database_manager::database_tauri::{
@@ -105,11 +110,13 @@ fn main() {
             delete_document,
             get_documents_by_path,
             get_documents_by_workspace_id,
+            get_reference_usages,
             get_document_by_id,
             get_document_metadata,
             set_document_metadata,
             remove_document_metadata,
             search_nodes_fts,
+            search_nodes_by_type,
             search_nodes_fts_with_snippets,
             fuzzy_search_nodes,
             fuzzy_search_nodes_with_snippets,
@@ -130,7 +137,12 @@ fn main() {
             clear_pending_asset_deletions,
             cleanup_old_pending_deletions,
             cleanup_unused_assets,
-            get_unused_assets
+            get_unused_assets,
+            new_reference,
+            update_reference,
+            delete_reference,
+            get_all_references,
+            get_reference_by_name,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

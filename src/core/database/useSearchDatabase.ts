@@ -1,5 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 
+import type { ReferenceUsageJson } from './useDocumentDatabase';
+
 export interface SearchResult {
     node_id: string;
     document_id: string;
@@ -21,6 +23,23 @@ export const searchNodes = async (query: string): Promise<SearchResult[]> => {
         return results;
     } catch (error) {
         console.error('Failed to search nodes:', error);
+        throw error;
+    }
+};
+
+export const searchNodesByType = async (
+    query: string,
+    nodeType: string,
+): Promise<ReferenceUsageJson[]> => {
+    try {
+        await ensureIndexes();
+        const results = await invoke('search_nodes_by_type', {
+            query,
+            nodeType,
+        }) as ReferenceUsageJson[];
+        return results;
+    } catch (error) {
+        console.error('Failed to search nodes by type:', error);
         throw error;
     }
 };
@@ -68,4 +87,3 @@ export const similaritySearchNodes = async (query: string, threshold: number = 0
         throw error;
     }
 };
-

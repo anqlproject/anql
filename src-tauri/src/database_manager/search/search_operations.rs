@@ -1,6 +1,18 @@
-use crate::database_manager::database::SearchResult;
+use crate::database_manager::database::{ReferenceUsageJson, SearchResult};
 use anyhow::Result;
 use sqlx::{Pool, Row, Sqlite};
+
+#[derive(sqlx::FromRow)]
+struct TypedNodeSearchRow {
+    id: String,
+    path: String,
+    workspace_id: String,
+    title: String,
+    created_at: i64,
+    updated_at: i64,
+    node_id: String,
+    full_text: String,
+}
 
 pub struct SearchOperations {
     pool: Pool<Sqlite>,
@@ -35,6 +47,49 @@ impl SearchOperations {
         }
 
         Ok(search_results)
+    }
+
+    pub async fn search_nodes_by_type(
+        &self,
+        query: &str,
+        node_type: &str,
+    ) -> Result<Vec<ReferenceUsageJson>> {
+        let query = query.trim();
+        let fts_term = query.trim_start_matches('@').trim();
+        if query.is_empty() || fts_term.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let fts_query = format!("\"{}\"", fts_term.replace('"', "\"\""));
+        let results = sqlx::query_as::<_, TypedNodeSearchRow>(
+            r#"SELECT d.id, d.path, d.workspace_id, d.title, d.created_at, d.updated_at,
+                      n.id AS node_id, n.full_text
+               FROM nodes n
+               JOIN nodes_fts ON nodes_fts.id = n.id
+               JOIN documents d ON d.id = n.document_id
+               WHERE nodes_fts MATCH ?
+                 AND n.node_type = ?
+                 AND d.path NOT LIKE 'trash/%'
+               ORDER BY d.title COLLATE NOCASE, n.position"#,
+        )
+        .bind(fts_query)
+        .bind(node_type)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(results
+            .into_iter()
+            .filter(|result| Self::contains_identifier(&result.full_text, fts_term))
+            .map(|result| ReferenceUsageJson {
+                id: result.id,
+                path: result.path,
+                workspace_id: result.workspace_id,
+                title: result.title,
+                created_at: result.created_at,
+                updated_at: result.updated_at,
+                node_id: result.node_id,
+            })
+            .collect())
     }
 
     // Recherche FTS avec highlighting
@@ -188,6 +243,20 @@ impl SearchOperations {
         }
 
         Ok(results_with_snippets)
+    }
+
+    fn contains_identifier(expression: &str, identifier: &str) -> bool {
+        expression.match_indices(identifier).any(|(start, _)| {
+            let end = start + identifier.len();
+            let is_identifier_char = |character: Option<char>| {
+                character
+                    .is_some_and(|character| character.is_ascii_alphanumeric() || character == '_')
+            };
+            let before = expression[..start].chars().next_back();
+            let after = expression[end..].chars().next();
+
+            !is_identifier_char(before) && !is_identifier_char(after)
+        })
     }
 
     // Levenshtein similarity search (simplified approach with SQL)
@@ -383,5 +452,22 @@ impl SearchOperations {
         }
 
         Ok(indexes_recreated)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SearchOperations;
+
+    #[test]
+    fn matches_exact_math_identifiers_only() {
+        assert!(SearchOperations::contains_identifier("bill + 1", "bill"));
+        assert!(SearchOperations::contains_identifier("@bill + 1", "bill"));
+        assert!(SearchOperations::contains_identifier(
+            "billing - bill",
+            "bill"
+        ));
+        assert!(!SearchOperations::contains_identifier("billing", "bill"));
+        assert!(!SearchOperations::contains_identifier("my_bill", "bill"));
     }
 }

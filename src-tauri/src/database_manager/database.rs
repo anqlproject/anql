@@ -3,6 +3,7 @@ use crate::database_manager::documents::documents_operations::DocumentsOperation
 use crate::database_manager::migrations;
 use crate::database_manager::nodes::nodes_operations::NodesOperations;
 use crate::database_manager::recent_documents::recent_documents_operations::RecentDocumentsOperations;
+use crate::database_manager::references::references_operations::ReferencesOperations;
 use crate::database_manager::search::search_operations::SearchOperations;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -20,6 +21,17 @@ pub struct DocumentsJson {
     pub metadata: Option<String>,
     pub created_at: i64,
     pub updated_at: i64,
+}
+
+#[derive(sqlx::FromRow, serde::Serialize)]
+pub struct ReferenceUsageJson {
+    pub id: String,
+    pub path: String,
+    pub workspace_id: String,
+    pub title: String,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub node_id: String,
 }
 
 #[derive(sqlx::FromRow, serde::Deserialize, serde::Serialize)]
@@ -65,6 +77,7 @@ pub struct Database {
     pub search_operations: SearchOperations,
     pub recent_documents_operations: RecentDocumentsOperations,
     pub assets_operations: AssetsOperations,
+    pub references_operations: ReferencesOperations,
     /// Absolute path to the assets directory on disk (sibling of the .db file)
     pub assets_dir: std::path::PathBuf,
 }
@@ -124,6 +137,7 @@ impl Database {
         let search_operations = SearchOperations::new(pool.clone());
         let recent_documents_operations = RecentDocumentsOperations::new(pool.clone());
         let assets_operations = AssetsOperations::new(pool.clone(), assets_dir.clone());
+        let references_operations = ReferencesOperations::new(pool.clone());
 
         Ok(Database {
             pool,
@@ -132,6 +146,7 @@ impl Database {
             search_operations,
             recent_documents_operations,
             assets_operations,
+            references_operations,
             assets_dir,
         })
     }
@@ -154,6 +169,7 @@ impl Database {
             "nodes_fts_content",
             "_sqlx_migrations",
             "pending_asset_deletions",
+            "references",
         ];
 
         let tables: Vec<String> = sqlx::query_scalar(

@@ -2,10 +2,12 @@ import "./TitleBar.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { type JSX, useEffect, useState } from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from 'react-i18next';
 
 import { DocumentMenu } from "@/App/AppComponents/DocumentMenu/DocumentMenu";
+import ReferencesPanel from "@/App/AppComponents/ReferencesPanel/ReferencesPanel";
 import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { Dialog } from "@/components/custom/Dialog/Dialog";
@@ -16,8 +18,11 @@ export default function TitleBar(): JSX.Element {
   const { t } = useTranslation();
   const appWindow = getCurrentWindow();
   const [openExitDialog, setOpenExitDialog] = useState(false);
+  const [refPanelOpen, setRefPanelOpen] = useState(false);
   const { setExitApp } = useGlobalShortcut();
   const isMac = useGlobalStore((state) => state.isMac);
+  const refBtnRef = useRef<HTMLButtonElement>(null);
+  const refPanelRef = useRef<HTMLDivElement>(null);
 
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault();
@@ -28,6 +33,19 @@ export default function TitleBar(): JSX.Element {
   useEffect(() => {
     setExitApp(() => setOpenExitDialog(true));
   }, [setExitApp]);
+
+  // Close panel when clicking outside
+  useEffect(() => {
+    if (!refPanelOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      if (refBtnRef.current?.contains(target) || refPanelRef.current?.contains(target)) return;
+      setRefPanelOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [refPanelOpen]);
 
   const [editor] = useLexicalComposerContext();
 
@@ -47,8 +65,8 @@ export default function TitleBar(): JSX.Element {
           }
         }}
         onClick={() => {
-          // ...
           editor.blur();
+          setRefPanelOpen(false);
         }}
       >
         <SidebarTrigger
@@ -63,6 +81,61 @@ export default function TitleBar(): JSX.Element {
           }}
         />
         <DocumentMenu />
+
+        <button
+          ref={refBtnRef}
+          className={`titlebar-ref-btn${refPanelOpen ? ' titlebar-ref-btn--active' : ''}`}
+          style={{
+            position: 'absolute',
+            top: '2px',
+            right: isMac ? '3.2rem' : '2.2rem',
+            width: '28px',
+            height: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '4px',
+            border: 'none',
+          }}
+          title="Références (@)"
+          aria-label="Ouvrir les références"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setRefPanelOpen((v) => !v);
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="7" r="4" />
+            <circle cx="4" cy="19" r="2" />
+            <circle cx="12" cy="19" r="2" />
+            <circle cx="20" cy="19" r="2" />
+            <path d="M8 7a4 4 0 0 0-4 4v6" />
+            <path d="M12 11v6" />
+            <path d="M16 7a4 4 0 0 1 4 4v6" />
+          </svg>
+        </button>
+
+        {refPanelOpen && (
+          createPortal(
+            <ReferencesPanel
+              panelRef={refPanelRef}
+              onClose={() => setRefPanelOpen(false)}
+            />,
+            document.body,
+          )
+        )}
       </div>
 
 

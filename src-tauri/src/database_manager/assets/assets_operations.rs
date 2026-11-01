@@ -54,6 +54,23 @@ impl AssetsOperations {
     }
 
     pub async fn delete_asset(&self, id: String) -> Result<bool> {
+        let is_in_use: bool = sqlx::query_scalar(
+            r#"SELECT EXISTS (
+                SELECT 1 FROM "references" WHERE value = ?
+            ) OR EXISTS (
+                SELECT 1 FROM nodes, json_tree(nodes.content)
+                WHERE json_tree.value = ?
+            )"#,
+        )
+        .bind(format!("asset://{id}"))
+        .bind(format!("asset://{id}"))
+        .fetch_one(&self.pool)
+        .await
+        .context("checking whether asset is still in use")?;
+        if is_in_use {
+            return Ok(false);
+        }
+
         // Fetch file_path BEFORE deleting the record
         let maybe_path: Option<String> =
             sqlx::query_scalar("SELECT file_path FROM assets WHERE id = ?")
@@ -185,6 +202,10 @@ impl AssetsOperations {
             WHERE NOT EXISTS (
                 SELECT 1 FROM nodes, json_tree(nodes.content) 
                 WHERE json_tree.value = 'asset://' || assets.id
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM "references"
+                WHERE "references".value = 'asset://' || assets.id
             )
             "#,
         )
