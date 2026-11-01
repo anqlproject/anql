@@ -1,0 +1,299 @@
+/* ── Wrapper flottant ──────────────────────────────── */
+.ref-panel {
+  position: fixed;
+  top: 40px;
+  right: 8px;
+  width: min(340px, calc(100vw - 16px));
+  max-height: min(520px, calc(100vh - 48px));
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 20px 48px -12px rgba(0,0,0,0.35),
+    0 8px 16px -8px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-popover);
+  overflow: hidden;
+  animation: ref-panel-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ref-panel-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);     }
+}
+
+/* ── Header ── */
+.ref-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.ref-panel__title {
+  font-size: var(--ui-text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.ref-panel__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 4px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.ref-panel__close:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+/* ── Search ── */
+.ref-panel__search-wrap {
+  position: relative;
+  padding: 8px 10px;
+  flex-shrink: 0;
+}
+
+.ref-panel__search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-disabled);
+  pointer-events: none;
+}
+
+.ref-panel__search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px 6px 30px;
+  background: var(--action-hover);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: var(--ui-text-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.ref-panel__search:focus {
+  background: var(--surface-color);
+  border-color: var(--primary-color);
+}
+
+/* ── List ── */
+.ref-panel__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.ref-panel__empty {
+  font-size: var(--ui-text-sm);
+  color: var(--text-disabled);
+  text-align: center;
+  padding: 24px 16px;
+  font-style: italic;
+}
+
+/* ── Reference item ── */
+.ref-item {
+  padding: 2px 10px;
+}
+
+.ref-item__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  cursor: default;
+  transition: background 0.12s;
+  min-height: 34px;
+}
+
+.ref-item__row:hover {
+  background: var(--action-hover);
+}
+
+.ref-item__row:hover .ref-item__btn--delete {
+  opacity: 1;
+}
+
+.ref-item__type-icon {
+  color: var(--text-disabled);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 16px;
+}
+
+.ref-item__name {
+  font-size: var(--ui-text-sm);
+  font-weight: var(--font-medium);
+  color: var(--primary-color);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ref-item__value {
+  font-size: var(--ui-text-sm);
+  color: var(--text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ref-item__value em {
+  opacity: 0.4;
+  font-style: normal;
+}
+
+/* ── Buttons ── */
+.ref-item__btn--delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-disabled);
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s, background 0.12s;
+  flex-shrink: 0;
+}
+
+.ref-item__btn--delete:hover {
+  color: var(--destructive);
+  background: var(--destructive-container);
+}
+
+/* ── Edit & New form ── */
+.ref-item__edit,
+.ref-item__new-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--action-hover);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.ref-item__input {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: var(--ui-text-sm);
+  color: var(--text-primary);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.12s;
+}
+
+.ref-item__input:focus {
+  border-color: var(--primary-color);
+}
+
+.ref-item__input--name {
+  font-family: var(--font-mono);
+  font-size: var(--ui-text-xs);
+  color: var(--primary-color);
+}
+
+.ref-item__select {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: var(--ui-text-sm);
+  color: var(--text-primary);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.ref-item__new-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.ref-item__btn {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: var(--ui-text-xs);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.ref-item__btn--cancel {
+  color: var(--text-secondary);
+}
+
+.ref-item__btn--cancel:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.ref-item__btn--save {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.ref-item__btn--save:hover {
+  filter: brightness(1.1);
+}
+
+/* ── Footer ── */
+.ref-panel__footer {
+  padding: 8px 10px;
+  border-top: 1px solid var(--divider-color);
+  flex-shrink: 0;
+}
+
+.ref-panel__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: var(--ui-text-sm);
+  padding: 5px 8px;
+  border-radius: 7px;
+  width: 100%;
+  transition: background 0.12s, color 0.12s;
+}
+
+.ref-panel__add-btn:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}

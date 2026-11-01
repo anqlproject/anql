@@ -16,6 +16,7 @@ import {
 } from 'lexical';
 import { useCallback, useEffect } from 'react';
 
+import { useReferenceStore } from '@/core/references/useReferenceStore';
 import { useMathVariables } from '@/editor/context/MathVariablesContext';
 import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
 import { $isTableNode } from '@/editor/nodes/TableNode/TableNode';
@@ -28,6 +29,7 @@ export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
 export default function MathPlugin() {
   const [editor] = useLexicalComposerContext();
+  const references = useReferenceStore((state) => state.references);
   const { setResults, setVariables, setScopes, setTableVariables, setChartTableVariables } = useMathVariables();
 
   const evaluateTree = useCallback(() => {
@@ -93,7 +95,17 @@ export default function MathPlugin() {
         }
       });
 
-      const { results, variables, scopes } = evaluateAllMathNodes(evaluationItems);
+      const globalReferences: Record<string, number> = {};
+      references.forEach((ref) => {
+        if (ref.ref_type === 'number' || ref.ref_type === 'text') {
+          const num = parseFloat(ref.value.trim());
+          if (!isNaN(num) && Number.isFinite(num)) {
+            globalReferences[ref.name] = num;
+          }
+        }
+      });
+
+      const { results, variables, scopes } = evaluateAllMathNodes(evaluationItems, globalReferences);
 
       setScopes(prev => JSON.stringify(prev) === JSON.stringify(scopes) ? prev : scopes);
       setResults(prev => JSON.stringify(prev) === JSON.stringify(results) ? prev : results);
@@ -101,7 +113,12 @@ export default function MathPlugin() {
       setTableVariables(prev => JSON.stringify(prev) === JSON.stringify(tableVariables) ? prev : tableVariables);
       setChartTableVariables(prev => JSON.stringify(prev) === JSON.stringify(chartTableVariables) ? prev : chartTableVariables);
     });
-  }, [editor, setResults, setVariables, setScopes, setTableVariables, setChartTableVariables]);
+  }, [editor, references, setResults, setVariables, setScopes, setTableVariables, setChartTableVariables]);
+
+  // Re-evaluate whenever references change
+  useEffect(() => {
+    evaluateTree();
+  }, [references, evaluateTree]);
 
   useEffect(() => {
     return mergeRegister(

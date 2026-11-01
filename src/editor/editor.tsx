@@ -45,6 +45,7 @@ import ListPlugin from "@/editor/plugins/ListPlugin";
 import MathAutocompletePlugin from "@/editor/plugins/MathAutocompletePlugin";
 import MathPlugin from "@/editor/plugins/MathPlugin";
 import PdfPlugin from "@/editor/plugins/PdfPlugin";
+import ReferencePlugin from "@/editor/plugins/ReferencePlugin";
 import RestoreFormatMemoryPlugin from "@/editor/plugins/RestoreFormatMemoryPlugin";
 import ShortcutsPlugin from "@/editor/plugins/ShortcutsPlugin";
 import StandardMarkdownPastePlugin from "@/editor/plugins/StandardMarkdownPastePlugin";
@@ -186,6 +187,7 @@ export default function Editor(): JSX.Element {
             />
             <MathPlugin />
             <MathAutocompletePlugin />
+            <ReferencePlugin />
             <TablePlugin />
             <ChartPlugin />
             <AddNewPlugin />

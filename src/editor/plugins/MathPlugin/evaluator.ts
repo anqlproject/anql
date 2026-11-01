@@ -125,6 +125,21 @@ function replaceTableReferences(
   return processedExpr;
 }
 
+/**
+ * Replaces @refName with the numeric value or variable identifier
+ */
+function replaceGlobalReferences(
+  expr: string,
+  globalReferences: Record<string, number>
+): string {
+  return expr.replace(/@([a-zA-Z0-9_]+)/g, (_match, name) => {
+    if (Object.prototype.hasOwnProperty.call(globalReferences, name)) {
+      return String(globalReferences[name]);
+    }
+    return name;
+  });
+}
+
 export type EvaluationItem = 
   | { type: 'math'; node: MathExpNode }
   | { type: 'table'; name: string; data: Record<string, number[]> | null };
@@ -136,12 +151,15 @@ export type EvaluationItem =
  *
  * Must be called inside a Lexical read callback.
  */
-export function evaluateAllMathNodes(items: EvaluationItem[]): EvaluationOutput {
+export function evaluateAllMathNodes(
+  items: EvaluationItem[],
+  globalReferences: Record<string, number> = {}
+): EvaluationOutput {
   const results: Record<string, MathEvaluationResult> = {};
-  const variables: Record<string, MathValue> = {};
+  const variables: Record<string, MathValue> = { ...globalReferences };
   const scopes: Record<string, Record<string, MathValue>> = {};
 
-  const scope: Record<string, any> = {};
+  const scope: Record<string, any> = { ...globalReferences };
   const currentTableVariables: Record<string, Record<string, number[]>> = {};
 
   for (const item of items) {
@@ -159,12 +177,14 @@ export function evaluateAllMathNodes(items: EvaluationItem[]): EvaluationOutput 
     // Snapshot the variables available AT THIS POINT in the document
     scopes[key] = { ...scope };
 
-    const expr = node.getTextContent();
+    let expr = node.getTextContent();
 
     if (!expr.trim()) {
       results[key] = { result: '', error: null };
       continue;
     }
+
+    expr = replaceGlobalReferences(expr, globalReferences);
 
     // Check for table-specific messages BEFORE mathjs
     const tableMessage = checkTableIssues(expr.trim(), currentTableVariables);

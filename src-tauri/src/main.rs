@@ -34,6 +34,10 @@ use database_manager::assets::assets_operations_tauri::{
     get_pending_asset_deletions, get_unused_assets, remove_pending_asset_deletion,
 };
 
+use database_manager::references::references_operations_tauri::{
+    new_reference, update_reference, delete_reference, get_all_references, get_reference_by_name,
+};
+
 use database_manager::database_tauri::{
     AppState, check_orphan_assets, check_unauthorized_tables, cleanup_database,
     cleanup_orphan_assets, init_db, quick_check_db,
@@ -130,7 +134,12 @@ fn main() {
             clear_pending_asset_deletions,
             cleanup_old_pending_deletions,
             cleanup_unused_assets,
-            get_unused_assets
+            get_unused_assets,
+            new_reference,
+            update_reference,
+            delete_reference,
+            get_all_references,
+            get_reference_by_name,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
