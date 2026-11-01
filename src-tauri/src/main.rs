@@ -20,7 +20,7 @@ use database_manager::documents::documents_operations_tauri::{
 };
 
 use database_manager::search::search_operations_tauri::{
-    fuzzy_search_nodes, fuzzy_search_nodes_with_snippets, search_nodes_fts,
+    fuzzy_search_nodes, fuzzy_search_nodes_with_snippets, search_nodes_by_type, search_nodes_fts,
     search_nodes_fts_with_snippets, similarity_search_nodes, verify_and_recreate_indexes,
 };
 
@@ -116,6 +116,7 @@ fn main() {
             set_document_metadata,
             remove_document_metadata,
             search_nodes_fts,
+            search_nodes_by_type,
             search_nodes_fts_with_snippets,
             fuzzy_search_nodes,
             fuzzy_search_nodes_with_snippets,

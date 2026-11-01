@@ -17,6 +17,20 @@ pub async fn search_nodes_fts(
 }
 
 #[tauri::command]
+pub async fn search_nodes_by_type(
+    state: State<'_, AppState>,
+    query: String,
+    node_type: String,
+) -> Result<Vec<crate::database_manager::database::ReferenceUsageJson>, String> {
+    let db = crate::database_manager::database_tauri::get_db(&state).await?;
+
+    db.search_operations
+        .search_nodes_by_type(&query, &node_type)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn search_nodes_fts_with_snippets(
     state: State<'_, AppState>,
     query: String,

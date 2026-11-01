@@ -11,6 +11,7 @@ import { useFile } from '@/App/hooks/FileHooks';
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
 import { getReferenceUsages, ReferenceUsageJson } from '@/core/database/useDocumentDatabase';
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
+import { searchNodesByType } from '@/core/database/useSearchDatabase';
 import { DIMENSIONS } from '@/core/global/defaultValues';
 import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
@@ -114,9 +115,21 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
     setUsages([]);
     setIsLoadingUsages(true);
     setUsageError('');
-    getReferenceUsages(usageReference.id)
-      .then((result) => {
-        if (isMounted) setUsages(result);
+    Promise.all([
+      getReferenceUsages(usageReference.id),
+      usageReference.ref_type === 'text'
+        ? searchNodesByType(usageReference.name, 'mathexp')
+        : Promise.resolve([]),
+    ])
+      .then(([linkedUsages, mathUsages]) => {
+        if (!isMounted) return;
+        const uniqueUsages = new Map<string, ReferenceUsageJson>();
+        [...linkedUsages, ...mathUsages].forEach((usage) => {
+          uniqueUsages.set(`${usage.id}:${usage.node_id}`, usage);
+        });
+        setUsages([...uniqueUsages.values()].sort((a, b) =>
+          a.title.localeCompare(b.title) || a.path.localeCompare(b.path),
+        ));
       })
       .catch((error: unknown) => {
         logger.error('Failed to load reference usages', error as Error, {
