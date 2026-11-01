@@ -18,6 +18,22 @@ import { useReferenceStore } from '@/core/references/useReferenceStore';
 
 type RefType = ReferenceJson['ref_type'];
 
+async function loadReferenceUsages(reference: ReferenceJson): Promise<ReferenceUsageJson[]> {
+  const [linkedUsages, mathUsages] = await Promise.all([
+    reference.id ? getReferenceUsages(reference.id) : Promise.resolve([]),
+    reference.ref_type === 'text'
+      ? searchNodesByType(reference.name, 'mathexp')
+      : Promise.resolve([]),
+  ]);
+  const uniqueUsages = new Map<string, ReferenceUsageJson>();
+  [...linkedUsages, ...mathUsages].forEach((usage) => {
+    uniqueUsages.set(`${usage.id}:${usage.node_id}`, usage);
+  });
+  return [...uniqueUsages.values()].sort((a, b) =>
+    a.title.localeCompare(b.title) || a.path.localeCompare(b.path),
+  );
+}
+
 const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   text:   <Type size={12} />,
   image:  <Image size={12} />,
@@ -86,6 +102,8 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
   const [isLoadingUsages, setIsLoadingUsages] = useState(false);
   const [usageError, setUsageError] = useState('');
   const [openingUsageId, setOpeningUsageId] = useState<string | null>(null);
+  const [hoveredReferenceKey, setHoveredReferenceKey] = useState<string | null>(null);
+  const [usageCounts, setUsageCounts] = useState<Record<string, number>>({});
 
   // New-reference form state
   const [newName, setNewName] = useState('');
@@ -110,27 +128,16 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
   }, [isLoaded, loadReferences]);
 
   useEffect(() => {
-    if (!usageReference?.id) return;
+    if (!usageReference) return;
 
     let isMounted = true;
     setUsages([]);
     setIsLoadingUsages(true);
     setUsageError('');
-    Promise.all([
-      getReferenceUsages(usageReference.id),
-      usageReference.ref_type === 'text'
-        ? searchNodesByType(usageReference.name, 'mathexp')
-        : Promise.resolve([]),
-    ])
-      .then(([linkedUsages, mathUsages]) => {
+    loadReferenceUsages(usageReference)
+      .then((loadedUsages) => {
         if (!isMounted) return;
-        const uniqueUsages = new Map<string, ReferenceUsageJson>();
-        [...linkedUsages, ...mathUsages].forEach((usage) => {
-          uniqueUsages.set(`${usage.id}:${usage.node_id}`, usage);
-        });
-        setUsages([...uniqueUsages.values()].sort((a, b) =>
-          a.title.localeCompare(b.title) || a.path.localeCompare(b.path),
-        ));
+        setUsages(loadedUsages);
       })
       .catch((error: unknown) => {
         logger.error('Failed to load reference usages', error as Error, {
@@ -146,6 +153,34 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
       isMounted = false;
     };
   }, [usageReference, t]);
+
+  useEffect(() => {
+    if (!hoveredReferenceKey || usageCounts[hoveredReferenceKey] !== undefined) return;
+    const reference = references.find(
+      (item) => (item.id ?? item.name) === hoveredReferenceKey,
+    );
+    if (!reference) return;
+
+    let isMounted = true;
+    loadReferenceUsages(reference)
+      .then((loadedUsages) => {
+        if (!isMounted) return;
+        setUsageCounts((counts) => ({
+          ...counts,
+          [hoveredReferenceKey]: loadedUsages.length,
+        }));
+      })
+      .catch((error: unknown) => {
+        logger.error('Failed to load reference usage count', error as Error, {
+          referenceId: reference.id,
+          referenceName: reference.name,
+        });
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [hoveredReferenceKey, references, usageCounts]);
 
   useEffect(() => {
     if (isAdding) newNameRef.current?.focus();
@@ -318,7 +353,18 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
         )}
 
         {filtered.map((ref) => (
-          <div key={ref.id ?? ref.name} className="ref-item">
+          <div
+            key={ref.id ?? ref.name}
+            className="ref-item"
+            onMouseEnter={() => setHoveredReferenceKey(ref.id ?? ref.name)}
+            onMouseLeave={() => setHoveredReferenceKey(null)}
+            onFocusCapture={() => setHoveredReferenceKey(ref.id ?? ref.name)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                setHoveredReferenceKey(null);
+              }
+            }}
+          >
             {editingId === ref.id ? (
               /* ── Edit mode ── */
               <div className="ref-item__edit" role="group" aria-label={t('REFERENCE_PANEL.editing', { name: ref.name }) as string}>
@@ -405,6 +451,19 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                   </span>
                 </button>
                 <div className="ref-item__actions">
+                  {hoveredReferenceKey === (ref.id ?? ref.name) &&
+                    usageCounts[ref.id ?? ref.name] !== undefined && (
+                      <span
+                        className="ref-usage-count"
+                        title={t('REFERENCE_PANEL.usagesTitle', { name: ref.name }) as string}
+                        aria-label={t('REFERENCE_PANEL.usageCount', {
+                          name: ref.name,
+                          count: usageCounts[ref.id ?? ref.name],
+                        }) as string}
+                      >
+                        {usageCounts[ref.id ?? ref.name]}
+                      </span>
+                    )}
                   <button
                     type="button"
                     className="ref-item__action-btn ref-item__action-btn--edit"
@@ -546,7 +605,12 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
             <header className="ref-usages-header">
               <h2 id="ref-usages-title">
                 {t('REFERENCE_PANEL.usagesTitle', { name: usageReference.name })}
-                {!isLoadingUsages && !usageError ? ` (${usages.length})` : ''}
+                {!isLoadingUsages && !usageError && (
+                  <>
+                    {' '}
+                    <span className="ref-usage-count">{usages.length}</span>
+                  </>
+                )}
               </h2>
               <button
                 type="button"

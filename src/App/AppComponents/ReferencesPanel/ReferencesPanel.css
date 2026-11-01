@@ -208,6 +208,26 @@
   transition: opacity 0.12s ease, visibility 0s linear 0.12s;
 }
 
+.ref-usage-count {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background-color: rgba(34, 197, 94, 0.2);
+  color: rgb(34, 197, 94);
+  font-size: var(--ui-text-xs);
+  font-weight: var(--font-semibold);
+  line-height: 1;
+}
+
+.ref-usages-header .ref-usage-count {
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 .ref-item__row:hover .ref-item__actions,
 .ref-item__row:focus-within .ref-item__actions {
   opacity: 1;

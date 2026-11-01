@@ -429,6 +429,7 @@
       "usagesTitle": "Blocks using @{{name}}",
       "loadingUsages": "Searching for blocks…",
       "noUsages": "No blocks are linked to this reference.",
+      "usageCount": "{{count}} use(s) of @{{name}}",
       "usageBlock": "Block {{number}}",
       "usagesFailed": "Failed to search for linked blocks.",
       "openingUsage": "Opening…",
