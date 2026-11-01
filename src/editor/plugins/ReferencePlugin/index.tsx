@@ -284,8 +284,6 @@ export default function ReferencePlugin(): React.JSX.Element | null {
                           <Plus size={12} />
                         ) : ref?.ref_type === 'image' ? (
                           <Image size={12} />
-                        ) : ref?.ref_type === 'number' ? (
-                          '#'
                         ) : (
                           <Type size={12} />
                         )}

@@ -431,7 +431,6 @@
       "imageUploadFailed": "Failed to upload the image.",
       "types": {
         "text": "Text",
-        "number": "Number",
         "image": "Image"
       },
       "cancel": "Cancel",

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub struct ReferenceJson {
     pub id: Option<String>,
     pub name: String,
-    pub ref_type: String,   // 'text' | 'number' | 'image'
+    pub ref_type: String,   // 'text' | 'image'
     pub value: String,
     pub created_at: i64,
     pub updated_at: i64,

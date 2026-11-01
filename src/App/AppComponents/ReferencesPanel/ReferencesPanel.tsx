@@ -15,7 +15,6 @@ type RefType = ReferenceJson['ref_type'];
 
 const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   text:   <Type size={12} />,
-  number: <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600 }}>#</span>,
   image:  <Image size={12} />,
 };
 
@@ -368,7 +367,6 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                 }}
               >
                 <option value="text">{t('REFERENCE_PANEL.types.text')}</option>
-                <option value="number">{t('REFERENCE_PANEL.types.number')}</option>
                 <option value="image">{t('REFERENCE_PANEL.types.image')}</option>
               </select>
               {newType === 'image' ? (

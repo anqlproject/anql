@@ -97,7 +97,7 @@ export default function MathPlugin() {
 
       const globalReferences: Record<string, number> = {};
       references.forEach((ref) => {
-        if (ref.ref_type === 'number' || ref.ref_type === 'text') {
+        if (ref.ref_type === 'text') {
           const num = parseFloat(ref.value.trim());
           if (!isNaN(num) && Number.isFinite(num)) {
             globalReferences[ref.name] = num;

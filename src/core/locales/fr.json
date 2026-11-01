@@ -431,7 +431,6 @@
       "imageUploadFailed": "Impossible d’importer l’image.",
       "types": {
         "text": "Texte",
-        "number": "Nombre",
         "image": "Image"
       },
       "cancel": "Annuler",
