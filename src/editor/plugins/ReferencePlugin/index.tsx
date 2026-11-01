@@ -116,7 +116,6 @@ export default function ReferencePlugin(): React.JSX.Element | null {
 
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
-    strategy: 'fixed',
     middleware: [
       offset(6),
       flip({ fallbackPlacements: ['top-start', 'bottom-end', 'top-end'] }),
@@ -253,7 +252,9 @@ export default function ReferencePlugin(): React.JSX.Element | null {
             <div
               ref={(node) => {
                 refs.setFloating(node);
-                popoverRef.current = node;
+                if (popoverRef.current !== node) {
+                  popoverRef.current = node;
+                }
               }}
               className="reference-typeahead-popover"
               style={floatingStyles}
