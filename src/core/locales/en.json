@@ -434,6 +434,7 @@
       "openingUsage": "Opening…",
       "openUsageFailed": "Failed to open this block.",
       "newNamePlaceholder": "reference_name",
+      "typeSelection": "Reference type",
       "duplicateName": "A reference with this name already exists.",
       "chooseImage": "Choose an image…",
       "uploadingImage": "Uploading image…",

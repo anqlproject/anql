@@ -255,15 +255,11 @@
   border-radius: 8px;
 }
 
-.ref-item__edit {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 20%, transparent);
-}
-
 .ref-item__edit-status {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 1px 1px 7px;
   color: var(--primary-color);
   font-size: var(--ui-text-xs);
   font-weight: var(--font-semibold);
@@ -279,11 +275,13 @@
   outline: none;
   width: 100%;
   box-sizing: border-box;
-  transition: border-color 0.12s;
+  transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
 }
 
 .ref-item__input:focus {
   border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 2%, var(--surface-color));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 14%, transparent);
 }
 
 .ref-item__image-picker {
@@ -450,17 +448,49 @@
   color: var(--primary-color);
 }
 
-.ref-item__select {
-  background: var(--surface-color);
+.ref-item__type-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 5px 8px;
+  border-radius: 7px;
+  background: var(--surface-color);
+}
+
+.ref-item__type-tab {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary);
   font-size: var(--ui-text-sm);
-  color: var(--text-primary);
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
   cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.ref-item__type-tab:hover {
+  color: var(--text-primary);
+}
+
+.ref-item__type-tab.is-active {
+  background: var(--action-hover);
+  color: var(--primary-color);
+  font-weight: var(--font-medium);
+}
+
+.ref-item__type-tab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.ref-item__type-panel {
+  min-width: 0;
 }
 
 .ref-item__new-actions {
@@ -473,11 +503,17 @@
   background: none;
   border: none;
   border-radius: 6px;
-  padding: 4px 10px;
+  min-height: 28px;
+  padding: 5px 11px;
   font-size: var(--ui-text-xs);
   font-weight: var(--font-medium);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s, transform 0.12s;
+}
+
+.ref-item__btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .ref-item__btn--cancel {
@@ -492,10 +528,13 @@
 .ref-item__btn--save {
   background: var(--primary-color);
   color: #fff;
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--primary-color) 28%, transparent);
 }
 
 .ref-item__btn--save:hover {
   filter: brightness(1.1);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--primary-color) 36%, transparent);
+  transform: translateY(-1px);
 }
 
 .ref-item__btn:disabled {

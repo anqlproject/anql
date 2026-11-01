@@ -434,6 +434,7 @@
       "openingUsage": "Ouverture…",
       "openUsageFailed": "Impossible d’ouvrir ce bloc.",
       "newNamePlaceholder": "nom_référence",
+      "typeSelection": "Type de référence",
       "duplicateName": "Une référence portant ce nom existe déjà.",
       "chooseImage": "Choisir une image…",
       "uploadingImage": "Importation de l’image…",

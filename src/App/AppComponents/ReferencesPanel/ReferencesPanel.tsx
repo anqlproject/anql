@@ -178,12 +178,18 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
   };
 
   const startEdit = (ref: ReferenceJson) => {
+    setIsAdding(false);
     setEditingId(ref.id ?? null);
     setEditValue(ref.value);
     setEditName(ref.name);
     setEditImageName(ref.ref_type === 'image' && ref.value ? t('REFERENCE_PANEL.selectedImage') as string : '');
     setImageError('');
     setEditError('');
+  };
+
+  const startAdd = () => {
+    setEditingId(null);
+    setIsAdding(true);
   };
 
   const saveEdit = async (id: string) => {
@@ -463,41 +469,59 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                 onKeyDown={(e) => handleKeyDown(e, handleAdd)}
               />
               {nameError && <span className="ref-item__error" role="alert">{nameError}</span>}
-              <select
-                className="ref-item__select"
-                value={newType}
-                onChange={(e) => {
-                  setNewType(e.target.value as RefType);
-                  setNewValue('');
-                  setNewImageName('');
-                  setImageError('');
-                }}
+              <div
+                className="ref-item__type-tabs"
+                role="tablist"
+                aria-label={t('REFERENCE_PANEL.typeSelection') as string}
               >
-                <option value="text">{t('REFERENCE_PANEL.types.text')}</option>
-                <option value="image">{t('REFERENCE_PANEL.types.image')}</option>
-              </select>
-              {newType === 'image' ? (
-                <button
-                  type="button"
-                  className="ref-item__image-picker"
-                  onClick={() => chooseImage((assetRef, fileName) => {
-                    setNewValue(assetRef);
-                    setNewImageName(fileName);
-                  })}
-                  disabled={isUploadingImage}
-                >
-                  <Image size={14} />
-                  {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : newImageName || t('REFERENCE_PANEL.chooseImage')}
-                </button>
-              ) : (
-                <input
-                  className="ref-item__input"
-                  placeholder={t('REFERENCE_PANEL.valuePlaceholder') as string}
-                  value={newValue}
-                  onChange={(e) => setNewValue(e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, handleAdd)}
-                />
-              )}
+                {(['text', 'image'] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    role="tab"
+                    aria-selected={newType === type}
+                    aria-controls="ref-item-new-value-panel"
+                    className={`ref-item__type-tab${newType === type ? ' is-active' : ''}`}
+                    onClick={() => {
+                      setNewType(type);
+                      setNewValue('');
+                      setNewImageName('');
+                      setImageError('');
+                    }}
+                  >
+                    {TYPE_ICONS[type]}
+                    {t(`REFERENCE_PANEL.types.${type}`)}
+                  </button>
+                ))}
+              </div>
+              <div
+                id="ref-item-new-value-panel"
+                role="tabpanel"
+                className="ref-item__type-panel"
+              >
+                {newType === 'image' ? (
+                  <button
+                    type="button"
+                    className="ref-item__image-picker"
+                    onClick={() => chooseImage((assetRef, fileName) => {
+                      setNewValue(assetRef);
+                      setNewImageName(fileName);
+                    })}
+                    disabled={isUploadingImage}
+                  >
+                    <Image size={14} />
+                    {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : newImageName || t('REFERENCE_PANEL.chooseImage')}
+                  </button>
+                ) : (
+                  <input
+                    className="ref-item__input"
+                    placeholder={t('REFERENCE_PANEL.valuePlaceholder') as string}
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, handleAdd)}
+                  />
+                )}
+              </div>
               {imageError && <span className="ref-item__error" role="alert">{imageError}</span>}
               <div className="ref-item__new-actions">
                 <button className="ref-item__btn ref-item__btn--cancel" onClick={() => setIsAdding(false)}>
@@ -518,7 +542,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
 
       {/* ── Footer ── */}
       <div className="ref-panel__footer">
-        <button className="ref-panel__add-btn" onClick={() => setIsAdding(true)}>
+        <button className="ref-panel__add-btn" onClick={startAdd}>
           <Plus size={14} />
           {t('REFERENCE_PANEL.newReference')}
         </button>
