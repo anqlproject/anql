@@ -1,7 +1,8 @@
 import './ReferencesPanel.css';
 
-import { Image, Plus, Search, Trash2, Type, X } from 'lucide-react';
+import { Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
@@ -14,18 +15,13 @@ const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   image:  <Image size={12} />,
 };
 
-const TYPE_LABELS: Record<RefType, string> = {
-  text: 'Texte',
-  number: 'Nombre',
-  image: 'Image',
-};
-
 interface ReferencesPanelProps {
   panelRef: React.Ref<HTMLDivElement>;
   onClose: () => void;
 }
 
 export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelProps) {
+  const { t } = useTranslation();
   const { references, isLoaded, loadReferences, addReference, editReference, removeReference } = useReferenceStore();
 
   const [search, setSearch] = useState('');
@@ -92,8 +88,8 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
     >
       {/* ── Header ── */}
       <div className="ref-panel__header">
-        <span className="ref-panel__title">Références</span>
-        <button className="ref-panel__close" onClick={onClose} aria-label="Fermer">
+        <span className="ref-panel__title">{t('REFERENCE_PANEL.title')}</span>
+        <button className="ref-panel__close" onClick={onClose} aria-label={t('REFERENCE_PANEL.close')}>
           <X size={14} />
         </button>
       </div>
@@ -104,7 +100,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
         <input
           ref={searchRef}
           className="ref-panel__search"
-          placeholder="Rechercher une référence…"
+          placeholder={t('REFERENCE_PANEL.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -114,7 +110,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
       <div className="ref-panel__list">
         {filtered.length === 0 && !isAdding && (
           <div className="ref-panel__empty">
-            {search ? 'Aucun résultat' : 'Aucune référence — cliquez + pour créer'}
+            {search ? t('REFERENCE_PANEL.noResults') : t('REFERENCE_PANEL.empty')}
           </div>
         )}
 
@@ -128,7 +124,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   onKeyDown={(e) => handleKeyDown(e, () => saveEdit(ref.id!))}
-                  placeholder="nom"
+                  placeholder={t('REFERENCE_PANEL.namePlaceholder')}
                   autoFocus
                 />
                 <input
@@ -136,24 +132,31 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={(e) => handleKeyDown(e, () => saveEdit(ref.id!))}
-                  placeholder="valeur"
+                  placeholder={t('REFERENCE_PANEL.valuePlaceholder')}
                 />
                 <button className="ref-item__btn ref-item__btn--save" onClick={() => saveEdit(ref.id!)}>
-                  Enregistrer
+                  {t('REFERENCE_PANEL.save')}
                 </button>
               </div>
             ) : (
               /* ── Display mode ── */
               <div className="ref-item__row" onDoubleClick={() => startEdit(ref)}>
-                <span className="ref-item__type-icon" title={TYPE_LABELS[ref.ref_type as RefType]}>
+                <span className="ref-item__type-icon" title={t(`REFERENCE_PANEL.types.${ref.ref_type}`)}>
                   {TYPE_ICONS[ref.ref_type as RefType]}
                 </span>
                 <span className="ref-item__name">@{ref.name}</span>
-                <span className="ref-item__value">{ref.value || <em>vide</em>}</span>
+                <span className="ref-item__value">{ref.value || <em>{t('REFERENCE_PANEL.emptyValue')}</em>}</span>
+                <button
+                  className="ref-item__btn ref-item__btn--edit"
+                  onClick={() => startEdit(ref)}
+                  aria-label={t('REFERENCE_PANEL.edit', { name: ref.name })}
+                >
+                  <Pencil size={12} />
+                </button>
                 <button
                   className="ref-item__btn ref-item__btn--delete"
                   onClick={() => removeReference(ref.id!)}
-                  aria-label={`Supprimer @${ref.name}`}
+                  aria-label={t('REFERENCE_PANEL.delete', { name: ref.name })}
                 >
                   <Trash2 size={12} />
                 </button>
@@ -169,7 +172,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
               <input
                 ref={newNameRef}
                 className="ref-item__input ref-item__input--name"
-                placeholder="nom_référence"
+                placeholder={t('REFERENCE_PANEL.newNamePlaceholder')}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, handleAdd)}
@@ -179,23 +182,23 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                 value={newType}
                 onChange={(e) => setNewType(e.target.value as RefType)}
               >
-                <option value="text">Texte</option>
-                <option value="number">Nombre</option>
-                <option value="image">Image</option>
+                <option value="text">{t('REFERENCE_PANEL.types.text')}</option>
+                <option value="number">{t('REFERENCE_PANEL.types.number')}</option>
+                <option value="image">{t('REFERENCE_PANEL.types.image')}</option>
               </select>
               <input
                 className="ref-item__input"
-                placeholder="valeur"
+                placeholder={t('REFERENCE_PANEL.valuePlaceholder')}
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, handleAdd)}
               />
               <div className="ref-item__new-actions">
                 <button className="ref-item__btn ref-item__btn--cancel" onClick={() => setIsAdding(false)}>
-                  Annuler
+                  {t('REFERENCE_PANEL.cancel')}
                 </button>
                 <button className="ref-item__btn ref-item__btn--save" onClick={handleAdd}>
-                  Créer
+                  {t('REFERENCE_PANEL.create')}
                 </button>
               </div>
             </div>
@@ -207,7 +210,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
       <div className="ref-panel__footer">
         <button className="ref-panel__add-btn" onClick={() => setIsAdding(true)}>
           <Plus size={14} />
-          Nouvelle référence
+          {t('REFERENCE_PANEL.newReference')}
         </button>
       </div>
     </div>

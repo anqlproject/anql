@@ -406,6 +406,28 @@
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer définitivement \"{{title}}\" ? Cette action est irréversible.",
       "confirmEmptyTrash": "Êtes-vous sûr de vouloir vider la corbeille ? Cette action supprimera définitivement {{count}} élément(s)."
     },
+    "REFERENCE_PANEL": {
+      "title": "Références",
+      "close": "Fermer",
+      "searchPlaceholder": "Rechercher une référence…",
+      "noResults": "Aucun résultat",
+      "empty": "Aucune référence — cliquez + pour créer",
+      "namePlaceholder": "nom",
+      "valuePlaceholder": "valeur",
+      "save": "Enregistrer",
+      "emptyValue": "vide",
+      "edit": "Modifier @{{name}}",
+      "delete": "Supprimer @{{name}}",
+      "newNamePlaceholder": "nom_référence",
+      "types": {
+        "text": "Texte",
+        "number": "Nombre",
+        "image": "Image"
+      },
+      "cancel": "Annuler",
+      "create": "Créer",
+      "newReference": "Nouvelle référence"
+    },
     "FOOTER_MENU": {
       "generalSettings": "Paramètres de l'application",
       "darkMode": "Mode sombre",

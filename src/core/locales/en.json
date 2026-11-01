@@ -406,6 +406,28 @@
       "confirmDelete": "Are you sure you want to permanently delete \"{{title}}\"? This action is irreversible.",
       "confirmEmptyTrash": "Are you sure you want to empty the trash? This action will permanently delete {{count}} item(s)."
     },
+    "REFERENCE_PANEL": {
+      "title": "References",
+      "close": "Close",
+      "searchPlaceholder": "Search references…",
+      "noResults": "No results",
+      "empty": "No references — click + to create one",
+      "namePlaceholder": "name",
+      "valuePlaceholder": "value",
+      "save": "Save",
+      "emptyValue": "empty",
+      "edit": "Edit @{{name}}",
+      "delete": "Delete @{{name}}",
+      "newNamePlaceholder": "reference_name",
+      "types": {
+        "text": "Text",
+        "number": "Number",
+        "image": "Image"
+      },
+      "cancel": "Cancel",
+      "create": "Create",
+      "newReference": "New reference"
+    },
     "FOOTER_MENU": {
       "generalSettings": "App settings",
       "darkMode": "Dark mode",

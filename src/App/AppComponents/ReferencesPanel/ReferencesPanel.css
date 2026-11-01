@@ -129,7 +129,10 @@
   background: var(--action-hover);
 }
 
-.ref-item__row:hover .ref-item__btn--delete {
+.ref-item__row:hover .ref-item__btn--edit,
+.ref-item__row:hover .ref-item__btn--delete,
+.ref-item__row:focus-within .ref-item__btn--edit,
+.ref-item__row:focus-within .ref-item__btn--delete {
   opacity: 1;
 }
 
@@ -169,11 +172,11 @@
 }
 
 /* ── Buttons ── */
+.ref-item__btn--edit,
 .ref-item__btn--delete {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-disabled);
   display: flex;
   align-items: center;
   padding: 3px;
@@ -181,6 +184,19 @@
   opacity: 0;
   transition: opacity 0.12s, color 0.12s, background 0.12s;
   flex-shrink: 0;
+}
+
+.ref-item__btn--edit {
+  color: var(--text-secondary);
+}
+
+.ref-item__btn--edit:hover {
+  color: var(--primary-color);
+  background: var(--action-hover);
+}
+
+.ref-item__btn--delete {
+  color: var(--text-disabled);
 }
 
 .ref-item__btn--delete:hover {
