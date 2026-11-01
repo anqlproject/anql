@@ -54,16 +54,20 @@ impl AssetsOperations {
     }
 
     pub async fn delete_asset(&self, id: String) -> Result<bool> {
-        let is_reference_image: bool = sqlx::query_scalar(
+        let is_in_use: bool = sqlx::query_scalar(
             r#"SELECT EXISTS (
                 SELECT 1 FROM "references" WHERE value = ?
+            ) OR EXISTS (
+                SELECT 1 FROM nodes, json_tree(nodes.content)
+                WHERE json_tree.value = ?
             )"#,
         )
         .bind(format!("asset://{id}"))
+        .bind(format!("asset://{id}"))
         .fetch_one(&self.pool)
         .await
-        .context("checking whether asset is used by a reference")?;
-        if is_reference_image {
+        .context("checking whether asset is still in use")?;
+        if is_in_use {
             return Ok(false);
         }
 
