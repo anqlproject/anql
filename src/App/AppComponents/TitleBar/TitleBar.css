@@ -40,3 +40,22 @@
   transform: scale(1.08);
   opacity: 1;
 }
+
+.titlebar-ref-btn {
+  z-index: var(--z-modal);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.titlebar-ref-btn:hover,
+.titlebar-ref-btn--active {
+  background-color: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.titlebar-ref-btn:focus-visible {
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 2px;
+}

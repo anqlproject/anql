@@ -2,7 +2,6 @@ import "./TitleBar.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Braces } from "lucide-react";
 import { type JSX, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from 'react-i18next';
@@ -82,10 +81,9 @@ export default function TitleBar(): JSX.Element {
         />
         <DocumentMenu />
 
-        {/* ── Références button ── */}
         <button
           ref={refBtnRef}
-          className={`sidebar-trigger titlebar-ref-btn${refPanelOpen ? ' titlebar-ref-btn--active' : ''}`}
+          className={`titlebar-ref-btn${refPanelOpen ? ' titlebar-ref-btn--active' : ''}`}
           style={{
             position: 'absolute',
             top: '2px',
@@ -96,20 +94,38 @@ export default function TitleBar(): JSX.Element {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '4px',
-            background: 'transparent',
             border: 'none',
           }}
           title="Références (@)"
           aria-label="Ouvrir les références"
+          onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             setRefPanelOpen((v) => !v);
           }}
         >
-          <Braces size={16} />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="7" r="4" />
+            <circle cx="4" cy="19" r="2" />
+            <circle cx="12" cy="19" r="2" />
+            <circle cx="20" cy="19" r="2" />
+            <path d="M8 7a4 4 0 0 0-4 4v6" />
+            <path d="M12 11v6" />
+            <path d="M16 7a4 4 0 0 1 4 4v6" />
+          </svg>
         </button>
 
-        {/* ── References panel ── */}
         {refPanelOpen && (
           createPortal(
             <ReferencesPanel
