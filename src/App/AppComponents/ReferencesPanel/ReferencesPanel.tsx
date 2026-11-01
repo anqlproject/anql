@@ -270,7 +270,9 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                     })}
                     disabled={isUploadingImage}
                   >
-                    <Image size={14} />
+                    {editValue
+                      ? <ReferenceImageThumbnail src={editValue} name={editName || ref.name} />
+                      : <Image size={14} />}
                     {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : editImageName || t('REFERENCE_PANEL.chooseImage')}
                   </button>
                 ) : (

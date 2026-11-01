@@ -284,6 +284,12 @@
   opacity: 0.7;
 }
 
+.ref-item__image-picker .ref-item__thumbnail {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .ref-item__error {
   color: var(--destructive);
   font-size: var(--ui-text-xs);
