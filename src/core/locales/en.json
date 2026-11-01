@@ -218,7 +218,10 @@
       "close": "Close (Esc)"
     },
     "EDITOR": {
-      "placeholder": "Start writing or click on \"...\" to create a node, or type \"help\""
+      "emptyStateDescription": "Write, choose a block, or type “help”.",
+      "createTable": "Table",
+      "createMath": "Math",
+      "createTodo": "Task"
     },
     "CREATE_NODE": {
       "buttonTitle": "Click to create node"

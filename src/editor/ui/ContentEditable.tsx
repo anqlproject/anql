@@ -10,13 +10,23 @@ import './ContentEditable.css';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { $getRoot, $getSelection, $isParagraphNode, $isRangeSelection } from 'lexical';
+import { $setBlocksType } from '@lexical/selection';
+import { Calculator, ListCheckIcon, TableIcon } from 'lucide-react';
+import {
+  $getRoot,
+  $getSelection,
+  $isParagraphNode,
+  $isRangeSelection,
+} from 'lexical';
 import type { JSX } from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useGlobalStore } from '@/App/store/useGlobalStore';
+import { $createListNode } from '@/editor/nodes/ListNode';
+import { INSERT_MATH_COMMAND } from '@/editor/plugins/MathPlugin';
+import { INSERT_TABLE_COMMAND } from '@/editor/plugins/TablePlugin';
 
 type Props = {
   className?: string;
@@ -32,6 +42,25 @@ export default function LexicalContentEditable({
     useShallow((state) => ({ config: state.config }))
   );
   const [showPlaceholder, setShowPlaceholder] = useState(false);
+
+  const createTable = () => {
+    const columnId = crypto.randomUUID();
+    editor.dispatchCommand(INSERT_TABLE_COMMAND, {
+      columns: [{ header: '', id: columnId }],
+      data: [{ [columnId]: '' }],
+      showColumnHeaders: false,
+      showRowHeaders: false,
+    });
+  };
+
+  const createTodo = () => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        $setBlocksType(selection, () => $createListNode('check'));
+      }
+    });
+  };
 
   useEffect(() => {
     const updatePlaceholder = () => {
@@ -75,26 +104,28 @@ export default function LexicalContentEditable({
   return (
     <div style={{ position: 'relative' }}>
       {showPlaceholder && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            pointerEvents: 'none',
-            color: 'var(--text-secondary)',
-            fontSize: '16px',
-            fontWeight: '400',
-            lineHeight: '1.5',
-            letterSpacing: '0.01em',
-            opacity: '0.5',
-            textAlign: 'center',
-            maxWidth: '80%',
-            userSelect: 'none',
-            fontStyle: 'italic',
-          }}
-        >
-          {t('EDITOR.placeholder') as string}
+        <div className="ContentEditable__empty-state">
+          <div className="ContentEditable__empty-state-description">
+            {t('EDITOR.emptyStateDescription') as string}
+          </div>
+          <div className="ContentEditable__empty-state-actions">
+            <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={createTable}>
+              <TableIcon size={14} />
+              {t('EDITOR.createTable') as string}
+            </button>
+            <button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => editor.dispatchCommand(INSERT_MATH_COMMAND, undefined)}
+            >
+              <Calculator size={14} />
+              {t('EDITOR.createMath') as string}
+            </button>
+            <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={createTodo}>
+              <ListCheckIcon size={14} />
+              {t('EDITOR.createTodo') as string}
+            </button>
+          </div>
         </div>
       )}
       <ContentEditable

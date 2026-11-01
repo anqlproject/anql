@@ -42,7 +42,85 @@
   pointer-events: none;
 }
 
-/* BREAKPOINTS.smallViewport = 480 — keep in sync with src/core/Global/styles.ts */
+.ContentEditable__empty-state {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  max-width: 90%;
+  transform: translate(-50%, -50%);
+  color: var(--text-primary);
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ContentEditable__empty-state-description {
+  color: var(--text-secondary);
+  font-size: var(--ui-text-sm);
+  line-height: 1.5;
+}
+
+.ContentEditable__empty-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+  pointer-events: auto;
+}
+
+.ContentEditable__empty-state-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface-color);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ContentEditable__empty-state-actions button:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.ContentEditable__empty-state-actions button svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.ContentEditable__empty-state-actions button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .ContentEditable__empty-state {
+    width: calc(100% - 24px);
+  }
+
+  .ContentEditable__empty-state-actions {
+    gap: 5px;
+  }
+
+  .ContentEditable__empty-state-actions button {
+    padding: 5px 8px;
+  }
+}
+
+/* BREAKPOINTS.smallViewport = 480 — keep in sync with src/core/global/styles.ts */
 @media (max-width: 480px) {
   .ContentEditable__placeholder {
     left: 8px;
