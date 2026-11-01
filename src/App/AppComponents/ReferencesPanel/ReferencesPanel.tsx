@@ -6,7 +6,7 @@ import { Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { createAsset } from '@/core/database/useAssetDatabase';
+import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
@@ -18,6 +18,50 @@ const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   number: <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600 }}>#</span>,
   image:  <Image size={12} />,
 };
+
+function ReferenceImageThumbnail({ src, name }: { src: string; name: string }) {
+  const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    let objectUrl: string | null = null;
+    setResolvedSrc(null);
+    setHasError(false);
+
+    resolveAssetUrl(src)
+      .then((url) => {
+        if (url?.startsWith('blob:')) objectUrl = url;
+        if (isMounted) {
+          setResolvedSrc(url);
+        } else if (objectUrl) {
+          URL.revokeObjectURL(objectUrl);
+        }
+      })
+      .catch((error: unknown) => {
+        logger.error('Failed to resolve reference image thumbnail', error as Error, { name });
+        if (isMounted) setHasError(true);
+      });
+
+    return () => {
+      isMounted = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [src, name]);
+
+  if (!resolvedSrc || hasError) {
+    return <Image size={14} />;
+  }
+
+  return (
+    <img
+      className="ref-item__thumbnail"
+      src={resolvedSrc}
+      alt={name}
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 interface ReferencesPanelProps {
   panelRef: React.Ref<HTMLDivElement>;
@@ -263,10 +307,16 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
             ) : (
               /* ── Display mode ── */
               <div className="ref-item__row" onDoubleClick={() => startEdit(ref)}>
-                <span className="ref-item__type-icon" title={t(`REFERENCE_PANEL.types.${ref.ref_type}`) as string}>
+                <span
+                  className="ref-item__type-icon"
+                  title={t(`REFERENCE_PANEL.types.${ref.ref_type}`) as string}
+                >
                   {TYPE_ICONS[ref.ref_type as RefType]}
                 </span>
                 <span className="ref-item__name">@{ref.name}</span>
+                {ref.ref_type === 'image' && (
+                  <ReferenceImageThumbnail src={ref.value} name={ref.name} />
+                )}
                 <span className="ref-item__value">
                   {ref.ref_type === 'image'
                     ? <em>{t('REFERENCE_PANEL.imageValue')}</em>

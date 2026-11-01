@@ -144,6 +144,15 @@
   width: 16px;
 }
 
+.ref-item__thumbnail {
+  display: block;
+  width: 34px;
+  height: 28px;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+}
+
 .ref-item__name {
   font-size: var(--ui-text-sm);
   font-weight: var(--font-medium);
