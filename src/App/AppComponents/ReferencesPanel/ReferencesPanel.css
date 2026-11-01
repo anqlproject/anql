@@ -233,6 +233,40 @@
   border-color: var(--primary-color);
 }
 
+.ref-item__image-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface-color);
+  color: var(--text-secondary);
+  font-size: var(--ui-text-sm);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ref-item__image-picker:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--text-primary);
+}
+
+.ref-item__image-picker:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.ref-item__error {
+  color: var(--destructive);
+  font-size: var(--ui-text-xs);
+}
+
 .ref-item__input--name {
   font-family: var(--font-mono);
   font-size: var(--ui-text-xs);

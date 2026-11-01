@@ -9,8 +9,10 @@ import {
 } from '@lexical/react/LexicalTypeaheadMenuPlugin';
 import {
   $createParagraphNode,
+  $getNodeByKey,
   $getSelection,
   $isRangeSelection,
+  $isTextNode,
   LexicalEditor,
   TextNode,
 } from 'lexical';
@@ -18,6 +20,7 @@ import { Image, Plus, Type } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
+import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 import { $createImageNode } from '@/editor/nodes/ImageNode/ImageNode';
 import { $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
@@ -99,7 +102,17 @@ export default function ReferencePlugin(): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const references = useReferenceStore((state) => state.references);
+  const isLoaded = useReferenceStore((state) => state.isLoaded);
+  const loadReferences = useReferenceStore((state) => state.loadReferences);
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!isLoaded) {
+      loadReferences().catch((error: unknown) => {
+        logger.error('Failed to load references for autocomplete', error as Error);
+      });
+    }
+  }, [isLoaded, loadReferences]);
 
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
@@ -144,23 +157,42 @@ export default function ReferencePlugin(): React.JSX.Element | null {
   }, [queryString, references]);
 
   const onSelectOption = useCallback(
-    (
+    async (
       selectedOption: ReferenceMenuOption,
       nodeToReplace: TextNode | null,
       closeMenu: () => void,
     ) => {
-      editor.update(() => {
-        if (nodeToReplace == null) return;
+      if (nodeToReplace == null) {
+        closeMenu();
+        return;
+      }
 
-        if (selectedOption.isCreateAction && selectedOption.createName) {
-          const name = selectedOption.createName;
-          void useReferenceStore.getState().addReference(name, 'text', '');
-          const textNode = new TextNode(`@${name}`);
-          nodeToReplace.replace(textNode);
-          textNode.select();
-          return;
+      if (selectedOption.isCreateAction && selectedOption.createName) {
+        const nodeKey = nodeToReplace.getKey();
+        try {
+          const reference = await useReferenceStore.getState().addReference(
+            selectedOption.createName,
+            'text',
+            '',
+          );
+          editor.update(() => {
+            const currentNode = $getNodeByKey(nodeKey);
+            if (!$isTextNode(currentNode)) return;
+            const textNode = new TextNode(`@${reference.name}`);
+            currentNode.replace(textNode);
+            textNode.select();
+          });
+        } catch (error) {
+          logger.error('Failed to create reference from autocomplete', error as Error, {
+            name: selectedOption.createName,
+          });
+        } finally {
+          closeMenu();
         }
+        return;
+      }
 
+      editor.update(() => {
         const ref = selectedOption.reference;
         if (!ref) return;
 

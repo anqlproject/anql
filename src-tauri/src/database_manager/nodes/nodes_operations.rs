@@ -202,6 +202,24 @@ impl NodesOperations {
         // Delete associated assets (DB record + file on disk) before removing nodes
         for content in &contents {
             for asset_id in extract_asset_ids(content) {
+                let is_referenced: bool = sqlx::query_scalar(
+                    r#"SELECT EXISTS (
+                        SELECT 1 FROM "references" WHERE value = ?
+                    ) OR EXISTS (
+                        SELECT 1 FROM nodes, json_tree(nodes.content)
+                        WHERE nodes.document_id != ?
+                          AND json_tree.value = ?
+                    )"#,
+                )
+                .bind(format!("asset://{asset_id}"))
+                .bind(&document_id)
+                .bind(format!("asset://{asset_id}"))
+                .fetch_one(&mut *tx)
+                .await?;
+                if is_referenced {
+                    continue;
+                }
+
                 // Fetch file_path before deletion
                 let maybe_path: Option<String> =
                     sqlx::query_scalar("SELECT file_path FROM assets WHERE id = ?")

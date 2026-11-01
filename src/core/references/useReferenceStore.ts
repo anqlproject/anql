@@ -22,7 +22,7 @@ interface ReferenceStore {
 
   // Actions
   loadReferences: () => Promise<void>;
-  addReference: (name: string, ref_type: ReferenceJson['ref_type'], value: string) => Promise<void>;
+  addReference: (name: string, ref_type: ReferenceJson['ref_type'], value: string) => Promise<ReferenceJson>;
   editReference: (id: string, updates: Partial<Pick<ReferenceJson, 'name' | 'ref_type' | 'value'>>) => Promise<void>;
   removeReference: (id: string) => Promise<void>;
 
@@ -40,18 +40,43 @@ export const useReferenceStore = create<ReferenceStore>((set, get) => ({
   },
 
   addReference: async (name, ref_type, value) => {
+    const normalizedName = name.trim().replace(/\s+/g, '_');
+    const existing = get().references.find(
+      (reference) => reference.name.toLowerCase() === normalizedName.toLowerCase(),
+    );
+    if (existing) return existing;
+
     const ts = now();
     const ref: ReferenceJson = {
       id: generateId(),
-      name: name.trim().replace(/\s+/g, '_'), // pas d'espaces dans les noms
+      name: normalizedName,
       ref_type,
       value,
       created_at: ts,
       updated_at: ts,
     };
-    await newReference(ref);
+
+    try {
+      await newReference(ref);
+    } catch (error) {
+      const references = await getAllReferences();
+      set({ references, isLoaded: true });
+
+      const duplicate = references.find(
+        (reference) => reference.name.toLowerCase() === normalizedName.toLowerCase(),
+      );
+      if (duplicate) return duplicate;
+      throw error;
+    }
+
     // Optimistic update
-    set((state) => ({ references: [...state.references, ref].sort((a, b) => a.name.localeCompare(b.name)) }));
+    set((state) => ({
+      references: [...state.references.filter(
+        (reference) => reference.name.toLowerCase() !== normalizedName.toLowerCase(),
+      ), ref].sort((a, b) => a.name.localeCompare(b.name)),
+      isLoaded: true,
+    }));
+    return ref;
   },
 
   editReference: async (id, updates) => {

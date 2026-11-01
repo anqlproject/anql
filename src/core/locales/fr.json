@@ -419,6 +419,13 @@
       "edit": "Modifier @{{name}}",
       "delete": "Supprimer @{{name}}",
       "newNamePlaceholder": "nom_référence",
+      "duplicateName": "Une référence portant ce nom existe déjà.",
+      "chooseImage": "Choisir une image…",
+      "uploadingImage": "Importation de l’image…",
+      "selectedImage": "Image sélectionnée",
+      "imageValue": "Image",
+      "invalidImage": "Ce fichier n’est pas une image prise en charge.",
+      "imageUploadFailed": "Impossible d’importer l’image.",
       "types": {
         "text": "Texte",
         "number": "Nombre",

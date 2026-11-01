@@ -419,6 +419,13 @@
       "edit": "Edit @{{name}}",
       "delete": "Delete @{{name}}",
       "newNamePlaceholder": "reference_name",
+      "duplicateName": "A reference with this name already exists.",
+      "chooseImage": "Choose an image…",
+      "uploadingImage": "Uploading image…",
+      "selectedImage": "Image selected",
+      "imageValue": "Image",
+      "invalidImage": "This file is not a supported image.",
+      "imageUploadFailed": "Failed to upload the image.",
       "types": {
         "text": "Text",
         "number": "Number",
