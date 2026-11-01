@@ -274,14 +274,16 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
               <React.Fragment key={item.id}>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    className="hover:bg-(--action-hover)"
+                    className={`hover:bg-(--action-hover)${item.id === "new-document" ? " sidebar-new-document" : ""}`}
                     isActive={item.id === "home" && currentPage === "home"}
                     onClick={() => {
                       item.onClick();
                     }}
                   >
                     <item.icon
-                      size={ICON_SIZES.md} />
+                      size={ICON_SIZES.md}
+                      className={item.id === "new-document" ? "sidebar-new-document-icon" : undefined}
+                    />
                     <span>{item.title}</span>
                     {item.id === "search" && globalSearchCount > 0 && (
                       <span className="search-count-badge">

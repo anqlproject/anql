@@ -580,8 +580,7 @@
 .ref-panel__add-btn svg {
   flex-shrink: 0;
   color: var(--text-secondary);
-  transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.16s ease;
-  transition-delay: 0.45s, 0s;
+  transition: color 0.16s ease;
 }
 
 .ref-panel__add-btn:hover {
@@ -597,7 +596,9 @@
 .ref-panel__add-btn:hover svg {
   color: var(--primary-color);
   transform: rotate(90deg) scale(1.08);
-  transition-delay: 0.45s, 0s;
+  transition:
+    transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s,
+    color 0.16s ease;
 }
 
 .ref-panel__add-btn:active {
