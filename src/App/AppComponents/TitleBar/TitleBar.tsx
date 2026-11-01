@@ -66,6 +66,7 @@ export default function TitleBar(): JSX.Element {
         }}
         onClick={() => {
           editor.blur();
+          setRefPanelOpen(false);
         }}
       >
         <SidebarTrigger
