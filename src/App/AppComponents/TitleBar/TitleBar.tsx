@@ -12,17 +12,24 @@ import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { Dialog } from "@/components/custom/Dialog/Dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ReferenceJson } from "@/core/database/useReferenceDatabase";
 import { DIMENSIONS } from "@/core/global/defaultValues";
+import { logger } from "@/core/logger";
+import { useReferenceStore } from "@/core/references/useReferenceStore";
 
 export default function TitleBar(): JSX.Element {
   const { t } = useTranslation();
   const appWindow = getCurrentWindow();
   const [openExitDialog, setOpenExitDialog] = useState(false);
   const [refPanelOpen, setRefPanelOpen] = useState(false);
+  const [referenceToDelete, setReferenceToDelete] = useState<ReferenceJson | null>(null);
+  const [isDeletingReference, setIsDeletingReference] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const { setExitApp } = useGlobalShortcut();
   const isMac = useGlobalStore((state) => state.isMac);
   const refBtnRef = useRef<HTMLButtonElement>(null);
   const refPanelRef = useRef<HTMLDivElement>(null);
+  const removeReference = useReferenceStore((state) => state.removeReference);
 
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault();
@@ -48,6 +55,28 @@ export default function TitleBar(): JSX.Element {
   }, [refPanelOpen]);
 
   const [editor] = useLexicalComposerContext();
+
+  const confirmDeleteReference = async () => {
+    if (!referenceToDelete) return;
+    if (!referenceToDelete.id) {
+      setDeleteError(t('REFERENCE_PANEL.deleteFailed') as string);
+      return;
+    }
+
+    setIsDeletingReference(true);
+    setDeleteError('');
+    try {
+      await removeReference(referenceToDelete.id);
+      setReferenceToDelete(null);
+    } catch (error) {
+      logger.error('Failed to delete reference', error as Error, {
+        referenceId: referenceToDelete.id,
+      });
+      setDeleteError(t('REFERENCE_PANEL.deleteFailed') as string);
+    } finally {
+      setIsDeletingReference(false);
+    }
+  };
 
   return (
     <>
@@ -132,12 +161,49 @@ export default function TitleBar(): JSX.Element {
             <ReferencesPanel
               panelRef={refPanelRef}
               onClose={() => setRefPanelOpen(false)}
+              onRequestDelete={(reference) => {
+                setDeleteError('');
+                setReferenceToDelete(reference);
+              }}
             />,
             document.body,
           )
         )}
       </div>
 
+      <Dialog
+        isOpen={referenceToDelete !== null}
+        onClose={() => {
+          if (!isDeletingReference) {
+            setReferenceToDelete(null);
+            setDeleteError('');
+          }
+        }}
+        title={t('REFERENCE_PANEL.deleteTitle') as string}
+        description={
+          <div>
+            <p>{t('REFERENCE_PANEL.confirmDelete', { name: referenceToDelete?.name ?? '' })}</p>
+            {deleteError && <p role="alert">{deleteError}</p>}
+          </div>
+        }
+        mode="urgent"
+        leftButton={{
+          text: t('REFERENCE_PANEL.cancel') as string,
+          onClick: () => {
+            setReferenceToDelete(null);
+            setDeleteError('');
+          },
+          disabled: isDeletingReference,
+        }}
+        rightButton={{
+          text: isDeletingReference
+            ? t('REFERENCE_PANEL.deleting') as string
+            : t('DIALOG.delete') as string,
+          onClick: confirmDeleteReference,
+          variant: 'danger',
+          disabled: isDeletingReference,
+        }}
+      />
 
       {openExitDialog && (
         <Dialog

@@ -8,7 +8,6 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useFile } from '@/App/hooks/FileHooks';
-import { Dialog } from '@/components/custom/Dialog/Dialog';
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
 import { getReferenceUsages, ReferenceUsageJson } from '@/core/database/useDocumentDatabase';
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
@@ -18,6 +17,22 @@ import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 
 type RefType = ReferenceJson['ref_type'];
+
+async function loadReferenceUsages(reference: ReferenceJson): Promise<ReferenceUsageJson[]> {
+  const [linkedUsages, mathUsages] = await Promise.all([
+    reference.id ? getReferenceUsages(reference.id) : Promise.resolve([]),
+    reference.ref_type === 'text'
+      ? searchNodesByType(reference.name, 'mathexp')
+      : Promise.resolve([]),
+  ]);
+  const uniqueUsages = new Map<string, ReferenceUsageJson>();
+  [...linkedUsages, ...mathUsages].forEach((usage) => {
+    uniqueUsages.set(`${usage.id}:${usage.node_id}`, usage);
+  });
+  return [...uniqueUsages.values()].sort((a, b) =>
+    a.title.localeCompare(b.title) || a.path.localeCompare(b.path),
+  );
+}
 
 const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   text:   <Type size={12} />,
@@ -71,11 +86,12 @@ function ReferenceImageThumbnail({ src, name }: { src: string; name: string }) {
 interface ReferencesPanelProps {
   panelRef: React.Ref<HTMLDivElement>;
   onClose: () => void;
+  onRequestDelete: (reference: ReferenceJson) => void;
 }
 
-export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelProps) {
+export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: ReferencesPanelProps) {
   const { t } = useTranslation();
-  const { references, isLoaded, loadReferences, addReference, editReference, removeReference } = useReferenceStore();
+  const { references, isLoaded, loadReferences, addReference, editReference } = useReferenceStore();
   const { openEditorWUFocusOnNode } = useFile();
 
   const [search, setSearch] = useState('');
@@ -86,9 +102,8 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
   const [isLoadingUsages, setIsLoadingUsages] = useState(false);
   const [usageError, setUsageError] = useState('');
   const [openingUsageId, setOpeningUsageId] = useState<string | null>(null);
-  const [referenceToDelete, setReferenceToDelete] = useState<ReferenceJson | null>(null);
-  const [isDeletingReference, setIsDeletingReference] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
+  const [hoveredReferenceKey, setHoveredReferenceKey] = useState<string | null>(null);
+  const [usageCounts, setUsageCounts] = useState<Record<string, number>>({});
 
   // New-reference form state
   const [newName, setNewName] = useState('');
@@ -113,27 +128,16 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
   }, [isLoaded, loadReferences]);
 
   useEffect(() => {
-    if (!usageReference?.id) return;
+    if (!usageReference) return;
 
     let isMounted = true;
     setUsages([]);
     setIsLoadingUsages(true);
     setUsageError('');
-    Promise.all([
-      getReferenceUsages(usageReference.id),
-      usageReference.ref_type === 'text'
-        ? searchNodesByType(usageReference.name, 'mathexp')
-        : Promise.resolve([]),
-    ])
-      .then(([linkedUsages, mathUsages]) => {
+    loadReferenceUsages(usageReference)
+      .then((loadedUsages) => {
         if (!isMounted) return;
-        const uniqueUsages = new Map<string, ReferenceUsageJson>();
-        [...linkedUsages, ...mathUsages].forEach((usage) => {
-          uniqueUsages.set(`${usage.id}:${usage.node_id}`, usage);
-        });
-        setUsages([...uniqueUsages.values()].sort((a, b) =>
-          a.title.localeCompare(b.title) || a.path.localeCompare(b.path),
-        ));
+        setUsages(loadedUsages);
       })
       .catch((error: unknown) => {
         logger.error('Failed to load reference usages', error as Error, {
@@ -149,6 +153,34 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
       isMounted = false;
     };
   }, [usageReference, t]);
+
+  useEffect(() => {
+    if (!hoveredReferenceKey || usageCounts[hoveredReferenceKey] !== undefined) return;
+    const reference = references.find(
+      (item) => (item.id ?? item.name) === hoveredReferenceKey,
+    );
+    if (!reference) return;
+
+    let isMounted = true;
+    loadReferenceUsages(reference)
+      .then((loadedUsages) => {
+        if (!isMounted) return;
+        setUsageCounts((counts) => ({
+          ...counts,
+          [hoveredReferenceKey]: loadedUsages.length,
+        }));
+      })
+      .catch((error: unknown) => {
+        logger.error('Failed to load reference usage count', error as Error, {
+          referenceId: reference.id,
+          referenceName: reference.name,
+        });
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [hoveredReferenceKey, references, usageCounts]);
 
   useEffect(() => {
     if (isAdding) newNameRef.current?.focus();
@@ -284,24 +316,6 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
     }
   };
 
-  const confirmDeleteReference = async () => {
-    if (!referenceToDelete?.id) return;
-
-    setIsDeletingReference(true);
-    setDeleteError('');
-    try {
-      await removeReference(referenceToDelete.id);
-      setReferenceToDelete(null);
-    } catch (error) {
-      logger.error('Failed to delete reference', error as Error, {
-        referenceId: referenceToDelete.id,
-      });
-      setDeleteError(t('REFERENCE_PANEL.deleteFailed') as string);
-    } finally {
-      setIsDeletingReference(false);
-    }
-  };
-
   return (
     <>
       <div
@@ -339,7 +353,18 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
         )}
 
         {filtered.map((ref) => (
-          <div key={ref.id ?? ref.name} className="ref-item">
+          <div
+            key={ref.id ?? ref.name}
+            className="ref-item"
+            onMouseEnter={() => setHoveredReferenceKey(ref.id ?? ref.name)}
+            onMouseLeave={() => setHoveredReferenceKey(null)}
+            onFocusCapture={() => setHoveredReferenceKey(ref.id ?? ref.name)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                setHoveredReferenceKey(null);
+              }
+            }}
+          >
             {editingId === ref.id ? (
               /* ── Edit mode ── */
               <div className="ref-item__edit" role="group" aria-label={t('REFERENCE_PANEL.editing', { name: ref.name }) as string}>
@@ -426,6 +451,19 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                   </span>
                 </button>
                 <div className="ref-item__actions">
+                  {hoveredReferenceKey === (ref.id ?? ref.name) &&
+                    usageCounts[ref.id ?? ref.name] !== undefined && (
+                      <span
+                        className="ref-usage-count"
+                        title={t('REFERENCE_PANEL.usagesTitle', { name: ref.name }) as string}
+                        aria-label={t('REFERENCE_PANEL.usageCount', {
+                          name: ref.name,
+                          count: usageCounts[ref.id ?? ref.name],
+                        }) as string}
+                      >
+                        {usageCounts[ref.id ?? ref.name]}
+                      </span>
+                    )}
                   <button
                     type="button"
                     className="ref-item__action-btn ref-item__action-btn--edit"
@@ -438,10 +476,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                   <button
                     type="button"
                     className="ref-item__action-btn ref-item__action-btn--delete"
-                    onClick={() => {
-                      setDeleteError('');
-                      setReferenceToDelete(ref);
-                    }}
+                    onClick={() => onRequestDelete(ref)}
                     aria-label={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
                     title={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
                   >
@@ -570,7 +605,12 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
             <header className="ref-usages-header">
               <h2 id="ref-usages-title">
                 {t('REFERENCE_PANEL.usagesTitle', { name: usageReference.name })}
-                {!isLoadingUsages && !usageError ? ` (${usages.length})` : ''}
+                {!isLoadingUsages && !usageError && (
+                  <>
+                    {' '}
+                    <span className="ref-usage-count">{usages.length}</span>
+                  </>
+                )}
               </h2>
               <button
                 type="button"
@@ -618,39 +658,6 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
         </div>,
         document.body,
       )}
-      <Dialog
-        isOpen={referenceToDelete !== null}
-        onClose={() => {
-          if (!isDeletingReference) {
-            setReferenceToDelete(null);
-            setDeleteError('');
-          }
-        }}
-        title={t('REFERENCE_PANEL.deleteTitle') as string}
-        description={
-          <div>
-            <p>{t('REFERENCE_PANEL.confirmDelete', { name: referenceToDelete?.name ?? '' })}</p>
-            {deleteError && <p role="alert">{deleteError}</p>}
-          </div>
-        }
-        mode="urgent"
-        leftButton={{
-          text: t('REFERENCE_PANEL.cancel') as string,
-          onClick: () => {
-            setReferenceToDelete(null);
-            setDeleteError('');
-          },
-          disabled: isDeletingReference,
-        }}
-        rightButton={{
-          text: isDeletingReference
-            ? t('REFERENCE_PANEL.deleting') as string
-            : t('DIALOG.delete') as string,
-          onClick: confirmDeleteReference,
-          variant: 'danger',
-          disabled: isDeletingReference,
-        }}
-      />
     </>
   );
 }
