@@ -120,7 +120,6 @@
   gap: 8px;
   padding: 7px 8px;
   border-radius: 8px;
-  cursor: default;
   transition: background 0.12s;
   min-height: 34px;
 }
@@ -129,13 +128,24 @@
   background: var(--action-hover);
 }
 
-.ref-item__row:hover .ref-item__btn--edit,
-.ref-item__row:hover .ref-item__btn--usages,
-.ref-item__row:hover .ref-item__btn--delete,
-.ref-item__row:focus-within .ref-item__btn--edit,
-.ref-item__row:focus-within .ref-item__btn--usages,
-.ref-item__row:focus-within .ref-item__btn--delete {
-  opacity: 1;
+.ref-item__link {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ref-item__link:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .ref-item__type-icon {
@@ -182,50 +192,54 @@
   font-style: normal;
 }
 
-/* ── Buttons ── */
-.ref-item__btn--edit,
-.ref-item__btn--usages,
-.ref-item__btn--delete {
-  background: none;
-  border: none;
-  cursor: pointer;
+/* ── Inline actions ── */
+.ref-item__actions {
   display: flex;
   align-items: center;
-  padding: 3px;
-  border-radius: 4px;
-  opacity: 0;
-  transition: opacity 0.12s, color 0.12s, background 0.12s;
   flex-shrink: 0;
+  gap: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s ease, visibility 0s linear 0.12s;
 }
 
-.ref-item__btn--edit {
+.ref-item__row:hover .ref-item__actions,
+.ref-item__row:focus-within .ref-item__actions {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.ref-item__action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
   color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
-.ref-item__btn--usages {
-  color: var(--text-secondary);
+.ref-item__action-btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
 }
 
-.ref-item__btn--usages:hover {
+.ref-item__action-btn--edit:hover {
   color: var(--primary-color);
   background: var(--action-hover);
 }
 
-.ref-item__btn--usages:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.ref-item__btn--edit:hover {
-  color: var(--primary-color);
-  background: var(--action-hover);
-}
-
-.ref-item__btn--delete {
+.ref-item__action-btn--delete {
   color: var(--text-disabled);
 }
 
-.ref-item__btn--delete:hover {
+.ref-item__action-btn--delete:hover {
   color: var(--destructive);
   background: var(--destructive-container);
 }

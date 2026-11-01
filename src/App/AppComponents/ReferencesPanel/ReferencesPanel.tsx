@@ -103,7 +103,6 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
 
   const searchRef = useRef<HTMLInputElement>(null);
   const newNameRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     if (!isLoaded) loadReferences();
   }, [isLoaded, loadReferences]);
@@ -299,7 +298,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
         )}
 
         {filtered.map((ref) => (
-          <div key={ref.id} className="ref-item">
+          <div key={ref.id ?? ref.name} className="ref-item">
             {editingId === ref.id ? (
               /* ── Edit mode ── */
               <div className="ref-item__edit" role="group" aria-label={t('REFERENCE_PANEL.editing', { name: ref.name }) as string}>
@@ -362,45 +361,49 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
               </div>
             ) : (
               /* ── Display mode ── */
-              <div className="ref-item__row" onDoubleClick={() => startEdit(ref)}>
-                <span
-                  className="ref-item__type-icon"
-                  title={t(`REFERENCE_PANEL.types.${ref.ref_type}`) as string}
-                >
-                  {TYPE_ICONS[ref.ref_type as RefType]}
-                </span>
-                <span className="ref-item__name">@{ref.name}</span>
-                {ref.ref_type === 'image' && (
-                  <ReferenceImageThumbnail src={ref.value} name={ref.name} />
-                )}
-                <span className="ref-item__value">
-                  {ref.ref_type === 'image'
-                    ? <em>{t('REFERENCE_PANEL.imageValue')}</em>
-                    : ref.value || <em>{t('REFERENCE_PANEL.emptyValue')}</em>}
-                </span>
+              <div className="ref-item__row">
                 <button
-                  className="ref-item__btn ref-item__btn--edit"
-                  onClick={() => startEdit(ref)}
-                  aria-label={t('REFERENCE_PANEL.edit', { name: ref.name }) as string}
-                >
-                  <Pencil size={12} />
-                </button>
-                <button
-                  className="ref-item__btn ref-item__btn--usages"
+                  type="button"
+                  className="ref-item__link"
                   onClick={() => setUsageReference(ref)}
                   aria-label={t('REFERENCE_PANEL.viewUsages', { name: ref.name }) as string}
-                  title={t('REFERENCE_PANEL.viewUsages', { name: ref.name }) as string}
-                  disabled={!ref.id}
                 >
-                  <FileSearch size={12} />
+                  <span
+                    className="ref-item__type-icon"
+                    title={t(`REFERENCE_PANEL.types.${ref.ref_type}`) as string}
+                  >
+                    {TYPE_ICONS[ref.ref_type as RefType]}
+                  </span>
+                  <span className="ref-item__name">@{ref.name}</span>
+                  {ref.ref_type === 'image' && (
+                    <ReferenceImageThumbnail src={ref.value} name={ref.name} />
+                  )}
+                  <span className="ref-item__value">
+                    {ref.ref_type === 'image'
+                      ? <em>{t('REFERENCE_PANEL.imageValue')}</em>
+                      : ref.value || <em>{t('REFERENCE_PANEL.emptyValue')}</em>}
+                  </span>
                 </button>
-                <button
-                  className="ref-item__btn ref-item__btn--delete"
-                  onClick={() => removeReference(ref.id!)}
-                  aria-label={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
-                >
-                  <Trash2 size={12} />
-                </button>
+                <div className="ref-item__actions">
+                  <button
+                    type="button"
+                    className="ref-item__action-btn ref-item__action-btn--edit"
+                    onClick={() => startEdit(ref)}
+                    aria-label={t('REFERENCE_PANEL.edit', { name: ref.name }) as string}
+                    title={t('REFERENCE_PANEL.edit', { name: ref.name }) as string}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="ref-item__action-btn ref-item__action-btn--delete"
+                    onClick={() => ref.id && removeReference(ref.id)}
+                    aria-label={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
+                    title={t('REFERENCE_PANEL.delete', { name: ref.name }) as string}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             )}
           </div>
