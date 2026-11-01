@@ -45,6 +45,8 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
   const [editImageName, setEditImageName] = useState('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
 
   const searchRef = useRef<HTMLInputElement>(null);
   const newNameRef = useRef<HTMLInputElement>(null);
@@ -86,11 +88,27 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
     setEditName(ref.name);
     setEditImageName(ref.ref_type === 'image' && ref.value ? t('REFERENCE_PANEL.selectedImage') as string : '');
     setImageError('');
+    setEditError('');
   };
 
   const saveEdit = async (id: string) => {
-    await editReference(id, { name: editName, value: editValue });
+    setIsSavingEdit(true);
+    setEditError('');
+    try {
+      await editReference(id, { name: editName, value: editValue });
+      setEditingId(null);
+    } catch (error) {
+      logger.error('Failed to edit reference', error as Error, { id });
+      setEditError(t('REFERENCE_PANEL.editFailed') as string);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const cancelEdit = () => {
     setEditingId(null);
+    setEditError('');
+    setImageError('');
   };
 
   const chooseImage = async (onSelected: (assetRef: string, fileName: string) => void) => {
@@ -144,7 +162,7 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
 
   const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === 'Enter') { e.preventDefault(); action(); }
-    if (e.key === 'Escape') { setIsAdding(false); setEditingId(null); }
+    if (e.key === 'Escape') { setIsAdding(false); cancelEdit(); }
   };
 
   return (
@@ -186,7 +204,11 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
           <div key={ref.id} className="ref-item">
             {editingId === ref.id ? (
               /* ── Edit mode ── */
-              <div className="ref-item__edit">
+              <div className="ref-item__edit" role="group" aria-label={t('REFERENCE_PANEL.editing', { name: ref.name }) as string}>
+                <div className="ref-item__edit-status">
+                  <Pencil size={13} />
+                  <span>{t('REFERENCE_PANEL.editing', { name: ref.name })}</span>
+                </div>
                 <input
                   className="ref-item__input ref-item__input--name"
                   value={editName}
@@ -218,9 +240,25 @@ export default function ReferencesPanel({ panelRef, onClose }: ReferencesPanelPr
                   />
                 )}
                 {imageError && <span className="ref-item__error" role="alert">{imageError}</span>}
-                <button className="ref-item__btn ref-item__btn--save" onClick={() => saveEdit(ref.id!)} disabled={isUploadingImage}>
-                  {t('REFERENCE_PANEL.save')}
-                </button>
+                {editError && <span className="ref-item__error" role="alert">{editError}</span>}
+                <div className="ref-item__new-actions">
+                  <button
+                    type="button"
+                    className="ref-item__btn ref-item__btn--cancel"
+                    onClick={cancelEdit}
+                    disabled={isSavingEdit || isUploadingImage}
+                  >
+                    {t('REFERENCE_PANEL.cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    className="ref-item__btn ref-item__btn--save"
+                    onClick={() => saveEdit(ref.id!)}
+                    disabled={isSavingEdit || isUploadingImage}
+                  >
+                    {isSavingEdit ? t('REFERENCE_PANEL.saving') : t('REFERENCE_PANEL.save')}
+                  </button>
+                </div>
               </div>
             ) : (
               /* ── Display mode ── */

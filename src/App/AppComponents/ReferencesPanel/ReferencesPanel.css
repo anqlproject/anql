@@ -216,6 +216,20 @@
   border: 1px solid var(--border-color);
 }
 
+.ref-item__edit {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.ref-item__edit-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary-color);
+  font-size: var(--ui-text-xs);
+  font-weight: var(--font-semibold);
+}
+
 .ref-item__input {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
@@ -319,6 +333,11 @@
 
 .ref-item__btn--save:hover {
   filter: brightness(1.1);
+}
+
+.ref-item__btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 
 /* ── Footer ── */
