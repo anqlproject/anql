@@ -53,17 +53,37 @@
   justify-content: center;
   width: 26px;
   height: 26px;
+  padding: 0;
+  border: 0;
   border-radius: 6px;
   background: color-mix(in srgb, var(--surface-color) 85%, transparent);
   color: var(--primary-color);
   opacity: 0;
-  pointer-events: none;
+  cursor: pointer;
   transition: opacity 0.12s ease;
 }
 
 .image-reference-wrapper:hover .image-reference-indicator,
-.image-reference-wrapper:focus-within .image-reference-indicator {
+.image-reference-wrapper:focus-within .image-reference-indicator,
+.image-reference-indicator:focus-visible {
   opacity: 1;
+}
+
+.image-reference-name {
+  position: absolute;
+  top: 8px;
+  right: 40px;
+  z-index: 5;
+  max-width: min(240px, calc(100% - 56px));
+  overflow: hidden;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface-color) 92%, transparent);
+  color: var(--text-primary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .image-resizer {
