@@ -237,14 +237,15 @@ export default function ImageComponent({
       ? state.references.find((reference) => reference.id === referenceId)
       : undefined,
   );
+  const isLinkedReference = linkedReference?.ref_type === 'image';
   const referencesLoaded = useReferenceStore((state) => state.isLoaded);
   const loadReferences = useReferenceStore((state) => state.loadReferences);
   const currentSrc =
-    linkedReference?.ref_type === 'image' && linkedReference.value
+    isLinkedReference && linkedReference.value
       ? linkedReference.value
       : src;
   const currentAltText =
-    linkedReference?.ref_type === 'image' ? linkedReference.name : altText;
+    isLinkedReference ? linkedReference.name : altText;
   const imageRef = useRef<null | HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [isSelected, setSelected, clearSelection] =
@@ -506,10 +507,10 @@ export default function ImageComponent({
       <>
         <div
           draggable={draggable}
-          className={referenceId ? 'image-reference-wrapper' : undefined}
+          className={isLinkedReference ? 'image-reference-wrapper' : undefined}
           style={{ position: 'relative', display: 'inline-block' }}
         >
-          {referenceId && (
+          {isLinkedReference && (
             <span
               className="image-reference-indicator"
               title={`@${currentAltText}`}
