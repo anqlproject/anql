@@ -125,6 +125,14 @@
   min-height: 38px;
 }
 
+.ref-item__link[draggable='true'] {
+  cursor: grab;
+}
+
+.ref-item__link[draggable='true']:active {
+  cursor: grabbing;
+}
+
 .ref-item__row:hover {
   background: var(--action-hover);
 }

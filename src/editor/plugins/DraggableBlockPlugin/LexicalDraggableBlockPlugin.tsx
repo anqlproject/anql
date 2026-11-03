@@ -36,6 +36,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { REFERENCE_IMAGE_DRAG_TYPE } from '@/core/references/referenceDragTypes';
+
 import { Point } from './point';
 import { Rectangle } from './rect';
 
@@ -351,8 +353,18 @@ function useDraggableBlockMenu(
   }, [editor, anchorElem, draggableBlockElem, menuRef]);
 
   useEffect(() => {
-    function onDragover(event: DragEvent): boolean {
+    const hideReferenceTargetLine = () => {
       if (!isDraggingBlockRef.current) {
+        hideTargetLine(targetLineRef.current);
+      }
+    };
+
+    document.addEventListener('dragend', hideReferenceTargetLine);
+
+    function onDragover(event: DragEvent): boolean {
+      const isReferenceImageDrag = Array.from(event.dataTransfer?.types ?? [])
+        .includes(REFERENCE_IMAGE_DRAG_TYPE);
+      if (!isDraggingBlockRef.current && !isReferenceImageDrag) {
         return false;
       }
       const [isFileTransfer] = eventFiles(event);
@@ -377,6 +389,9 @@ function useDraggableBlockMenu(
         pageY / calculateZoomLevel(target),
         anchorElem,
       );
+      if (isReferenceImageDrag && event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'copy';
+      }
 
       if (IS_APPLE_WEBKIT) {
         let scrollerElem = scrollRef?.current || getParentElement(anchorElem);
@@ -489,6 +504,7 @@ function useDraggableBlockMenu(
     }
 
     return mergeRegister(
+      () => document.removeEventListener('dragend', hideReferenceTargetLine),
       editor.registerCommand(
         DRAGOVER_COMMAND,
         event => {

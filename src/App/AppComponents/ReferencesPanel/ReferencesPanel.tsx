@@ -9,6 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
+import {
+  REFERENCE_DRAG_TYPE,
+  REFERENCE_IMAGE_DRAG_TYPE,
+  REFERENCE_TEXT_DRAG_TYPE,
+} from '@/core/references/referenceDragTypes';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 
 import ReferenceUsagesPanel, { loadReferenceUsages } from './ReferenceUsagesPanel';
@@ -362,6 +367,18 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                 <button
                   type="button"
                   className="ref-item__link"
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = 'copy';
+                    event.dataTransfer.setData(
+                      REFERENCE_DRAG_TYPE,
+                      ref.id ?? `name:${ref.name}`,
+                    );
+                    event.dataTransfer.setData(
+                      ref.ref_type === 'image' ? REFERENCE_IMAGE_DRAG_TYPE : REFERENCE_TEXT_DRAG_TYPE,
+                      '1',
+                    );
+                  }}
                   onClick={() => setUsageReference(ref)}
                   aria-label={t('REFERENCE_PANEL.viewUsages', { name: ref.name }) as string}
                 >
