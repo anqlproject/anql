@@ -222,7 +222,19 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const startAdd = () => {
     setEditingId(null);
     setNewGroup(selectedGroup ? getGroupName(selectedGroup) : '');
+    setNewName('');
+    setNewValue('');
+    setNewType('text');
+    setNewImageName('');
+    setNameError('');
+    setImageError('');
     setIsAdding(true);
+  };
+
+  const cancelAdd = () => {
+    setIsAdding(false);
+    setNameError('');
+    setImageError('');
   };
 
   const saveEdit = async (id: string) => {
@@ -296,7 +308,10 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
 
   const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === 'Enter') { e.preventDefault(); action(); }
-    if (e.key === 'Escape') { setIsAdding(false); cancelEdit(); }
+    if (e.key === 'Escape') {
+      if (isAdding) cancelAdd();
+      else cancelEdit();
+    }
   };
 
   return (
@@ -310,56 +325,160 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       >
       {/* ── Header ── */}
       <div className="ref-panel__header">
-        <div
-          className="ref-panel__view-tabs"
-          role="tablist"
-          aria-label={t('REFERENCE_PANEL.views') as string}
-        >
-          {[null, ...groups].map((groupPath, index) => (
-            <button
-              key={groupPath ?? 'all'}
-              id={groupPath ? `reference-view-tab-${index}` : 'reference-view-tab-all'}
-              type="button"
-              role="tab"
-              aria-selected={selectedGroup === groupPath}
-              className={`ref-panel__view-tab${selectedGroup === groupPath ? ' is-active' : ''}`}
-              onClick={() => {
-                setSelectedGroup(groupPath);
-                setSearch('');
-              }}
-            >
-              {groupPath ? getGroupName(groupPath) : t('REFERENCE_PANEL.all')}
-            </button>
-          ))}
-        </div>
+        {isAdding ? (
+          <div className="ref-panel__create-heading">
+            <Plus size={15} aria-hidden="true" />
+            <span>{t('REFERENCE_PANEL.newReference')}</span>
+          </div>
+        ) : (
+          <div
+            className="ref-panel__view-tabs"
+            role="tablist"
+            aria-label={t('REFERENCE_PANEL.views') as string}
+          >
+            {[null, ...groups].map((groupPath, index) => (
+              <button
+                key={groupPath ?? 'all'}
+                id={groupPath ? `reference-view-tab-${index}` : 'reference-view-tab-all'}
+                type="button"
+                role="tab"
+                aria-selected={selectedGroup === groupPath}
+                className={`ref-panel__view-tab${selectedGroup === groupPath ? ' is-active' : ''}`}
+                onClick={() => {
+                  setSelectedGroup(groupPath);
+                  setSearch('');
+                }}
+              >
+                {groupPath ? getGroupName(groupPath) : t('REFERENCE_PANEL.all')}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="ref-panel__search-wrap">
-        <Search size={13} className="ref-panel__search-icon" />
-        <input
-          ref={searchRef}
-          className="ref-panel__search"
-          placeholder={t('REFERENCE_PANEL.searchPlaceholder') as string}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      {!isAdding && (
+        <div className="ref-panel__search-wrap">
+          <Search size={13} className="ref-panel__search-icon" />
+          <input
+            ref={searchRef}
+            className="ref-panel__search"
+            placeholder={t('REFERENCE_PANEL.searchPlaceholder') as string}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      )}
 
       {/* ── List ── */}
       <div
         className="ref-panel__list"
-        role="tabpanel"
-        aria-labelledby={selectedGroup
+        role={isAdding ? undefined : 'tabpanel'}
+        aria-labelledby={isAdding ? undefined : selectedGroup
           ? `reference-view-tab-${groups.indexOf(selectedGroup) + 1}`
           : 'reference-view-tab-all'}
       >
-        {filtered.length === 0 && !isAdding && (
+        {isAdding ? (
+          <div className="ref-panel__create-content">
+            <div className="ref-item__new-form">
+              <div
+                className="ref-item__type-tabs"
+                role="tablist"
+                aria-label={t('REFERENCE_PANEL.typeSelection') as string}
+              >
+                {(['text', 'image', 'code'] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    role="tab"
+                    aria-selected={newType === type}
+                    aria-controls="ref-item-new-value-panel"
+                    className={`ref-item__type-tab${newType === type ? ' is-active' : ''}`}
+                    onClick={() => {
+                      setNewType(type);
+                      setNewValue('');
+                      setNewImageName('');
+                      setImageError('');
+                    }}
+                  >
+                    {TYPE_ICONS[type]}
+                    {t(`REFERENCE_PANEL.types.${type}`)}
+                  </button>
+                ))}
+              </div>
+              <input
+                ref={newNameRef}
+                className="ref-item__input ref-item__input--name"
+                placeholder={t('REFERENCE_PANEL.newNamePlaceholder') as string}
+                value={newName}
+                onChange={(e) => {
+                  setNewName(e.target.value);
+                  setNameError('');
+                }}
+                onKeyDown={(e) => handleKeyDown(e, handleAdd)}
+              />
+              <label className="ref-item__group-field">
+                <span>{t('REFERENCE_PANEL.group')}</span>
+                <input
+                  className="ref-item__input"
+                  value={newGroup}
+                  onChange={(event) => setNewGroup(event.target.value)}
+                  placeholder={t('REFERENCE_PANEL.ungrouped') as string}
+                  list="reference-group-options"
+                />
+              </label>
+              {nameError && <span className="ref-item__error" role="alert">{nameError}</span>}
+              <div
+                id="ref-item-new-value-panel"
+                role="tabpanel"
+                className="ref-item__type-panel"
+              >
+                {newType === 'image' ? (
+                  <button
+                    type="button"
+                    className="ref-item__image-picker"
+                    onClick={() => chooseImage((assetRef, fileName) => {
+                      setNewValue(assetRef);
+                      setNewImageName(fileName);
+                    })}
+                    disabled={isUploadingImage}
+                  >
+                    <Image size={14} />
+                    {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : newImageName || t('REFERENCE_PANEL.chooseImage')}
+                  </button>
+                ) : newType === 'code' ? (
+                  <textarea
+                    className="ref-item__input ref-item__input--code"
+                    placeholder={t('REFERENCE_PANEL.codePlaceholder') as string}
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelAdd();
+                      }
+                    }}
+                    spellCheck={false}
+                  />
+                ) : (
+                  <input
+                    className="ref-item__input"
+                    placeholder={t('REFERENCE_PANEL.valuePlaceholder') as string}
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, handleAdd)}
+                  />
+                )}
+              </div>
+              {imageError && <span className="ref-item__error" role="alert">{imageError}</span>}
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="ref-panel__empty">
             {search ? t('REFERENCE_PANEL.noResults') : t('REFERENCE_PANEL.empty')}
           </div>
-        )}
+        ) : null}
 
-        {filtered.map((ref) => (
+        {!isAdding && filtered.map((ref) => (
           <div
             key={ref.id ?? ref.name}
             className="ref-item"
@@ -531,115 +650,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
           </div>
         ))}
 
-        {/* ── Add form ── */}
-        {isAdding && (
-          <div className="ref-item ref-item--new">
-            <div className="ref-item__new-form">
-              <input
-                ref={newNameRef}
-                className="ref-item__input ref-item__input--name"
-                placeholder={t('REFERENCE_PANEL.newNamePlaceholder') as string}
-                value={newName}
-                onChange={(e) => {
-                  setNewName(e.target.value);
-                  setNameError('');
-                }}
-                onKeyDown={(e) => handleKeyDown(e, handleAdd)}
-              />
-              <label className="ref-item__group-field">
-                <span>{t('REFERENCE_PANEL.group')}</span>
-                <input
-                  className="ref-item__input"
-                  value={newGroup}
-                  onChange={(event) => setNewGroup(event.target.value)}
-                  placeholder={t('REFERENCE_PANEL.ungrouped') as string}
-                  list="reference-group-options"
-                />
-              </label>
-              {nameError && <span className="ref-item__error" role="alert">{nameError}</span>}
-              <div
-                className="ref-item__type-tabs"
-                role="tablist"
-                aria-label={t('REFERENCE_PANEL.typeSelection') as string}
-              >
-                {(['text', 'image', 'code'] as const).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    role="tab"
-                    aria-selected={newType === type}
-                    aria-controls="ref-item-new-value-panel"
-                    className={`ref-item__type-tab${newType === type ? ' is-active' : ''}`}
-                    onClick={() => {
-                      setNewType(type);
-                      setNewValue('');
-                      setNewImageName('');
-                      setImageError('');
-                    }}
-                  >
-                    {TYPE_ICONS[type]}
-                    {t(`REFERENCE_PANEL.types.${type}`)}
-                  </button>
-                ))}
-              </div>
-              <div
-                id="ref-item-new-value-panel"
-                role="tabpanel"
-                className="ref-item__type-panel"
-              >
-                {newType === 'image' ? (
-                  <button
-                    type="button"
-                    className="ref-item__image-picker"
-                    onClick={() => chooseImage((assetRef, fileName) => {
-                      setNewValue(assetRef);
-                      setNewImageName(fileName);
-                    })}
-                    disabled={isUploadingImage}
-                  >
-                    <Image size={14} />
-                    {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : newImageName || t('REFERENCE_PANEL.chooseImage')}
-                  </button>
-                ) : newType === 'code' ? (
-                  <textarea
-                    className="ref-item__input ref-item__input--code"
-                    placeholder={t('REFERENCE_PANEL.codePlaceholder') as string}
-                    value={newValue}
-                    onChange={(e) => setNewValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        e.preventDefault();
-                        setIsAdding(false);
-                      }
-                    }}
-                    spellCheck={false}
-                  />
-                ) : (
-                  <input
-                    className="ref-item__input"
-                    placeholder={t('REFERENCE_PANEL.valuePlaceholder') as string}
-                    value={newValue}
-                    onChange={(e) => setNewValue(e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, handleAdd)}
-                  />
-                )}
-              </div>
-              {imageError && <span className="ref-item__error" role="alert">{imageError}</span>}
-              <div className="ref-item__new-actions">
-                <button className="ref-item__btn ref-item__btn--cancel" onClick={() => setIsAdding(false)}>
-                  {t('REFERENCE_PANEL.cancel')}
-                </button>
-                <button
-                  className="ref-item__btn ref-item__btn--save"
-                  onClick={handleAdd}
-                  disabled={isUploadingImage || (newType === 'image' && !newValue)}
-                >
-                  {t('REFERENCE_PANEL.create')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <datalist id="reference-group-options">
@@ -650,10 +660,31 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
 
       {/* ── Footer ── */}
       <div className="ref-panel__footer">
-        <button className="ref-panel__add-btn" onClick={startAdd}>
-          <Plus size={14} />
-          {t('REFERENCE_PANEL.newReference')}
-        </button>
+        {isAdding ? (
+          <div className="ref-panel__create-actions">
+            <button
+              type="button"
+              className="ref-item__btn ref-item__btn--cancel"
+              onClick={cancelAdd}
+              disabled={isUploadingImage}
+            >
+              {t('REFERENCE_PANEL.cancel')}
+            </button>
+            <button
+              type="button"
+              className="ref-item__btn ref-item__btn--save"
+              onClick={handleAdd}
+              disabled={isUploadingImage || !newName.trim() || (newType === 'image' && !newValue)}
+            >
+              {t('REFERENCE_PANEL.create')}
+            </button>
+          </div>
+        ) : (
+          <button className="ref-panel__add-btn" onClick={startAdd}>
+            <Plus size={14} />
+            {t('REFERENCE_PANEL.newReference')}
+          </button>
+        )}
       </div>
       </div>
       {usageReference && (
