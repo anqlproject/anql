@@ -1,6 +1,7 @@
 .floating-text-format-popup {
   display: flex;
   align-items: center;
+  animation: toolbar-appear 0.16s ease-out both;
   padding: 6px;
   border-radius: 12px;
   height: 40px;
@@ -14,6 +15,17 @@
   background: var(--surface-color);
   gap: 2px;
   transition: border-radius 0.2s ease;
+}
+
+@keyframes toolbar-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* When expanded: flatten the inner edges so expansion sections connect visually */
@@ -246,6 +258,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .floating-text-format-popup {
+    animation: none;
+  }
+
   .toolbar-expansion-left button.popup-item,
   .toolbar-expansion-right button.popup-item,
   .floating-text-format-popup .popup-item,
