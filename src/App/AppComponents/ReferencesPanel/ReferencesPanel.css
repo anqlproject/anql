@@ -76,10 +76,17 @@
 /* ── Main views ── */
 .ref-panel__view-tabs {
   display: flex;
+  width: 100%;
   gap: 2px;
   padding: 2px;
+  overflow-x: auto;
   border-radius: 7px;
   background: transparent;
+  scrollbar-width: none;
+}
+
+.ref-panel__view-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .ref-panel__view-tab {
@@ -101,7 +108,7 @@
 }
 
 .ref-panel__view-tab.is-active {
-  background: var(--panel-color);
+  background: var(--surface-color);
   color: var(--text-primary);
   font-weight: var(--font-medium);
   box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
@@ -110,66 +117,6 @@
 .ref-panel__view-tab:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 1px;
-}
-
-.ref-panel__group-item {
-  display: flex;
-  width: calc(100% - 16px);
-  align-items: center;
-  justify-content: space-between;
-  margin: 3px 8px;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: var(--ui-text-sm);
-  text-align: left;
-  cursor: pointer;
-}
-
-.ref-panel__group-item:hover,
-.ref-panel__group-item:focus-visible {
-  background: var(--action-hover);
-}
-
-.ref-panel__group-item:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 1px;
-}
-
-.ref-panel__group-count {
-  min-width: 22px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--ui-text-xs);
-  text-align: center;
-}
-
-.ref-panel__group-heading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px 2px;
-  color: var(--text-primary);
-  font-size: var(--ui-text-sm);
-  font-weight: var(--font-semibold);
-}
-
-.ref-panel__back-btn {
-  padding: 4px 7px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--primary-color);
-  font-size: var(--ui-text-xs);
-  cursor: pointer;
-}
-
-.ref-panel__back-btn:hover {
-  background: var(--action-hover);
 }
 
 /* ── List ── */

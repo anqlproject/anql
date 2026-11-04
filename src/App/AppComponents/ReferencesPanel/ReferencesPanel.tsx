@@ -24,7 +24,6 @@ import { useReferenceStore } from '@/core/references/useReferenceStore';
 import ReferenceUsagesPanel, { loadReferenceUsages } from './ReferenceUsagesPanel';
 
 type RefType = ReferenceJson['ref_type'];
-type ReferenceView = 'all' | 'groups';
 const GROUP_PATH_PREFIX = 'groups/';
 
 function getGroupName(path: string): string {
@@ -104,7 +103,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
 
   const [search, setSearch] = useState('');
-  const [activeView, setActiveView] = useState<ReferenceView>('all');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -174,13 +172,11 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       .map((reference) => normalizeReferencePath(reference.path))
       .filter(Boolean),
   )].sort((a, b) => getGroupName(a).localeCompare(getGroupName(b)));
-  const referencesToShow = activeView === 'all'
-    ? activeReferences
-    : selectedGroup
-      ? activeReferences.filter(
-          (reference) => normalizeReferencePath(reference.path) === selectedGroup,
-        )
-      : [];
+  const referencesToShow = selectedGroup
+    ? activeReferences.filter(
+        (reference) => normalizeReferencePath(reference.path) === selectedGroup,
+      )
+    : activeReferences;
   const filtered = referencesToShow.filter((reference) =>
     reference.name.toLowerCase().includes(search.toLowerCase()) ||
     reference.value.toLowerCase().includes(search.toLowerCase())
@@ -202,13 +198,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
 
     const newGroupPath = getGroupPath(newGroup);
     await addReference(newName, newType, newValue, newGroupPath);
-    if (newGroupPath) {
-      setActiveView('groups');
-      setSelectedGroup(newGroupPath);
-    } else {
-      setActiveView('all');
-      setSelectedGroup(null);
-    }
+    setSelectedGroup(newGroupPath || null);
     setNewName('');
     setNewValue('');
     setNewType('text');
@@ -232,9 +222,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const startAdd = () => {
     setEditingId(null);
     setNewGroup(selectedGroup ? getGroupName(selectedGroup) : '');
-    if (activeView === 'groups' && selectedGroup === null) {
-      setActiveView('all');
-    }
     setIsAdding(true);
   };
 
@@ -328,67 +315,25 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
           role="tablist"
           aria-label={t('REFERENCE_PANEL.views') as string}
         >
-          {(['all', 'groups'] as const).map((view) => (
+          {[null, ...groups].map((groupPath, index) => (
             <button
-              key={view}
-              id={`reference-view-tab-${view}`}
+              key={groupPath ?? 'all'}
+              id={groupPath ? `reference-view-tab-${index}` : 'reference-view-tab-all'}
               type="button"
               role="tab"
-              aria-selected={activeView === view}
-              className={`ref-panel__view-tab${activeView === view ? ' is-active' : ''}`}
+              aria-selected={selectedGroup === groupPath}
+              className={`ref-panel__view-tab${selectedGroup === groupPath ? ' is-active' : ''}`}
               onClick={() => {
-                setActiveView(view);
-                setSelectedGroup(null);
+                setSelectedGroup(groupPath);
                 setSearch('');
               }}
             >
-              {t(view === 'all' ? 'REFERENCE_PANEL.all' : 'REFERENCE_PANEL.groupsTab')}
+              {groupPath ? getGroupName(groupPath) : t('REFERENCE_PANEL.all')}
             </button>
           ))}
         </div>
       </div>
 
-      {activeView === 'groups' && selectedGroup === null ? (
-        <div className="ref-panel__list" role="tabpanel" aria-labelledby="reference-view-tab-groups">
-          {groups.length === 0 ? (
-            <div className="ref-panel__empty">{t('REFERENCE_PANEL.noGroups')}</div>
-          ) : groups.map((groupPath) => {
-            const groupReferenceCount = activeReferences.filter(
-              (reference) => normalizeReferencePath(reference.path) === groupPath,
-            ).length;
-            return (
-              <button
-                key={groupPath}
-                type="button"
-                className="ref-panel__group-item"
-                onClick={() => {
-                  setSelectedGroup(groupPath);
-                  setSearch('');
-                }}
-              >
-                <span>{getGroupName(groupPath)}</span>
-                <span className="ref-panel__group-count">{groupReferenceCount}</span>
-              </button>
-            );
-          })}
-        </div>
-      ) : (
-        <>
-        {activeView === 'groups' && selectedGroup !== null && (
-        <div className="ref-panel__group-heading">
-          <button
-            type="button"
-            className="ref-panel__back-btn"
-            onClick={() => {
-              setSelectedGroup(null);
-              setSearch('');
-            }}
-          >
-            {t('REFERENCE_PANEL.backToGroups')}
-          </button>
-          <span>{getGroupName(selectedGroup)}</span>
-        </div>
-      )}
       <div className="ref-panel__search-wrap">
         <Search size={13} className="ref-panel__search-icon" />
         <input
@@ -404,7 +349,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       <div
         className="ref-panel__list"
         role="tabpanel"
-        aria-labelledby={`reference-view-tab-${activeView}`}
+        aria-labelledby={selectedGroup
+          ? `reference-view-tab-${groups.indexOf(selectedGroup) + 1}`
+          : 'reference-view-tab-all'}
       >
         {filtered.length === 0 && !isAdding && (
           <div className="ref-panel__empty">
@@ -694,8 +641,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
           </div>
         )}
       </div>
-        </>
-      )}
 
       <datalist id="reference-group-options">
         {groups.map((groupPath) => (
