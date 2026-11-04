@@ -5,7 +5,7 @@
   left: 8px;
   width: min(320px, calc(100vw - 16px));
   max-height: min(540px, calc(100vh - 48px));
-  background: var(--panel-color);
+  background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 12px 32px rgb(0 0 0 / 14%);
@@ -123,7 +123,7 @@
 
 .ref-panel__view-tab.is-active {
   border-color: color-mix(in srgb, var(--primary-color) 40%, var(--border-color));
-  background: color-mix(in srgb, var(--primary-color) 16%, var(--panel-color));
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--surface-color));
   color: var(--text-primary);
   font-weight: var(--font-medium);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
@@ -439,7 +439,7 @@
 
 .ref-item__type-tab.is-active {
   border-color: color-mix(in srgb, var(--primary-color) 40%, var(--border-color));
-  background: color-mix(in srgb, var(--primary-color) 16%, var(--panel-color));
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--surface-color));
   color: var(--text-primary);
   font-weight: var(--font-medium);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
@@ -498,7 +498,7 @@
 /* ── Footer ── */
 .ref-panel__footer {
   padding: 10px 12px;
-  background: var(--panel-color);
+  background: var(--surface-color);
   flex-shrink: 0;
 }
 
@@ -516,7 +516,7 @@
   width: 100%;
   height: 34px;
   padding: 0 12px;
-  background: var(--panel-color);
+  background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: 7px;
   color: var(--primary-color);
@@ -533,7 +533,7 @@
 }
 
 .ref-panel__add-btn:hover {
-  background: color-mix(in srgb, var(--primary-color) 7%, var(--panel-color));
+  background: color-mix(in srgb, var(--primary-color) 7%, var(--surface-color));
   border-color: color-mix(in srgb, var(--primary-color) 36%, var(--border-color));
 }
 
@@ -543,7 +543,7 @@
 }
 
 .ref-panel__add-btn:active {
-  background: color-mix(in srgb, var(--primary-color) 12%, var(--panel-color));
+  background: color-mix(in srgb, var(--primary-color) 12%, var(--surface-color));
 }
 
 .ref-panel__add-btn:focus-visible {
