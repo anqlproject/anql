@@ -7,7 +7,7 @@ import {
 } from '@lexical/code';
 import { getCodeThemeOptions } from '@lexical/code-shiki';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getNearestNodeFromDOMNode, $getNodeByKey, $getState, $nodesOfType, $setState } from 'lexical';
+import { $createTextNode, $getNearestNodeFromDOMNode, $getNodeByKey, $getState, $nodesOfType, $setState } from 'lexical';
 import { ChevronDown } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 
@@ -15,7 +15,10 @@ import { useScrollLock } from '@/App/hooks/useScrollLock';
 import { Button } from '@/components/ui/button';
 import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
-import { codeReferenceIdState } from '@/editor/plugins/ReferencePlugin/referenceState';
+import {
+  codeReferenceIdState,
+  codeReferenceUpdatedAtState,
+} from '@/editor/plugins/ReferencePlugin/referenceState';
 
 import { CODE_LANGUAGES, CODE_THEMES } from '../CodeHighlightShikiPlugin';
 
@@ -185,18 +188,31 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
 
   useEffect(() => {
     if (!referencesLoaded || !referenceId) return;
-    if (references.some((reference) => reference.id === referenceId)) return;
+    const linkedReference = references.find((reference) => reference.id === referenceId);
 
     editor.update(() => {
       const codeNode = $getNodeByKey(codeNodeKey);
-      if (
-        $isCodeNode(codeNode) &&
-        $getState(codeNode, codeReferenceIdState) === referenceId
-      ) {
+      if (!$isCodeNode(codeNode) || $getState(codeNode, codeReferenceIdState) !== referenceId) {
+        return;
+      }
+
+      if (!linkedReference) {
         $setState(codeNode, codeReferenceIdState, undefined);
+        $setState(codeNode, codeReferenceUpdatedAtState, undefined);
+        return;
+      }
+
+      if (linkedReference.ref_type !== 'code') return;
+
+      const lastSyncedAt = $getState(codeNode, codeReferenceUpdatedAtState);
+      if (lastSyncedAt !== linkedReference.updated_at) {
+        if (codeNode.getTextContent() !== linkedReference.value) {
+          codeNode.clear().append($createTextNode(linkedReference.value));
+        }
+        $setState(codeNode, codeReferenceUpdatedAtState, linkedReference.updated_at);
       }
     });
-    setShowReferenceName(false);
+    if (!linkedReference) setShowReferenceName(false);
   }, [codeNodeKey, editor, referenceId, references, referencesLoaded]);
 
   useEffect(() => {

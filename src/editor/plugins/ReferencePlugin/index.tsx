@@ -27,7 +27,7 @@ import { useReferenceStore } from '@/core/references/useReferenceStore';
 import { $createImageNode } from '@/editor/nodes/ImageNode/ImageNode';
 import { $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
 
-import { codeReferenceIdState } from './referenceState';
+import { codeReferenceIdState, codeReferenceUpdatedAtState } from './referenceState';
 
 class ReferenceMenuOption extends MenuOption {
   reference?: ReferenceJson;
@@ -228,6 +228,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           const codeNode = $createCodeNode().append($createTextNode(ref.value));
           if (ref.id) {
             $setState(codeNode, codeReferenceIdState, ref.id);
+            $setState(codeNode, codeReferenceUpdatedAtState, ref.updated_at);
           }
           if (parentBlock.getTextContent().trim() === '') {
             parentBlock.replace(codeNode);
