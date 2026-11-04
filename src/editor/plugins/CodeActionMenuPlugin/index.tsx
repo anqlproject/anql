@@ -302,6 +302,11 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
             setShowReferenceName((visible) => !visible);
           }}
         >
+          {showReferenceName && (
+            <span className="code-action-reference-name">
+              @{referenceName}
+            </span>
+          )}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"
@@ -322,11 +327,6 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
             <path d="M12 11v6" />
             <path d="M16 7a4 4 0 0 1 4 4v6" />
           </svg>
-          {showReferenceName && (
-            <span className="code-action-reference-name">
-              {referenceName}
-            </span>
-          )}
         </button>
       )}
     </div>

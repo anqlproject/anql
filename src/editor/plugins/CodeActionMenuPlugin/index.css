@@ -55,7 +55,7 @@
 .code-action-reference-button {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 6px;
   height: 22px;
   max-width: 220px;
@@ -65,7 +65,7 @@
   margin-left: 1px;
   border-radius: 4px;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--primary-color);
   cursor: pointer;
   font-size: 11px;
   white-space: nowrap;
@@ -73,11 +73,14 @@
 
 .code-action-reference-button:hover,
 .code-action-reference-button.is-active {
-  background: var(--action-hover);
-  color: var(--text-primary);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
 }
 
 .code-action-reference-name {
+  min-width: 0;
+  max-width: 180px;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
 }
