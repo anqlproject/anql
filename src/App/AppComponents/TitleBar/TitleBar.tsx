@@ -9,11 +9,12 @@ import { useTranslation } from 'react-i18next';
 import { DocumentMenu } from "@/App/AppComponents/DocumentMenu/DocumentMenu";
 import ReferencesPanel from "@/App/AppComponents/ReferencesPanel/ReferencesPanel";
 import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
+import { useGlobalToast } from "@/App/hooks/useGlobalToast";
 import { useGlobalStore } from "@/App/store/useGlobalStore";
 import { Dialog } from "@/components/custom/Dialog/Dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ReferenceJson } from "@/core/database/useReferenceDatabase";
-import { DIMENSIONS } from "@/core/global/defaultValues";
+import { DIMENSIONS, TOAST_DURATION } from "@/core/global/defaultValues";
 import { logger } from "@/core/logger";
 import { useReferenceStore } from "@/core/references/useReferenceStore";
 
@@ -22,14 +23,13 @@ export default function TitleBar(): JSX.Element {
   const appWindow = getCurrentWindow();
   const [openExitDialog, setOpenExitDialog] = useState(false);
   const [refPanelOpen, setRefPanelOpen] = useState(false);
-  const [referenceToDelete, setReferenceToDelete] = useState<ReferenceJson | null>(null);
-  const [isDeletingReference, setIsDeletingReference] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
   const { setExitApp } = useGlobalShortcut();
+  const { showToast, dismissToast } = useGlobalToast();
   const isMac = useGlobalStore((state) => state.isMac);
   const refBtnRef = useRef<HTMLButtonElement>(null);
   const refPanelRef = useRef<HTMLDivElement>(null);
   const moveReferenceToTrash = useReferenceStore((state) => state.moveReferenceToTrash);
+  const restoreReference = useReferenceStore((state) => state.restoreReference);
 
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault();
@@ -56,25 +56,51 @@ export default function TitleBar(): JSX.Element {
 
   const [editor] = useLexicalComposerContext();
 
-  const confirmDeleteReference = async () => {
-    if (!referenceToDelete) return;
-    if (!referenceToDelete.id) {
-      setDeleteError(t('REFERENCE_PANEL.deleteFailed') as string);
-      return;
-    }
-
-    setIsDeletingReference(true);
-    setDeleteError('');
+  const handleMoveReferenceToTrash = async (reference: ReferenceJson) => {
+    if (!reference.id) return;
+    const referenceId = reference.id;
     try {
-      await moveReferenceToTrash(referenceToDelete.id);
-      setReferenceToDelete(null);
+      await moveReferenceToTrash(referenceId);
+      const toastIdRef = { current: '' };
+      const toastContent = (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>{t('REFERENCE_PANEL.movedToTrash', { name: reference.name })}</span>
+          <button
+            onClick={async () => {
+              dismissToast(toastIdRef.current);
+              try {
+                await restoreReference(referenceId);
+                showToast(t('REFERENCE_PANEL.restored', { name: reference.name }), 'info', TOAST_DURATION);
+              } catch (error) {
+                logger.error('Failed to restore reference from toast', error as Error, {
+                  referenceId,
+                });
+                showToast(t('REFERENCE_PANEL.restoreFailed') as string, 'error');
+              }
+            }}
+            style={{
+              background: 'transparent',
+              border: '1px solid currentColor',
+              borderRadius: '4px',
+              padding: '2px 8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              color: 'inherit',
+              opacity: 0.9,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {t('FEEDBACK.restore')}
+          </button>
+        </span>
+      );
+      toastIdRef.current = showToast(toastContent, 'success', TOAST_DURATION);
     } catch (error) {
       logger.error('Failed to move reference to trash', error as Error, {
-        referenceId: referenceToDelete.id,
+        referenceId,
       });
-      setDeleteError(t('REFERENCE_PANEL.deleteFailed') as string);
-    } finally {
-      setIsDeletingReference(false);
+      showToast(t('REFERENCE_PANEL.deleteFailed') as string, 'error');
     }
   };
 
@@ -161,49 +187,12 @@ export default function TitleBar(): JSX.Element {
             <ReferencesPanel
               panelRef={refPanelRef}
               onClose={() => setRefPanelOpen(false)}
-              onRequestDelete={(reference) => {
-                setDeleteError('');
-                setReferenceToDelete(reference);
-              }}
+              onRequestDelete={handleMoveReferenceToTrash}
             />,
             document.body,
           )
         )}
       </div>
-
-      <Dialog
-        isOpen={referenceToDelete !== null}
-        onClose={() => {
-          if (!isDeletingReference) {
-            setReferenceToDelete(null);
-            setDeleteError('');
-          }
-        }}
-        title={t('REFERENCE_PANEL.moveToTrashTitle') as string}
-        description={
-          <div>
-            <p>{t('REFERENCE_PANEL.confirmMoveToTrash', { name: referenceToDelete?.name ?? '' })}</p>
-            {deleteError && <p role="alert">{deleteError}</p>}
-          </div>
-        }
-        mode="urgent"
-        leftButton={{
-          text: t('REFERENCE_PANEL.cancel') as string,
-          onClick: () => {
-            setReferenceToDelete(null);
-            setDeleteError('');
-          },
-          disabled: isDeletingReference,
-        }}
-        rightButton={{
-          text: isDeletingReference
-            ? t('REFERENCE_PANEL.deleting') as string
-            : t('REFERENCE_PANEL.moveToTrash') as string,
-          onClick: confirmDeleteReference,
-          variant: 'danger',
-          disabled: isDeletingReference,
-        }}
-      />
 
       {openExitDialog && (
         <Dialog
