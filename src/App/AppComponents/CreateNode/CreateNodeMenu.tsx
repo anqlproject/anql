@@ -121,7 +121,90 @@ export default function CreateNodeMenu({
 
   const menuItems: Array<MenuItemProps> = [
     {
-      icon: <Code2Icon size={ICON_SIZES.default}/>,
+      title: t('NODES.h1') as string,
+      icon: <Heading1Icon size={ICON_SIZES.default} />,
+      onClick: () => {
+        applyToNodes((node, selection) => {
+          if (node.__type !== "h1") {
+            $setBlocksType(selection, () => $createHeadingNode("h1"));
+          }
+        });
+      },
+    },
+    {
+      title: t('NODES.h2') as string,
+      icon: <Heading2Icon size={ICON_SIZES.default} />,
+      onClick: () => {
+        applyToNodes((node, selection) => {
+          if (node.__type !== "h2") {
+            $setBlocksType(selection, () => $createHeadingNode("h2"));
+          }
+        });
+      },
+    },
+    {
+      title: t('NODES.h3') as string,
+      icon: <Heading3Icon size={ICON_SIZES.default} />,
+      onClick: () => {
+        applyToNodes((node, selection) => {
+          if (node.__type !== "h3") {
+            $setBlocksType(selection, () => $createHeadingNode("h3"));
+          }
+        });
+      },
+    },
+    {
+      title: t('NODE_MENU.bulletList') as string,
+      icon: <ListIcon size={ICON_SIZES.default} />,
+      onClick: () => {
+        applyToNodes((node, selection) => {
+          if ($isListNode(node) && node.getListType() === "bullet") {
+            $setBlocksType(selection, () => $createParagraphNode());
+          } else {
+            $setBlocksType(selection, () => $createListNode("bullet"));
+          }
+        });
+      },
+    },
+    {
+      title: t('NODE_MENU.numberList') as string,
+      icon: <ListOrderedIcon size={ICON_SIZES.default} />,
+      onClick: () => {
+        applyToNodes((node, selection) => {
+          if ($isListNode(node) && node.getListType() === "number") {
+            $setBlocksType(selection, () => $createParagraphNode());
+          } else {
+            $setBlocksType(selection, () => $createListNode("number"));
+          }
+        });
+      },
+    },
+    {
+      title: t('NODE_MENU.checkList') as string,
+      icon: <ListCheckIcon size={ICON_SIZES.default} />,
+      onClick: () => {
+        applyToNodes((node, selection) => {
+          if ($isListNode(node) && node.getListType() === "check") {
+            $setBlocksType(selection, () => $createParagraphNode());
+          } else {
+            $setBlocksType(selection, () => $createListNode("check"));
+          }
+        });
+      },
+    },
+    {
+      title: t('NODES.quote') as string,
+      icon: <QuoteIcon size={ICON_SIZES.default} />,
+      onClick: () => {
+        applyToNodes((node, selection) => {
+          if (node.__type !== "quote") {
+            $setBlocksType(selection, () => $createQuoteNode());
+          }
+        });
+      },
+    },
+    {
+      icon: <Code2Icon size={ICON_SIZES.default} />,
       title: t('NODES.code') as string,
       variant: "default",
       onClick: () => {
@@ -143,18 +226,18 @@ export default function CreateNodeMenu({
       },
     },
     {
-      icon: <LineChartIcon size={ICON_SIZES.default} />,
-      title: t('NODES.line') as string,
-      onClick: () => {
-        editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
-        setIsMenuOpen(false);
-      },
-    },
-    {
       icon: <Calculator size={ICON_SIZES.default} />,
       title: t('INLINES.math') as string,
       onClick: () => {
         editor.dispatchCommand(INSERT_MATH_COMMAND, undefined);
+        setIsMenuOpen(false);
+      },
+    },
+    {
+      icon: <LineChartIcon size={ICON_SIZES.default} />,
+      title: t('NODES.line') as string,
+      onClick: () => {
+        editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
         setIsMenuOpen(false);
       },
     },
@@ -194,89 +277,6 @@ export default function CreateNodeMenu({
       onClick: () => {
         editor.dispatchCommand(INSERT_CHART_COMMAND, undefined);
         setIsMenuOpen(false);
-      },
-    },
-    {
-      title: t('NODES.h1') as string,
-      icon: <Heading1Icon size={ICON_SIZES.default} />,
-      onClick: () => {
-        applyToNodes((node, selection) => {
-          if (node.__type !== "h1") {
-            $setBlocksType(selection, () => $createHeadingNode("h1"));
-          }
-        });
-      },
-    },
-    {
-      title: t('NODES.h2') as string,
-      icon: <Heading2Icon size={ICON_SIZES.default} />,
-      onClick: () => {
-        applyToNodes((node, selection) => {
-          if (node.__type !== "h2") {
-            $setBlocksType(selection, () => $createHeadingNode("h2"));
-          }
-        });
-      },
-    },
-    {
-      title: t('NODES.h3') as string,
-      icon: <Heading3Icon size={ICON_SIZES.default} />,
-      onClick: () => {
-        applyToNodes((node, selection) => {
-          if (node.__type !== "h3") {
-            $setBlocksType(selection, () => $createHeadingNode("h3"));
-          }
-        });
-      },
-    },
-    {
-      title: t('NODE_MENU.numberList') as string,
-      icon: <ListOrderedIcon size={ICON_SIZES.default} />,
-      onClick: () => {
-        applyToNodes((node, selection) => {
-          if ($isListNode(node) && node.getListType() === "number") {
-            $setBlocksType(selection, () => $createParagraphNode());
-          } else {
-            $setBlocksType(selection, () => $createListNode("number"));
-          }
-        });
-      },
-    },
-    {
-      title: t('NODE_MENU.bulletList') as string,
-      icon: <ListIcon size={ICON_SIZES.default} />,
-      onClick: () => {
-        applyToNodes((node, selection) => {
-          if ($isListNode(node) && node.getListType() === "bullet") {
-            $setBlocksType(selection, () => $createParagraphNode());
-          } else {
-            $setBlocksType(selection, () => $createListNode("bullet"));
-          }
-        });
-      },
-    },
-    {
-      title: t('NODE_MENU.checkList') as string,
-      icon: <ListCheckIcon size={ICON_SIZES.default} />,
-      onClick: () => {
-        applyToNodes((node, selection) => {
-          if ($isListNode(node) && node.getListType() === "check") {
-            $setBlocksType(selection, () => $createParagraphNode());
-          } else {
-            $setBlocksType(selection, () => $createListNode("check"));
-          }
-        });
-      },
-    },
-    {
-      title: t('NODES.quote') as string,
-      icon: <QuoteIcon size={ICON_SIZES.default} />,
-      onClick: () => {
-        applyToNodes((node, selection) => {
-          if (node.__type !== "quote") {
-            $setBlocksType(selection, () => $createQuoteNode());
-          }
-        });
       },
     },
   ];
