@@ -36,7 +36,10 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import { REFERENCE_IMAGE_DRAG_TYPE } from '@/core/references/referenceDragTypes';
+import {
+  REFERENCE_CODE_DRAG_TYPE,
+  REFERENCE_IMAGE_DRAG_TYPE,
+} from '@/core/references/referenceDragTypes';
 
 import { Point } from './point';
 import { Rectangle } from './rect';
@@ -362,9 +365,11 @@ function useDraggableBlockMenu(
     document.addEventListener('dragend', hideReferenceTargetLine);
 
     function onDragover(event: DragEvent): boolean {
-      const isReferenceImageDrag = Array.from(event.dataTransfer?.types ?? [])
-        .includes(REFERENCE_IMAGE_DRAG_TYPE);
-      if (!isDraggingBlockRef.current && !isReferenceImageDrag) {
+      const dragTypes = Array.from(event.dataTransfer?.types ?? []);
+      const isReferenceBlockDrag = dragTypes.some((type) =>
+        [REFERENCE_CODE_DRAG_TYPE, REFERENCE_IMAGE_DRAG_TYPE].includes(type),
+      );
+      if (!isDraggingBlockRef.current && !isReferenceBlockDrag) {
         return false;
       }
       const [isFileTransfer] = eventFiles(event);
@@ -389,7 +394,7 @@ function useDraggableBlockMenu(
         pageY / calculateZoomLevel(target),
         anchorElem,
       );
-      if (isReferenceImageDrag && event.dataTransfer) {
+      if (isReferenceBlockDrag && event.dataTransfer) {
         event.dataTransfer.dropEffect = 'copy';
       }
 

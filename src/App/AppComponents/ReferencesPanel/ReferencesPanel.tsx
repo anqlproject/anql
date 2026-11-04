@@ -15,6 +15,7 @@ import {
 } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import {
+  REFERENCE_CODE_DRAG_TYPE,
   REFERENCE_DRAG_TYPE,
   REFERENCE_IMAGE_DRAG_TYPE,
   REFERENCE_TEXT_DRAG_TYPE,
@@ -574,7 +575,11 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                       ref.id ?? `name:${ref.name}`,
                     );
                     event.dataTransfer.setData(
-                      ref.ref_type === 'image' ? REFERENCE_IMAGE_DRAG_TYPE : REFERENCE_TEXT_DRAG_TYPE,
+                      ref.ref_type === 'image'
+                        ? REFERENCE_IMAGE_DRAG_TYPE
+                        : ref.ref_type === 'code'
+                          ? REFERENCE_CODE_DRAG_TYPE
+                          : REFERENCE_TEXT_DRAG_TYPE,
                       '1',
                     );
                   }}

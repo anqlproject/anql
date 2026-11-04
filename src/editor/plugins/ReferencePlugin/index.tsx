@@ -33,6 +33,7 @@ import { createPortal } from 'react-dom';
 import { isReferenceInTrash, ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import {
+  REFERENCE_CODE_DRAG_TYPE,
   REFERENCE_DRAG_TYPE,
   REFERENCE_IMAGE_DRAG_TYPE,
   REFERENCE_TEXT_DRAG_TYPE,
@@ -46,7 +47,12 @@ function hasReferenceDragData(event: DragEvent): boolean {
   return Boolean(
     event.dataTransfer &&
     Array.from(event.dataTransfer.types).some((type) =>
-      [REFERENCE_DRAG_TYPE, REFERENCE_IMAGE_DRAG_TYPE, REFERENCE_TEXT_DRAG_TYPE].includes(type),
+      [
+        REFERENCE_DRAG_TYPE,
+        REFERENCE_CODE_DRAG_TYPE,
+        REFERENCE_IMAGE_DRAG_TYPE,
+        REFERENCE_TEXT_DRAG_TYPE,
+      ].includes(type),
     ),
   );
 }
@@ -336,7 +342,11 @@ export default function ReferencePlugin(): React.JSX.Element | null {
       hideDropCaret();
     };
     const handleDocumentDragOver = (event: DragEvent) => {
-      if (!hasReferenceDragData(event) || event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE)) {
+      if (
+        !hasReferenceDragData(event) ||
+        event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE) ||
+        event.dataTransfer?.types.includes(REFERENCE_CODE_DRAG_TYPE)
+      ) {
         return;
       }
 
@@ -358,7 +368,10 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           return false;
         }
 
-        if (event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE)) {
+        if (
+          event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE) ||
+          event.dataTransfer?.types.includes(REFERENCE_CODE_DRAG_TYPE)
+        ) {
           return false;
         }
 
@@ -399,32 +412,38 @@ export default function ReferencePlugin(): React.JSX.Element | null {
         rangeSelection.applyDOMRange(range);
         $setSelection(rangeSelection);
 
-        if (reference.ref_type === 'image') {
+        if (reference.ref_type === 'image' || reference.ref_type === 'code') {
           const parentBlock = rangeSelection.anchor.getNode().getTopLevelElementOrThrow();
-          const imageNode = $createImageNode({
-            src: reference.value,
-            altText: reference.name,
-            maxWidth: 600,
-            referenceId: reference.id ?? undefined,
-          });
+          const blockNode = reference.ref_type === 'image'
+            ? $createImageNode({
+                src: reference.value,
+                altText: reference.name,
+                maxWidth: 600,
+                referenceId: reference.id ?? undefined,
+              })
+            : $createCodeNode().append($createTextNode(reference.value));
+          if (reference.ref_type === 'code' && reference.id) {
+            $setState(blockNode, codeReferenceIdState, reference.id);
+            $setState(blockNode, codeReferenceValueVersionState, getReferenceValueVersion(reference.value));
+          }
 
           if (
             parentBlock.getType() === 'paragraph' &&
             parentBlock.getTextContent().trim() === ''
           ) {
-            parentBlock.replace(imageNode);
+            parentBlock.replace(blockNode);
           } else {
             const blockElement = editor.getElementByKey(parentBlock.getKey());
             const blockRect = blockElement?.getBoundingClientRect();
             if (blockRect && event.clientY < blockRect.top) {
-              parentBlock.insertBefore(imageNode);
+              parentBlock.insertBefore(blockNode);
             } else {
-              parentBlock.insertAfter(imageNode);
+              parentBlock.insertAfter(blockNode);
             }
           }
 
           const nextParagraph = $createParagraphNode();
-          imageNode.insertAfter(nextParagraph);
+          blockNode.insertAfter(nextParagraph);
           nextParagraph.select();
         } else {
           $insertNodes([$createTextNode(reference.value || reference.name)]);
