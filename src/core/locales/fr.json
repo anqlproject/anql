@@ -443,12 +443,16 @@
       "chooseImage": "Choisir une image…",
       "uploadingImage": "Importation de l’image…",
       "selectedImage": "Image sélectionnée",
+      "codePlaceholder": "Saisir ou coller le code…",
+      "linkedCodeReference": "Référence liée",
+      "referenceNotFound": "Référence introuvable",
       "imageValue": "Image",
       "invalidImage": "Ce fichier n’est pas une image prise en charge.",
       "imageUploadFailed": "Impossible d’importer l’image.",
       "types": {
         "text": "Texte",
-        "image": "Image"
+        "image": "Image",
+        "code": "Code"
       },
       "cancel": "Annuler",
       "create": "Créer",

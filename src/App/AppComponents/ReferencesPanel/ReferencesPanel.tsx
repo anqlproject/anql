@@ -2,7 +2,7 @@ import './ReferencesPanel.css';
 
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
-import { Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
+import { Code2, FileSearch, Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +23,7 @@ type RefType = ReferenceJson['ref_type'];
 const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   text:   <Type size={12} />,
   image:  <Image size={12} />,
+  code:   <Code2 size={12} />,
 };
 
 function ReferenceImageThumbnail({ src, name }: { src: string; name: string }) {
@@ -331,6 +332,20 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                       : <Image size={14} />}
                     {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : editImageName || t('REFERENCE_PANEL.chooseImage')}
                   </button>
+                ) : ref.ref_type === 'code' ? (
+                  <textarea
+                    className="ref-item__input ref-item__input--code"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelEdit();
+                      }
+                    }}
+                    placeholder={t('REFERENCE_PANEL.codePlaceholder') as string}
+                    spellCheck={false}
+                  />
                 ) : (
                   <input
                     className="ref-item__input"
@@ -457,7 +472,7 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                 role="tablist"
                 aria-label={t('REFERENCE_PANEL.typeSelection') as string}
               >
-                {(['text', 'image'] as const).map((type) => (
+                {(['text', 'image', 'code'] as const).map((type) => (
                   <button
                     key={type}
                     type="button"
@@ -495,6 +510,20 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                     <Image size={14} />
                     {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : newImageName || t('REFERENCE_PANEL.chooseImage')}
                   </button>
+                ) : newType === 'code' ? (
+                  <textarea
+                    className="ref-item__input ref-item__input--code"
+                    placeholder={t('REFERENCE_PANEL.codePlaceholder') as string}
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.preventDefault();
+                        setIsAdding(false);
+                      }
+                    }}
+                    spellCheck={false}
+                  />
                 ) : (
                   <input
                     className="ref-item__input"

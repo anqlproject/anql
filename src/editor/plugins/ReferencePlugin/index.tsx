@@ -1,7 +1,7 @@
 import './ReferencePlugin.css';
 
 import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react';
-import { $isCodeNode } from '@lexical/code';
+import { $createCodeNode, $isCodeNode } from '@lexical/code';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   LexicalTypeaheadMenuPlugin,
@@ -16,6 +16,7 @@ import {
   $insertNodes,
   $isRangeSelection,
   $isTextNode,
+  $setState,
   $setSelection,
   COMMAND_PRIORITY_HIGH,
   DRAGOVER_COMMAND,
@@ -25,7 +26,7 @@ import {
   LexicalEditor,
   TextNode,
 } from 'lexical';
-import { Image, Plus, Type } from 'lucide-react';
+import { Code2, Image, Plus, Type } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -164,6 +165,8 @@ function insertReferenceIntoTableCell(
 
   return inserted;
 }
+
+import { codeReferenceIdState, codeReferenceUpdatedAtState } from './referenceState';
 
 class ReferenceMenuOption extends MenuOption {
   reference?: ReferenceJson;
@@ -538,6 +541,24 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           const nextParagraph = $createParagraphNode();
           imageNode.insertAfter(nextParagraph);
           nextParagraph.select();
+        } else if (ref.ref_type === 'code') {
+          const parentBlock = nodeToReplace.getTopLevelElementOrThrow();
+          nodeToReplace.remove();
+
+          const codeNode = $createCodeNode().append($createTextNode(ref.value));
+          if (ref.id) {
+            $setState(codeNode, codeReferenceIdState, ref.id);
+            $setState(codeNode, codeReferenceUpdatedAtState, ref.updated_at);
+          }
+          if (parentBlock.getTextContent().trim() === '') {
+            parentBlock.replace(codeNode);
+          } else {
+            parentBlock.insertAfter(codeNode);
+          }
+
+          const nextParagraph = $createParagraphNode();
+          codeNode.insertAfter(nextParagraph);
+          nextParagraph.select();
         } else {
           // Insertion immédiate comme vrai TextNode Lexical
           const textToInsert = ref.value || ref.name;
@@ -608,6 +629,8 @@ export default function ReferencePlugin(): React.JSX.Element | null {
                           <Plus size={12} />
                         ) : ref?.ref_type === 'image' ? (
                           <Image size={12} />
+                        ) : ref?.ref_type === 'code' ? (
+                          <Code2 size={12} />
                         ) : (
                           <Type size={12} />
                         )}

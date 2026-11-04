@@ -113,7 +113,7 @@ export const useReferenceStore = create<ReferenceStore>((set, get) => ({
       ...existing,
       ...updates,
       name: updates.name ? updates.name.trim().replace(/\s+/g, '_') : existing.name,
-      updated_at: now(),
+      updated_at: Math.max(now(), existing.updated_at + 1),
     };
     await updateReference(updated);
     set((state) => ({
