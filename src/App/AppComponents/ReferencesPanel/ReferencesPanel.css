@@ -243,7 +243,12 @@
   outline-offset: 1px;
 }
 
-.ref-item__action-btn--edit:hover {
+.ref-item__action-btn--edit {
+  color: var(--text-disabled);
+}
+
+.ref-item__action-btn--edit:hover,
+.ref-item__action-btn--edit:focus-visible {
   color: var(--primary-color);
   background: var(--action-hover);
 }
