@@ -93,11 +93,12 @@ function ReferenceImageThumbnail({ src, name }: { src: string; name: string }) {
 
 interface ReferencesPanelProps {
   panelRef: React.Ref<HTMLDivElement>;
+  panelLeft: number;
   onClose: () => void;
   onRequestDelete: (reference: ReferenceJson) => void;
 }
 
-export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: ReferencesPanelProps) {
+export default function ReferencesPanel({ panelRef, panelLeft, onClose, onRequestDelete }: ReferencesPanelProps) {
   const { t } = useTranslation();
   const { references, isLoaded, loadReferences, addReference, editReference } = useReferenceStore();
   const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
@@ -316,6 +317,7 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
       <div
         ref={panelRef}
         className="ref-panel"
+        style={{ left: panelLeft }}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >

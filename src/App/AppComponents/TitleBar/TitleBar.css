@@ -12,6 +12,16 @@
   align-items: center;
 }
 
+.titlebar-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.titlebar-controls--right {
+  height: 100%;
+}
+
 .sidebar-trigger {
   position: relative;
   color: var(--text-primary);
@@ -46,13 +56,27 @@
   color: var(--text-secondary);
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .titlebar-ref-btn:hover,
 .titlebar-ref-btn--active {
   background-color: var(--action-hover);
   color: var(--text-primary);
+}
+
+.titlebar-ref-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.titlebar-ref-btn svg {
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.titlebar-ref-btn:hover svg {
+  transform: scale(1.08);
+  opacity: 1;
 }
 
 .titlebar-ref-btn:focus-visible {

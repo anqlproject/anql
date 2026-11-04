@@ -362,9 +362,6 @@ export const DocumentMenu = () => {
           className={`documentMenu ${isMenuOpen ? "documentMenu--open" : ""}`}
           ref={triggerRef}
           onMouseDown={(e) => e.stopPropagation()}
-          style={{
-            right: isMac ? "1rem" : 0,
-          }}
           onClick={() => {
             const rect = triggerRef.current?.getBoundingClientRect();
             if (rect) {

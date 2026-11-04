@@ -1,6 +1,5 @@
 .documentMenu {
-  position: absolute;
-  top: 2px;
+  position: relative;
   z-index: var(--z-modal);
   user-select: none;
   color: var(--text-secondary);
