@@ -623,6 +623,66 @@
           ]
         }
       ]
+    },
+    {
+      "id": "references",
+      "title": "References",
+      "content": [
+        {
+          "id": "references-intro",
+          "title": "What are references?",
+          "description": [
+            "A reference is named content that you can reuse in your documents: text, an image, or a code snippet.",
+            "",
+            "Open the References panel using its button in the top bar. Click + New Reference, enter a name, choose a type, and provide its content. From this panel, you can search for, edit, or move a reference to the trash."
+          ]
+        },
+        {
+          "id": "text-references",
+          "title": "Insert a text reference",
+          "description": [
+            "In a paragraph, type @ followed by the reference name, then select the suggested reference.",
+            "",
+            "The reference content is inserted where you typed. If its value is empty, its name is inserted instead. Inserted text is a copy: it will not change if you later edit the reference."
+          ]
+        },
+        {
+          "id": "image-references",
+          "title": "Insert an image reference",
+          "description": [
+            "Create an Image reference and choose the image file to associate with it.",
+            "",
+            "In a paragraph, type @ followed by the reference name and select it to insert the image into the document. You can also drag the reference from the References panel to the desired location in the document."
+          ]
+        },
+        {
+          "id": "code-references",
+          "title": "Insert a code reference",
+          "description": [
+            "Create a Code reference and type or paste the code you want to reuse.",
+            "",
+            "From a paragraph (not from inside a code block), type @ followed by the reference name and select it. ANQL inserts a code block linked to that reference. When you edit the reference content, the linked block is updated."
+          ]
+        },
+        {
+          "id": "math-references",
+          "title": "Use a reference in a math node",
+          "description": [
+            "A Text reference with a numeric value can be used as a variable in math nodes. Type @ followed by its name in a math expression, for example: @tax_rate * 100.",
+            "",
+            "The reference value is used in the calculation, and the result updates when you edit the reference. References in the trash are not available to math nodes, so expressions using them can no longer be evaluated."
+          ]
+        },
+        {
+          "id": "reference-lifecycle",
+          "title": "What happens when you delete a reference?",
+          "description": [
+            "Moving a reference to the trash removes it from the active References panel, autocomplete, and math calculations. You can restore it from the trash to use it again.",
+            "",
+            "Deleting a reference does not delete content that was already inserted into documents. Inserted text remains as plain text, images remain in the document, and code blocks keep their current code but are no longer linked to the reference. Permanently deleting a reference from the trash cannot be undone."
+          ]
+        }
+      ]
     }
   ]
 }
