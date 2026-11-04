@@ -93,7 +93,6 @@ export default function SettingsOverlay({ isOpen, onClose }: SettingsOverlayProp
       <div className="settings-overlay-backdrop" onClick={onClose}></div>
       <div className="settings-overlay-content" style={{ width: DIMENSIONS.panelWidth, height: DIMENSIONS.panelHeight }}>
         <div className="settings-overlay-header">
-          <h2 className="text-lg font-semibold">{t('SETTINGS.title')}</h2>
           <div className="settings-header-actions">
             <Button
               variant="ghost"

@@ -26,7 +26,6 @@ export function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
       <div className="help-overlay-backdrop" onClick={onClose}></div>
       <div className="help-overlay-content" style={{ width: DIMENSIONS.panelWidth, height: DIMENSIONS.panelHeight }}>
         <div className="help-overlay-header">
-          <h2 className="text-lg font-semibold">{t('HELP_PANEL.title')}</h2>
           <div className="help-header-actions">
             <Button
               variant="ghost"
@@ -147,4 +146,3 @@ export function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
     </div>
   );
 }
-
