@@ -187,7 +187,7 @@ function ToolbarDropdown({
 }
 
 const FONT_FAMILY_OPTIONS = [
-  'Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Trebuchet MS', 'Verdana'
+  'Inter', 'Courier New', 'Georgia', 'Times New Roman'
 ];
 
 const FONT_SIZE_OPTIONS = Array.from({ length: 23 }, (_, i) => `${i + 8}px`);
@@ -223,7 +223,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
   const [isCapitalize, setIsCapitalize] = useState(false);
   const [isHighlight, setIsHighlight] = useState(false);
 
-  const [fontFamily, setFontFamily] = useState<string>('Arial');
+  const [fontFamily, setFontFamily] = useState<string>('Inter');
   const [fontSize, setFontSize] = useState<string>('15px');
   const [fontColor, setFontColor] = useState<string>('#000000');
   const [bgColor, setBgColor] = useState<string>('#ffffff');
@@ -299,7 +299,7 @@ export default function ToolbarPlugin({ anchorElem = document.body }: ToolbarPlu
       }
 
       setFontFamily(
-        $getSelectionStyleValueForProperty(selection, 'font-family', 'Arial'),
+        $getSelectionStyleValueForProperty(selection, 'font-family', 'Inter'),
       );
       setFontSize(
         $getSelectionStyleValueForProperty(selection, 'font-size', '15px'),
