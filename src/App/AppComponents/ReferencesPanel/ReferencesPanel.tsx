@@ -181,6 +181,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     reference.name.toLowerCase().includes(search.toLowerCase()) ||
     reference.value.toLowerCase().includes(search.toLowerCase())
   );
+  const editingReference = editingId
+    ? activeReferences.find((reference) => reference.id === editingId)
+    : undefined;
 
   useEffect(() => {
     if (selectedGroup && !groups.includes(selectedGroup)) {
@@ -325,10 +328,14 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       >
       {/* ── Header ── */}
       <div className="ref-panel__header">
-        {isAdding ? (
+        {isAdding || editingReference ? (
           <div className="ref-panel__create-heading">
-            <Plus size={15} aria-hidden="true" />
-            <span>{t('REFERENCE_PANEL.newReference')}</span>
+            {isAdding ? <Plus size={15} aria-hidden="true" /> : <Pencil size={14} aria-hidden="true" />}
+            <span>
+              {isAdding
+                ? t('REFERENCE_PANEL.newReference')
+                : t('REFERENCE_PANEL.editing', { name: editingReference?.name })}
+            </span>
           </div>
         ) : (
           <div
@@ -356,7 +363,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
         )}
       </div>
 
-      {!isAdding && (
+      {!isAdding && !editingReference && (
         <div className="ref-panel__search-wrap">
           <Search size={13} className="ref-panel__search-icon" />
           <input
@@ -372,8 +379,8 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       {/* ── List ── */}
       <div
         className="ref-panel__list"
-        role={isAdding ? undefined : 'tabpanel'}
-        aria-labelledby={isAdding ? undefined : selectedGroup
+        role={isAdding || editingReference ? undefined : 'tabpanel'}
+        aria-labelledby={isAdding || editingReference ? undefined : selectedGroup
           ? `reference-view-tab-${groups.indexOf(selectedGroup) + 1}`
           : 'reference-view-tab-all'}
       >
@@ -472,16 +479,16 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               {imageError && <span className="ref-item__error" role="alert">{imageError}</span>}
             </div>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : !editingReference && filtered.length === 0 ? (
           <div className="ref-panel__empty">
             {search ? t('REFERENCE_PANEL.noResults') : t('REFERENCE_PANEL.empty')}
           </div>
         ) : null}
 
-        {!isAdding && filtered.map((ref) => (
+        {!isAdding && (editingReference ? [editingReference] : filtered).map((ref) => (
           <div
             key={ref.id ?? ref.name}
-            className="ref-item"
+            className={`ref-item${editingId === ref.id ? ' ref-item--editing' : ''}`}
             onMouseEnter={() => setHoveredReferenceKey(ref.id ?? ref.name)}
             onMouseLeave={() => setHoveredReferenceKey(null)}
             onFocusCapture={() => setHoveredReferenceKey(ref.id ?? ref.name)}
@@ -494,10 +501,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
             {editingId === ref.id ? (
               /* ── Edit mode ── */
               <div className="ref-item__edit" role="group" aria-label={t('REFERENCE_PANEL.editing', { name: ref.name }) as string}>
-                <div className="ref-item__edit-status">
-                  <Pencil size={13} />
-                  <span>{t('REFERENCE_PANEL.editing', { name: ref.name })}</span>
-                </div>
                 <input
                   className="ref-item__input ref-item__input--name"
                   value={editName}
@@ -556,24 +559,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                 )}
                 {imageError && <span className="ref-item__error" role="alert">{imageError}</span>}
                 {editError && <span className="ref-item__error" role="alert">{editError}</span>}
-                <div className="ref-item__new-actions">
-                  <button
-                    type="button"
-                    className="ref-item__btn ref-item__btn--cancel"
-                    onClick={cancelEdit}
-                    disabled={isSavingEdit || isUploadingImage}
-                  >
-                    {t('REFERENCE_PANEL.cancel')}
-                  </button>
-                  <button
-                    type="button"
-                    className="ref-item__btn ref-item__btn--save"
-                    onClick={() => saveEdit(ref.id!)}
-                    disabled={isSavingEdit || isUploadingImage}
-                  >
-                    {isSavingEdit ? t('REFERENCE_PANEL.saving') : t('REFERENCE_PANEL.save')}
-                  </button>
-                </div>
               </div>
             ) : (
               /* ── Display mode ── */
@@ -677,6 +662,25 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               disabled={isUploadingImage || !newName.trim() || (newType === 'image' && !newValue)}
             >
               {t('REFERENCE_PANEL.create')}
+            </button>
+          </div>
+        ) : editingReference ? (
+          <div className="ref-panel__create-actions">
+            <button
+              type="button"
+              className="ref-item__btn ref-item__btn--cancel"
+              onClick={cancelEdit}
+              disabled={isSavingEdit || isUploadingImage}
+            >
+              {t('REFERENCE_PANEL.cancel')}
+            </button>
+            <button
+              type="button"
+              className="ref-item__btn ref-item__btn--save"
+              onClick={() => saveEdit(editingReference.id!)}
+              disabled={isSavingEdit || isUploadingImage}
+            >
+              {isSavingEdit ? t('REFERENCE_PANEL.saving') : t('REFERENCE_PANEL.save')}
             </button>
           </div>
         ) : (

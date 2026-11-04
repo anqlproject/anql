@@ -304,18 +304,20 @@
 }
 
 /* ── Edit & New form ── */
-.ref-item__edit,
 .ref-item__new-form {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px;
-  border-radius: 8px;
 }
 
 .ref-item__edit {
-  background: color-mix(in srgb, var(--primary-color) 3%, var(--panel-color));
-  border: 1px solid color-mix(in srgb, var(--primary-color) 18%, var(--border-color));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ref-item--editing {
+  padding: 4px 12px 12px;
 }
 
 .ref-item__new-form {
@@ -324,16 +326,6 @@
 
 .ref-panel__create-content {
   padding: 4px 12px 12px;
-}
-
-.ref-item__edit-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 1px 1px 7px;
-  color: var(--primary-color);
-  font-size: var(--ui-text-xs);
-  font-weight: var(--font-semibold);
 }
 
 .ref-item__input {
@@ -460,12 +452,6 @@
 
 .ref-item__type-panel {
   min-width: 0;
-}
-
-.ref-item__new-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
 }
 
 .ref-item__btn {
