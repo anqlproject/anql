@@ -119,6 +119,50 @@
   border-radius: 4px;
 }
 
+.trash-filter {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.trash-filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--ui-text-sm);
+  cursor: pointer;
+}
+
+.trash-filter-button:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.trash-filter-button.is-active {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+}
+
+.trash-filter-count {
+  color: inherit;
+  opacity: 0.7;
+  font-size: var(--ui-text-xs);
+}
+
+.trash-filter-empty {
+  padding: 32px 16px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: var(--ui-text-sm);
+}
+
 /* Each trash card = a horizontal list row */
 .card.trashCard {
   border: none !important;

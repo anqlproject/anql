@@ -19,7 +19,6 @@ import {
 } from "@/core/database/useDocumentDatabase";
 import { DocumentsJson } from "@/core/database/useDocumentDatabase";
 import {
-  getReferenceOriginalPath,
   isReferenceInTrash,
   ReferenceJson,
 } from "@/core/database/useReferenceDatabase";
@@ -44,6 +43,8 @@ type TrashItem =
       reference: ReferenceJson;
     };
 
+type TrashFilter = "all" | TrashItem["kind"];
+
 interface TrashPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -55,6 +56,7 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
   const [trashDocuments, setTrashDocuments] = useState<DocumentsJson[]>([]);
   const [restoring, setRestoring] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [filter, setFilter] = useState<TrashFilter>("all");
   const references = useReferenceStore((state) => state.references);
   const loadReferences = useReferenceStore((state) => state.loadReferences);
   const restoreReference = useReferenceStore((state) => state.restoreReference);
@@ -123,6 +125,22 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
     })),
     ...trashReferenceItems,
   ].sort((a, b) => b.updated_at - a.updated_at);
+  const filteredTrashItems = trashItems.filter(
+    (item) => filter === "all" || item.kind === filter,
+  );
+  const filterOptions: { value: TrashFilter; label: string; count: number }[] = [
+    { value: "all", label: t("TRASH.filterAll"), count: trashItems.length },
+    {
+      value: "document",
+      label: t("TRASH.filterDocuments"),
+      count: trashDocuments.length,
+    },
+    {
+      value: "reference",
+      label: t("TRASH.filterReferences"),
+      count: trashReferenceItems.length,
+    },
+  ];
 
   const handleRestore = async (item: TrashItem) => {
     const itemKey = `${item.kind}:${item.id}`;
@@ -332,7 +350,27 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
           </div>
         </div>
         <div className="grid">
-          {trashItems.map((item) => (
+          <div className="trash-filter" role="group" aria-label={t("TRASH.filterLabel") as string}>
+            {filterOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`trash-filter-button${filter === option.value ? " is-active" : ""}`}
+                aria-pressed={filter === option.value}
+                onClick={() => setFilter(option.value)}
+              >
+                {option.label}
+                <span className="trash-filter-count">{option.count}</span>
+              </button>
+            ))}
+          </div>
+          {filteredTrashItems.length === 0 ? (
+            <div className="trash-filter-empty">
+              {trashItems.length === 0
+                ? t("TRASH.empty")
+                : t("TRASH.noFilteredItems")}
+            </div>
+          ) : filteredTrashItems.map((item) => (
             <Card key={`${item.kind}:${item.id}`} className="card trashCard">
               <CardHeader className="cardHeader">
                 <CardTitle className="cardTitle">
@@ -348,7 +386,7 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
                     </div>
                     {item.kind === "reference" && (
                       <div className="originalDate">
-                        {getReferenceOriginalPath(item.reference)}
+                        {t(`REFERENCE_PANEL.types.${item.reference.ref_type}`)}
                       </div>
                     )}
                     {item.created_at && (

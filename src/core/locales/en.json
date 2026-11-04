@@ -398,6 +398,11 @@
     },
     "TRASH": {
       "title": "Trash",
+      "filterLabel": "Filter trash items",
+      "filterAll": "All",
+      "filterDocuments": "Documents",
+      "filterReferences": "References",
+      "noFilteredItems": "No items in this category",
       "loading": "Loading...",
       "empty": "Trash is empty",
       "emptyDescription": "Items you delete will appear here",

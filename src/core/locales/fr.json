@@ -398,6 +398,11 @@
     },
     "TRASH": {
       "title": "Corbeille",
+      "filterLabel": "Filtrer les éléments de la corbeille",
+      "filterAll": "Tout",
+      "filterDocuments": "Documents",
+      "filterReferences": "Références",
+      "noFilteredItems": "Aucun élément dans cette catégorie",
       "loading": "Chargement en cours...",
       "empty": "Corbeille vide",
       "emptyDescription": "Les éléments que vous supprimez apparaîtront ici",
