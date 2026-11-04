@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 
 export const REFERENCE_TRASH_PATH = 'trash/';
+export const DEFAULT_REFERENCE_PATH = '';
 
 export interface ReferenceJson {
   id?: string | null;
@@ -32,9 +33,13 @@ export function isReferenceInTrash(reference: ReferenceJson): boolean {
   return reference.path.startsWith(REFERENCE_TRASH_PATH);
 }
 
+export function normalizeReferencePath(path: string): string {
+  return path === 'home/' || path === 'home' ? DEFAULT_REFERENCE_PATH : path;
+}
+
 export function getReferenceOriginalPath(reference: ReferenceJson): string {
   if (!isReferenceInTrash(reference)) return reference.path;
-  return reference.path.slice(REFERENCE_TRASH_PATH.length) || 'home/';
+  return normalizeReferencePath(reference.path.slice(REFERENCE_TRASH_PATH.length));
 }
 
 export const getReferenceByName = async (name: string): Promise<ReferenceJson | null> => {

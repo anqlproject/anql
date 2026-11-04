@@ -7,7 +7,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
-import { isReferenceInTrash, ReferenceJson } from '@/core/database/useReferenceDatabase';
+import {
+  DEFAULT_REFERENCE_PATH,
+  isReferenceInTrash,
+  normalizeReferencePath,
+  ReferenceJson,
+} from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import {
   REFERENCE_DRAG_TYPE,
@@ -19,6 +24,22 @@ import { useReferenceStore } from '@/core/references/useReferenceStore';
 import ReferenceUsagesPanel, { loadReferenceUsages } from './ReferenceUsagesPanel';
 
 type RefType = ReferenceJson['ref_type'];
+type ReferenceView = 'all' | 'groups';
+const GROUP_PATH_PREFIX = 'groups/';
+
+function getGroupName(path: string): string {
+  const normalizedPath = normalizeReferencePath(path);
+  if (!normalizedPath) return '';
+  const groupPath = normalizedPath.startsWith(GROUP_PATH_PREFIX)
+    ? normalizedPath.slice(GROUP_PATH_PREFIX.length)
+    : normalizedPath;
+  return groupPath.replace(/\/+$/, '');
+}
+
+function getGroupPath(groupName: string): string {
+  const normalizedName = groupName.trim().replace(/[\\/]+/g, '_');
+  return normalizedName ? `${GROUP_PATH_PREFIX}${normalizedName}/` : DEFAULT_REFERENCE_PATH;
+}
 
 const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   text:   <Type size={12} />,
@@ -82,6 +103,8 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
   const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
 
   const [search, setSearch] = useState('');
+  const [activeView, setActiveView] = useState<ReferenceView>('all');
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [usageReference, setUsageReference] = useState<ReferenceJson | null>(null);
@@ -93,12 +116,14 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
   const [newType, setNewType] = useState<RefType>('text');
   const [newValue, setNewValue] = useState('');
   const [newImageName, setNewImageName] = useState('');
+  const [newGroup, setNewGroup] = useState('');
   const [nameError, setNameError] = useState('');
 
   // Edit form state
   const [editValue, setEditValue] = useState('');
   const [editName, setEditName] = useState('');
   const [editImageName, setEditImageName] = useState('');
+  const [editGroup, setEditGroup] = useState('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -143,10 +168,28 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
     else searchRef.current?.focus();
   }, [isAdding]);
 
-  const filtered = activeReferences.filter((r) =>
-    r.name.toLowerCase().includes(search.toLowerCase()) ||
-    r.value.toLowerCase().includes(search.toLowerCase())
+  const groups = [...new Set(
+    activeReferences
+      .map((reference) => normalizeReferencePath(reference.path))
+      .filter(Boolean),
+  )].sort((a, b) => getGroupName(a).localeCompare(getGroupName(b)));
+  const referencesToShow = activeView === 'all'
+    ? activeReferences
+    : selectedGroup
+      ? activeReferences.filter(
+          (reference) => normalizeReferencePath(reference.path) === selectedGroup,
+        )
+      : [];
+  const filtered = referencesToShow.filter((reference) =>
+    reference.name.toLowerCase().includes(search.toLowerCase()) ||
+    reference.value.toLowerCase().includes(search.toLowerCase())
   );
+
+  useEffect(() => {
+    if (selectedGroup && !groups.includes(selectedGroup)) {
+      setSelectedGroup(null);
+    }
+  }, [groups, selectedGroup]);
 
   const handleAdd = async () => {
     if (!newName.trim() || (newType === 'image' && !newValue)) return;
@@ -156,11 +199,20 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
       return;
     }
 
-    await addReference(newName, newType, newValue);
+    const newGroupPath = getGroupPath(newGroup);
+    await addReference(newName, newType, newValue, newGroupPath);
+    if (newGroupPath) {
+      setActiveView('groups');
+      setSelectedGroup(newGroupPath);
+    } else {
+      setActiveView('all');
+      setSelectedGroup(null);
+    }
     setNewName('');
     setNewValue('');
     setNewType('text');
     setNewImageName('');
+    setNewGroup('');
     setNameError('');
     setIsAdding(false);
   };
@@ -171,12 +223,17 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
     setEditValue(ref.value);
     setEditName(ref.name);
     setEditImageName(ref.ref_type === 'image' && ref.value ? t('REFERENCE_PANEL.selectedImage') as string : '');
+    setEditGroup(getGroupName(ref.path));
     setImageError('');
     setEditError('');
   };
 
   const startAdd = () => {
     setEditingId(null);
+    setNewGroup(selectedGroup ? getGroupName(selectedGroup) : '');
+    if (activeView === 'groups' && selectedGroup === null) {
+      setActiveView('all');
+    }
     setIsAdding(true);
   };
 
@@ -184,7 +241,7 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
     setIsSavingEdit(true);
     setEditError('');
     try {
-      await editReference(id, { name: editName, value: editValue });
+      await editReference(id, { name: editName, value: editValue, path: getGroupPath(editGroup) });
       setEditingId(null);
     } catch (error) {
       logger.error('Failed to edit reference', error as Error, { id });
@@ -264,13 +321,75 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
       >
       {/* ── Header ── */}
       <div className="ref-panel__header">
-        <span className="ref-panel__title">{t('REFERENCE_PANEL.title')}</span>
+        <div
+          className="ref-panel__view-tabs"
+          role="tablist"
+          aria-label={t('REFERENCE_PANEL.views') as string}
+        >
+          {(['all', 'groups'] as const).map((view) => (
+            <button
+              key={view}
+              id={`reference-view-tab-${view}`}
+              type="button"
+              role="tab"
+              aria-selected={activeView === view}
+              className={`ref-panel__view-tab${activeView === view ? ' is-active' : ''}`}
+              onClick={() => {
+                setActiveView(view);
+                setSelectedGroup(null);
+                setSearch('');
+              }}
+            >
+              {t(view === 'all' ? 'REFERENCE_PANEL.all' : 'REFERENCE_PANEL.groupsTab')}
+            </button>
+          ))}
+        </div>
         <button className="ref-panel__close" onClick={onClose} aria-label={t('REFERENCE_PANEL.close') as string}>
           <X size={14} />
         </button>
       </div>
 
-      {/* ── Search ── */}
+      {activeView === 'groups' && selectedGroup === null ? (
+        <div className="ref-panel__list" role="tabpanel" aria-labelledby="reference-view-tab-groups">
+          {groups.length === 0 ? (
+            <div className="ref-panel__empty">{t('REFERENCE_PANEL.noGroups')}</div>
+          ) : groups.map((groupPath) => {
+            const groupReferenceCount = activeReferences.filter(
+              (reference) => normalizeReferencePath(reference.path) === groupPath,
+            ).length;
+            return (
+              <button
+                key={groupPath}
+                type="button"
+                className="ref-panel__group-item"
+                onClick={() => {
+                  setSelectedGroup(groupPath);
+                  setSearch('');
+                }}
+              >
+                <span>{getGroupName(groupPath)}</span>
+                <span className="ref-panel__group-count">{groupReferenceCount}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <>
+        {activeView === 'groups' && selectedGroup !== null && (
+        <div className="ref-panel__group-heading">
+          <button
+            type="button"
+            className="ref-panel__back-btn"
+            onClick={() => {
+              setSelectedGroup(null);
+              setSearch('');
+            }}
+          >
+            {t('REFERENCE_PANEL.backToGroups')}
+          </button>
+          <span>{getGroupName(selectedGroup)}</span>
+        </div>
+      )}
       <div className="ref-panel__search-wrap">
         <Search size={13} className="ref-panel__search-icon" />
         <input
@@ -283,7 +402,11 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
       </div>
 
       {/* ── List ── */}
-      <div className="ref-panel__list">
+      <div
+        className="ref-panel__list"
+        role="tabpanel"
+        aria-labelledby={`reference-view-tab-${activeView}`}
+      >
         {filtered.length === 0 && !isAdding && (
           <div className="ref-panel__empty">
             {search ? t('REFERENCE_PANEL.noResults') : t('REFERENCE_PANEL.empty')}
@@ -318,6 +441,16 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                   placeholder={t('REFERENCE_PANEL.namePlaceholder') as string}
                   autoFocus
                 />
+                <label className="ref-item__group-field">
+                  <span>{t('REFERENCE_PANEL.group')}</span>
+                  <input
+                    className="ref-item__input"
+                    value={editGroup}
+                    onChange={(event) => setEditGroup(event.target.value)}
+                    placeholder={t('REFERENCE_PANEL.ungrouped') as string}
+                    list="reference-group-options"
+                  />
+                </label>
                 {ref.ref_type === 'image' ? (
                   <button
                     type="button"
@@ -467,6 +600,16 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                 }}
                 onKeyDown={(e) => handleKeyDown(e, handleAdd)}
               />
+              <label className="ref-item__group-field">
+                <span>{t('REFERENCE_PANEL.group')}</span>
+                <input
+                  className="ref-item__input"
+                  value={newGroup}
+                  onChange={(event) => setNewGroup(event.target.value)}
+                  placeholder={t('REFERENCE_PANEL.ungrouped') as string}
+                  list="reference-group-options"
+                />
+              </label>
               {nameError && <span className="ref-item__error" role="alert">{nameError}</span>}
               <div
                 className="ref-item__type-tabs"
@@ -552,6 +695,14 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
           </div>
         )}
       </div>
+        </>
+      )}
+
+      <datalist id="reference-group-options">
+        {groups.map((groupPath) => (
+          <option key={groupPath} value={getGroupName(groupPath)} />
+        ))}
+      </datalist>
 
       {/* ── Footer ── */}
       <div className="ref-panel__footer">
