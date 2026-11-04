@@ -345,6 +345,41 @@ mod tests {
         let _ = std::fs::remove_dir_all(dir);
     }
 
+    #[tokio::test]
+    async fn references_default_to_home_path() {
+        let dir = std::env::temp_dir().join(format!("anql_test_{}", uuid_id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let db_path = dir.join("references.db");
+        let pool = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect_with(
+                sqlx::sqlite::SqliteConnectOptions::new()
+                    .filename(&db_path)
+                    .create_if_missing(true),
+            )
+            .await
+            .unwrap();
+
+        run_migrations(&pool).await.unwrap();
+
+        sqlx::query(
+            r#"INSERT INTO "references" (id, name, ref_type, value, created_at, updated_at)
+               VALUES ('ref1', 'example', 'text', 'value', 1, 1)"#,
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        let path: String = sqlx::query_scalar(r#"SELECT path FROM "references" WHERE id = 'ref1'"#)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(path, "home/");
+
+        pool.close().await;
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
     fn uuid_id() -> u128 {
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)

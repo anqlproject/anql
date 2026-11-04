@@ -17,7 +17,8 @@ import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 import {
   codeReferenceIdState,
-  codeReferenceUpdatedAtState,
+  codeReferenceValueVersionState,
+  getReferenceValueVersion,
 } from '@/editor/plugins/ReferencePlugin/referenceState';
 
 import { CODE_LANGUAGES, CODE_THEMES } from '../CodeHighlightShikiPlugin';
@@ -198,18 +199,21 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
 
       if (!linkedReference) {
         $setState(codeNode, codeReferenceIdState, undefined);
-        $setState(codeNode, codeReferenceUpdatedAtState, undefined);
+        $setState(codeNode, codeReferenceValueVersionState, undefined);
         return;
       }
 
       if (linkedReference.ref_type !== 'code') return;
 
-      const lastSyncedAt = $getState(codeNode, codeReferenceUpdatedAtState);
-      if (lastSyncedAt !== linkedReference.updated_at) {
+      const currentValueVersion = getReferenceValueVersion(linkedReference.value);
+      const lastSyncedVersion = $getState(codeNode, codeReferenceValueVersionState);
+      if (lastSyncedVersion === undefined) {
+        $setState(codeNode, codeReferenceValueVersionState, currentValueVersion);
+      } else if (lastSyncedVersion !== currentValueVersion) {
         if (codeNode.getTextContent() !== linkedReference.value) {
           codeNode.clear().append($createTextNode(linkedReference.value));
         }
-        $setState(codeNode, codeReferenceUpdatedAtState, linkedReference.updated_at);
+        $setState(codeNode, codeReferenceValueVersionState, currentValueVersion);
       }
     });
     if (!linkedReference) setShowReferenceName(false);

@@ -14,8 +14,9 @@ import {
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
 } from 'lexical';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
+import { isReferenceInTrash } from '@/core/database/useReferenceDatabase';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 import { useMathVariables } from '@/editor/context/MathVariablesContext';
 import { $createMathExpNode, $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
@@ -29,7 +30,11 @@ export const INSERT_MATH_COMMAND = createCommand('INSERT_MATH_COMMAND');
 
 export default function MathPlugin() {
   const [editor] = useLexicalComposerContext();
-  const references = useReferenceStore((state) => state.references);
+  const allReferences = useReferenceStore((state) => state.references);
+  const references = useMemo(
+    () => allReferences.filter((reference) => !isReferenceInTrash(reference)),
+    [allReferences],
+  );
   const { setResults, setVariables, setScopes, setTableVariables, setChartTableVariables } = useMathVariables();
 
   const evaluateTree = useCallback(() => {

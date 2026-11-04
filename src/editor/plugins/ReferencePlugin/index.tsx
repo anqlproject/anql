@@ -16,8 +16,8 @@ import {
   $insertNodes,
   $isRangeSelection,
   $isTextNode,
-  $setState,
   $setSelection,
+  $setState,
   COMMAND_PRIORITY_HIGH,
   DRAGOVER_COMMAND,
   DROP_COMMAND,
@@ -30,7 +30,7 @@ import { Code2, Image, Plus, Type } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { ReferenceJson } from '@/core/database/useReferenceDatabase';
+import { isReferenceInTrash, ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import {
   REFERENCE_DRAG_TYPE,
@@ -166,7 +166,11 @@ function insertReferenceIntoTableCell(
   return inserted;
 }
 
-import { codeReferenceIdState, codeReferenceUpdatedAtState } from './referenceState';
+import {
+  codeReferenceIdState,
+  codeReferenceValueVersionState,
+  getReferenceValueVersion,
+} from './referenceState';
 
 class ReferenceMenuOption extends MenuOption {
   reference?: ReferenceJson;
@@ -245,6 +249,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const references = useReferenceStore((state) => state.references);
+  const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
   const isLoaded = useReferenceStore((state) => state.isLoaded);
   const loadReferences = useReferenceStore((state) => state.loadReferences);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -378,7 +383,9 @@ export default function ReferencePlugin(): React.JSX.Element | null {
         hideDropCaret();
         const dragValue = event.dataTransfer?.getData(REFERENCE_DRAG_TYPE);
         const reference = references.find(
-          (item) => item.id === dragValue || `name:${item.name}` === dragValue,
+          (item) =>
+            !isReferenceInTrash(item) &&
+            (item.id === dragValue || `name:${item.name}` === dragValue),
         );
         if (reference?.ref_type === 'text') {
           const tableCellDrop = insertReferenceIntoTableCell(event, editor, reference);
@@ -453,12 +460,12 @@ export default function ReferencePlugin(): React.JSX.Element | null {
     const q = queryString.toLowerCase().trim();
 
     const filtered = q
-      ? references.filter(
+      ?       activeReferences.filter(
           (r) =>
             r.name.toLowerCase().includes(q) ||
             r.value.toLowerCase().includes(q),
         )
-      : references;
+      : activeReferences;
 
     const items: ReferenceMenuOption[] = filtered.map(
       (ref) => new ReferenceMenuOption(`@${ref.name}`, ref),
@@ -477,7 +484,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
     }
 
     return items;
-  }, [queryString, references, isLoaded]);
+  }, [queryString, activeReferences, isLoaded]);
 
   const onSelectOption = useCallback(
     async (
@@ -548,7 +555,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           const codeNode = $createCodeNode().append($createTextNode(ref.value));
           if (ref.id) {
             $setState(codeNode, codeReferenceIdState, ref.id);
-            $setState(codeNode, codeReferenceUpdatedAtState, ref.updated_at);
+            $setState(codeNode, codeReferenceValueVersionState, getReferenceValueVersion(ref.value));
           }
           if (parentBlock.getTextContent().trim() === '') {
             parentBlock.replace(codeNode);

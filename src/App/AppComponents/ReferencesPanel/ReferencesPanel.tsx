@@ -2,12 +2,12 @@ import './ReferencesPanel.css';
 
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
-import { Code2, FileSearch, Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
+import { Code2, Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
-import { ReferenceJson } from '@/core/database/useReferenceDatabase';
+import { isReferenceInTrash, ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import {
   REFERENCE_DRAG_TYPE,
@@ -79,6 +79,7 @@ interface ReferencesPanelProps {
 export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: ReferencesPanelProps) {
   const { t } = useTranslation();
   const { references, isLoaded, loadReferences, addReference, editReference } = useReferenceStore();
+  const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
 
   const [search, setSearch] = useState('');
   const [isAdding, setIsAdding] = useState(false);
@@ -111,7 +112,7 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
 
   useEffect(() => {
     if (!hoveredReferenceKey || usageCounts[hoveredReferenceKey] !== undefined) return;
-    const reference = references.find(
+    const reference = activeReferences.find(
       (item) => (item.id ?? item.name) === hoveredReferenceKey,
     );
     if (!reference) return;
@@ -135,14 +136,14 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
     return () => {
       isMounted = false;
     };
-  }, [hoveredReferenceKey, references, usageCounts]);
+  }, [activeReferences, hoveredReferenceKey, usageCounts]);
 
   useEffect(() => {
     if (isAdding) newNameRef.current?.focus();
     else searchRef.current?.focus();
   }, [isAdding]);
 
-  const filtered = references.filter((r) =>
+  const filtered = activeReferences.filter((r) =>
     r.name.toLowerCase().includes(search.toLowerCase()) ||
     r.value.toLowerCase().includes(search.toLowerCase())
   );

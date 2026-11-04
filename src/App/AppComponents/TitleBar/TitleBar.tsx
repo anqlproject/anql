@@ -29,7 +29,7 @@ export default function TitleBar(): JSX.Element {
   const isMac = useGlobalStore((state) => state.isMac);
   const refBtnRef = useRef<HTMLButtonElement>(null);
   const refPanelRef = useRef<HTMLDivElement>(null);
-  const removeReference = useReferenceStore((state) => state.removeReference);
+  const moveReferenceToTrash = useReferenceStore((state) => state.moveReferenceToTrash);
 
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault();
@@ -66,10 +66,10 @@ export default function TitleBar(): JSX.Element {
     setIsDeletingReference(true);
     setDeleteError('');
     try {
-      await removeReference(referenceToDelete.id);
+      await moveReferenceToTrash(referenceToDelete.id);
       setReferenceToDelete(null);
     } catch (error) {
-      logger.error('Failed to delete reference', error as Error, {
+      logger.error('Failed to move reference to trash', error as Error, {
         referenceId: referenceToDelete.id,
       });
       setDeleteError(t('REFERENCE_PANEL.deleteFailed') as string);
@@ -179,10 +179,10 @@ export default function TitleBar(): JSX.Element {
             setDeleteError('');
           }
         }}
-        title={t('REFERENCE_PANEL.deleteTitle') as string}
+        title={t('REFERENCE_PANEL.moveToTrashTitle') as string}
         description={
           <div>
-            <p>{t('REFERENCE_PANEL.confirmDelete', { name: referenceToDelete?.name ?? '' })}</p>
+            <p>{t('REFERENCE_PANEL.confirmMoveToTrash', { name: referenceToDelete?.name ?? '' })}</p>
             {deleteError && <p role="alert">{deleteError}</p>}
           </div>
         }
@@ -198,7 +198,7 @@ export default function TitleBar(): JSX.Element {
         rightButton={{
           text: isDeletingReference
             ? t('REFERENCE_PANEL.deleting') as string
-            : t('DIALOG.delete') as string,
+            : t('REFERENCE_PANEL.moveToTrash') as string,
           onClick: confirmDeleteReference,
           variant: 'danger',
           disabled: isDeletingReference,

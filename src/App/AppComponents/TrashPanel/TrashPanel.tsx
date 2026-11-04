@@ -1,6 +1,6 @@
 import "./TrashPanel.css";
 
-import { RotateCcw, Trash2, X } from "lucide-react";
+import { Bookmark, RotateCcw, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,7 +18,31 @@ import {
   updateDocument,
 } from "@/core/database/useDocumentDatabase";
 import { DocumentsJson } from "@/core/database/useDocumentDatabase";
+import {
+  getReferenceOriginalPath,
+  isReferenceInTrash,
+  ReferenceJson,
+} from "@/core/database/useReferenceDatabase";
 import { DIMENSIONS } from "@/core/global/defaultValues";
+import { useReferenceStore } from "@/core/references/useReferenceStore";
+
+type TrashItem =
+  | {
+      kind: "document";
+      id: string;
+      title: string;
+      created_at: number;
+      updated_at: number;
+      document: DocumentsJson;
+    }
+  | {
+      kind: "reference";
+      id: string;
+      title: string;
+      created_at: number;
+      updated_at: number;
+      reference: ReferenceJson;
+    };
 
 interface TrashPanelProps {
   isOpen: boolean;
@@ -28,9 +52,13 @@ interface TrashPanelProps {
 export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
-  const [trashItems, setTrashItems] = useState<DocumentsJson[]>([]);
+  const [trashDocuments, setTrashDocuments] = useState<DocumentsJson[]>([]);
   const [restoring, setRestoring] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const references = useReferenceStore((state) => state.references);
+  const loadReferences = useReferenceStore((state) => state.loadReferences);
+  const restoreReference = useReferenceStore((state) => state.restoreReference);
+  const removeReference = useReferenceStore((state) => state.removeReference);
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -47,42 +75,73 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
     return new Date(timestamp).toLocaleString();
   }, []);
 
-  // Fetch trash items on component mount
   useEffect(() => {
+    if (!isOpen) return;
+
+    let isMounted = true;
     const fetchTrashItems = async () => {
       try {
-        const result = await getDocumentsByPath("trash/");
-        setTrashItems(result.sort((a, b) => b.updated_at - a.updated_at)); // Sort by newest first
+        const [documents] = await Promise.all([
+          getDocumentsByPath("trash/"),
+          loadReferences(),
+        ]);
+        if (isMounted) {
+          setTrashDocuments(documents.sort((a, b) => b.updated_at - a.updated_at));
+        }
       } catch (error) {
         console.error("Error fetching trash items:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
+    setLoading(true);
     fetchTrashItems();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, loadReferences]);
 
-  const handleRestore = async (item: DocumentsJson) => {
-    setRestoring(item.id);
+  const trashReferenceItems: TrashItem[] = references
+    .filter((reference) => reference.id && isReferenceInTrash(reference))
+    .map((reference) => ({
+      kind: "reference",
+      id: reference.id as string,
+      title: `@${reference.name}`,
+      created_at: reference.created_at,
+      updated_at: reference.updated_at,
+      reference,
+    }));
+  const trashItems: TrashItem[] = [
+    ...trashDocuments.map((document) => ({
+      kind: "document" as const,
+      id: document.id,
+      title: document.title,
+      created_at: document.created_at,
+      updated_at: document.updated_at,
+      document,
+    })),
+    ...trashReferenceItems,
+  ].sort((a, b) => b.updated_at - a.updated_at);
+
+  const handleRestore = async (item: TrashItem) => {
+    const itemKey = `${item.kind}:${item.id}`;
+    setRestoring(itemKey);
     try {
-      // Extract original path from title or use a default path
-      // You might want to store the original path in the trash system
-      const originalPath = item.title.includes("/")
-        ? item.title.substring(0, item.title.lastIndexOf("/")) + "/"
-        : "home/";
-
-      const restoredItem: DocumentsJson = {
-        ...item,
-        path: originalPath,
-        updated_at: Date.now(),
-      };
-
-      const success = await updateDocument(restoredItem);
-      if (success) {
-        // Remove from local state
-        setTrashItems((prev) => prev.filter((i) => i.id !== item.id));
-        console.log(`Item restored: ${item.title}`);
+      if (item.kind === "reference") {
+        await restoreReference(item.id);
+      } else {
+        const originalPath = item.document.title.includes("/")
+          ? item.document.title.substring(0, item.document.title.lastIndexOf("/")) + "/"
+          : "home/";
+        const restoredItem: DocumentsJson = {
+          ...item.document,
+          path: originalPath,
+          updated_at: Date.now(),
+        };
+        const success = await updateDocument(restoredItem);
+        if (!success) throw new Error(`Failed to restore document: ${item.id}`);
+        setTrashDocuments((prev) => prev.filter((document) => document.id !== item.id));
       }
     } catch (error) {
       console.error("Error restoring item:", error);
@@ -91,19 +150,23 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
     }
   };
 
-  const handlePermanentDelete = async (item: DocumentsJson) => {
+  const handlePermanentDelete = async (item: TrashItem) => {
     setConfirmDialog({
       isOpen: true,
       title: t("DIALOG.deleteTitle") as string,
       message: t("TRASH.confirmDelete", { title: item.title }) as string,
       onConfirm: async () => {
-        setDeleting(item.id);
+        const itemKey = `${item.kind}:${item.id}`;
+        setDeleting(itemKey);
         try {
-          const success = await deleteDocument(item.id);
-          if (success) {
-            setTrashItems((prev) => prev.filter((i) => i.id !== item.id));
-            console.log(`Item permanently deleted: ${item.title}`);
+          if (item.kind === "reference") {
+            await removeReference(item.id);
+          } else {
+            const success = await deleteDocument(item.id);
+            if (!success) throw new Error(`Failed to delete document: ${item.id}`);
+            setTrashDocuments((prev) => prev.filter((document) => document.id !== item.id));
           }
+          console.log(`Item permanently deleted: ${item.title}`);
         } catch (error) {
           console.error("Error deleting item:", error);
         } finally {
@@ -127,15 +190,20 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
         count: trashItems.length,
       }) as string,
       onConfirm: async () => {
-        try {
-          for (const item of trashItems) {
-            await deleteDocument(item.id);
+        for (const item of trashItems) {
+          try {
+            if (item.kind === "reference") {
+              await removeReference(item.id);
+            } else {
+              const success = await deleteDocument(item.id);
+              if (!success) throw new Error(`Failed to delete document: ${item.id}`);
+              setTrashDocuments((prev) => prev.filter((document) => document.id !== item.id));
+            }
+          } catch (error) {
+            console.error(`Error permanently deleting trash item ${item.id}:`, error);
           }
-          setTrashItems([]);
-          console.log("Trash emptied");
-        } catch (error) {
-          console.error("Error emptying trash:", error);
         }
+        console.log("Trash emptied");
         setConfirmDialog({
           isOpen: false,
           title: "",
@@ -203,7 +271,7 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
           }}
         >
           <div className="trash-overlay-header">
-            <h1 className="title">Corbeille</h1>
+            <h1 className="title">{t("TRASH.title")}</h1>
             <Button
               variant="ghost"
               size="sm"
@@ -264,11 +332,13 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
           </div>
         </div>
         <div className="grid">
-          {trashItems.map((item, index) => (
-            <Card key={index} className="card trashCard">
+          {trashItems.map((item) => (
+            <Card key={`${item.kind}:${item.id}`} className="card trashCard">
               <CardHeader className="cardHeader">
                 <CardTitle className="cardTitle">
-                  <Trash2 className="cardIcon trashIcon" />
+                  {item.kind === "reference"
+                    ? <Bookmark className="cardIcon" />
+                    : <Trash2 className="cardIcon trashIcon" />}
                   {item.title || t("SIDEBAR.untitled")}
                 </CardTitle>
                 <CardDescription className="cardDescription">
@@ -276,6 +346,11 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
                     <div className="fileDate">
                       {t("TRASH.deletedOn")} {formatDate(item.updated_at)}
                     </div>
+                    {item.kind === "reference" && (
+                      <div className="originalDate">
+                        {getReferenceOriginalPath(item.reference)}
+                      </div>
+                    )}
                     {item.created_at && (
                       <div className="originalDate">
                         {t("TRASH.createdOn")} {formatDate(item.created_at)}
@@ -289,7 +364,7 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
                   <button
                     className="trash-action-btn trash-restore-btn"
                     onClick={() => handleRestore(item)}
-                    disabled={restoring === item.id}
+                    disabled={restoring === `${item.kind}:${item.id}`}
                     title={t("FEEDBACK.restore") as string}
                   >
                     <RotateCcw size={15} />
@@ -297,7 +372,7 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
                   <button
                     className="trash-action-btn trash-delete-btn"
                     onClick={() => handlePermanentDelete(item)}
-                    disabled={deleting === item.id}
+                    disabled={deleting === `${item.kind}:${item.id}`}
                     title={t("TRASH.permanentlyDelete") as string}
                   >
                     <Trash2 size={15} />
