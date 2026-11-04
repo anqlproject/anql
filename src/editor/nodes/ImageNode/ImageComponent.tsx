@@ -38,6 +38,7 @@ import {
 } from 'react';
 
 import { resolveAssetUrl } from '@/core/database/useAssetDatabase';
+import { isReferenceInTrash } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 
@@ -238,6 +239,11 @@ export default function ImageComponent({
       : undefined,
   );
   const isLinkedReference = linkedReference?.ref_type === 'image';
+  const showReferenceIndicator = Boolean(
+    linkedReference &&
+    isLinkedReference &&
+    !isReferenceInTrash(linkedReference),
+  );
   const referencesLoaded = useReferenceStore((state) => state.isLoaded);
   const loadReferences = useReferenceStore((state) => state.loadReferences);
   const currentSrc =
@@ -259,6 +265,10 @@ export default function ImageComponent({
     currentSrc.startsWith('asset://') ? null : currentSrc
   );
   const isEditable = useLexicalEditable();
+
+  useEffect(() => {
+    if (!showReferenceIndicator) setIsReferenceNameVisible(false);
+  }, [showReferenceIndicator]);
 
   useEffect(() => {
     if (referenceId && !referencesLoaded) {
@@ -508,10 +518,10 @@ export default function ImageComponent({
       <>
         <div
           draggable={draggable}
-          className={isLinkedReference ? 'image-reference-wrapper' : undefined}
+          className={showReferenceIndicator ? 'image-reference-wrapper' : undefined}
           style={{ position: 'relative', display: 'inline-block' }}
         >
-          {isLinkedReference && (
+          {showReferenceIndicator && (
             <>
               <button
                 type="button"

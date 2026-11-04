@@ -13,6 +13,7 @@ import { JSX, useCallback, useEffect, useState } from 'react';
 
 import { useScrollLock } from '@/App/hooks/useScrollLock';
 import { Button } from '@/components/ui/button';
+import { isReferenceInTrash } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 import {
@@ -216,7 +217,9 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
         $setState(codeNode, codeReferenceValueVersionState, currentValueVersion);
       }
     });
-    if (!linkedReference) setShowReferenceName(false);
+    if (!linkedReference || isReferenceInTrash(linkedReference)) {
+      setShowReferenceName(false);
+    }
   }, [codeNodeKey, editor, referenceId, references, referencesLoaded]);
 
   useEffect(() => {
@@ -266,9 +269,13 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
   };
 
   const showMenu = isHoveringCode || isHoveringMenu || isDropdownOpen;
-  const referenceName = referenceId
-    ? references.find((reference) => reference.id === referenceId)?.name
+  const linkedReference = referenceId
+    ? references.find((reference) => reference.id === referenceId)
     : undefined;
+  const referenceName =
+    linkedReference && !isReferenceInTrash(linkedReference)
+      ? linkedReference.name
+      : undefined;
   const hasLinkedReference = Boolean(referenceId && referenceName);
 
   if (!codeElement) return null;
