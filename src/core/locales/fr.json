@@ -414,6 +414,21 @@
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer définitivement \"{{title}}\" ? Cette action est irréversible.",
       "confirmEmptyTrash": "Êtes-vous sûr de vouloir vider la corbeille ? Cette action supprimera définitivement {{count}} élément(s)."
     },
+    "DOCUMENT_INFO": {
+      "title": "Informations du document",
+      "openPanel": "Ouvrir les informations du document",
+      "untitled": "Document sans titre",
+      "location": "Emplacement",
+      "words": "Mots",
+      "wordCount_one": "{{count}} mot",
+      "wordCount_other": "{{count}} mots",
+      "home": "Accueil",
+      "trash": "Corbeille",
+      "unknown": "Inconnu",
+      "created": "Créé le",
+      "modified": "Dernière modification",
+      "notAvailable": "Indisponible"
+    },
     "REFERENCE_PANEL": {
       "title": "Références",
       "openPanel": "Ouvrir le panneau des références",

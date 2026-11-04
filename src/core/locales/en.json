@@ -414,6 +414,21 @@
       "confirmDelete": "Are you sure you want to permanently delete \"{{title}}\"? This action is irreversible.",
       "confirmEmptyTrash": "Are you sure you want to empty the trash? This action will permanently delete {{count}} item(s)."
     },
+    "DOCUMENT_INFO": {
+      "title": "Document information",
+      "openPanel": "Open document information",
+      "untitled": "Untitled document",
+      "location": "Location",
+      "words": "Words",
+      "wordCount_one": "{{count}} word",
+      "wordCount_other": "{{count}} words",
+      "home": "Home",
+      "trash": "Trash",
+      "unknown": "Unknown",
+      "created": "Created",
+      "modified": "Last modified",
+      "notAvailable": "Not available"
+    },
     "REFERENCE_PANEL": {
       "title": "References",
       "openPanel": "Open references panel",

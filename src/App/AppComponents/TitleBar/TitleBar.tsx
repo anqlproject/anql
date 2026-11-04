@@ -2,10 +2,14 @@ import "./TitleBar.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { $getRoot } from "lexical";
+import { Info } from "lucide-react";
 import { type JSX, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from 'react-i18next';
+import { useShallow } from "zustand/react/shallow";
 
+import DocumentInfoPanel from "@/App/AppComponents/DocumentInfoPanel/DocumentInfoPanel";
 import { DocumentMenu } from "@/App/AppComponents/DocumentMenu/DocumentMenu";
 import ReferencesPanel from "@/App/AppComponents/ReferencesPanel/ReferencesPanel";
 import { useGlobalShortcut } from "@/App/GlobalShortcut/GlobalShortcutContext";
@@ -17,17 +21,26 @@ import { ReferenceJson } from "@/core/database/useReferenceDatabase";
 import { DIMENSIONS, TOAST_DURATION } from "@/core/global/defaultValues";
 import { logger } from "@/core/logger";
 import { useReferenceStore } from "@/core/references/useReferenceStore";
+import { useNavigationStore } from "@/GlobalState/navigationStore";
 
 export default function TitleBar(): JSX.Element {
   const { t } = useTranslation();
   const appWindow = getCurrentWindow();
   const [openExitDialog, setOpenExitDialog] = useState(false);
   const [refPanelOpen, setRefPanelOpen] = useState(false);
+  const [documentInfoOpen, setDocumentInfoOpen] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
   const { setExitApp } = useGlobalShortcut();
   const { showToast, dismissToast } = useGlobalToast();
-  const isMac = useGlobalStore((state) => state.isMac);
+  const { isMac, currentDocument } = useGlobalStore(useShallow((state) => ({
+    isMac: state.isMac,
+    currentDocument: state.currentDocument,
+  })));
+  const currentPage = useNavigationStore((state) => state.currentPage);
   const refBtnRef = useRef<HTMLButtonElement>(null);
   const refPanelRef = useRef<HTMLDivElement>(null);
+  const infoBtnRef = useRef<HTMLButtonElement>(null);
+  const infoPanelRef = useRef<HTMLDivElement>(null);
   const moveReferenceToTrash = useReferenceStore((state) => state.moveReferenceToTrash);
   const restoreReference = useReferenceStore((state) => state.restoreReference);
 
@@ -54,7 +67,41 @@ export default function TitleBar(): JSX.Element {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [refPanelOpen]);
 
+  useEffect(() => {
+    if (!documentInfoOpen) return;
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (infoBtnRef.current?.contains(target) || infoPanelRef.current?.contains(target)) return;
+      setDocumentInfoOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [documentInfoOpen]);
+
   const [editor] = useLexicalComposerContext();
+  const hasCurrentDocument = currentPage === 'editor' && Boolean(currentDocument?.id);
+
+  useEffect(() => {
+    if (!hasCurrentDocument) setDocumentInfoOpen(false);
+  }, [hasCurrentDocument]);
+
+  useEffect(() => {
+    if (!documentInfoOpen || !hasCurrentDocument) return;
+
+    const updateWordCount = () => {
+      editor.getEditorState().read(() => {
+        const text = $getRoot().getTextContent();
+        const words = text.match(/[\p{L}\p{M}\p{N}]+(?:['’][\p{L}\p{M}\p{N}]+)*/gu);
+        setWordCount(words?.length ?? 0);
+      });
+    };
+
+    updateWordCount();
+    return editor.registerUpdateListener(({ dirtyElements, dirtyLeaves }) => {
+      if (dirtyElements.size > 0 || dirtyLeaves.size > 0) updateWordCount();
+    });
+  }, [currentDocument?.id, documentInfoOpen, editor, hasCurrentDocument]);
 
   const handleMoveReferenceToTrash = async (reference: ReferenceJson) => {
     if (!reference.id) return;
@@ -122,6 +169,7 @@ export default function TitleBar(): JSX.Element {
         onClick={() => {
           editor.blur();
           setRefPanelOpen(false);
+          setDocumentInfoOpen(false);
         }}
       >
         <SidebarTrigger
@@ -136,6 +184,36 @@ export default function TitleBar(): JSX.Element {
           }}
         />
         <DocumentMenu />
+
+        {hasCurrentDocument && (
+          <button
+            ref={infoBtnRef}
+            className={`titlebar-ref-btn${documentInfoOpen ? ' titlebar-ref-btn--active' : ''}`}
+            style={{
+              position: 'absolute',
+              top: '2px',
+              right: isMac ? '5.2rem' : '4.2rem',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '4px',
+              border: 'none',
+            }}
+            title={t('DOCUMENT_INFO.title') as string}
+            aria-label={t('DOCUMENT_INFO.openPanel') as string}
+            aria-expanded={documentInfoOpen}
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              setRefPanelOpen(false);
+              setDocumentInfoOpen((isOpen) => !isOpen);
+            }}
+          >
+            <Info size={16} aria-hidden="true" />
+          </button>
+        )}
 
         <button
           ref={refBtnRef}
@@ -157,6 +235,7 @@ export default function TitleBar(): JSX.Element {
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
+            setDocumentInfoOpen(false);
             setRefPanelOpen((v) => !v);
           }}
         >
@@ -188,6 +267,16 @@ export default function TitleBar(): JSX.Element {
               panelRef={refPanelRef}
               onClose={() => setRefPanelOpen(false)}
               onRequestDelete={handleMoveReferenceToTrash}
+            />,
+            document.body,
+          )
+        )}
+        {documentInfoOpen && hasCurrentDocument && (
+          createPortal(
+            <DocumentInfoPanel
+              panelRef={infoPanelRef}
+              document={currentDocument}
+              wordCount={wordCount}
             />,
             document.body,
           )
