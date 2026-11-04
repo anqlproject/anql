@@ -1,7 +1,7 @@
 import './ReferencePlugin.css';
 
 import { autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/react';
-import { $isCodeNode } from '@lexical/code';
+import { $createCodeNode, $isCodeNode } from '@lexical/code';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   LexicalTypeaheadMenuPlugin,
@@ -9,14 +9,16 @@ import {
 } from '@lexical/react/LexicalTypeaheadMenuPlugin';
 import {
   $createParagraphNode,
+  $createTextNode,
   $getNodeByKey,
   $getSelection,
   $isRangeSelection,
   $isTextNode,
+  $setState,
   LexicalEditor,
   TextNode,
 } from 'lexical';
-import { Image, Plus, Type } from 'lucide-react';
+import { Code2, Image, Plus, Type } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
@@ -24,6 +26,8 @@ import { logger } from '@/core/logger';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 import { $createImageNode } from '@/editor/nodes/ImageNode/ImageNode';
 import { $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
+
+import { codeReferenceIdState } from './referenceState';
 
 class ReferenceMenuOption extends MenuOption {
   reference?: ReferenceJson;
@@ -217,6 +221,23 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           const nextParagraph = $createParagraphNode();
           imageNode.insertAfter(nextParagraph);
           nextParagraph.select();
+        } else if (ref.ref_type === 'code') {
+          const parentBlock = nodeToReplace.getTopLevelElementOrThrow();
+          nodeToReplace.remove();
+
+          const codeNode = $createCodeNode().append($createTextNode(ref.value));
+          if (ref.id) {
+            $setState(codeNode, codeReferenceIdState, ref.id);
+          }
+          if (parentBlock.getTextContent().trim() === '') {
+            parentBlock.replace(codeNode);
+          } else {
+            parentBlock.insertAfter(codeNode);
+          }
+
+          const nextParagraph = $createParagraphNode();
+          codeNode.insertAfter(nextParagraph);
+          nextParagraph.select();
         } else {
           // Insertion immédiate comme vrai TextNode Lexical
           const textToInsert = ref.value || ref.name;
@@ -285,6 +306,8 @@ export default function ReferencePlugin(): React.JSX.Element | null {
                           <Plus size={12} />
                         ) : ref?.ref_type === 'image' ? (
                           <Image size={12} />
+                        ) : ref?.ref_type === 'code' ? (
+                          <Code2 size={12} />
                         ) : (
                           <Type size={12} />
                         )}

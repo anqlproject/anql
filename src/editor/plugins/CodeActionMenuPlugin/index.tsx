@@ -7,12 +7,15 @@ import {
 } from '@lexical/code';
 import { getCodeThemeOptions } from '@lexical/code-shiki';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getNearestNodeFromDOMNode, $getNodeByKey, $nodesOfType } from 'lexical';
+import { $getNearestNodeFromDOMNode, $getNodeByKey, $getState, $nodesOfType, $setState } from 'lexical';
 import { ChevronDown } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 
 import { useScrollLock } from '@/App/hooks/useScrollLock';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/core/logger';
+import { useReferenceStore } from '@/core/references/useReferenceStore';
+import { codeReferenceIdState } from '@/editor/plugins/ReferencePlugin/referenceState';
 
 import { CODE_LANGUAGES, CODE_THEMES } from '../CodeHighlightShikiPlugin';
 
@@ -123,9 +126,14 @@ function CodeMenuDropdown({
 // code style in PlaygroundEditorTheme.css : .anql_code {
 function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
+  const references = useReferenceStore((state) => state.references);
+  const referencesLoaded = useReferenceStore((state) => state.isLoaded);
+  const loadReferences = useReferenceStore((state) => state.loadReferences);
 
   const [lang, setLang] = useState('');
   const [theme, setTheme] = useState('github-light');
+  const [referenceId, setReferenceId] = useState<string>();
+  const [showReferenceName, setShowReferenceName] = useState(false);
 
   const [codeElement, setCodeElement] = useState<HTMLElement | null>(null);
 
@@ -157,13 +165,39 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
           refs.setReference(elem);
           setLang(codeNode.getLanguage() || '');
           setTheme(codeNode.getTheme() || 'github-light');
+          setReferenceId($getState(codeNode, codeReferenceIdState));
         }
       } else {
         setCodeElement(null);
         refs.setReference(null);
+        setReferenceId(undefined);
       }
     });
   }, [editor, codeNodeKey, refs]);
+
+  useEffect(() => {
+    if (!referencesLoaded) {
+      loadReferences().catch((error: unknown) => {
+        logger.error('Failed to load reference for code action menu', error as Error);
+      });
+    }
+  }, [loadReferences, referencesLoaded]);
+
+  useEffect(() => {
+    if (!referencesLoaded || !referenceId) return;
+    if (references.some((reference) => reference.id === referenceId)) return;
+
+    editor.update(() => {
+      const codeNode = $getNodeByKey(codeNodeKey);
+      if (
+        $isCodeNode(codeNode) &&
+        $getState(codeNode, codeReferenceIdState) === referenceId
+      ) {
+        $setState(codeNode, codeReferenceIdState, undefined);
+      }
+    });
+    setShowReferenceName(false);
+  }, [codeNodeKey, editor, referenceId, references, referencesLoaded]);
 
   useEffect(() => {
     updateMenu();
@@ -212,6 +246,10 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
   };
 
   const showMenu = isHoveringCode || isHoveringMenu || isDropdownOpen;
+  const referenceName = referenceId
+    ? references.find((reference) => reference.id === referenceId)?.name
+    : undefined;
+  const hasLinkedReference = Boolean(referenceId && referenceName);
 
   if (!codeElement) return null;
 
@@ -248,6 +286,49 @@ function CodeActionMenuContainer({ codeNodeKey }: { codeNodeKey: string }): JSX.
         onChange={handleThemeChange}
         onOpenChange={setIsDropdownOpen}
       />
+      {hasLinkedReference && (
+        <button
+          type="button"
+          className={`code-action-reference-button${showReferenceName ? ' is-active' : ''}`}
+          aria-label={referenceName || ''}
+          aria-expanded={showReferenceName}
+          title={referenceName}
+          onMouseDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            setShowReferenceName((visible) => !visible);
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="7" r="4" />
+            <circle cx="4" cy="19" r="2" />
+            <circle cx="12" cy="19" r="2" />
+            <circle cx="20" cy="19" r="2" />
+            <path d="M8 7a4 4 0 0 0-4 4v6" />
+            <path d="M12 11v6" />
+            <path d="M16 7a4 4 0 0 1 4 4v6" />
+          </svg>
+          {showReferenceName && (
+            <span className="code-action-reference-name">
+              {referenceName}
+            </span>
+          )}
+        </button>
+      )}
     </div>
   );
 }

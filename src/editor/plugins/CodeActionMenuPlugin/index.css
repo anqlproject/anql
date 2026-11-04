@@ -52,6 +52,36 @@
   opacity: 0.9;
 }
 
+.code-action-reference-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 22px;
+  max-width: 220px;
+  padding: 2px 6px;
+  border: 0;
+  border-left: 1px solid var(--border-color);
+  margin-left: 1px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.code-action-reference-button:hover,
+.code-action-reference-button.is-active {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.code-action-reference-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .code-action-menu-dropdown {
   max-height: 220px;
   overflow-y: auto;

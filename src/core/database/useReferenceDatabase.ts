@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 export interface ReferenceJson {
   id?: string | null;
   name: string;
-  ref_type: 'text' | 'image';
+  ref_type: 'text' | 'image' | 'code';
   value: string;
   created_at: number;
   updated_at: number;

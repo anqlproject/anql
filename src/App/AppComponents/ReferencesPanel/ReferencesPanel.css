@@ -310,6 +310,14 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 14%, transparent);
 }
 
+.ref-item__input--code {
+  min-height: 120px;
+  resize: vertical;
+  font-family: var(--font-mono);
+  line-height: var(--leading-relaxed);
+  tab-size: 2;
+}
+
 .ref-item__image-picker {
   display: flex;
   align-items: center;
