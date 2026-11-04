@@ -411,6 +411,7 @@
     },
     "REFERENCE_PANEL": {
       "title": "References",
+      "openPanel": "Open references panel",
       "close": "Close",
       "searchPlaceholder": "Search references…",
       "noResults": "No results",

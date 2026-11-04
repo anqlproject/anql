@@ -126,8 +126,8 @@ export default function TitleBar(): JSX.Element {
             padding: '4px',
             border: 'none',
           }}
-          title="Références (@)"
-          aria-label="Ouvrir les références"
+          title={t('REFERENCE_PANEL.title') as string}
+          aria-label={t('REFERENCE_PANEL.openPanel') as string}
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
