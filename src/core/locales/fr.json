@@ -218,7 +218,10 @@
       "close": "Fermer (Échap)"
     },
     "EDITOR": {
-      "placeholder": "Commencez à écrire ou cliquez sur \"...\" pour créer un node, ou tapez \"help\""
+      "emptyStateDescription": "Écrivez, choisissez un bloc ou tapez « help ».",
+      "createTable": "Tableau",
+      "createMath": "Math",
+      "createTodo": "Tâche"
     },
     "CREATE_NODE": {
       "buttonTitle": "Cliquez pour créer un node"

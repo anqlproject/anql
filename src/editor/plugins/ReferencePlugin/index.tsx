@@ -9,23 +9,162 @@ import {
 } from '@lexical/react/LexicalTypeaheadMenuPlugin';
 import {
   $createParagraphNode,
+  $createRangeSelection,
   $createTextNode,
   $getNodeByKey,
   $getSelection,
+  $insertNodes,
   $isRangeSelection,
   $isTextNode,
   $setState,
+  $setSelection,
+  COMMAND_PRIORITY_HIGH,
+  DRAGOVER_COMMAND,
+  DROP_COMMAND,
+  getDOMSelectionFromTarget,
+  isHTMLElement,
   LexicalEditor,
   TextNode,
 } from 'lexical';
 import { Code2, Image, Plus, Type } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
+import {
+  REFERENCE_DRAG_TYPE,
+  REFERENCE_IMAGE_DRAG_TYPE,
+  REFERENCE_TEXT_DRAG_TYPE,
+} from '@/core/references/referenceDragTypes';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 import { $createImageNode } from '@/editor/nodes/ImageNode/ImageNode';
 import { $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
+import { $isTableNode } from '@/editor/nodes/TableNode/TableNode';
+
+function hasReferenceDragData(event: DragEvent): boolean {
+  return Boolean(
+    event.dataTransfer &&
+    Array.from(event.dataTransfer.types).some((type) =>
+      [REFERENCE_DRAG_TYPE, REFERENCE_IMAGE_DRAG_TYPE, REFERENCE_TEXT_DRAG_TYPE].includes(type),
+    ),
+  );
+}
+
+function isDropInsideEditor(event: DragEvent, editor: LexicalEditor): boolean {
+  const target = event.target;
+  const rootElement = editor.getRootElement();
+  return isHTMLElement(target) && rootElement !== null && rootElement.contains(target);
+}
+
+function getReferenceDropRange(event: DragEvent, editor: LexicalEditor): Range | null {
+  const target = event.target;
+  if (isHTMLElement(target)) {
+    const tableContainer = target.closest<HTMLElement>('.table-container');
+    const tableNodeKey = tableContainer?.dataset.nodeKey;
+    const tableElement = tableNodeKey ? editor.getElementByKey(tableNodeKey) : null;
+    if (tableElement) {
+      const cell = target.closest<HTMLElement>('.table-cell');
+      if (cell) {
+        const range = document.caretRangeFromPoint?.(event.clientX, event.clientY);
+        if (range && cell.contains(range.startContainer)) return range;
+
+        const cellRange = document.createRange();
+        cellRange.selectNodeContents(cell);
+        cellRange.collapse(event.clientX >= cell.getBoundingClientRect().left + cell.getBoundingClientRect().width / 2);
+        return cellRange;
+      }
+
+      const tableRect = tableElement.getBoundingClientRect();
+      const range = document.createRange();
+      if (event.clientY < tableRect.top + tableRect.height / 2) {
+        range.setStartBefore(tableElement);
+      } else {
+        range.setStartAfter(tableElement);
+      }
+      range.collapse(true);
+      return range;
+    }
+  }
+
+  const range = document.caretRangeFromPoint?.(event.clientX, event.clientY);
+  if (range) return range;
+
+  const domSelection = getDOMSelectionFromTarget(target);
+  if (event.rangeParent && domSelection) {
+    domSelection.collapse(event.rangeParent, event.rangeOffset ?? 0);
+    return domSelection.getRangeAt(0);
+  }
+
+  return null;
+}
+
+function insertReferenceIntoTableCell(
+  event: DragEvent,
+  editor: LexicalEditor,
+  reference: ReferenceJson,
+): boolean | null {
+  const target = event.target;
+  if (!isHTMLElement(target)) return null;
+
+  const tableContainer = target.closest<HTMLElement>('.table-container');
+  const cell = target.closest<HTMLElement>('.table-cell');
+  if (!tableContainer || !cell) return null;
+
+  const row = cell?.closest<HTMLElement>('.table-row[data-row-id]');
+  const tableKey = tableContainer?.dataset.nodeKey;
+  const rowId = row?.dataset.rowId;
+  const columnIndex = Number(cell?.dataset.columnIndex);
+  if (!tableKey || !rowId || !Number.isInteger(columnIndex)) return false;
+
+  const input = target.closest<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
+  const range = getReferenceDropRange(event, editor);
+  let insertionOffset = 0;
+  const display = cell.querySelector<HTMLElement>('.table-cell-display');
+  const currentText = input?.value ?? display?.textContent ?? cell.textContent ?? '';
+
+  if (input) {
+    insertionOffset = input.selectionStart ?? currentText.length;
+  } else if (range && display?.contains(range.startContainer)) {
+    const prefixRange = document.createRange();
+    prefixRange.selectNodeContents(display);
+    prefixRange.setEnd(range.startContainer, range.startOffset);
+    insertionOffset = prefixRange.toString().length;
+  } else {
+    insertionOffset = currentText.length;
+  }
+  insertionOffset = Math.max(0, Math.min(insertionOffset, currentText.length));
+
+  let inserted = false;
+  editor.update(() => {
+    const tableNode = $getNodeByKey(tableKey);
+    if (!$isTableNode(tableNode)) return;
+
+    const rowIndex = tableNode.__data.findIndex((tableRow) => tableRow._rowId === rowId);
+    if (rowIndex < 0) return;
+
+    const valueToInsert = reference.value || reference.name;
+    const updatedText =
+      currentText.slice(0, insertionOffset) +
+      valueToInsert +
+      currentText.slice(insertionOffset);
+    const updatedData = tableNode.__data.map((tableRow, index) => {
+      if (index !== rowIndex) return tableRow;
+      if (columnIndex === -1) return { ...tableRow, rowHeader: updatedText };
+
+      const column = tableNode.__columns[columnIndex];
+      if (!column || (column.meta?.type && column.meta.type !== 'text')) return tableRow;
+      return { ...tableRow, [column.id]: updatedText };
+    });
+
+    if (updatedData[rowIndex] !== tableNode.__data[rowIndex]) {
+      tableNode.updateData(updatedData);
+      inserted = true;
+    }
+  });
+
+  return inserted;
+}
 
 import { codeReferenceIdState, codeReferenceUpdatedAtState } from './referenceState';
 
@@ -109,6 +248,10 @@ export default function ReferencePlugin(): React.JSX.Element | null {
   const isLoaded = useReferenceStore((state) => state.isLoaded);
   const loadReferences = useReferenceStore((state) => state.loadReferences);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const dragScrollContainerRef = useRef<HTMLElement | null>(null);
+  const dragScrollDirectionRef = useRef<-1 | 0 | 1>(0);
+  const dragScrollIntervalRef = useRef<number | null>(null);
+  const dropCaretRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!isLoaded) {
@@ -117,6 +260,183 @@ export default function ReferencePlugin(): React.JSX.Element | null {
       });
     }
   }, [isLoaded, loadReferences]);
+
+  React.useEffect(() => {
+    const stopDragAutoScroll = () => {
+      dragScrollDirectionRef.current = 0;
+      if (dragScrollIntervalRef.current !== null) {
+        window.clearInterval(dragScrollIntervalRef.current);
+        dragScrollIntervalRef.current = null;
+      }
+      dragScrollContainerRef.current = null;
+    };
+
+    const hideDropCaret = () => {
+      if (dropCaretRef.current) dropCaretRef.current.style.display = 'none';
+    };
+
+    const showDropCaret = (range: Range, event: DragEvent) => {
+      const caret = dropCaretRef.current;
+      if (!caret) return;
+
+      const rect = range.getBoundingClientRect();
+      const isVisibleRect = rect.height > 0;
+      caret.style.left = `${isVisibleRect ? rect.left : event.clientX}px`;
+      caret.style.top = `${isVisibleRect ? rect.top : event.clientY - 10}px`;
+      caret.style.height = `${isVisibleRect ? rect.height : 20}px`;
+      caret.style.display = 'block';
+    };
+
+    const updateDragAutoScroll = (event: DragEvent) => {
+      const root = editor.getRootElement();
+      const scrollContainer = root?.closest<HTMLElement>('.editor-container') ?? null;
+      if (!scrollContainer) {
+        stopDragAutoScroll();
+        return;
+      }
+
+      const rect = scrollContainer.getBoundingClientRect();
+      const edgeSize = 48;
+      const canScrollUp = scrollContainer.scrollTop > 0;
+      const canScrollDown =
+        scrollContainer.scrollTop + scrollContainer.clientHeight < scrollContainer.scrollHeight;
+      const direction = event.clientY <= rect.top + edgeSize && canScrollUp
+        ? -1
+        : event.clientY >= rect.bottom - edgeSize && canScrollDown
+          ? 1
+          : 0;
+
+      dragScrollContainerRef.current = scrollContainer;
+      dragScrollDirectionRef.current = direction;
+      if (direction === 0 || dragScrollIntervalRef.current !== null) return;
+
+      dragScrollIntervalRef.current = window.setInterval(() => {
+        const container = dragScrollContainerRef.current;
+        const currentDirection = dragScrollDirectionRef.current;
+        if (!container || currentDirection === 0) {
+          stopDragAutoScroll();
+          return;
+        }
+
+        container.scrollTop += currentDirection * 10;
+        const reachedEdge = currentDirection < 0
+          ? container.scrollTop <= 0
+          : container.scrollTop + container.clientHeight >= container.scrollHeight;
+        if (reachedEdge) stopDragAutoScroll();
+      }, 20);
+    };
+
+    const handleDragEndWithCaret = () => {
+      stopDragAutoScroll();
+      hideDropCaret();
+    };
+    const handleDocumentDragOver = (event: DragEvent) => {
+      if (!hasReferenceDragData(event) || event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE)) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Node) || !dragScrollContainerRef.current?.contains(target)) {
+        stopDragAutoScroll();
+      }
+      if (!(target instanceof Node) || !editor.getRootElement()?.contains(target)) {
+        hideDropCaret();
+      }
+    };
+    document.addEventListener('dragend', handleDragEndWithCaret);
+    document.addEventListener('dragover', handleDocumentDragOver);
+
+    const unregisterDragOver = editor.registerCommand<DragEvent>(
+      DRAGOVER_COMMAND,
+      (event) => {
+        if (!editor.isEditable() || !hasReferenceDragData(event) || !isDropInsideEditor(event, editor)) {
+          return false;
+        }
+
+        if (event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE)) {
+          return false;
+        }
+
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+        updateDragAutoScroll(event);
+        const range = getReferenceDropRange(event, editor);
+        if (range) showDropCaret(range, event);
+        return true;
+      },
+      COMMAND_PRIORITY_HIGH,
+    );
+    const unregisterDrop = editor.registerCommand<DragEvent>(
+      DROP_COMMAND,
+      (event) => {
+        if (!editor.isEditable() || !hasReferenceDragData(event) || !isDropInsideEditor(event, editor)) {
+          return false;
+        }
+
+        event.preventDefault();
+        stopDragAutoScroll();
+        hideDropCaret();
+        const dragValue = event.dataTransfer?.getData(REFERENCE_DRAG_TYPE);
+        const reference = references.find(
+          (item) => item.id === dragValue || `name:${item.name}` === dragValue,
+        );
+        if (reference?.ref_type === 'text') {
+          const tableCellDrop = insertReferenceIntoTableCell(event, editor, reference);
+          if (tableCellDrop !== null) return true;
+        }
+
+        const range = getReferenceDropRange(event, editor);
+        if (!reference || !range) return true;
+
+        const rangeSelection = $createRangeSelection();
+        rangeSelection.applyDOMRange(range);
+        $setSelection(rangeSelection);
+
+        if (reference.ref_type === 'image') {
+          const parentBlock = rangeSelection.anchor.getNode().getTopLevelElementOrThrow();
+          const imageNode = $createImageNode({
+            src: reference.value,
+            altText: reference.name,
+            maxWidth: 600,
+            referenceId: reference.id ?? undefined,
+          });
+
+          if (
+            parentBlock.getType() === 'paragraph' &&
+            parentBlock.getTextContent().trim() === ''
+          ) {
+            parentBlock.replace(imageNode);
+          } else {
+            const blockElement = editor.getElementByKey(parentBlock.getKey());
+            const blockRect = blockElement?.getBoundingClientRect();
+            if (blockRect && event.clientY < blockRect.top) {
+              parentBlock.insertBefore(imageNode);
+            } else {
+              parentBlock.insertAfter(imageNode);
+            }
+          }
+
+          const nextParagraph = $createParagraphNode();
+          imageNode.insertAfter(nextParagraph);
+          nextParagraph.select();
+        } else {
+          $insertNodes([$createTextNode(reference.value || reference.name)]);
+        }
+
+        return true;
+      },
+      COMMAND_PRIORITY_HIGH,
+    );
+
+    return () => {
+      document.removeEventListener('dragend', handleDragEndWithCaret);
+      document.removeEventListener('dragover', handleDocumentDragOver);
+      stopDragAutoScroll();
+      hideDropCaret();
+      unregisterDragOver();
+      unregisterDrop();
+    };
+  }, [editor, references]);
 
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
@@ -254,6 +574,8 @@ export default function ReferencePlugin(): React.JSX.Element | null {
   );
 
   return (
+    <>
+    {createPortal(<div ref={dropCaretRef} className="reference-drop-caret" />, document.body)}
     <LexicalTypeaheadMenuPlugin<ReferenceMenuOption>
       onQueryChange={setQueryString}
       onSelectOption={onSelectOption}
@@ -341,5 +663,6 @@ export default function ReferencePlugin(): React.JSX.Element | null {
         );
       }}
     />
+    </>
   );
 }

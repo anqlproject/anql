@@ -15,6 +15,18 @@
   animation: ref-popover-in 0.12s ease-out;
 }
 
+.reference-drop-caret {
+  position: fixed;
+  z-index: var(--z-overlay);
+  display: none;
+  width: 2px;
+  min-height: 16px;
+  background: var(--primary-color);
+  border-radius: 2px;
+  pointer-events: none;
+  box-shadow: 0 0 4px color-mix(in srgb, var(--primary-color) 45%, transparent);
+}
+
 @keyframes ref-popover-in {
   from {
     opacity: 0;

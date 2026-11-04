@@ -4,35 +4,21 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { Code2, FileSearch, Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useFile } from '@/App/hooks/FileHooks';
 import { createAsset, resolveAssetUrl } from '@/core/database/useAssetDatabase';
-import { getReferenceUsages, ReferenceUsageJson } from '@/core/database/useDocumentDatabase';
 import { ReferenceJson } from '@/core/database/useReferenceDatabase';
-import { searchNodesByType } from '@/core/database/useSearchDatabase';
-import { DIMENSIONS } from '@/core/global/defaultValues';
 import { logger } from '@/core/logger';
+import {
+  REFERENCE_DRAG_TYPE,
+  REFERENCE_IMAGE_DRAG_TYPE,
+  REFERENCE_TEXT_DRAG_TYPE,
+} from '@/core/references/referenceDragTypes';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 
-type RefType = ReferenceJson['ref_type'];
+import ReferenceUsagesPanel, { loadReferenceUsages } from './ReferenceUsagesPanel';
 
-async function loadReferenceUsages(reference: ReferenceJson): Promise<ReferenceUsageJson[]> {
-  const [linkedUsages, mathUsages] = await Promise.all([
-    reference.id ? getReferenceUsages(reference.id) : Promise.resolve([]),
-    reference.ref_type === 'text'
-      ? searchNodesByType(reference.name, 'mathexp')
-      : Promise.resolve([]),
-  ]);
-  const uniqueUsages = new Map<string, ReferenceUsageJson>();
-  [...linkedUsages, ...mathUsages].forEach((usage) => {
-    uniqueUsages.set(`${usage.id}:${usage.node_id}`, usage);
-  });
-  return [...uniqueUsages.values()].sort((a, b) =>
-    a.title.localeCompare(b.title) || a.path.localeCompare(b.path),
-  );
-}
+type RefType = ReferenceJson['ref_type'];
 
 const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   text:   <Type size={12} />,
@@ -93,16 +79,11 @@ interface ReferencesPanelProps {
 export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: ReferencesPanelProps) {
   const { t } = useTranslation();
   const { references, isLoaded, loadReferences, addReference, editReference } = useReferenceStore();
-  const { openEditorWUFocusOnNode } = useFile();
 
   const [search, setSearch] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [usageReference, setUsageReference] = useState<ReferenceJson | null>(null);
-  const [usages, setUsages] = useState<ReferenceUsageJson[]>([]);
-  const [isLoadingUsages, setIsLoadingUsages] = useState(false);
-  const [usageError, setUsageError] = useState('');
-  const [openingUsageId, setOpeningUsageId] = useState<string | null>(null);
   const [hoveredReferenceKey, setHoveredReferenceKey] = useState<string | null>(null);
   const [usageCounts, setUsageCounts] = useState<Record<string, number>>({});
 
@@ -127,33 +108,6 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
   useEffect(() => {
     if (!isLoaded) loadReferences();
   }, [isLoaded, loadReferences]);
-
-  useEffect(() => {
-    if (!usageReference) return;
-
-    let isMounted = true;
-    setUsages([]);
-    setIsLoadingUsages(true);
-    setUsageError('');
-    loadReferenceUsages(usageReference)
-      .then((loadedUsages) => {
-        if (!isMounted) return;
-        setUsages(loadedUsages);
-      })
-      .catch((error: unknown) => {
-        logger.error('Failed to load reference usages', error as Error, {
-          referenceId: usageReference.id,
-        });
-        if (isMounted) setUsageError(t('REFERENCE_PANEL.usagesFailed') as string);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoadingUsages(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [usageReference, t]);
 
   useEffect(() => {
     if (!hoveredReferenceKey || usageCounts[hoveredReferenceKey] !== undefined) return;
@@ -299,24 +253,6 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
     if (e.key === 'Escape') { setIsAdding(false); cancelEdit(); }
   };
 
-  const openUsage = async (usage: ReferenceUsageJson) => {
-    setOpeningUsageId(usage.node_id);
-    setUsageError('');
-    try {
-      await openEditorWUFocusOnNode(usage, usage.node_id);
-      setUsageReference(null);
-      onClose();
-    } catch (error) {
-      logger.error('Failed to open reference usage', error as Error, {
-        documentId: usage.id,
-        nodeId: usage.node_id,
-      });
-      setUsageError(t('REFERENCE_PANEL.openUsageFailed') as string);
-    } finally {
-      setOpeningUsageId(null);
-    }
-  };
-
   return (
     <>
       <div
@@ -446,6 +382,18 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
                 <button
                   type="button"
                   className="ref-item__link"
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = 'copy';
+                    event.dataTransfer.setData(
+                      REFERENCE_DRAG_TYPE,
+                      ref.id ?? `name:${ref.name}`,
+                    );
+                    event.dataTransfer.setData(
+                      ref.ref_type === 'image' ? REFERENCE_IMAGE_DRAG_TYPE : REFERENCE_TEXT_DRAG_TYPE,
+                      '1',
+                    );
+                  }}
                   onClick={() => setUsageReference(ref)}
                   aria-label={t('REFERENCE_PANEL.viewUsages', { name: ref.name }) as string}
                 >
@@ -612,80 +560,12 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
         </button>
       </div>
       </div>
-      {usageReference && createPortal(
-        <div
-          className="ref-usages-overlay"
-          style={{ paddingTop: DIMENSIONS.overlayTopOffset }}
-          onClick={() => setUsageReference(null)}
-          onMouseDown={(event) => event.stopPropagation()}
-        >
-          <div className="ref-usages-backdrop" />
-          <section
-            className="ref-usages-panel"
-            style={{
-              width: DIMENSIONS.panelWidth_medium,
-              height: DIMENSIONS.panelHeight_medium,
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="ref-usages-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <header className="ref-usages-header">
-              <h2 id="ref-usages-title">
-                {t('REFERENCE_PANEL.usagesTitle', { name: usageReference.name })}
-                {!isLoadingUsages && !usageError && (
-                  <>
-                    {' '}
-                    <span className="ref-usage-count">{usages.length}</span>
-                  </>
-                )}
-              </h2>
-              <button
-                type="button"
-                className="ref-panel__close"
-                onClick={() => setUsageReference(null)}
-                aria-label={t('REFERENCE_PANEL.close') as string}
-              >
-                <X size={14} />
-              </button>
-            </header>
-            <div className="ref-usages-list">
-              {isLoadingUsages ? (
-                <p className="ref-usages-message">{t('REFERENCE_PANEL.loadingUsages')}</p>
-              ) : usageError ? (
-                <p className="ref-usages-message ref-usages-message--error" role="alert">{usageError}</p>
-              ) : usages.length === 0 ? (
-                <p className="ref-usages-message">{t('REFERENCE_PANEL.noUsages')}</p>
-              ) : usages.map((usage, index) => {
-                const blockNumber = usages
-                  .slice(0, index + 1)
-                  .filter((item) => item.id === usage.id).length;
-                return (
-                  <button
-                    key={`${usage.id}-${usage.node_id}`}
-                    type="button"
-                    className="ref-usages-item"
-                    onClick={() => openUsage(usage)}
-                    disabled={openingUsageId !== null}
-                  >
-                    <FileSearch size={15} />
-                    <span className="ref-usages-item__text">
-                      <strong>{usage.title || t('SIDEBAR.untitled')}</strong>
-                      <small>
-                        {usage.path}
-                        {usage.path ? ' · ' : ''}
-                        {t('REFERENCE_PANEL.usageBlock', { number: blockNumber })}
-                      </small>
-                    </span>
-                    {openingUsageId === usage.node_id && <span>{t('REFERENCE_PANEL.openingUsage')}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        </div>,
-        document.body,
+      {usageReference && (
+        <ReferenceUsagesPanel
+          reference={usageReference}
+          onClose={() => setUsageReference(null)}
+          onUsageOpened={onClose}
+        />
       )}
     </>
   );
