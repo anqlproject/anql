@@ -78,21 +78,42 @@ export function useFile() {
         // Block node that was not defined
         // Work directly on the object — avoid an expensive JSON deep-clone.
         // sanitizeNode only mutates when an unknown type is found (rare).
-        const sanitizeNode = (node: { children?: unknown[]; type?: string; $?: { id?: string } }) => {
+        const sanitizeNode = (node: {
+          children?: unknown[];
+          type?: string;
+          $?: Record<string, unknown>;
+          referenceId?: unknown;
+        }) => {
           if (node.children && Array.isArray(node.children)) {
             node.children = node.children.filter((child: unknown) => {
-              const typedChild = child as { type?: string; $?: { id?: string } };
+              const typedChild = child as {
+                type?: string;
+                $?: Record<string, unknown>;
+                referenceId?: unknown;
+              };
               if (typedChild.type && !AppNodeTypes.has(typedChild.type)) {
                 console.warn(`Blocked unregistered node type: ${typedChild.type}`);
-                if (typedChild.$ && typedChild.$.id) {
+                if (typeof typedChild.$?.id === 'string') {
                   deleteNode(typedChild.$.id).catch(console.error);
                 }
                 return false;
               }
+
+              if (typedChild.type === 'code' && typeof typedChild.referenceId === 'string') {
+                typedChild.$ ??= {};
+                typedChild.$.referenceId ??= typedChild.referenceId;
+                delete typedChild.referenceId;
+              }
+
               return true;
             });
             node.children.forEach((child: unknown) => {
-              sanitizeNode(child as { children?: unknown[]; type?: string; $?: { id?: string } });
+              sanitizeNode(child as {
+                children?: unknown[];
+                type?: string;
+                $?: Record<string, unknown>;
+                referenceId?: unknown;
+              });
             });
           }
         };
