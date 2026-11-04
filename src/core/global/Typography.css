@@ -20,9 +20,8 @@
   --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
 
   /*  font size */
-  /* Base: 16px — matches the image's comfortable reading size     */
   /* All rem values will be relative to this value.                */
-  --font-size-root: 16px;
+  --font-size-root: 15px;
 
   /*  Type Scale */
   /* Method: Modular Scale × 1.25 (Major Third)                   */

@@ -9,7 +9,7 @@
   font-family: var(--font-sans);
   font-size: var(--text-md);
   line-height: var(--leading-relaxed);
-  font-weight: 420;
+  font-weight: 400;
   letter-spacing: var(--tracking-normal);
   white-space: normal;
 }
