@@ -83,3 +83,18 @@
   outline: 2px solid var(--text-secondary);
   outline-offset: 2px;
 }
+
+.titlebar-info-btn,
+.titlebar-info-btn:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.titlebar-info-btn,
+.titlebar-info-btn svg {
+  transition: none;
+}
+
+.titlebar-info-btn:hover svg {
+  transform: none;
+}

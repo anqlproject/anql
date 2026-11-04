@@ -248,7 +248,7 @@ export default function TitleBar(): JSX.Element {
           {hasCurrentDocument && (
             <button
               ref={infoBtnRef}
-              className={`titlebar-ref-btn${documentInfoOpen ? ' titlebar-ref-btn--active' : ''}`}
+              className={`titlebar-ref-btn titlebar-info-btn${documentInfoOpen ? ' titlebar-ref-btn--active' : ''}`}
               style={{
                 width: '28px',
                 height: '28px',
