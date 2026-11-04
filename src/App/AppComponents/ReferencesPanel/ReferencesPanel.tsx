@@ -2,7 +2,7 @@ import './ReferencesPanel.css';
 
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
-import { Code2, Image, Pencil, Plus, Search, Trash2, Type, X } from 'lucide-react';
+import { Code2, Image, Pencil, Plus, Search, Trash2, Type } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -344,9 +344,6 @@ export default function ReferencesPanel({ panelRef, onClose, onRequestDelete }: 
             </button>
           ))}
         </div>
-        <button className="ref-panel__close" onClick={onClose} aria-label={t('REFERENCE_PANEL.close') as string}>
-          <X size={14} />
-        </button>
       </div>
 
       {activeView === 'groups' && selectedGroup === null ? (
