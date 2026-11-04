@@ -136,34 +136,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   }, [isLoaded, loadReferences]);
 
   useEffect(() => {
-    if (!hoveredReferenceKey || usageCounts[hoveredReferenceKey] !== undefined) return;
-    const reference = activeReferences.find(
-      (item) => (item.id ?? item.name) === hoveredReferenceKey,
-    );
-    if (!reference) return;
-
-    let isMounted = true;
-    loadReferenceUsages(reference)
-      .then((loadedUsages) => {
-        if (!isMounted) return;
-        setUsageCounts((counts) => ({
-          ...counts,
-          [hoveredReferenceKey]: loadedUsages.length,
-        }));
-      })
-      .catch((error: unknown) => {
-        logger.error('Failed to load reference usage count', error as Error, {
-          referenceId: reference.id,
-          referenceName: reference.name,
-        });
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [activeReferences, hoveredReferenceKey, usageCounts]);
-
-  useEffect(() => {
     if (isAdding) newNameRef.current?.focus();
     else searchRef.current?.focus();
   }, [isAdding]);
@@ -185,6 +157,50 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const editingReference = editingId
     ? activeReferences.find((reference) => reference.id === editingId)
     : undefined;
+  const hoveredReference = hoveredReferenceKey
+    ? activeReferences.find((reference) => (reference.id ?? reference.name) === hoveredReferenceKey)
+    : undefined;
+
+  useEffect(() => {
+    if (!hoveredReference || !hoveredReferenceKey) return;
+
+    let isMounted = true;
+    let refreshTimeout: number | undefined;
+    let requestId = 0;
+
+    const refreshUsageCount = () => {
+      const currentRequestId = ++requestId;
+      loadReferenceUsages(hoveredReference)
+        .then((loadedUsages) => {
+          if (!isMounted || currentRequestId !== requestId) return;
+          setUsageCounts((counts) => ({
+            ...counts,
+            [hoveredReferenceKey]: loadedUsages.length,
+          }));
+        })
+        .catch((error: unknown) => {
+          if (!isMounted || currentRequestId !== requestId) return;
+          logger.error('Failed to load reference usage count', error as Error, {
+            referenceId: hoveredReference.id,
+            referenceName: hoveredReference.name,
+          });
+        });
+    };
+
+    const handleDatabaseChange = () => {
+      window.clearTimeout(refreshTimeout);
+      refreshTimeout = window.setTimeout(refreshUsageCount, 150);
+    };
+
+    refreshUsageCount();
+    window.addEventListener('node-database-changed', handleDatabaseChange);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(refreshTimeout);
+      window.removeEventListener('node-database-changed', handleDatabaseChange);
+    };
+  }, [hoveredReference, hoveredReferenceKey]);
 
   useEffect(() => {
     if (selectedGroup && !groups.includes(selectedGroup)) {
