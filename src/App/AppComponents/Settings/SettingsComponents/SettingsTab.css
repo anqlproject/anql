@@ -1,15 +1,18 @@
 /* SettingsTab — section title + card wrapper */
 
 .settings-section-title {
-  font-size: var(--ui-text-md);
+  font-size: var(--ui-text-sm);
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
   color: var(--text-primary);
-  margin: 0 0 18px 0;
+  margin: 0 0 12px;
   letter-spacing: var(--tracking-tight);
 }
 
 .settings-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   background-color: transparent;
   border: none;
   border-radius: 0;

@@ -4,11 +4,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
-  padding: 12px 10px;
-  margin: 0 -6px;
-  border-radius: 8px;
-  border-bottom: 1px solid transparent;
+  gap: 1.5rem;
+  padding: 14px 12px;
+  border-radius: 10px;
+  background-color: var(--panel-color);
   transition: background-color 0.15s ease;
 }
 
@@ -24,18 +23,18 @@
 
 .settings-field-label {
   display: block;
-  font-size: var(--ui-text-base);
-  font-weight: var(--font-medium);
+  font-size: var(--ui-text-sm);
+  font-weight: var(--font-semibold);
   line-height: var(--leading-snug);
   color: var(--text-primary);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   letter-spacing: var(--tracking-normal);
 }
 
 .settings-field-description {
-  font-size: var(--ui-text-sm);
+  font-size: var(--ui-text-xs);
   color: var(--text-secondary);
-  opacity: 0.82;
+  opacity: 0.9;
   margin: 0;
   line-height: var(--leading-snug);
   max-width: 52ch;
@@ -61,7 +60,7 @@
   border: 1px solid var(--border-color);
   cursor: pointer;
   white-space: nowrap;
-  background-color: var(--panel-color);
+  background-color: var(--surface-color);
   color: var(--text-primary);
 }
 
@@ -139,7 +138,7 @@ select.settings-input option {
   padding: 0 12px;
   white-space: nowrap;
   border: 1px solid var(--border-color);
-  background-color: var(--panel-color);
+  background-color: var(--surface-color);
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

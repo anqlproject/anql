@@ -175,6 +175,12 @@
   scrollbar-color: var(--border-color) transparent;
 }
 
+.settings-main > div {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
 .settings-main::-webkit-scrollbar {
   width: 4px;
 }
