@@ -2,7 +2,7 @@
 .table-container {
   position: relative;
   margin: 0.75rem 0 1.25rem;
-  padding: 8px 36px 36px 24px;
+  padding: 8px 36px 10px 24px;
   margin-left: -24px;
   max-width: 100%;
   overflow-x: auto;
@@ -41,27 +41,6 @@
   width: fit-content;
 }
 
-/* Bottom boundary indicator — centered gradient pill, fades on both sides */
-.table-grid-wrapper::after {
-  content: '';
-  position: absolute;
-  bottom: -34px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 56px;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--border-color) 30%,
-    var(--border-color) 70%,
-    transparent
-  );
-  border-radius: 2px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 .table-grid {
   display: flex;
   flex-direction: column;
@@ -80,51 +59,100 @@
 /* Bottom strip — spans full width of the table */
 .table-add-row-strip {
   position: absolute;
-  bottom: -28px;
-  left: 0;
-  right: 0;
+  bottom: -5px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  opacity: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.1s, background-color 0.1s;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* Column add button — centered on the table's right edge */
+.table-add-col-strip {
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
+  width: 20px;
   height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   background: transparent;
-  border-radius: 0 0 4px 4px;
+  border-radius: 3px;
   opacity: 0;
   cursor: pointer;
   padding: 0;
-  transition: opacity 0.1s, background-color 0.1s;
+  transition: opacity 0.1s;
 }
 
-/* Right strip — spans full height of the table */
-.table-add-col-strip {
-  position: absolute;
-  top: 0;
-  right: -28px;
-  bottom: 0;
-  width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  border-radius: 0 4px 4px 0;
-  opacity: 0;
-  cursor: pointer;
-  padding: 0;
-  transition: opacity 0.1s, background-color 0.1s;
-}
-
-.table-add-row-strip:hover,
-.table-add-col-strip:hover {
+.table-grid-wrapper:hover .table-add-row-strip,
+.table-add-row-strip:focus-visible {
   opacity: 1;
-  background-color: var(--action-hover);
-  transition: opacity 0.1s ease-in 0.1s, background-color 0.1s ease-in 0.1s;
+}
+
+.table-grid-wrapper:hover .table-add-col-strip,
+.table-add-col-strip:focus-visible {
+  opacity: 1;
 }
 
 .table-add-row-strip:hover .table-add-strip-btn,
 .table-add-col-strip:hover .table-add-strip-btn {
-  color: var(--text-primary);
+  background-color: var(--action-hover);
+}
+
+.table-add-row-strip .table-add-strip-btn,
+.table-add-col-strip .table-add-strip-btn {
+  position: relative;
+}
+
+.table-add-row-strip .table-add-strip-btn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.table-add-row-strip .table-add-strip-btn::before,
+.table-add-col-strip .table-add-strip-btn::before {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary-color);
+}
+
+.table-add-row-strip .table-add-strip-btn svg,
+.table-add-col-strip .table-add-strip-btn svg {
+  color: var(--primary-color);
+  opacity: 0;
+}
+
+.table-add-row-strip:hover .table-add-strip-btn::before,
+.table-add-row-strip:focus-visible .table-add-strip-btn::before,
+.table-add-col-strip:hover .table-add-strip-btn::before,
+.table-add-col-strip:focus-visible .table-add-strip-btn::before {
+  opacity: 0;
+}
+
+.table-add-row-strip:hover .table-add-strip-btn svg,
+.table-add-row-strip:focus-visible .table-add-strip-btn svg,
+.table-add-col-strip:hover .table-add-strip-btn svg,
+.table-add-col-strip:focus-visible .table-add-strip-btn svg {
+  opacity: 1;
 }
 
 /* The actual + button inside the strip */
