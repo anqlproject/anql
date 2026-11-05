@@ -6,7 +6,7 @@ use sqlx::Row;
 pub struct ReferenceJson {
     pub id: Option<String>,
     pub name: String,
-    pub ref_type: String, // 'text' | 'image' | 'code'
+    pub ref_type: String, // 'text' | 'image' | 'code' | 'pdf'
     pub path: String,
     pub value: String,
     pub created_at: i64,

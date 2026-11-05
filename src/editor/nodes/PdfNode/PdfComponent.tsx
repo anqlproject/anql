@@ -1,21 +1,42 @@
 import './PdfComponent.css';
 
 import type {JSX} from 'react';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
+
+import { logger } from '@/core/logger';
+import { useReferenceStore } from '@/core/references/useReferenceStore';
 
 import { PdfViewer } from './PdfViewer';
 
 type PdfComponentProps = {
   url: string;
   name: string;
+  referenceId?: string;
   nodeKey: string;
 };
 
 export default function PdfComponent({
   url,
   name,
+  referenceId,
 }: PdfComponentProps): JSX.Element {
+  const linkedReference = useReferenceStore((state) =>
+    referenceId
+      ? state.references.find((reference) => reference.id === referenceId)
+      : undefined,
+  );
+  const referencesLoaded = useReferenceStore((state) => state.isLoaded);
+  const loadReferences = useReferenceStore((state) => state.loadReferences);
+  const currentUrl = linkedReference?.ref_type === 'pdf' ? linkedReference.value : url;
+  const currentName = linkedReference?.ref_type === 'pdf' ? linkedReference.name : name;
   const [showViewer, setShowViewer] = useState(false);
+
+  useEffect(() => {
+    if (!referenceId || referencesLoaded) return;
+    loadReferences().catch((error: unknown) => {
+      logger.error('Failed to load linked PDF reference', error as Error, { referenceId });
+    });
+  }, [loadReferences, referenceId, referencesLoaded]);
 
   const handleClick = useCallback(() => {
     // Show PDF viewer dialog
@@ -27,7 +48,7 @@ export default function PdfComponent({
       <span
         className="pdf-inline-node"
         onClick={handleClick}
-        title={`Open PDF: ${name || url}`}
+        title={`Open PDF: ${currentName || currentUrl}`}
       >
       <svg
         width="16"
@@ -43,12 +64,12 @@ export default function PdfComponent({
         <polyline points="14 2 14 8 20 8" />
         <path d="M9 15l2 2 4-4" />
       </svg>
-      <span>{name || 'PDF Document'}</span>
+      <span>{currentName || 'PDF Document'}</span>
       </span>
       {showViewer && (
         <PdfViewer
-          url={url}
-          name={name}
+          url={currentUrl}
+          name={currentName}
           onClose={() => setShowViewer(false)}
         />
       )}

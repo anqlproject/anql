@@ -6,7 +6,7 @@ export const DEFAULT_REFERENCE_PATH = '';
 export interface ReferenceJson {
   id?: string | null;
   name: string;
-  ref_type: 'text' | 'image' | 'code';
+  ref_type: 'text' | 'image' | 'code' | 'pdf';
   path: string;
   value: string;
   created_at: number;

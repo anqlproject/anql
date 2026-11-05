@@ -2,7 +2,7 @@ import './ReferencesPanel.css';
 
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
-import { Code2, Image, Pencil, Plus, Search, Trash2, Type } from 'lucide-react';
+import { Code2, FileText, Image, Pencil, Plus, Search, Trash2, Type } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,7 @@ import {
   REFERENCE_CODE_DRAG_TYPE,
   REFERENCE_DRAG_TYPE,
   REFERENCE_IMAGE_DRAG_TYPE,
+  REFERENCE_PDF_DRAG_TYPE,
   REFERENCE_TEXT_DRAG_TYPE,
 } from '@/core/references/referenceDragTypes';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
@@ -45,6 +46,7 @@ const TYPE_ICONS: Record<RefType, React.ReactNode> = {
   text:   <Type size={12} />,
   image:  <Image size={12} />,
   code:   <Code2 size={12} />,
+  pdf:    <FileText size={12} />,
 };
 
 function ReferenceImageThumbnail({ src, name }: { src: string; name: string }) {
@@ -124,7 +126,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const [editName, setEditName] = useState('');
   const [editImageName, setEditImageName] = useState('');
   const [editGroup, setEditGroup] = useState('');
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isUploadingAsset, setIsUploadingAsset] = useState(false);
   const [imageError, setImageError] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
@@ -209,7 +211,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   }, [groups, selectedGroup]);
 
   const handleAdd = async () => {
-    if (!newName.trim() || (newType === 'image' && !newValue)) return;
+    if (!newName.trim() || (['image', 'pdf'].includes(newType) && !newValue)) return;
     const normalizedName = newName.trim().replace(/\s+/g, '_').toLowerCase();
     if (references.some((reference) => reference.name.toLowerCase() === normalizedName)) {
       setNameError(t('REFERENCE_PANEL.duplicateName') as string);
@@ -233,7 +235,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     setEditingId(ref.id ?? null);
     setEditValue(ref.value);
     setEditName(ref.name);
-    setEditImageName(ref.ref_type === 'image' && ref.value ? t('REFERENCE_PANEL.selectedImage') as string : '');
+    setEditImageName(['image', 'pdf'].includes(ref.ref_type) && ref.value
+      ? t(`REFERENCE_PANEL.selected${ref.ref_type === 'pdf' ? 'Pdf' : 'Image'}`) as string
+      : '');
     setEditGroup(getGroupName(ref.path));
     setImageError('');
     setEditError('');
@@ -277,20 +281,25 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     setImageError('');
   };
 
-  const chooseImage = async (onSelected: (assetRef: string, fileName: string) => void) => {
+  const chooseReferenceFile = async (
+    type: 'image' | 'pdf',
+    onSelected: (assetRef: string, fileName: string) => void,
+  ) => {
     setImageError('');
     try {
       const selectedPath = await open({
         multiple: false,
         directory: false,
-        filters: [{ name: t('REFERENCE_PANEL.types.image') as string, extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'tiff'] }],
+        filters: [type === 'image'
+          ? { name: t('REFERENCE_PANEL.types.image') as string, extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'tiff'] }
+          : { name: t('REFERENCE_PANEL.types.pdf') as string, extensions: ['pdf'] }],
       });
 
       if (!selectedPath || typeof selectedPath !== 'string') return;
 
-      const fileName = selectedPath.split(/[/\\]/).pop() || (t('REFERENCE_PANEL.selectedImage') as string);
+      const fileName = selectedPath.split(/[/\\]/).pop() || (t(`REFERENCE_PANEL.selected${type === 'pdf' ? 'Pdf' : 'Image'}`) as string);
       const extension = fileName.split('.').pop()?.toLowerCase();
-      const mimeTypeByExtension: Record<string, string> = {
+      const mimeTypeByExtension: Record<string, string> = type === 'image' ? {
         png: 'image/png',
         jpg: 'image/jpeg',
         jpeg: 'image/jpeg',
@@ -300,14 +309,14 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
         bmp: 'image/bmp',
         tif: 'image/tiff',
         tiff: 'image/tiff',
-      };
+      } : { pdf: 'application/pdf' };
       const mimeType = extension ? mimeTypeByExtension[extension] : undefined;
       if (!mimeType) {
-        setImageError(t('REFERENCE_PANEL.invalidImage') as string);
+        setImageError(t(type === 'pdf' ? 'REFERENCE_PANEL.invalidPdf' : 'REFERENCE_PANEL.invalidImage') as string);
         return;
       }
 
-      setIsUploadingImage(true);
+      setIsUploadingAsset(true);
       const bytes = await readFile(selectedPath);
       let binary = '';
       const chunkSize = 0x8000;
@@ -319,10 +328,10 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       await createAsset(id, fileName, mimeType, btoa(binary));
       onSelected(`asset://${id}`, fileName);
     } catch (error) {
-      logger.error('Failed to select reference image', error as Error);
-      setImageError(t('REFERENCE_PANEL.imageUploadFailed') as string);
+      logger.error(`Failed to select reference ${type}`, error as Error);
+      setImageError(t(type === 'pdf' ? 'REFERENCE_PANEL.pdfUploadFailed' : 'REFERENCE_PANEL.imageUploadFailed') as string);
     } finally {
-      setIsUploadingImage(false);
+      setIsUploadingAsset(false);
     }
   };
 
@@ -409,7 +418,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                 role="tablist"
                 aria-label={t('REFERENCE_PANEL.typeSelection') as string}
               >
-                {(['text', 'image', 'code'] as const).map((type) => (
+                {(['text', 'image', 'code', 'pdf'] as const).map((type) => (
                   <button
                     key={type}
                     type="button"
@@ -456,18 +465,20 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                 role="tabpanel"
                 className="ref-item__type-panel"
               >
-                {newType === 'image' ? (
+                {newType === 'image' || newType === 'pdf' ? (
                   <button
                     type="button"
                     className="ref-item__image-picker"
-                    onClick={() => chooseImage((assetRef, fileName) => {
+                    onClick={() => chooseReferenceFile(newType, (assetRef, fileName) => {
                       setNewValue(assetRef);
                       setNewImageName(fileName);
                     })}
-                    disabled={isUploadingImage}
+                    disabled={isUploadingAsset}
                   >
-                    <Image size={14} />
-                    {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : newImageName || t('REFERENCE_PANEL.chooseImage')}
+                    {newType === 'image' ? <Image size={14} /> : <FileText size={14} />}
+                    {isUploadingAsset
+                      ? t(`REFERENCE_PANEL.uploading${newType === 'pdf' ? 'Pdf' : 'Image'}`)
+                      : newImageName || t(`REFERENCE_PANEL.choose${newType === 'pdf' ? 'Pdf' : 'Image'}`)}
                   </button>
                 ) : newType === 'code' ? (
                   <textarea
@@ -536,20 +547,22 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                     list="reference-group-options"
                   />
                 </label>
-                {ref.ref_type === 'image' ? (
+                {ref.ref_type === 'image' || ref.ref_type === 'pdf' ? (
                   <button
                     type="button"
                     className="ref-item__image-picker"
-                    onClick={() => chooseImage((assetRef, fileName) => {
+                    onClick={() => chooseReferenceFile(ref.ref_type === 'pdf' ? 'pdf' : 'image', (assetRef, fileName) => {
                       setEditValue(assetRef);
                       setEditImageName(fileName);
                     })}
-                    disabled={isUploadingImage}
+                    disabled={isUploadingAsset}
                   >
-                    {editValue
+                    {ref.ref_type === 'image' && editValue
                       ? <ReferenceImageThumbnail src={editValue} name={editName || ref.name} />
-                      : <Image size={14} />}
-                    {isUploadingImage ? t('REFERENCE_PANEL.uploadingImage') : editImageName || t('REFERENCE_PANEL.chooseImage')}
+                      : ref.ref_type === 'image' ? <Image size={14} /> : <FileText size={14} />}
+                    {isUploadingAsset
+                      ? t(`REFERENCE_PANEL.uploading${ref.ref_type === 'pdf' ? 'Pdf' : 'Image'}`)
+                      : editImageName || t(`REFERENCE_PANEL.choose${ref.ref_type === 'pdf' ? 'Pdf' : 'Image'}`)}
                   </button>
                 ) : ref.ref_type === 'code' ? (
                   <textarea
@@ -593,6 +606,8 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                     event.dataTransfer.setData(
                       ref.ref_type === 'image'
                         ? REFERENCE_IMAGE_DRAG_TYPE
+                        : ref.ref_type === 'pdf'
+                          ? REFERENCE_PDF_DRAG_TYPE
                         : ref.ref_type === 'code'
                           ? REFERENCE_CODE_DRAG_TYPE
                           : REFERENCE_TEXT_DRAG_TYPE,
@@ -615,6 +630,8 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                   <span className="ref-item__value">
                     {ref.ref_type === 'image'
                       ? <em>{t('REFERENCE_PANEL.imageValue')}</em>
+                      : ref.ref_type === 'pdf'
+                        ? <em>{t('REFERENCE_PANEL.pdfValue')}</em>
                       : ref.value || <em>{t('REFERENCE_PANEL.emptyValue')}</em>}
                   </span>
                 </button>
@@ -672,7 +689,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               type="button"
               className="ref-item__btn ref-item__btn--cancel"
               onClick={cancelAdd}
-              disabled={isUploadingImage}
+              disabled={isUploadingAsset}
             >
               {t('REFERENCE_PANEL.cancel')}
             </button>
@@ -680,7 +697,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               type="button"
               className="ref-item__btn ref-item__btn--save"
               onClick={handleAdd}
-              disabled={isUploadingImage || !newName.trim() || (newType === 'image' && !newValue)}
+              disabled={isUploadingAsset || !newName.trim() || (['image', 'pdf'].includes(newType) && !newValue)}
             >
               {t('REFERENCE_PANEL.create')}
             </button>
@@ -691,7 +708,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               type="button"
               className="ref-item__btn ref-item__btn--cancel"
               onClick={cancelEdit}
-              disabled={isSavingEdit || isUploadingImage}
+              disabled={isSavingEdit || isUploadingAsset}
             >
               {t('REFERENCE_PANEL.cancel')}
             </button>
@@ -699,7 +716,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               type="button"
               className="ref-item__btn ref-item__btn--save"
               onClick={() => saveEdit(editingReference.id!)}
-              disabled={isSavingEdit || isUploadingImage}
+              disabled={isSavingEdit || isUploadingAsset}
             >
               {isSavingEdit ? t('REFERENCE_PANEL.saving') : t('REFERENCE_PANEL.save')}
             </button>

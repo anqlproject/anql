@@ -16,6 +16,7 @@ export type SerializedPdfNode = Spread<
   {
     url: string;
     name: string;
+    referenceId?: string;
   },
   SerializedLexicalNode
 >;
@@ -25,8 +26,9 @@ function $convertPdfElement(
 ): null | DOMConversionOutput {
   const url = domNode.getAttribute('data-lexical-pdf-url');
   const name = domNode.getAttribute('data-lexical-pdf-name');
+  const referenceId = domNode.getAttribute('data-lexical-pdf-reference-id') || undefined;
   if (url) {
-    const node = $createPdfNode(url, name || '');
+    const node = $createPdfNode(url, name || '', referenceId);
     return {node};
   }
 
@@ -36,25 +38,32 @@ function $convertPdfElement(
 export class PdfNode extends DecoratorNode<JSX.Element> {
   __url: string;
   __name: string;
+  __referenceId?: string;
 
   static getType(): string {
     return 'pdf';
   }
 
-  static clone(node: PdfNode): PdfNode {
-    return new PdfNode(node.__url, node.__name, node.__key);
+  isInline(): true {
+    return true;
   }
 
-  constructor(url = '', name = '', key?: NodeKey) {
+  static clone(node: PdfNode): PdfNode {
+    return new PdfNode(node.__url, node.__name, node.__referenceId, node.__key);
+  }
+
+  constructor(url = '', name = '', referenceId?: string, key?: NodeKey) {
     super(key);
     this.__url = url;
     this.__name = name;
+    this.__referenceId = referenceId;
   }
 
   static importJSON(serializedNode: SerializedPdfNode): PdfNode {
     return $createPdfNode(
       serializedNode.url,
       serializedNode.name,
+      serializedNode.referenceId,
     ).updateFromJSON(serializedNode);
   }
 
@@ -63,6 +72,7 @@ export class PdfNode extends DecoratorNode<JSX.Element> {
       ...super.exportJSON(),
       url: this.getUrl(),
       name: this.getName(),
+      ...(this.__referenceId ? { referenceId: this.__referenceId } : {}),
     };
   }
 
@@ -76,6 +86,9 @@ export class PdfNode extends DecoratorNode<JSX.Element> {
     const element = document.createElement('span');
     element.setAttribute('data-lexical-pdf-url', this.__url);
     element.setAttribute('data-lexical-pdf-name', this.__name);
+    if (this.__referenceId) {
+      element.setAttribute('data-lexical-pdf-reference-id', this.__referenceId);
+    }
     return {element};
   }
 
@@ -124,6 +137,7 @@ export class PdfNode extends DecoratorNode<JSX.Element> {
       <PdfComponent
         url={this.__url}
         name={this.__name}
+        referenceId={this.__referenceId}
         nodeKey={this.__key}
       />
     );
@@ -133,8 +147,9 @@ export class PdfNode extends DecoratorNode<JSX.Element> {
 export function $createPdfNode(
   url = '',
   name = '',
+  referenceId?: string,
 ): PdfNode {
-  const pdfNode = new PdfNode(url, name);
+  const pdfNode = new PdfNode(url, name, referenceId);
   return $applyNodeReplacement(pdfNode);
 }
 

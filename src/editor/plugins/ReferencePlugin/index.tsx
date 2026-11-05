@@ -26,7 +26,7 @@ import {
   LexicalEditor,
   TextNode,
 } from 'lexical';
-import { Code2, Image, Plus, Type } from 'lucide-react';
+import { Code2, FileText, Image, Plus, Type } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -36,12 +36,16 @@ import {
   REFERENCE_CODE_DRAG_TYPE,
   REFERENCE_DRAG_TYPE,
   REFERENCE_IMAGE_DRAG_TYPE,
+  REFERENCE_PDF_DRAG_TYPE,
   REFERENCE_TEXT_DRAG_TYPE,
 } from '@/core/references/referenceDragTypes';
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 import { $createImageNode } from '@/editor/nodes/ImageNode/ImageNode';
 import { $isMathExpNode } from '@/editor/nodes/MathNode/MathExpNode';
+import { $createPdfNode } from '@/editor/nodes/PdfNode/PdfNode';
 import { $isTableNode } from '@/editor/nodes/TableNode/TableNode';
+
+const BLOCK_REFERENCE_DRAG_TYPES = [REFERENCE_CODE_DRAG_TYPE, REFERENCE_IMAGE_DRAG_TYPE];
 
 function hasReferenceDragData(event: DragEvent): boolean {
   return Boolean(
@@ -51,6 +55,7 @@ function hasReferenceDragData(event: DragEvent): boolean {
         REFERENCE_DRAG_TYPE,
         REFERENCE_CODE_DRAG_TYPE,
         REFERENCE_IMAGE_DRAG_TYPE,
+        REFERENCE_PDF_DRAG_TYPE,
         REFERENCE_TEXT_DRAG_TYPE,
       ].includes(type),
     ),
@@ -344,8 +349,9 @@ export default function ReferencePlugin(): React.JSX.Element | null {
     const handleDocumentDragOver = (event: DragEvent) => {
       if (
         !hasReferenceDragData(event) ||
-        event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE) ||
-        event.dataTransfer?.types.includes(REFERENCE_CODE_DRAG_TYPE)
+        Array.from(event.dataTransfer?.types ?? []).some((type) =>
+          BLOCK_REFERENCE_DRAG_TYPES.includes(type),
+        )
       ) {
         return;
       }
@@ -369,8 +375,9 @@ export default function ReferencePlugin(): React.JSX.Element | null {
         }
 
         if (
-          event.dataTransfer?.types.includes(REFERENCE_IMAGE_DRAG_TYPE) ||
-          event.dataTransfer?.types.includes(REFERENCE_CODE_DRAG_TYPE)
+          Array.from(event.dataTransfer?.types ?? []).some((type) =>
+            BLOCK_REFERENCE_DRAG_TYPES.includes(type),
+          )
         ) {
           return false;
         }
@@ -412,7 +419,9 @@ export default function ReferencePlugin(): React.JSX.Element | null {
         rangeSelection.applyDOMRange(range);
         $setSelection(rangeSelection);
 
-        if (reference.ref_type === 'image' || reference.ref_type === 'code') {
+        if (reference.ref_type === 'pdf') {
+          $insertNodes([$createPdfNode(reference.value, reference.name, reference.id ?? undefined)]);
+        } else if (reference.ref_type === 'image' || reference.ref_type === 'code') {
           const parentBlock = rangeSelection.anchor.getNode().getTopLevelElementOrThrow();
           const blockNode = reference.ref_type === 'image'
             ? $createImageNode({
@@ -567,6 +576,10 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           const nextParagraph = $createParagraphNode();
           imageNode.insertAfter(nextParagraph);
           nextParagraph.select();
+        } else if (ref.ref_type === 'pdf') {
+          const pdfNode = $createPdfNode(ref.value, ref.name, ref.id ?? undefined);
+          nodeToReplace.replace(pdfNode);
+          pdfNode.selectNext();
         } else if (ref.ref_type === 'code') {
           const parentBlock = nodeToReplace.getTopLevelElementOrThrow();
           nodeToReplace.remove();
@@ -657,6 +670,8 @@ export default function ReferencePlugin(): React.JSX.Element | null {
                           <Image size={12} />
                         ) : ref?.ref_type === 'code' ? (
                           <Code2 size={12} />
+                        ) : ref?.ref_type === 'pdf' ? (
+                          <FileText size={12} />
                         ) : (
                           <Type size={12} />
                         )}
@@ -670,7 +685,9 @@ export default function ReferencePlugin(): React.JSX.Element | null {
                           <span className="reference-typeahead-item__preview">
                             {ref.ref_type === 'image'
                               ? '[Image]'
-                              : ref.value || '(vide)'}
+                                : ref.ref_type === 'pdf'
+                                  ? '[PDF]'
+                                : ref.value || '(vide)'}
                           </span>
                         )}
                       </div>
