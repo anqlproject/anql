@@ -109,21 +109,35 @@ export default function LexicalContentEditable({
             {t('EDITOR.emptyStateDescription') as string}
           </div>
           <div className="ContentEditable__empty-state-actions">
-            <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={createTable}>
+            <button
+              type="button"
+              title={t('EDITOR.createTable') as string}
+              aria-label={t('EDITOR.createTable') as string}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={createTable}
+            >
               <TableIcon size={14} />
-              {t('EDITOR.createTable') as string}
+              <span>{t('EDITOR.createTable') as string}</span>
             </button>
             <button
               type="button"
+              title={t('EDITOR.createMath') as string}
+              aria-label={t('EDITOR.createMath') as string}
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => editor.dispatchCommand(INSERT_MATH_COMMAND, undefined)}
             >
               <Calculator size={14} />
-              {t('EDITOR.createMath') as string}
+              <span>{t('EDITOR.createMath') as string}</span>
             </button>
-            <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={createTodo}>
+            <button
+              type="button"
+              title={t('EDITOR.createTodo') as string}
+              aria-label={t('EDITOR.createTodo') as string}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={createTodo}
+            >
               <ListCheckIcon size={14} />
-              {t('EDITOR.createTodo') as string}
+              <span>{t('EDITOR.createTodo') as string}</span>
             </button>
           </div>
         </div>

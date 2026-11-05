@@ -19,7 +19,7 @@
   -ms-user-select: text !important;
 }
 
-/* BREAKPOINTS.smallViewport = 480 — keep in sync with src/core/Global/styles.ts */
+/* BREAKPOINTS.smallViewport = 480 — keep in sync with src/core/global/styles.ts */
 @media (max-width: 480px) {
   .ContentEditable__root {
     padding-left: 8px;
@@ -68,9 +68,9 @@
 
 .ContentEditable__empty-state-actions {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   margin-top: 6px;
   pointer-events: auto;
 }
@@ -78,14 +78,16 @@
 .ContentEditable__empty-state-actions button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 6px 9px;
-  border: 1px solid var(--border-color);
+  min-height: 30px;
+  padding: 0 8px;
+  border: none;
   border-radius: 6px;
-  background: var(--surface-color);
+  background: transparent;
   color: var(--text-secondary);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--ui-text-xs);
   font-weight: var(--font-medium);
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -97,13 +99,19 @@
 }
 
 .ContentEditable__empty-state-actions button svg {
-  color: var(--primary-color);
+  color: currentColor;
   flex-shrink: 0;
 }
 
 .ContentEditable__empty-state-actions button:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ContentEditable__empty-state-actions button {
+    transition: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -114,13 +122,9 @@
   .ContentEditable__empty-state-actions {
     gap: 5px;
   }
-
-  .ContentEditable__empty-state-actions button {
-    padding: 5px 8px;
-  }
 }
 
-/* BREAKPOINTS.smallViewport = 480 — keep in sync with src/core/global/styles.ts */
+/* BREAKPOINTS.smallViewport = 480 — keep in sync with src/core/Global/styles.ts */
 @media (max-width: 480px) {
   .ContentEditable__placeholder {
     left: 8px;
