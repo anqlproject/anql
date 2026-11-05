@@ -20,42 +20,35 @@
   --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
 
   /*  font size */
-  /* All rem values will be relative to this value.                */
+  /* All rem values will be relative to this value.*/
   --font-size-root: 15px;
 
   /*  Type Scale */
-  /* Method: Modular Scale × 1.25 (Major Third)                   */
-  --text-2xs:  0.625rem;   /* 10px  — ultra-compact badges       */
-  --text-xs:   0.75rem;    /* 12px  — labels, meta info          */
-  --text-sm:   0.875rem;   /* 14px  — secondary text, hints      */
-  --text-base: 1rem;       /* 16px  — body text (base)           */
-  --text-md:   1.0625rem;  /* 17px  — rich body text             */
-  --text-lg:   1.125rem;   /* 18px  — light subtitles            */
-  --text-xl:   1.25rem;    /* 20px  — section titles             */
-  --text-2xl:  1.5rem;     /* 24px  — page titles                */
-  --text-3xl:  1.875rem;   /* 30px  — large titles               */
-  --text-4xl:  2.5rem;     /* 40px  — document titles            */
+  --text-2xs:  0.625rem;   /* ultra-compact badges               */
+  --text-xs:   0.75rem;    /* labels, meta info                   */
+  --text-sm:   0.875rem;   /* secondary text, hints               */
+  --text-base: 1rem;       /* body text                           */
+  --text-md:   1.0625rem;  /* rich body text                      */
+  --text-lg:   1.125rem;   /* light subtitles                     */
+  --text-xl:   1.25rem;    /* section titles                      */
+  --text-2xl:  1.5rem;     /* page titles                         */
+  --text-3xl:  1.875rem;   /* large titles                        */
+  --text-4xl:  2.5rem;     /* document titles                     */
 
-  /* ─── UI Scale (fixed — do NOT follow root)  ────────────────── */
   /* These sizes are independent of --font-size-root.              */
   /* Use them for interface components: Button, Menu,               */
   /* Dialog, Toast, etc. (principle: UI fades behind content,       */
-  /* like in Notion / Linear / Figma).                             */
-  --ui-text-xs:   12px;    /* badges, raccourcis clavier         */
-  --ui-text-sm:   13px;    /* labels secondaires, meta           */
-  --ui-text-base: 14px;    /* texte de base des composants UI    */
-  --ui-text-md:   16px;    /* titres de menu, labels importants  */
-  --ui-text-lg:   16px;    /* titres de dialog, en-têtes UI      */
+  --ui-text-xs:   12px;    /* badges, keyboard shortcuts         */
+  --ui-text-sm:   13px;    /* secondary labels, metadata          */
+  --ui-text-base: 14px;    /* base UI component text             */
+  --ui-text-md:   16px;    /* menu titles, prominent labels      */
+  --ui-text-lg:   16px;    /* dialog titles, UI headers          */
 
   /* Line Heights */
-  /* tight (1.25)   : titles and headings                         */
-  /* snug (1.375)   : subtitles                                   */
-  /* normal (1.5)   : body text optimal                           */
-  /* relaxed (1.65) : long paragraphs, articles (matches image)   */
-  --leading-tight:   1.25;
-  --leading-snug:    1.375;
-  --leading-normal:  1.5;
-  --leading-relaxed: 1.65;
+  --leading-tight:   1.25;  /* titles and headings */
+  --leading-snug:    1.375; /* subtitles */
+  --leading-normal:  1.5;   /* body text */
+  --leading-relaxed: 1.65;  /* long paragraphs and articles */
 
   /* Font Weights */
   /* light (300)  : secondary text, metadata (use sparingly)      */
