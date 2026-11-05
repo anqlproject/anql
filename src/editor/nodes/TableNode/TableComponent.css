@@ -97,12 +97,12 @@
   transition: opacity 0.1s;
 }
 
-.table-grid-wrapper:hover .table-add-row-strip,
+.table-container:hover .table-add-row-strip,
 .table-add-row-strip:focus-visible {
   opacity: 1;
 }
 
-.table-grid-wrapper:hover .table-add-col-strip,
+.table-container:hover .table-add-col-strip,
 .table-add-col-strip:focus-visible {
   opacity: 1;
 }
