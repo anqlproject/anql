@@ -13,12 +13,19 @@
   flex-direction: column;
   z-index: var(--z-popover);
   overflow: hidden;
-  animation: ref-panel-in 0.14s ease-out;
+  animation: ref-panel-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top left;
 }
 
 @keyframes ref-panel-in {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ref-panel {
+    animation: none;
+  }
 }
 
 /* ── Header ── */
