@@ -81,7 +81,7 @@
 .table-add-col-strip {
   position: absolute;
   top: 50%;
-  right: -10px;
+  right: -8.5px;
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
@@ -126,33 +126,47 @@
 }
 
 .table-add-row-strip .table-add-strip-btn::before,
-.table-add-col-strip .table-add-strip-btn::before {
+.table-add-col-strip .table-add-strip-btn::before,
+.table-add-row-strip .table-add-strip-btn::after,
+.table-add-col-strip .table-add-strip-btn::after {
   content: '';
   position: absolute;
+  top: 50%;
+  left: 50%;
+  background: var(--primary-color);
+  transform: translate(-50%, -50%);
+  transition: width 140ms ease, height 140ms ease, border-radius 140ms ease;
+}
+
+.table-add-row-strip .table-add-strip-btn::before,
+.table-add-col-strip .table-add-strip-btn::before {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--primary-color);
 }
 
-.table-add-row-strip .table-add-strip-btn svg,
-.table-add-col-strip .table-add-strip-btn svg {
-  color: var(--primary-color);
-  opacity: 0;
+.table-add-row-strip .table-add-strip-btn::after,
+.table-add-col-strip .table-add-strip-btn::after {
+  width: 0;
+  height: 0;
+  border-radius: 1px;
 }
 
 .table-add-row-strip:hover .table-add-strip-btn::before,
 .table-add-row-strip:focus-visible .table-add-strip-btn::before,
 .table-add-col-strip:hover .table-add-strip-btn::before,
 .table-add-col-strip:focus-visible .table-add-strip-btn::before {
-  opacity: 0;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
 }
 
-.table-add-row-strip:hover .table-add-strip-btn svg,
-.table-add-row-strip:focus-visible .table-add-strip-btn svg,
-.table-add-col-strip:hover .table-add-strip-btn svg,
-.table-add-col-strip:focus-visible .table-add-strip-btn svg {
-  opacity: 1;
+.table-add-row-strip:hover .table-add-strip-btn::after,
+.table-add-row-strip:focus-visible .table-add-strip-btn::after,
+.table-add-col-strip:hover .table-add-strip-btn::after,
+.table-add-col-strip:focus-visible .table-add-strip-btn::after {
+  width: 2px;
+  height: 12px;
 }
 
 /* The actual + button inside the strip */

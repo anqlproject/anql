@@ -35,10 +35,9 @@ import {
   RowData,
   useReactTable,
 } from "@tanstack/react-table";
-import { motion } from "framer-motion";
 import type { ElementFormatType } from "lexical";
 import { $getNodeByKey, COMMAND_PRIORITY_LOW, NodeKey } from "lexical";
-import { Move, Plus } from "lucide-react";
+import { Move } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -722,9 +721,7 @@ export function TableComponent({
               <span
                 className="table-add-strip-btn"
                 aria-hidden="true"
-              >
-                <Plus size={14} />
-              </span>
+              />
             </button>
             <button
               className="table-add-col-strip"
@@ -735,9 +732,7 @@ export function TableComponent({
               <span
                 className="table-add-strip-btn"
                 aria-hidden="true"
-              >
-                <Plus size={14} />
-              </span>
+              />
             </button>
           </div>
 
