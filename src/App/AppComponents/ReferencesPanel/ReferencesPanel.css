@@ -99,15 +99,25 @@
   display: flex;
   width: 100%;
   gap: 2px;
-  padding: 2px;
+  padding: 2px 2px 10px;
   overflow-x: auto;
   border-radius: 7px;
   background: transparent;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-secondary) 45%, transparent) transparent;
 }
 
 .ref-panel__view-tabs::-webkit-scrollbar {
-  display: none;
+  height: 3px;
+}
+
+.ref-panel__view-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ref-panel__view-tabs::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-secondary) 45%, transparent);
+  border-radius: 3px;
 }
 
 .ref-panel__view-tab {
