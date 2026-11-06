@@ -18,11 +18,12 @@
 </p>
 
 <p align="center">
-  <a href="#about-anql">About ANQL</a> |
+  <a href="#about-anql">About</a> |
   <a href="#features">Features</a> |
   <a href="#download"><strong>Download</strong></a> |
-  <a href="#getting-started">Getting Started</a> |
-  <a href="#technical-details">Technical Details</a> |
+  <a href="#getting-started">Get started</a>
+  <br />
+  <a href="#technical-details">Technical</a> |
   <a href="#community">Community</a>
 </p>
 

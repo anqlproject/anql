@@ -21,8 +21,9 @@
   <a href="#à-propos-danql">À propos</a> |
   <a href="#fonctionnalités">Fonctionnalités</a> |
   <a href="#télécharger"><strong>Télécharger</strong></a> |
-  <a href="#prise-en-main">Prise en main</a> |
-  <a href="#détails-techniques">Détails techniques</a> |
+  <a href="#prise-en-main">Démarrer</a>
+  <br />
+  <a href="#détails-techniques">Technique</a> |
   <a href="#communauté">Communauté</a>
 </p>
 
