@@ -166,6 +166,10 @@
   background-color: var(--surface-color);
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) transparent;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .help-main::-webkit-scrollbar {
@@ -205,15 +209,21 @@
 
 /* Content items */
 .help-content-item {
-  padding: 28px 0;
+  margin-bottom: 14px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 12%, var(--border-color));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary-color) 3%, var(--surface-color));
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.help-content-item:hover {
+  border-color: color-mix(in srgb, var(--primary-color) 24%, var(--border-color));
+  box-shadow: 0 4px 16px -10px color-mix(in srgb, var(--primary-color) 30%, transparent);
 }
 
 .help-content-item:last-child {
-  padding-bottom: 0;
-}
-
-.help-content-item--first {
-  padding-top: 0;
+  margin-bottom: 0;
 }
 
 /* Item header: numbered badge + title */
