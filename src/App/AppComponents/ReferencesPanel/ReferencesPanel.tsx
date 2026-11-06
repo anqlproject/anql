@@ -384,7 +384,19 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                   setSearch('');
                 }}
               >
-                {groupPath ? getGroupName(groupPath) : t('REFERENCE_PANEL.all')}
+                {selectedGroup === groupPath && (
+                  <motion.span
+                    aria-hidden="true"
+                    className="ref-panel__tab-indicator"
+                    layoutId="reference-group-tab-indicator"
+                    transition={prefersReducedMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 500, damping: 36 }}
+                  />
+                )}
+                <span className="ref-panel__view-tab-content">
+                  {groupPath ? getGroupName(groupPath) : t('REFERENCE_PANEL.all')}
+                </span>
               </button>
             ))}
           </div>
@@ -438,7 +450,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                     {newType === type && (
                       <motion.span
                         aria-hidden="true"
-                        className="ref-item__type-tab-indicator"
+                        className="ref-panel__tab-indicator"
                         layoutId="reference-type-tab-indicator"
                         transition={prefersReducedMotion
                           ? { duration: 0 }
