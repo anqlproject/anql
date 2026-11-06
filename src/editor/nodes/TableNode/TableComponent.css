@@ -109,7 +109,9 @@
 
 .table-add-row-strip:hover .table-add-strip-btn,
 .table-add-col-strip:hover .table-add-strip-btn {
-  background-color: var(--action-hover);
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--primary-color) 12%, var(--surface-color));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 24%, transparent);
 }
 
 .table-add-row-strip .table-add-strip-btn,
@@ -181,7 +183,7 @@
   background: transparent;
   color: var(--text-disabled);
   cursor: pointer;
-  transition: color 120ms;
+  transition: color 120ms, background-color 120ms, box-shadow 120ms;
 }
 
 .table-add-strip-btn:focus-visible {
