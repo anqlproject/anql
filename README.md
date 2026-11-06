@@ -5,6 +5,10 @@
 <h1 align="center">ANQL</h1>
 
 <p align="center">
+  <a href="README.md">English</a> | <a href="README.fr.md">Français</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/anqlproject/anql/releases/latest">
     <img alt="GitHub Release" src="https://img.shields.io/github/v/release/anqlproject/anql?color=blue" />
   </a>
