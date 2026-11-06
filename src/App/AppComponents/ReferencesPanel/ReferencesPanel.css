@@ -424,6 +424,7 @@
 }
 
 .ref-item__type-tab {
+  position: relative;
   display: flex;
   flex: 1;
   align-items: center;
@@ -437,7 +438,7 @@
   color: var(--text-secondary);
   font-size: var(--ui-text-sm);
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: color 0.12s ease;
 }
 
 .ref-item__type-tab:hover {
@@ -445,11 +446,27 @@
 }
 
 .ref-item__type-tab.is-active {
-  border-color: color-mix(in srgb, var(--primary-color) 40%, var(--border-color));
-  background: color-mix(in srgb, var(--primary-color) 16%, var(--surface-color));
   color: var(--text-primary);
   font-weight: var(--font-medium);
+}
+
+.ref-item__type-tab-indicator {
+  position: absolute;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 40%, var(--border-color));
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--surface-color));
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+  pointer-events: none;
+}
+
+.ref-item__type-tab-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .ref-item__type-tab:focus-visible {

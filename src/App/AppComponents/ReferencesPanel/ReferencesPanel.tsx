@@ -2,6 +2,7 @@ import './ReferencesPanel.css';
 
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Code2, FileText, Image, Pencil, Plus, Search, Trash2, Type } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -102,6 +103,7 @@ interface ReferencesPanelProps {
 
 export default function ReferencesPanel({ panelRef, panelLeft, onClose, onRequestDelete }: ReferencesPanelProps) {
   const { t } = useTranslation();
+  const prefersReducedMotion = useReducedMotion();
   const { references, isLoaded, loadReferences, addReference, editReference } = useReferenceStore();
   const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
 
@@ -433,8 +435,20 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                       setImageError('');
                     }}
                   >
-                    {TYPE_ICONS[type]}
-                    {t(`REFERENCE_PANEL.types.${type}`)}
+                    {newType === type && (
+                      <motion.span
+                        aria-hidden="true"
+                        className="ref-item__type-tab-indicator"
+                        layoutId="reference-type-tab-indicator"
+                        transition={prefersReducedMotion
+                          ? { duration: 0 }
+                          : { type: 'spring', stiffness: 500, damping: 36 }}
+                      />
+                    )}
+                    <span className="ref-item__type-tab-content">
+                      {TYPE_ICONS[type]}
+                      {t(`REFERENCE_PANEL.types.${type}`)}
+                    </span>
                   </button>
                 ))}
               </div>
