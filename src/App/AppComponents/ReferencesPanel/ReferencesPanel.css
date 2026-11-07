@@ -393,6 +393,13 @@
   tab-size: 2;
 }
 
+.ref-item__input--latex {
+  min-height: 72px;
+  resize: vertical;
+  font-family: var(--font-mono);
+  line-height: var(--leading-relaxed);
+}
+
 .ref-item__image-picker {
   display: flex;
   align-items: center;
@@ -442,14 +449,16 @@
 .ref-item__type-tabs {
   display: flex;
   gap: 4px;
-  padding: 0;
+  padding: 0 0 12px;
+  overflow-x: auto;
   background: transparent;
+  scrollbar-width: thin;
 }
 
 .ref-item__type-tab {
   position: relative;
   display: flex;
-  flex: 1;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   gap: 6px;
@@ -460,6 +469,7 @@
   background: transparent;
   color: var(--text-secondary);
   font-size: var(--ui-text-sm);
+  white-space: nowrap;
   cursor: pointer;
   transition: color 0.12s ease;
 }

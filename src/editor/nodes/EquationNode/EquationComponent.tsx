@@ -23,6 +23,9 @@ import type {JSX} from 'react';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 
+import { logger } from '@/core/logger';
+import { useReferenceStore } from '@/core/references/useReferenceStore';
+
 import EquationEditor from './EquationEditor';
 import {$isEquationNode} from './EquationNode';
 import KatexRenderer from './KatexRenderer';
@@ -30,12 +33,14 @@ import KatexRenderer from './KatexRenderer';
 type EquationComponentProps = {
   equation: string;
   inline: boolean;
+  referenceId?: string;
   nodeKey: NodeKey;
 };
 
 export default function EquationComponent({
   equation,
   inline,
+  referenceId,
   nodeKey,
 }: EquationComponentProps): JSX.Element {
   const [editor] = useLexicalComposerContext();
@@ -43,6 +48,22 @@ export default function EquationComponent({
   const [equationValue, setEquationValue] = useState(equation);
   const [showEquationEditor, setShowEquationEditor] = useState<boolean>(false);
   const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
+  const equationAtEditStartRef = useRef(equation);
+  const linkedReference = useReferenceStore((state) =>
+    referenceId
+      ? state.references.find((reference) => reference.id === referenceId)
+      : undefined,
+  );
+  const referencesLoaded = useReferenceStore((state) => state.isLoaded);
+  const loadReferences = useReferenceStore((state) => state.loadReferences);
+  const currentEquation =
+    linkedReference?.ref_type === 'latex' ? linkedReference.value : equation;
+
+  const showEditor = useCallback(() => {
+    equationAtEditStartRef.current = currentEquation;
+    setEquationValue(currentEquation);
+    setShowEquationEditor(true);
+  }, [currentEquation]);
 
   const onHide = useCallback(
     (restoreSelection?: boolean) => {
@@ -50,21 +71,51 @@ export default function EquationComponent({
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if ($isEquationNode(node)) {
-          node.setEquation(equationValue);
+          const stillLinked = linkedReference?.ref_type === 'latex';
+          const changedLinkedValue =
+            referenceId &&
+            stillLinked &&
+            equationValue !== equationAtEditStartRef.current;
+
+          if (!stillLinked || changedLinkedValue) {
+            node.setEquation(equationValue);
+          }
+          if (referenceId && !stillLinked) {
+            node.setReferenceId(undefined);
+          } else if (changedLinkedValue) {
+            node.setReferenceId(undefined);
+          }
           if (restoreSelection) {
             node.selectNext(0, 0);
           }
         }
       });
     },
-    [editor, equationValue, nodeKey],
+    [editor, equationValue, linkedReference, nodeKey, referenceId],
   );
 
   useEffect(() => {
-    if (!showEquationEditor && equationValue !== equation) {
-      setEquationValue(equation);
+    if (referenceId && !referencesLoaded) {
+      loadReferences().catch((error: unknown) => {
+        logger.error('Failed to load linked LaTeX reference', error as Error, { referenceId });
+      });
     }
-  }, [showEquationEditor, equation, equationValue]);
+  }, [loadReferences, referenceId, referencesLoaded]);
+
+  useEffect(() => {
+    if (equation !== currentEquation) {
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isEquationNode(node) && node.getReferenceId() === referenceId) {
+          node.setEquation(currentEquation);
+        }
+      });
+    }
+
+    if (!showEquationEditor && equationValue !== currentEquation) {
+      setEquationValue(currentEquation);
+    }
+  }, [currentEquation, editor, equation, equationValue, nodeKey, referenceId, showEquationEditor]);
 
   useEffect(() => {
     if (!isEditable) {
@@ -109,11 +160,11 @@ export default function EquationComponent({
           );
         });
         if (isSelected) {
-          setShowEquationEditor(true);
+          showEditor();
         }
       });
     }
-  }, [editor, nodeKey, onHide, showEquationEditor, isEditable]);
+  }, [editor, nodeKey, onHide, showEditor, showEquationEditor, isEditable]);
 
   return (
     <>
@@ -131,7 +182,7 @@ export default function EquationComponent({
             inline={inline}
             onDoubleClick={() => {
               if (isEditable) {
-                setShowEquationEditor(true);
+                showEditor();
               }
             }}
           />

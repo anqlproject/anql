@@ -483,6 +483,8 @@
       "referenceNotFound": "Référence introuvable",
       "imageValue": "Image",
       "pdfValue": "Document PDF",
+      "latexPlaceholder": "Saisir une formule LaTeX…",
+      "latexValue": "Formule LaTeX",
       "invalidImage": "Ce fichier n’est pas une image prise en charge.",
       "imageUploadFailed": "Impossible d’importer l’image.",
       "invalidPdf": "Ce fichier n’est pas un PDF.",
@@ -491,7 +493,8 @@
         "text": "Texte",
         "image": "Image",
         "code": "Code",
-        "pdf": "PDF"
+        "pdf": "PDF",
+        "latex": "LaTeX"
       },
       "cancel": "Annuler",
       "create": "Créer",

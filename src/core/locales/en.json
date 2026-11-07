@@ -483,6 +483,8 @@
       "referenceNotFound": "Reference not found",
       "imageValue": "Image",
       "pdfValue": "PDF document",
+      "latexPlaceholder": "Enter a LaTeX formula…",
+      "latexValue": "LaTeX formula",
       "invalidImage": "This file is not a supported image.",
       "imageUploadFailed": "Failed to upload the image.",
       "invalidPdf": "This file is not a PDF.",
@@ -491,7 +493,8 @@
         "text": "Text",
         "image": "Image",
         "code": "Code",
-        "pdf": "PDF"
+        "pdf": "PDF",
+        "latex": "LaTeX"
       },
       "cancel": "Cancel",
       "create": "Create",

@@ -25,6 +25,7 @@ export type SerializedEquationNode = Spread<
   {
     equation: string;
     inline: boolean;
+    referenceId?: string;
   },
   SerializedLexicalNode
 >;
@@ -34,10 +35,11 @@ function $convertEquationElement(
 ): null | DOMConversionOutput {
   let equation = domNode.getAttribute('data-lexical-equation');
   const inline = domNode.getAttribute('data-lexical-inline') === 'true';
+  const referenceId = domNode.getAttribute('data-lexical-equation-reference-id') || undefined;
   // Decode the equation from base64
   equation = atob(equation || '');
   if (equation) {
-    const node = $createEquationNode(equation, inline);
+    const node = $createEquationNode(equation, inline, referenceId);
     return { node };
   }
 
@@ -47,19 +49,21 @@ function $convertEquationElement(
 export class EquationNode extends DecoratorNode<JSX.Element> {
   __equation: string;
   __inline: boolean;
+  __referenceId?: string;
 
   static getType(): string {
     return 'equation';
   }
 
   static clone(node: EquationNode): EquationNode {
-    return new EquationNode(node.__equation, node.__inline, node.__key);
+    return new EquationNode(node.__equation, node.__inline, node.__key, node.__referenceId);
   }
 
-  constructor(equation: string, inline?: boolean, key?: NodeKey) {
+  constructor(equation: string, inline?: boolean, key?: NodeKey, referenceId?: string) {
     super(key);
     this.__equation = equation;
     this.__inline = inline ?? false;
+    this.__referenceId = referenceId;
   }
 
   isInline(): boolean {
@@ -70,6 +74,7 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
     return $createEquationNode(
       serializedNode.equation,
       serializedNode.inline,
+      serializedNode.referenceId,
     ).updateFromJSON(serializedNode);
   }
 
@@ -78,6 +83,7 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
       ...super.exportJSON(),
       equation: this.getEquation(),
       inline: this.__inline,
+      ...(this.__referenceId ? { referenceId: this.__referenceId } : {}),
     };
   }
 
@@ -94,6 +100,9 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
     const equation = btoa(this.__equation);
     element.setAttribute('data-lexical-equation', equation);
     element.setAttribute('data-lexical-inline', `${this.__inline}`);
+    if (this.__referenceId) {
+      element.setAttribute('data-lexical-equation-reference-id', this.__referenceId);
+    }
     katex.render(this.__equation, element, {
       displayMode: !this.__inline, // true === block display //
       errorColor: '#cc0000',
@@ -141,9 +150,18 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
     return this.__equation;
   }
 
+  getReferenceId(): string | undefined {
+    return this.__referenceId;
+  }
+
   setEquation(equation: string): void {
     const writable = this.getWritable();
     writable.__equation = equation;
+  }
+
+  setReferenceId(referenceId?: string): void {
+    const writable = this.getWritable();
+    writable.__referenceId = referenceId;
   }
 
   decorate(): JSX.Element {
@@ -151,6 +169,7 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
       <EquationComponent
         equation={this.__equation}
         inline={this.__inline}
+        referenceId={this.__referenceId}
         nodeKey={this.__key}
       />
     );
@@ -160,8 +179,9 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
 export function $createEquationNode(
   equation = '',
   inline = false,
+  referenceId?: string,
 ): EquationNode {
-  const equationNode = new EquationNode(equation, inline);
+  const equationNode = new EquationNode(equation, inline, undefined, referenceId);
   return $applyNodeReplacement(equationNode);
 }
 
