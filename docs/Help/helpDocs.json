@@ -632,9 +632,9 @@
           "id": "references-intro",
           "title": "What are references?",
           "description": [
-            "A reference is named content that you can reuse in your documents: text, an image, or a code snippet.",
+            "A reference is named content that you can reuse in your documents: text, an image, a code snippet, a PDF, or a LaTeX formula.",
             "",
-            "Open the References panel using its button in the top bar. Click + New Reference, enter a name, choose a type, and provide its content. From this panel, you can search for, edit, or move a reference to the trash."
+            "Open the References panel using its button in the top bar. In the Local tab, click + New Reference, enter a name, choose a type, and provide its content. From this panel, you can search for, edit, group, or move a reference to the trash."
           ]
         },
         {
@@ -671,6 +671,17 @@
             "A Text reference with a numeric value can be used as a variable in math nodes. Type @ followed by its name in a math expression, for example: @tax_rate * 100.",
             "",
             "The reference value is used in the calculation, and the result updates when you edit the reference. References in the trash are not available to math nodes, so expressions using them can no longer be evaluated."
+          ]
+        },
+        {
+          "id": "online-references",
+          "title": "Download references from online libraries",
+          "description": [
+            "Open the Online tab in the References panel to browse public libraries hosted by ANQL on GitHub. Select a library, then click Download next to a resource to install only that resource. No GitHub account is required.",
+            "",
+            "Downloaded references are saved in your local reference collection and remain available offline. ANQL verifies the resource size and SHA-256 checksum against the library catalog before installing it; saved catalogs can also be shown when offline. The library, resource, version, source URL, and license are retained with the installed reference. If a newer version is published, choose Update to refresh the same reference without breaking its existing links.",
+            "",
+            "Online constants are installed as numeric Text references using their symbol as the reference name (for example, download the speed of light and use @c in a math node). Online formulas are installed as LaTeX references that you can insert as equations. Their catalog expression is not automatically evaluated as a MathNode formula."
           ]
         },
         {

@@ -380,6 +380,68 @@ mod tests {
         let _ = std::fs::remove_dir_all(dir);
     }
 
+    #[tokio::test]
+    async fn online_reference_source_metadata_round_trips() {
+        let dir = std::env::temp_dir().join(format!("anql_source_{}", uuid_id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let db_path = dir.join("references.db");
+        let pool = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect_with(
+                sqlx::sqlite::SqliteConnectOptions::new()
+                    .filename(&db_path)
+                    .create_if_missing(true),
+            )
+            .await
+            .unwrap();
+
+        run_migrations(&pool).await.unwrap();
+
+        let operations =
+            crate::database_manager::references::references_operations::ReferencesOperations::new(
+                pool.clone(),
+            );
+        let reference = crate::database_manager::references::references_operations::ReferenceJson {
+            id: Some("online-ref".to_string()),
+            name: "speed_of_light".to_string(),
+            ref_type: "text".to_string(),
+            path: "online/science/constants.speed-of-light".to_string(),
+            value: "299792458".to_string(),
+            source_repo_id: Some("science".to_string()),
+            source_resource_id: Some("constants.speed-of-light".to_string()),
+            source_version: Some("1.0.0".to_string()),
+            source_url: Some("https://www.bipm.org/en/publications/si-brochure".to_string()),
+            license: Some("MIT".to_string()),
+            created_at: 1,
+            updated_at: 1,
+        };
+        operations.new_reference(&reference).await.unwrap();
+
+        let mut updated_reference = reference.clone();
+        updated_reference.value = "299792459".to_string();
+        updated_reference.source_version = Some("1.1.0".to_string());
+        updated_reference.updated_at = 2;
+        assert!(operations.update_reference(&updated_reference).await.unwrap());
+
+        let loaded = operations.get_all_references().await.unwrap();
+        let loaded = loaded.first().unwrap();
+        assert_eq!(loaded.source_repo_id.as_deref(), Some("science"));
+        assert_eq!(
+            loaded.source_resource_id.as_deref(),
+            Some("constants.speed-of-light")
+        );
+        assert_eq!(loaded.source_version.as_deref(), Some("1.1.0"));
+        assert_eq!(loaded.value, "299792459");
+        assert_eq!(
+            loaded.source_url.as_deref(),
+            Some("https://www.bipm.org/en/publications/si-brochure")
+        );
+        assert_eq!(loaded.license.as_deref(), Some("MIT"));
+
+        pool.close().await;
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
     fn uuid_id() -> u128 {
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)

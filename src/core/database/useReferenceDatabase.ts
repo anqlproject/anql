@@ -9,6 +9,11 @@ export interface ReferenceJson {
   ref_type: 'text' | 'image' | 'code' | 'pdf' | 'latex';
   path: string;
   value: string;
+  source_repo_id?: string | null;
+  source_resource_id?: string | null;
+  source_version?: string | null;
+  source_url?: string | null;
+  license?: string | null;
   created_at: number;
   updated_at: number;
 }

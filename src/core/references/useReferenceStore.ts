@@ -29,8 +29,20 @@ interface ReferenceStore {
 
   // Actions
   loadReferences: () => Promise<void>;
-  addReference: (name: string, ref_type: ReferenceJson['ref_type'], value: string, path?: string) => Promise<ReferenceJson>;
-  editReference: (id: string, updates: Partial<Pick<ReferenceJson, 'name' | 'ref_type' | 'path' | 'value'>>) => Promise<void>;
+  addReference: (
+    name: string,
+    ref_type: ReferenceJson['ref_type'],
+    value: string,
+    path?: string,
+    source?: Pick<ReferenceJson, 'source_repo_id' | 'source_resource_id' | 'source_version' | 'source_url' | 'license'>,
+  ) => Promise<ReferenceJson>;
+  editReference: (
+    id: string,
+    updates: Partial<Pick<
+      ReferenceJson,
+      'name' | 'ref_type' | 'path' | 'value' | 'source_repo_id' | 'source_resource_id' | 'source_version' | 'source_url' | 'license'
+    >>,
+  ) => Promise<void>;
   moveReferenceToTrash: (id: string) => Promise<void>;
   restoreReference: (id: string) => Promise<void>;
   removeReference: (id: string) => Promise<void>;
@@ -57,7 +69,7 @@ export const useReferenceStore = create<ReferenceStore>((set, get) => ({
     await referencesLoadPromise;
   },
 
-  addReference: async (name, ref_type, value, path = DEFAULT_REFERENCE_PATH) => {
+  addReference: async (name, ref_type, value, path = DEFAULT_REFERENCE_PATH, source) => {
     const normalizedName = name.trim().replace(/\s+/g, '_');
     const key = normalizedName.toLowerCase();
     const pending = pendingReferenceCreations.get(key);
@@ -78,6 +90,7 @@ export const useReferenceStore = create<ReferenceStore>((set, get) => ({
         ref_type,
         path,
         value,
+        ...source,
         created_at: ts,
         updated_at: ts,
       };

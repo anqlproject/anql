@@ -33,7 +33,7 @@
     "src",
     "docs",
     "tests"
-  ],
+, "__tests__/tests/References/onlineReferenceCatalog.test.ts"  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

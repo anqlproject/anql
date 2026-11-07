@@ -9,6 +9,16 @@ pub struct ReferenceJson {
     pub ref_type: String, // 'text' | 'image' | 'code' | 'pdf' | 'latex'
     pub path: String,
     pub value: String,
+    #[serde(default)]
+    pub source_repo_id: Option<String>,
+    #[serde(default)]
+    pub source_resource_id: Option<String>,
+    #[serde(default)]
+    pub source_version: Option<String>,
+    #[serde(default)]
+    pub source_url: Option<String>,
+    #[serde(default)]
+    pub license: Option<String>,
     pub created_at: i64,
     pub updated_at: i64,
 }
@@ -24,8 +34,10 @@ impl ReferencesOperations {
 
     pub async fn new_reference(&self, reference: &ReferenceJson) -> Result<String> {
         let id = sqlx::query(
-            r#"INSERT INTO "references" (id, name, ref_type, path, value, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?)
+            r#"INSERT INTO "references" (
+                   id, name, ref_type, path, value, source_repo_id, source_resource_id,
+                   source_version, source_url, license, created_at, updated_at
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                RETURNING id"#,
         )
         .bind(&reference.id)
@@ -33,6 +45,11 @@ impl ReferencesOperations {
         .bind(&reference.ref_type)
         .bind(&reference.path)
         .bind(&reference.value)
+        .bind(&reference.source_repo_id)
+        .bind(&reference.source_resource_id)
+        .bind(&reference.source_version)
+        .bind(&reference.source_url)
+        .bind(&reference.license)
         .bind(&reference.created_at)
         .bind(&reference.updated_at)
         .fetch_one(&self.pool)
@@ -44,13 +61,20 @@ impl ReferencesOperations {
 
     pub async fn update_reference(&self, reference: &ReferenceJson) -> Result<bool> {
         let rows_affected = sqlx::query(
-            r#"UPDATE "references" SET name = ?, ref_type = ?, path = ?, value = ?, updated_at = ?
+            r#"UPDATE "references"
+               SET name = ?, ref_type = ?, path = ?, value = ?, source_repo_id = ?,
+                   source_resource_id = ?, source_version = ?, source_url = ?, license = ?, updated_at = ?
                WHERE id = ?"#,
         )
         .bind(&reference.name)
         .bind(&reference.ref_type)
         .bind(&reference.path)
         .bind(&reference.value)
+        .bind(&reference.source_repo_id)
+        .bind(&reference.source_resource_id)
+        .bind(&reference.source_version)
+        .bind(&reference.source_url)
+        .bind(&reference.license)
         .bind(&reference.updated_at)
         .bind(&reference.id)
         .execute(&self.pool)
@@ -72,7 +96,8 @@ impl ReferencesOperations {
 
     pub async fn get_all_references(&self) -> Result<Vec<ReferenceJson>> {
         let refs = sqlx::query_as::<_, ReferenceJson>(
-            r#"SELECT id, name, ref_type, path, value, created_at, updated_at
+            r#"SELECT id, name, ref_type, path, value, source_repo_id, source_resource_id,
+                      source_version, source_url, license, created_at, updated_at
                FROM "references"
                ORDER BY name ASC"#,
         )
@@ -84,7 +109,8 @@ impl ReferencesOperations {
 
     pub async fn get_reference_by_name(&self, name: String) -> Result<Option<ReferenceJson>> {
         let r = sqlx::query_as::<_, ReferenceJson>(
-            r#"SELECT id, name, ref_type, path, value, created_at, updated_at
+            r#"SELECT id, name, ref_type, path, value, source_repo_id, source_resource_id,
+                      source_version, source_url, license, created_at, updated_at
                FROM "references"
                WHERE name = ?"#,
         )
