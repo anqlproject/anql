@@ -845,10 +845,10 @@
   width: 100%;
   height: 34px;
   padding: 0 12px;
-  background: var(--surface-color);
+  background: var(--panel-color);
   border: 1px solid var(--border-color);
   border-radius: 7px;
-  color: var(--primary-color);
+  color: var(--text-primary);
   font-size: var(--ui-text-sm);
   font-weight: var(--font-medium);
   cursor: pointer;
@@ -862,8 +862,7 @@
 }
 
 .ref-panel__add-btn:hover {
-  background: color-mix(in srgb, var(--primary-color) 7%, var(--surface-color));
-  border-color: color-mix(in srgb, var(--primary-color) 36%, var(--border-color));
+  border-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
 }
 
 .ref-panel__add-btn:hover svg {
@@ -872,7 +871,7 @@
 }
 
 .ref-panel__add-btn:active {
-  background: color-mix(in srgb, var(--primary-color) 12%, var(--surface-color));
+  background: color-mix(in srgb, var(--text-secondary) 18%, var(--surface-color));
 }
 
 .ref-panel__add-btn:focus-visible {
