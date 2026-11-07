@@ -241,7 +241,6 @@
 }
 
 .ref-panel__view-tab:hover {
-  background: var(--action-hover);
   color: var(--text-primary);
 }
 
@@ -253,6 +252,12 @@
 .ref-panel__view-tab-content {
   position: relative;
   z-index: 1;
+}
+
+.ref-panel__view-tab .ref-panel__tab-indicator {
+  border-color: var(--text-secondary);
+  background: transparent;
+  box-shadow: none;
 }
 
 .ref-panel__tab-indicator {
@@ -752,6 +757,12 @@
 .ref-item__type-tab.is-active {
   color: var(--text-primary);
   font-weight: var(--font-medium);
+}
+
+.ref-item__type-tab .ref-panel__tab-indicator {
+  border-color: var(--text-secondary);
+  background: transparent;
+  box-shadow: none;
 }
 
 .ref-item__type-tab-content {
