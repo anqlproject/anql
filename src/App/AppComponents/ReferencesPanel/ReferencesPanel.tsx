@@ -249,13 +249,14 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     repository: OnlineReferenceRepository,
     resource: OnlineReferenceResource,
   ) => {
-    const path = getOnlineReferencePath(repository.id, resource.id);
+    const path = getGroupPath(repository.name);
+    const legacyOnlinePath = getOnlineReferencePath(repository.id, resource.id);
     const existingReference = references.find(
       (reference) =>
         (reference.source_repo_id === repository.id && reference.source_resource_id === resource.id) ||
         normalizeReferencePath(
           isReferenceInTrash(reference) ? reference.path.slice('trash/'.length) : reference.path,
-        ) === path,
+        ) === legacyOnlinePath,
     );
     if (existingReference?.id && isReferenceInTrash(existingReference)) {
       try {
@@ -269,6 +270,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       }
     }
     if (existingReference && (existingReference.source_version ?? undefined) === resource.version) {
+      if (existingReference.id && existingReference.path !== path) {
+        await editReference(existingReference.id, { path });
+      }
       return;
     }
 
