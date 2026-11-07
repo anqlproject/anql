@@ -255,7 +255,7 @@
 }
 
 .ref-panel__view-tab .ref-panel__tab-indicator {
-  border-color: var(--text-secondary);
+  border-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
   background: transparent;
   box-shadow: none;
 }
@@ -760,7 +760,7 @@
 }
 
 .ref-item__type-tab .ref-panel__tab-indicator {
-  border-color: var(--text-secondary);
+  border-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
   background: transparent;
   box-shadow: none;
 }
