@@ -83,6 +83,7 @@
 }
 
 .ref-panel__mode-tab {
+  position: relative;
   min-height: 27px;
   padding: 4px 10px;
   border: 0;
@@ -98,10 +99,18 @@
 }
 
 .ref-panel__mode-tab.is-active {
-  background: var(--surface-color);
   color: var(--text-primary);
   font-weight: var(--font-medium);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
+.ref-panel__mode-tab-content {
+  position: relative;
+  z-index: 1;
+}
+
+.ref-panel__mode-tab .ref-panel__tab-indicator {
+  border-color: var(--border-color);
+  background: var(--surface-color);
 }
 
 .ref-panel__mode-tab:focus-visible,

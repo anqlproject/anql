@@ -722,7 +722,19 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                     setSearch('');
                   }}
                 >
-                  {t('REFERENCE_PANEL.localTab')}
+                  {referenceView === 'local' && (
+                    <motion.span
+                      aria-hidden="true"
+                      className="ref-panel__tab-indicator"
+                      layoutId="reference-mode-tab-indicator"
+                      transition={prefersReducedMotion
+                        ? { duration: 0 }
+                        : { type: 'spring', stiffness: 500, damping: 36 }}
+                    />
+                  )}
+                  <span className="ref-panel__mode-tab-content">
+                    {t('REFERENCE_PANEL.localTab')}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -731,7 +743,19 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                   className={`ref-panel__mode-tab${referenceView === 'online' ? ' is-active' : ''}`}
                   onClick={openOnlineView}
                 >
-                  {t('REFERENCE_PANEL.onlineTab')}
+                  {referenceView === 'online' && (
+                    <motion.span
+                      aria-hidden="true"
+                      className="ref-panel__tab-indicator"
+                      layoutId="reference-mode-tab-indicator"
+                      transition={prefersReducedMotion
+                        ? { duration: 0 }
+                        : { type: 'spring', stiffness: 500, damping: 36 }}
+                    />
+                  )}
+                  <span className="ref-panel__mode-tab-content">
+                    {t('REFERENCE_PANEL.onlineTab')}
+                  </span>
                 </button>
               </div>
               {referenceView === 'online' && (
