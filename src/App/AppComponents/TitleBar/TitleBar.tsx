@@ -190,6 +190,9 @@ export default function TitleBar(): JSX.Element {
             style={{
               marginLeft: isMac ? "90px" : 0,
             }}
+            onMouseDown={(event) => {
+              event.stopPropagation();
+            }}
             onClick={() => {
               editor.blur();
             }}
