@@ -30,15 +30,15 @@
 }
 
 .math-typeahead-popover li.selected {
-  background-color: var(--action-active);
+  background-color: var(--action-hover);
 }
 
 .math-typeahead-popover li.selected:hover {
-  background-color: var(--action-active);
+  background-color: var(--action-hover);
 }
 
 .math-typeahead-popover li:hover {
-  background-color: var(--hover-color);
+  background-color: var(--action-hover);
 }
 
 .math-typeahead-popover li .text {
