@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { SettingsItem, SettingsTab } from '../SettingsComponents/index';
+import ThemePreferenceTabs from '../SettingsComponents/ThemePreferenceTabs';
 
 interface AppearanceTabProps {
   settings: any;
@@ -16,16 +17,10 @@ export default function AppearanceTab({ settings, updateSetting }: AppearanceTab
         label={t('SETTINGS.appearance.theme') as string}
         description={t('SETTINGS.appearance.themeDescription') as string}
       >
-        <select
-          className="settings-input"
+        <ThemePreferenceTabs
           value={settings.appearance.theme}
-          onChange={(e) => updateSetting('theme', e.target.value, 'appearance')}
-          style={{ maxWidth: '200px' }}
-        >
-          <option value="system">{t('SETTINGS.appearance.system')}</option>
-          <option value="light">{t('SETTINGS.appearance.light')}</option>
-          <option value="dark">{t('SETTINGS.appearance.dark')}</option>
-        </select>
+          onChange={(theme) => updateSetting('theme', theme, 'appearance')}
+        />
       </SettingsItem>
       <SettingsItem
         label={t('SETTINGS.appearance.language') as string}
