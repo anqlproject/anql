@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { CODE_THEMES } from '@/editor/plugins/CodeHighlightShikiPlugin';
 
-import { SettingsItem, SettingsSeparator, SettingsTab } from '../SettingsComponents/index';
+import { SettingsItem, SettingsSelect, SettingsSeparator, SettingsTab } from '../SettingsComponents/index';
 
 interface EditorTabProps {
   settings: any;
@@ -19,31 +19,23 @@ export default function EditorTab({ settings, updateSetting }: EditorTabProps) {
         label={t('SETTINGS.editor.codeThemeDark') as string}
         description="Default theme for code blocks in dark mode"
       >
-        <select
+        <SettingsSelect
           value={settings.editor.codeThemeDark}
-          onChange={(e) => updateSetting('codeThemeDark', e.target.value, 'editor')}
-          className="settings-input"
-          style={{ maxWidth: '200px' }}
-        >
-          {CODE_THEMES.map(theme => (
-            <option key={theme} value={theme}>{theme}</option>
-          ))}
-        </select>
+          onChange={(value) => updateSetting('codeThemeDark', value, 'editor')}
+          ariaLabel={t('SETTINGS.editor.codeThemeDark') as string}
+          options={CODE_THEMES.map((theme) => ({ value: theme, label: theme }))}
+        />
       </SettingsItem>
       <SettingsItem
         label={t('SETTINGS.editor.codeThemeLight') as string}
         description="Default theme for code blocks in light mode"
       >
-        <select
+        <SettingsSelect
           value={settings.editor.codeThemeLight}
-          onChange={(e) => updateSetting('codeThemeLight', e.target.value, 'editor')}
-          className="settings-input"
-          style={{ maxWidth: '200px' }}
-        >
-          {CODE_THEMES.map(theme => (
-            <option key={theme} value={theme}>{theme}</option>
-          ))}
-        </select>
+          onChange={(value) => updateSetting('codeThemeLight', value, 'editor')}
+          ariaLabel={t('SETTINGS.editor.codeThemeLight') as string}
+          options={CODE_THEMES.map((theme) => ({ value: theme, label: theme }))}
+        />
       </SettingsItem>
 
       <SettingsSeparator label={t('SETTINGS.editor.markdown') as string} />

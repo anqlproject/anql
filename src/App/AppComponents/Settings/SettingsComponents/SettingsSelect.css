@@ -1,0 +1,78 @@
+.settings-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 200px;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--ui-text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.settings-select-trigger:hover {
+  border-color: var(--text-secondary);
+  background: var(--action-hover);
+}
+
+.settings-select-trigger:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.settings-select-trigger svg {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+}
+
+.settings-select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-select-menu {
+  z-index: calc(var(--z-overlay) + 1) !important;
+  min-width: 200px;
+  max-height: min(320px, var(--radix-dropdown-menu-content-available-height));
+  overflow-y: auto;
+  border: 1px solid var(--border-color) !important;
+  background: var(--surface-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.settings-select-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 6px;
+  border-radius: 4px;
+  color: var(--text-secondary) !important;
+  font-size: var(--ui-text-sm);
+  cursor: pointer;
+}
+
+.settings-select-option:hover,
+.settings-select-option:focus,
+.settings-select-option[data-highlighted] {
+  background: var(--action-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+.settings-select-option-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--primary-color);
+}

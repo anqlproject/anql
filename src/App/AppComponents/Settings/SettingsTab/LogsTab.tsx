@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { LogLevel, logStorage } from '@/core/logger';
 
-import { SettingsItem, SettingsTab } from '../SettingsComponents/index';
+import { SettingsItem, SettingsSelect, SettingsTab } from '../SettingsComponents/index';
 
 export default function LogsTab() {
   const { t } = useTranslation();
@@ -72,18 +72,18 @@ export default function LogsTab() {
         label={t('SETTINGS.logs.levelFilter') as string}
         description={t('SETTINGS.logs.levelFilterDescription') as string}
       >
-        <select
-          className="settings-input"
+        <SettingsSelect
           value={filter}
-          onChange={(e) => setFilter(e.target.value as LogLevel | 'all')}
-          style={{ maxWidth: '200px' }}
-        >
-          <option value="all">{t('SETTINGS.logs.allLevels')}</option>
-          <option value={LogLevel.ERROR}>{t('SETTINGS.logs.errorOnly')}</option>
-          <option value={LogLevel.WARN}>{t('SETTINGS.logs.warnOnly')}</option>
-          <option value={LogLevel.INFO}>{t('SETTINGS.logs.infoOnly')}</option>
-          <option value={LogLevel.DEBUG}>{t('SETTINGS.logs.debugOnly')}</option>
-        </select>
+          onChange={(value) => setFilter(value as LogLevel | 'all')}
+          ariaLabel={t('SETTINGS.logs.levelFilter') as string}
+          options={[
+            { value: 'all', label: 'SETTINGS.logs.allLevels' },
+            { value: LogLevel.ERROR, label: 'SETTINGS.logs.errorOnly' },
+            { value: LogLevel.WARN, label: 'SETTINGS.logs.warnOnly' },
+            { value: LogLevel.INFO, label: 'SETTINGS.logs.infoOnly' },
+            { value: LogLevel.DEBUG, label: 'SETTINGS.logs.debugOnly' },
+          ]}
+        />
       </SettingsItem>
 
       <SettingsItem

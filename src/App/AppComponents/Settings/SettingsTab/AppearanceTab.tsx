@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { SettingsItem, SettingsTab } from '../SettingsComponents/index';
+import { SettingsItem, SettingsSelect, SettingsTab } from '../SettingsComponents/index';
 import ThemePreferenceTabs from '../SettingsComponents/ThemePreferenceTabs';
 
 interface AppearanceTabProps {
@@ -26,29 +26,29 @@ export default function AppearanceTab({ settings, updateSetting }: AppearanceTab
         label={t('SETTINGS.appearance.language') as string}
         description={t('SETTINGS.appearance.languageDescription') as string}
       >
-        <select
-          className="settings-input"
+        <SettingsSelect
           value={settings.appearance.language}
-          onChange={(e) => updateSetting('language', e.target.value, 'appearance')}
-          style={{ maxWidth: '200px' }}
-        >
-          <option value="en">{t('SETTINGS.appearance.english')}</option>
-          <option value="fr">{t('SETTINGS.appearance.french')}</option>
-        </select>
+          onChange={(value) => updateSetting('language', value, 'appearance')}
+          ariaLabel={t('SETTINGS.appearance.language') as string}
+          options={[
+            { value: 'en', label: 'SETTINGS.appearance.english' },
+            { value: 'fr', label: 'SETTINGS.appearance.french' },
+          ]}
+        />
       </SettingsItem>
       <SettingsItem
         label={t('SETTINGS.appearance.sidebarVariant') as string}
         description={t('SETTINGS.appearance.sidebarVariantDescription') as string}
       >
-        <select
-          className="settings-input"
+        <SettingsSelect
           value={settings.sidebar.variant}
-          onChange={(e) => updateSetting('variant', e.target.value as 'floating' | 'inset', 'sidebar')}
-          style={{ maxWidth: '200px' }}
-        >
-          <option value="inset">{t('SETTINGS.appearance.inset')}</option>
-          <option value="floating">{t('SETTINGS.appearance.floating')}</option>
-        </select>
+          onChange={(value) => updateSetting('variant', value as 'floating' | 'inset', 'sidebar')}
+          ariaLabel={t('SETTINGS.appearance.sidebarVariant') as string}
+          options={[
+            { value: 'inset', label: 'SETTINGS.appearance.inset' },
+            { value: 'floating', label: 'SETTINGS.appearance.floating' },
+          ]}
+        />
       </SettingsItem>
       <SettingsItem
         label={t('SETTINGS.appearance.collapsibleSidebar') as string}
