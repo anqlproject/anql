@@ -8,11 +8,6 @@
   padding: 14px 12px;
   border-radius: 10px;
   background-color: var(--panel-color);
-  transition: background-color 0.15s ease;
-}
-
-.settings-field:hover {
-  background-color: var(--action-hover);
 }
 
 
