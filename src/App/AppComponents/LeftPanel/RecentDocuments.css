@@ -71,7 +71,7 @@
 }
 
 .history-item:not(.active):hover {
-  background-color: transparent;
+  background-color: var(--action-hover);
   color: var(--text-primary);
   opacity: 1;
 }
