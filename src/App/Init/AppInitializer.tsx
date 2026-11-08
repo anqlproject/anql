@@ -26,6 +26,7 @@ import { getDocumentsByWorkspaceId } from '@/core/database/useDocumentDatabase';
 import { APP_PATH, DEFAULT_SETTINGS } from '@/core/global/defaultSettings';
 import { logger, logStorage } from '@/core/logger';
 import { normalizeTheme, useThemeStore } from '@/GlobalState/themeStore';
+import { ShikiInitializer } from './ShikiInitializer';
 
 interface AppInitializerProps {
   children: React.ReactNode;
@@ -220,7 +221,10 @@ export function AppInitializer({ children }: AppInitializerProps): JSX.Element {
     };
   }, []);
 
-  if (isDbLoading) return <></>;
-
-  return <>{children}</>;
+  return (
+    <>
+      <ShikiInitializer />
+      {!isDbLoading && children}
+    </>
+  );
 }

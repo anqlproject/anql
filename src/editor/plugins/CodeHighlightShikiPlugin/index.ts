@@ -47,6 +47,26 @@ export const CODE_THEMES = [
   'one-light',
 ];
 
+let shikiPreloadPromise: Promise<void> | null = null;
+
+export async function preloadShikiResources(): Promise<void> {
+  if (!shikiPreloadPromise) {
+    const loads = [
+      ...CODE_LANGUAGES.filter(Boolean).map(lang => loadCodeLanguage(lang)),
+      ...CODE_THEMES.map(theme => loadCodeTheme(theme)),
+    ].filter((load): load is Promise<void> => load !== undefined);
+
+    shikiPreloadPromise = Promise.all(loads)
+      .then(() => undefined)
+      .catch((error: unknown) => {
+        shikiPreloadPromise = null;
+        throw error;
+      });
+  }
+
+  await shikiPreloadPromise;
+}
+
 export default function CodeHighlightShikiPlugin(): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   const { resolvedTheme } = useThemeStore();
@@ -67,11 +87,9 @@ export default function CodeHighlightShikiPlugin(): JSX.Element | null {
       : config.editor.codeThemeLight;
 
   useEffect(() => {
-    // Load all languages
     CODE_LANGUAGES.forEach(lang => {
       if (lang) loadCodeLanguage(lang, editor);
     });
-    // Load all themes
     CODE_THEMES.forEach(theme => {
       loadCodeTheme(theme, editor);
     });

@@ -1,4 +1,3 @@
-import { isCodeLanguageLoaded, loadCodeLanguage } from "@lexical/code-shiki";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { invoke } from "@tauri-apps/api/core";
 import { $createParagraphNode, $createTextNode, $getNodeByKey, $getRoot, $getSelection, $isNodeSelection, CLEAR_HISTORY_COMMAND } from "lexical";
@@ -213,26 +212,6 @@ export function useFile() {
 
       setCurrentDocument(document);
       navigateTo("editor", document);
-
-      // ── Pre-load Shiki grammars ──────────────────────────────────────
-      // $codeNodeTransform sets inFlight=true and defers tokenization when
-      // the grammar isn't ready yet. That triggers a second transform pass
-      // AFTER the promise resolves, forcing a full re-tokenization of every
-      // line in the code block inside the same render frame → visible lag.
-      // By awaiting loadCodeLanguage here (before setEditorState), the
-      // grammar is already in Shiki's cache when the transform runs.
-      const codeNodes = editorState.root.children.filter(
-        (n: any) => n.type === "code" && n.language
-      );
-      const uniqueLangs = [...new Set(codeNodes.map((n: any) => n.language as string))];
-      const loadPromises = uniqueLangs
-        .filter(lang => !isCodeLanguageLoaded(lang))
-        .map(lang => loadCodeLanguage(lang))
-        .filter(Boolean) as Promise<void>[];
-      if (loadPromises.length > 0) {
-        await Promise.all(loadPromises);
-      }
-      // ────────────────────────────────────────────────────────────────
 
       navigatingEditors.add(editor);
       try {
