@@ -3,16 +3,30 @@
   align-items: center;
   gap: 8px;
   background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid color-mix(in srgb, var(--text-secondary) 50%, transparent);
   border-radius: 8px;
   padding: 6px 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24), 0 3px 8px rgba(0, 0, 0, 0.12);
+  transition: border-color 0.15s, box-shadow 0.15s;
   z-index: var(--z-overlay);
   backdrop-filter: blur(10px);
   position: fixed;
-  top: 0;
+  top: 40px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.search-plugin-container:focus-within {
+  border-color: color-mix(in srgb, var(--text-secondary) 65%, transparent);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--text-secondary) 10%, transparent),
+    0 10px 28px rgba(0, 0, 0, 0.24),
+    0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+:root.dark .search-plugin-container,
+:root.dark .search-plugin-container:focus-within {
+  box-shadow: none;
 }
 
 .search-plugin-input {
