@@ -79,6 +79,21 @@
   color: var(--text-primary);
 }
 
+.sidebar-menu-shortcut {
+  margin-left: auto;
+  color: var(--text-disabled);
+  font-size: var(--ui-text-xs);
+  font-weight: var(--font-normal);
+  opacity: 0;
+  transition: opacity 0.18s ease, color 0.18s ease;
+}
+
+.sidebar [data-slot="sidebar-menu-button"]:hover .sidebar-menu-shortcut,
+.sidebar [data-slot="sidebar-menu-button"]:focus-visible .sidebar-menu-shortcut {
+  color: var(--text-disabled);
+  opacity: 1;
+}
+
 .sidebar button[data-slot="sidebar-menu-button"].active span,
 .sidebar button[data-slot="sidebar-menu-button"][data-active="true"] span {
   font-weight: var(--font-semibold);

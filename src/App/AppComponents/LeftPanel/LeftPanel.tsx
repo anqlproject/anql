@@ -47,7 +47,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
   const { handleNewFile, openEditorWithUpdate } = useFile();
   const { getFileFromDocument } = useSettingsFile();
 
-  const { config, patchConfig } = useGlobalStore(useShallow((state) => ({
+  const { isMac, config, patchConfig } = useGlobalStore(useShallow((state) => ({
     isMac: state.isMac,
     config: state.config,
     patchConfig: state.patchConfig
@@ -96,6 +96,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
       title: t('SIDEBAR.search') as string,
       id: "search",
       icon: SearchIcon,
+      shortcut: isMac ? "⌘G" : "Ctrl+G",
       onClick: () => {
         openGlobalSearch();
       },
@@ -104,6 +105,7 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
       title: t('DOCUMENT_MENU.newDocument') as string,
       id: "new-document",
       icon: Plus,
+      shortcut: isMac ? "⌘N" : "Ctrl+N",
       onClick: () => {
         handleNewFile();
       },
@@ -285,6 +287,11 @@ const LeftPanels: React.FC<LeftPanelsProps> = ({ onOpenTrash }) => {
                       className={item.id === "new-document" ? "sidebar-new-document-icon" : undefined}
                     />
                     <span>{item.title}</span>
+                    {"shortcut" in item && (
+                      <span className="sidebar-menu-shortcut" aria-hidden="true">
+                        {item.shortcut}
+                      </span>
+                    )}
                     {item.id === "search" && globalSearchCount > 0 && (
                       <span className="search-count-badge">
                         {globalSearchCount}
