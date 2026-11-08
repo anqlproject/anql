@@ -1,7 +1,7 @@
 import './HomePage.css';
 
-import { CheckCheck, FileText, LayoutGrid, List, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CheckCheck, FileText, LayoutGrid, List, Search, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -30,6 +30,10 @@ export default function Home() {
 
   const [loading, setLoading] = useState(true);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [documentFilter, setDocumentFilter] = useState('');
+  const filterInputRef = useRef<HTMLInputElement>(null);
+  const filterInputWrapRef = useRef<HTMLDivElement>(null);
   const { documents,
     setDocument,
     dynamicState,
@@ -169,6 +173,32 @@ export default function Home() {
     return sorted;
   }, [documents, sortBy]);
 
+  const filteredDocuments = useMemo(() => {
+    const query = documentFilter.trim().toLocaleLowerCase();
+    if (!query) return sortedDocuments;
+    return sortedDocuments.filter((document) =>
+      (document.title || t('HOME_PAGE.untitled') as string).toLocaleLowerCase().includes(query),
+    );
+  }, [documentFilter, sortedDocuments, t]);
+
+  useEffect(() => {
+    if (isFilterOpen) filterInputRef.current?.focus();
+  }, [isFilterOpen]);
+
+  useEffect(() => {
+    if (!isFilterOpen) return;
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      if (!filterInputWrapRef.current?.contains(event.target as Node)) {
+        setDocumentFilter('');
+        setIsFilterOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handleOutsidePointerDown);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
+  }, [isFilterOpen]);
+
   // Fetch pages on component mount and set up auto-refresh
   // NOTE : auto refresh is needed when document was deleted so no need to display in homepage
   useEffect(() => {
@@ -245,6 +275,37 @@ export default function Home() {
       <div className="home-header">
         <h1 className="home-title">{t('HOME_PAGE.documents')}</h1>
         <div className="home-headerActions">
+          {isFilterOpen && (
+            <div className="home-filterInputWrap" ref={filterInputWrapRef}>
+              <Search className="home-filterIcon" aria-hidden="true" />
+              <input
+                ref={filterInputRef}
+                className="home-filterInput"
+                type="search"
+                value={documentFilter}
+                onChange={(event) => setDocumentFilter(event.target.value)}
+                placeholder={t('HOME_PAGE.filterPlaceholder') as string}
+                aria-label={t('HOME_PAGE.filter') as string}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') {
+                    setDocumentFilter('');
+                    setIsFilterOpen(false);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="home-filterClose"
+                onClick={() => {
+                  setDocumentFilter('');
+                  setIsFilterOpen(false);
+                }}
+                aria-label={t('HOME_PAGE.closeFilter') as string}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
           {selectedDocuments.size > 0 && (
             <Button
               variant="destructive"
@@ -268,6 +329,18 @@ export default function Home() {
               <CheckCheck className="home-selectionIcon" />
             </Button>
           )}
+          {!isFilterOpen && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="home-viewButton"
+              onClick={() => setIsFilterOpen(true)}
+              title={t('HOME_PAGE.filter') as string}
+              aria-label={t('HOME_PAGE.filter') as string}
+            >
+              <Search className="home-viewIcon" />
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -282,7 +355,11 @@ export default function Home() {
         </div>
       </div>
       <div className={`home-documents-container ${viewMode === 'grid' ? 'grid-view' : 'list-view'}`}>
-        {sortedDocuments.map((document, index) => (
+        {filteredDocuments.length === 0 ? (
+          <div className="home-filterEmpty" role="status">
+            {t('HOME_PAGE.noMatchingDocuments')}
+          </div>
+        ) : filteredDocuments.map((document, index) => (
           <DocumentItem 
             key={index} 
             document={document} 

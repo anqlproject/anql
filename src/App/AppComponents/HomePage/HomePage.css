@@ -44,6 +44,68 @@
   gap: 6px;
 }
 
+.home-filterInputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(220px, 30vw);
+  height: 32px;
+}
+
+.home-filterIcon {
+  position: absolute;
+  left: 9px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-disabled);
+  pointer-events: none;
+}
+
+.home-filterInput {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 30px 0 30px;
+  border: 1px solid color-mix(in srgb, var(--text-secondary) 50%, transparent);
+  border-radius: 8px;
+  outline: none;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--ui-text-sm);
+}
+
+.home-filterInput:focus {
+  border-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text-secondary) 14%, transparent);
+}
+
+.home-filterClose {
+  position: absolute;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.home-filterClose:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.home-filterClose:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
 /* Selection button */
 .home-selectionButton {
   display: flex;
@@ -199,6 +261,13 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+.home-filterEmpty {
+  grid-column: 1 / -1;
+  padding: 32px 16px;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* ── Empty state ─────────────────────────────── */
