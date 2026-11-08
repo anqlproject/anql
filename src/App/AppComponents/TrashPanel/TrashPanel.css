@@ -121,33 +121,58 @@
 
 .trash-filter {
   display: flex;
-  gap: 6px;
+  width: 100%;
+  gap: 2px;
   padding: 8px 16px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .trash-filter-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 5px 9px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
   color: var(--text-secondary);
   font-size: var(--ui-text-sm);
   cursor: pointer;
+  transition: color 0.12s ease;
 }
 
 .trash-filter-button:hover {
-  background: var(--action-hover);
   color: var(--text-primary);
 }
 
 .trash-filter-button.is-active {
-  border-color: var(--primary-color);
-  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
-  color: var(--primary-color);
+  color: var(--text-primary);
+  font-weight: var(--font-medium);
+}
+
+.trash-filter-button-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trash-filter-indicator {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--text-secondary) 50%, transparent);
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+  pointer-events: none;
+}
+
+.trash-filter-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
 }
 
 .trash-filter-count {

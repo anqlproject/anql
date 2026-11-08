@@ -1,5 +1,6 @@
 import "./TrashPanel.css";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { Bookmark, RotateCcw, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -52,6 +53,7 @@ interface TrashPanelProps {
 
 export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
   const { t } = useTranslation();
+  const prefersReducedMotion = useReducedMotion();
   const [loading, setLoading] = useState(true);
   const [trashDocuments, setTrashDocuments] = useState<DocumentsJson[]>([]);
   const [restoring, setRestoring] = useState<string | null>(null);
@@ -350,17 +352,30 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
           </div>
         </div>
         <div className="grid">
-          <div className="trash-filter" role="group" aria-label={t("TRASH.filterLabel") as string}>
+          <div className="trash-filter" role="tablist" aria-label={t("TRASH.filterLabel") as string}>
             {filterOptions.map((option) => (
               <button
                 key={option.value}
                 type="button"
+                role="tab"
+                aria-selected={filter === option.value}
                 className={`trash-filter-button${filter === option.value ? " is-active" : ""}`}
-                aria-pressed={filter === option.value}
                 onClick={() => setFilter(option.value)}
               >
-                {option.label}
-                <span className="trash-filter-count">{option.count}</span>
+                {filter === option.value && (
+                  <motion.span
+                    aria-hidden="true"
+                    className="trash-filter-indicator"
+                    layoutId="trash-filter-tab-indicator"
+                    transition={prefersReducedMotion
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 500, damping: 36 }}
+                  />
+                )}
+                <span className="trash-filter-button-content">
+                  {option.label}
+                  <span className="trash-filter-count">{option.count}</span>
+                </span>
               </button>
             ))}
           </div>
