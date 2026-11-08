@@ -328,30 +328,30 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
           height: DIMENSIONS.panelHeight_medium
         }}
       >
-        <div className="trash-overlay-header">
-          <h1 className="title">
-            {t("TRASH.title")} ({trashItems.length})
-          </h1>
-          <div className="header-actions">
-            <button
-              className="trash-empty-all-btn"
-              onClick={handleEmptyTrash}
-              disabled={trashItems.length === 0}
-              title={t("TRASH.emptyTrash") as string}
-            >
-              <Trash2 size={13} />
-              {t("TRASH.emptyTrash") as string}
-            </button>
-            <button
-              className="close-button"
-              onClick={onClose}
-              title={t("TRASH.close") as string}
-            >
-              <X size={15} />
-            </button>
+        <div className="trash-overlay-header trash-overlay-header--with-filter">
+          <div className="trash-overlay-header-main">
+            <h1 className="title">
+              {t("TRASH.title")} ({trashItems.length})
+            </h1>
+            <div className="header-actions">
+              <button
+                className="trash-empty-all-btn"
+                onClick={handleEmptyTrash}
+                disabled={trashItems.length === 0}
+                title={t("TRASH.emptyTrash") as string}
+              >
+                <Trash2 size={13} />
+                {t("TRASH.emptyTrash") as string}
+              </button>
+              <button
+                className="close-button"
+                onClick={onClose}
+                title={t("TRASH.close") as string}
+              >
+                <X size={15} />
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="grid">
           <div className="trash-filter" role="tablist" aria-label={t("TRASH.filterLabel") as string}>
             {filterOptions.map((option) => (
               <button
@@ -379,6 +379,8 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
               </button>
             ))}
           </div>
+        </div>
+        <div className="grid">
           {filteredTrashItems.length === 0 ? (
             <div className="trash-filter-empty">
               {trashItems.length === 0
