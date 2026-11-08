@@ -43,7 +43,6 @@
 
 .clear-history-btn:hover {
   opacity: 1;
-  background-color: var(--action-hover);
   color: #ef4444;
 }
 
