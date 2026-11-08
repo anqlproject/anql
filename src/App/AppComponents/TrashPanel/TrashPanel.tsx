@@ -1,7 +1,7 @@
 import "./TrashPanel.css";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Bookmark, RotateCcw, Trash2, X } from "lucide-react";
+import { RotateCcw, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -390,7 +390,29 @@ export default function TrashPanel({ isOpen, onClose }: TrashPanelProps) {
               <CardHeader className="cardHeader">
                 <CardTitle className="cardTitle">
                   {item.kind === "reference"
-                    ? <Bookmark className="cardIcon" />
+                    ? (
+                      <svg
+                        className="cardIcon referenceIcon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="7" r="4" />
+                        <circle cx="4" cy="19" r="2" />
+                        <circle cx="12" cy="19" r="2" />
+                        <circle cx="20" cy="19" r="2" />
+                        <path d="M8 7a4 4 0 0 0-4 4v6" />
+                        <path d="M12 11v6" />
+                        <path d="M16 7a4 4 0 0 1 4 4v6" />
+                      </svg>
+                    )
                     : <Trash2 className="cardIcon trashIcon" />}
                   {item.title || t("SIDEBAR.untitled")}
                 </CardTitle>
