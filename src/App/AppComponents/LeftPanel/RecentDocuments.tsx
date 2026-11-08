@@ -1,5 +1,6 @@
 import './RecentDocuments.css';
 
+import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,6 +19,7 @@ import { useRecentDocumentsStore } from "@/GlobalState/recentDocumentsStore";
 
 const RecentDocuments: React.FC = () => {
   const { t } = useTranslation();
+  const prefersReducedMotion = useReducedMotion();
   const { currentDocument } = useGlobalStore(useShallow((state) => ({ currentDocument: state.currentDocument })));
 
   const { openEditor } = useFile();
@@ -106,6 +108,16 @@ const RecentDocuments: React.FC = () => {
                 openEditor(document);
               }}
             >
+              {document.id === currentDocument.id && (
+                <motion.span
+                  aria-hidden="true"
+                  className="history-item__active-indicator"
+                  layoutId="recent-document-active-indicator"
+                  transition={prefersReducedMotion
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 500, damping: 36 }}
+                />
+              )}
               <span className="history-item-name">{document.title || t('SIDEBAR.untitled')}</span>
               {(document as DocumentsJson & { readMode?: boolean }).readMode && <span className="history-item__read-mode-badge" />}
               <button

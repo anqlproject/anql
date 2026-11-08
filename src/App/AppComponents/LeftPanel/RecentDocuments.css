@@ -57,31 +57,43 @@
 }
 
 .history-item {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.12s ease;
+  transition: color 0.12s ease;
   font-size: var(--ui-text-sm);
   color: var(--text-secondary);
   opacity: 0.9;
 }
 
 .history-item:not(.active):hover {
-  background-color: var(--action-hover);
-  opacity: 1;
-}
-
-.history-item.active {
-  background-color: var(--action-active);
-  border-radius: 6px;
+  background-color: transparent;
   color: var(--text-primary);
   opacity: 1;
 }
 
+.history-item.active {
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.history-item__active-indicator {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: 6px;
+  background: var(--action-active);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+  pointer-events: none;
+}
+
 .history-item__read-mode-badge {
+  position: relative;
+  z-index: 1;
   width: 6px;
   height: 6px;
   background-color: var(--primary-green);
@@ -91,6 +103,8 @@
 }
 
 .history-item-name {
+  position: relative;
+  z-index: 1;
   flex: 0 1 75%;
   width: 75%;
   min-width: 0;
@@ -107,6 +121,8 @@
 }
 
 .history-item-close {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,6 +139,11 @@
 
 .history-item:hover .history-item-close {
   opacity: 0.7;
+  color: var(--text-primary);
+}
+
+.history-item:hover .history-item-close:hover {
+  color: var(--destructive);
 }
 
 .history-item-close:hover {
