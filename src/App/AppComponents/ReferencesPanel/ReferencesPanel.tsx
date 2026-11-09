@@ -35,6 +35,7 @@ import {
 import { useReferenceStore } from '@/core/references/useReferenceStore';
 
 import ReferenceUsagesPanel, { loadReferenceUsages } from './ReferenceUsagesPanel';
+import useOnlineReferenceSearch, { OnlineReferenceSearchResult } from './useOnlineReferenceSearch';
 
 type RefType = ReferenceJson['ref_type'];
 const GROUP_PATH_PREFIX = 'groups/';
@@ -211,6 +212,17 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const newNameRef = useRef<HTMLInputElement>(null);
   const onlineRepositoriesRequestId = useRef(0);
   const onlineLibraryRequestId = useRef(0);
+  const {
+    results: globalOnlineSearchResults,
+    isLoading: isLoadingGlobalOnlineLibraries,
+    hasError: globalOnlineLibrariesError,
+    retry: retryGlobalOnlineSearch,
+  } = useOnlineReferenceSearch({
+    enabled: referenceView === 'online' && Boolean(search.trim()),
+    query: search,
+    repositories: onlineRepositories,
+    isLoadingRepositories: isLoadingOnlineRepositories,
+  });
 
   const loadOnlineRepositories = async () => {
     const requestId = ++onlineRepositoriesRequestId.current;
@@ -320,7 +332,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       return;
     }
 
-    setDownloadingResourceId(resource.id);
+    setDownloadingResourceId(`${repository.id}:${resource.id}`);
     setDownloadError(false);
     try {
       const payload = await downloadOnlineReferenceResource(resource);
@@ -586,33 +598,145 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     repository.name.toLowerCase().includes(search.toLowerCase()) ||
     (repository.description ?? '').toLowerCase().includes(search.toLowerCase()),
   );
+  const onlineQuery = search.trim().toLowerCase();
+  const hasOnlineQuery = onlineQuery.length > 0;
   const onlineResourcesFiltered = (onlineLibrary?.resources ?? []).filter((resource) =>
-    resource.name.toLowerCase().includes(search.toLowerCase()) ||
-    (resource.description ?? '').toLowerCase().includes(search.toLowerCase()) ||
-    (resource.category ?? '').toLowerCase().includes(search.toLowerCase()) ||
-    resource.type.toLowerCase().includes(search.toLowerCase()),
+    resource.name.toLowerCase().includes(onlineQuery) ||
+    (resource.description ?? '').toLowerCase().includes(onlineQuery) ||
+    (resource.category ?? '').toLowerCase().includes(onlineQuery) ||
+    resource.type.toLowerCase().includes(onlineQuery) ||
+    resource.id.toLowerCase().includes(onlineQuery) ||
+    resource.fileUrl.toLowerCase().includes(onlineQuery),
   );
   const currentOnlineFolder = onlineLibrary
     ? findOnlineFolder(onlineLibrary.folders, selectedOnlineFolderPath)
     : undefined;
-  const onlineFoldersToShow = search
+  const onlineFoldersToShow = hasOnlineQuery
     ? []
     : currentOnlineFolder?.folders ?? onlineLibrary?.folders ?? [];
-  const onlineResourceIdsToShow = search
+  const onlineResourceIdsToShow = hasOnlineQuery
     ? onlineResourcesFiltered.map((resource) => resource.id)
     : currentOnlineFolder?.resourceIds ?? onlineLibrary?.resourceIds ?? [];
-  const onlineResourcesToShow = search
+  const onlineResourcesToShow = hasOnlineQuery
     ? onlineResourcesFiltered
     : onlineResourceIdsToShow.flatMap((id) => {
       const resource = onlineLibrary?.resources.find((item) => item.id === id);
       return resource ? [resource] : [];
     });
+  const onlineLibrarySearchResults: OnlineReferenceSearchResult[] = selectedOnlineRepository
+    ? onlineResourcesToShow.map((resource) => ({
+      repository: selectedOnlineRepository,
+      resource,
+    }))
+    : [];
+  const renderOnlineResources = (results: OnlineReferenceSearchResult[]) => (
+    <div className="ref-online__resources" role="list">
+      {results.map(({ repository, resource }) => {
+        const path = getOnlineReferencePath(repository.id, resource.id);
+        const importedReference = activeReferences.find(
+          (reference) =>
+            (reference.source_repo_id === repository.id &&
+              reference.source_resource_id === resource.id) ||
+            reference.path === path,
+        );
+        const isInstalled = Boolean(
+          importedReference &&
+          (importedReference.source_version ?? undefined) === resource.version,
+        );
+        const hasUpdate = Boolean(importedReference && !isInstalled);
+        const downloadKey = `${repository.id}:${resource.id}`;
+        const isDownloading = downloadingResourceId === downloadKey;
+        const isSupported = resource.type === 'constant' ||
+          resource.type === 'formula' ||
+          resource.type === 'code';
+        return (
+          <div key={downloadKey} className="ref-online__resource" role="listitem">
+            <div className="ref-online__resource-info">
+              <span className="ref-online__title">{resource.name}</span>
+              <span className="ref-online__meta">
+                {[repository.name, resource.category, resource.type, resource.version]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+              {resource.description && (
+                <span className="ref-online__description">{resource.description}</span>
+              )}
+            </div>
+            <button
+              type="button"
+              className={`ref-online__install${isInstalled ? ' is-installed' : ''}${hasUpdate ? ' is-update' : ''}${!isSupported ? ' is-unsupported' : ''}`}
+              disabled={!isSupported || !isLoaded || isInstalled || downloadingResourceId !== null}
+              onClick={() => void installOnlineResource(repository, resource)}
+              aria-label={t(isInstalled
+                ? 'REFERENCE_PANEL.onlineInstalled'
+                : isDownloading
+                  ? 'REFERENCE_PANEL.onlineDownloading'
+                  : isSupported
+                    ? hasUpdate
+                      ? 'REFERENCE_PANEL.onlineUpdate'
+                      : 'REFERENCE_PANEL.onlineInstall'
+                    : 'REFERENCE_PANEL.onlineUnsupported', { name: resource.name }) as string}
+            >
+              {isInstalled ? <Check size={14} /> : <Download size={14} />}
+              <span>
+                {t(isInstalled
+                  ? 'REFERENCE_PANEL.onlineInstalled'
+                  : isDownloading
+                    ? 'REFERENCE_PANEL.onlineDownloading'
+                    : isSupported
+                      ? hasUpdate
+                        ? 'REFERENCE_PANEL.onlineUpdate'
+                        : 'REFERENCE_PANEL.onlineInstall'
+                      : 'REFERENCE_PANEL.onlineUnsupported')}
+              </span>
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+  const renderGlobalOnlineSearch = () => {
+    if (isLoadingOnlineRepositories || isLoadingGlobalOnlineLibraries) {
+      return <div className="ref-panel__empty" role="status">{t('REFERENCE_PANEL.onlineLoading')}</div>;
+    }
+    if (onlineRepositoriesError) {
+      return (
+        <div className="ref-online__error" role="alert">
+          <span>{t('REFERENCE_PANEL.onlineCatalogError')}</span>
+          <button type="button" className="ref-online__retry" onClick={() => void loadOnlineRepositories()}>
+            <RefreshCw size={13} />
+            {t('REFERENCE_PANEL.onlineRetry')}
+          </button>
+        </div>
+      );
+    }
+    return (
+      <>
+        {globalOnlineLibrariesError && (
+          <div className="ref-online__error" role="alert">
+            <span>{t('REFERENCE_PANEL.onlineCatalogError')}</span>
+            <button type="button" className="ref-online__retry" onClick={retryGlobalOnlineSearch}>
+              <RefreshCw size={13} />
+              {t('REFERENCE_PANEL.onlineRetry')}
+            </button>
+          </div>
+        )}
+        {globalOnlineSearchResults.length > 0
+          ? renderOnlineResources(globalOnlineSearchResults)
+          : !globalOnlineLibrariesError && (
+            <div className="ref-panel__empty">{t('REFERENCE_PANEL.noResults')}</div>
+          )}
+      </>
+    );
+  };
   const onlineListContent = !selectedOnlineRepository ? (
     <>
       {onlineRepositoriesFromCache && (
         <div className="ref-online__notice">{t('REFERENCE_PANEL.onlineCatalogCached')}</div>
       )}
-      {isLoadingOnlineRepositories ? (
+      {hasOnlineQuery ? (
+        renderGlobalOnlineSearch()
+      ) : isLoadingOnlineRepositories ? (
         <div className="ref-panel__empty" role="status">{t('REFERENCE_PANEL.onlineLoading')}</div>
       ) : onlineRepositoriesError ? (
         <div className="ref-online__error" role="alert">
@@ -649,7 +773,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
       {onlineLibraryFromCache && (
         <div className="ref-online__notice">{t('REFERENCE_PANEL.onlineCatalogCached')}</div>
       )}
-      {isLoadingOnlineLibrary ? (
+      {hasOnlineQuery ? (
+        renderGlobalOnlineSearch()
+      ) : isLoadingOnlineLibrary ? (
         <div className="ref-panel__empty" role="status">{t('REFERENCE_PANEL.onlineLoading')}</div>
       ) : onlineLibraryError ? (
         <div className="ref-online__error" role="alert">
@@ -676,7 +802,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               {search ? t('REFERENCE_PANEL.noResults') : t('REFERENCE_PANEL.onlineNoResources')}
             </div>
           ) : (
-            <div className="ref-online__resources" role="list">
+            <>
+              {onlineFoldersToShow.length > 0 && (
+                <div className="ref-online__resources" role="list">
               {onlineFoldersToShow.map((folder) => (
                 <div key={folder.id} role="listitem">
                   <button
@@ -693,68 +821,10 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                   </button>
                 </div>
               ))}
-              {onlineResourcesToShow.map((resource) => {
-                const path = getOnlineReferencePath(selectedOnlineRepository.id, resource.id);
-                const importedReference = activeReferences.find(
-                  (reference) =>
-                    (reference.source_repo_id === selectedOnlineRepository.id &&
-                      reference.source_resource_id === resource.id) ||
-                    reference.path === path,
-                );
-                const isInstalled = Boolean(
-                  importedReference &&
-                  (importedReference.source_version ?? undefined) === resource.version,
-                );
-                const hasUpdate = Boolean(importedReference && !isInstalled);
-                const isDownloading = downloadingResourceId === resource.id;
-                const isSupported = resource.type === 'constant' ||
-                  resource.type === 'formula' ||
-                  resource.type === 'code';
-                return (
-                  <div key={resource.id} className="ref-online__resource" role="listitem">
-                    <div className="ref-online__resource-info">
-                      <span className="ref-online__title">{resource.name}</span>
-                      <span className="ref-online__meta">
-                        {[resource.category, resource.type, resource.version]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </span>
-                      {resource.description && (
-                        <span className="ref-online__description">{resource.description}</span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      className={`ref-online__install${isInstalled ? ' is-installed' : ''}${hasUpdate ? ' is-update' : ''}${!isSupported ? ' is-unsupported' : ''}`}
-                      disabled={!isSupported || !isLoaded || isInstalled || downloadingResourceId !== null}
-                      onClick={() => void installOnlineResource(selectedOnlineRepository, resource)}
-                      aria-label={t(isInstalled
-                        ? 'REFERENCE_PANEL.onlineInstalled'
-                        : isDownloading
-                          ? 'REFERENCE_PANEL.onlineDownloading'
-                          : isSupported
-                            ? hasUpdate
-                              ? 'REFERENCE_PANEL.onlineUpdate'
-                              : 'REFERENCE_PANEL.onlineInstall'
-                            : 'REFERENCE_PANEL.onlineUnsupported', { name: resource.name }) as string}
-                    >
-                      {isInstalled ? <Check size={14} /> : <Download size={14} />}
-                      <span>
-                        {t(isInstalled
-                          ? 'REFERENCE_PANEL.onlineInstalled'
-                          : isDownloading
-                            ? 'REFERENCE_PANEL.onlineDownloading'
-                            : isSupported
-                              ? hasUpdate
-                                ? 'REFERENCE_PANEL.onlineUpdate'
-                                : 'REFERENCE_PANEL.onlineInstall'
-                              : 'REFERENCE_PANEL.onlineUnsupported')}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+                </div>
+              )}
+              {renderOnlineResources(onlineLibrarySearchResults)}
+            </>
           )}
         </>
       ) : null}
@@ -762,6 +832,11 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   );
 
   const refreshOnlineCatalog = () => {
+    if (hasOnlineQuery) {
+      retryGlobalOnlineSearch();
+      void loadOnlineRepositories();
+      return;
+    }
     if (selectedOnlineRepository) {
       void loadOnlineLibrary(selectedOnlineRepository);
     } else {
