@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Dialog } from '@/components/custom/Dialog/Dialog';
 import { MathEvaluationResult, useMathVariables } from '@/editor/context/MathVariablesContext';
 
+import { MathVariableTooltip } from './MathVariableTooltip';
 import { $getAllMathNodes } from './traversal';
 
 /**
@@ -238,6 +239,8 @@ export function MathResultDisplay() {
           </div>
         }
       />
+
+      <MathVariableTooltip nodes={nodes} />
     </>
   );
 }

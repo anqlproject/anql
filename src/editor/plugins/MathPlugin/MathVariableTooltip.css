@@ -1,0 +1,80 @@
+.math-var-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: var(--z-tooltip);
+  background: var(--panel-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  translate: 0 4px;
+  transition:
+    opacity 0.14s ease 0s,
+    translate 0.14s ease 0s;
+}
+
+.math-var-tooltip--visible {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.14s ease,
+    translate 0.14s ease;
+}
+
+.math-var-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  border: 5px solid transparent;
+  border-top-color: var(--border-color);
+}
+
+.math-var-tooltip::before {
+  content: '';
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 50%;
+  translate: -50% 0;
+  border: 5px solid transparent;
+  border-top-color: var(--panel-color);
+  z-index: 1;
+}
+
+.math-var-tooltip[data-placement^="bottom"]::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--border-color);
+}
+
+.math-var-tooltip[data-placement^="bottom"]::before {
+  top: auto;
+  bottom: calc(100% - 1px);
+  border-top-color: transparent;
+  border-bottom-color: var(--panel-color);
+}
+
+.math-var-tooltip__name {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.math-var-tooltip__eq {
+  color: var(--text-disabled);
+}
+
+.math-var-tooltip__value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
