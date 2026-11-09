@@ -316,7 +316,43 @@
   background: var(--action-hover);
 }
 
+.ref-online__folder {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ref-online__folder:hover,
+.ref-online__folder:focus-visible {
+  background: var(--action-hover);
+}
+
+.ref-online__folder-name {
+  flex: 1;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: var(--ui-text-sm);
+  font-weight: var(--font-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ref-online__folder-count {
+  color: var(--text-disabled);
+  font-size: var(--ui-text-xs);
+}
+
 .ref-online__repository:focus-visible,
+.ref-online__folder:focus-visible,
 .ref-online__retry:focus-visible,
 .ref-online__install:focus-visible {
   outline: 2px solid var(--primary-color);

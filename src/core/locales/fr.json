@@ -445,6 +445,7 @@
       "onlineSearchPlaceholder": "Rechercher des bibliothèques et ressources…",
       "onlineLibraries": "Bibliothèques en ligne",
       "onlineBack": "Retour aux bibliothèques",
+      "onlineBackFolder": "Retour au dossier précédent",
       "onlineRefresh": "Actualiser les catalogues en ligne",
       "onlineLoading": "Chargement du catalogue en ligne…",
       "onlineCatalogError": "Impossible de charger le catalogue en ligne.",

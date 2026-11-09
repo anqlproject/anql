@@ -445,6 +445,7 @@
       "onlineSearchPlaceholder": "Search libraries and resources…",
       "onlineLibraries": "Online libraries",
       "onlineBack": "Back to libraries",
+      "onlineBackFolder": "Back to previous folder",
       "onlineRefresh": "Refresh online catalogs",
       "onlineLoading": "Loading online catalog…",
       "onlineCatalogError": "The online catalog could not be loaded.",

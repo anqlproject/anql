@@ -24,11 +24,20 @@ export interface OnlineReferenceResource {
   sha256: string;
 }
 
+export interface OnlineReferenceFolder {
+  id: string;
+  name: string;
+  resourceIds: string[];
+  folders: OnlineReferenceFolder[];
+}
+
 export interface OnlineReferenceLibrary {
   id: string;
   name?: string;
   description?: string;
   resources: OnlineReferenceResource[];
+  resourceIds: string[];
+  folders: OnlineReferenceFolder[];
 }
 
 export interface DownloadedOnlineResource {
@@ -91,6 +100,46 @@ function validateCentralCatalog(value: unknown): OnlineReferenceRepository[] {
   });
 }
 
+function buildResourceFolders(resources: OnlineReferenceResource[]): OnlineReferenceFolder[] {
+  const foldersByType = new Map<string, OnlineReferenceFolder>();
+  const typeNames: Record<string, string> = {
+    constant: 'Constants',
+    formula: 'Equations',
+  };
+
+  for (const resource of resources) {
+    let typeFolder = foldersByType.get(resource.type);
+    if (!typeFolder) {
+      typeFolder = {
+        id: resource.type,
+        name: typeNames[resource.type] ?? resource.type,
+        resourceIds: [],
+        folders: [],
+      };
+      foldersByType.set(resource.type, typeFolder);
+    }
+
+    if (!resource.category) {
+      typeFolder.resourceIds.push(resource.id);
+      continue;
+    }
+
+    let categoryFolder = typeFolder.folders.find((folder) => folder.id === resource.category);
+    if (!categoryFolder) {
+      categoryFolder = {
+        id: resource.category,
+        name: resource.category,
+        resourceIds: [],
+        folders: [],
+      };
+      typeFolder.folders.push(categoryFolder);
+    }
+    categoryFolder.resourceIds.push(resource.id);
+  }
+
+  return [...foldersByType.values()];
+}
+
 function validateLibraryCatalog(value: unknown, repository: OnlineReferenceRepository): OnlineReferenceLibrary {
   if (!isRecord(value) || !Array.isArray(value.resources)) {
     throw new Error('Invalid library reference catalog');
@@ -144,6 +193,8 @@ function validateLibraryCatalog(value: unknown, repository: OnlineReferenceRepos
     name: typeof library.name === 'string' ? library.name : repository.name,
     description: typeof library.description === 'string' ? library.description : repository.description,
     resources,
+    resourceIds: [],
+    folders: buildResourceFolders(resources),
   };
 }
 

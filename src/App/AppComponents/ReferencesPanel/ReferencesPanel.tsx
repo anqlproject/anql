@@ -3,7 +3,7 @@ import './ReferencesPanel.css';
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowLeft, Check, Code2, Download, FileText, Image, Pencil, Plus, RefreshCw, Search, Sigma, Trash2, Type } from 'lucide-react';
+import { ArrowLeft, Check, ChevronRight, Code2, Download, FileText, Folder, Image, Pencil, Plus, RefreshCw, Search, Sigma, Trash2, Type } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +19,7 @@ import {
   downloadOnlineReferenceResource,
   fetchOnlineReferenceLibrary,
   fetchOnlineReferenceRepositories,
+  OnlineReferenceFolder,
   OnlineReferenceLibrary,
   OnlineReferenceRepository,
   OnlineReferenceResource,
@@ -41,6 +42,37 @@ const ONLINE_REFERENCE_PATH_PREFIX = 'online/';
 
 function getOnlineReferencePath(repositoryId: string, resourceId: string): string {
   return `${ONLINE_REFERENCE_PATH_PREFIX}${encodeURIComponent(repositoryId)}/${encodeURIComponent(resourceId)}`;
+}
+
+function findOnlineFolder(
+  folders: OnlineReferenceFolder[],
+  path: string[],
+): OnlineReferenceFolder | undefined {
+  let currentFolders = folders;
+  let currentFolder: OnlineReferenceFolder | undefined;
+  for (const folderId of path) {
+    currentFolder = currentFolders.find((folder) => folder.id === folderId);
+    if (!currentFolder) return undefined;
+    currentFolders = currentFolder.folders;
+  }
+  return currentFolder;
+}
+
+function getOnlineFolderTrail(folders: OnlineReferenceFolder[], path: string[]): string[] {
+  const trail: string[] = [];
+  let currentFolders = folders;
+  for (const folderId of path) {
+    const folder = currentFolders.find((item) => item.id === folderId);
+    if (!folder) break;
+    trail.push(folder.name);
+    currentFolders = folder.folders;
+  }
+  return trail;
+}
+
+function countOnlineFolderResources(folder: OnlineReferenceFolder): number {
+  return folder.resourceIds.length +
+    folder.folders.reduce((count, child) => count + countOnlineFolderResources(child), 0);
 }
 
 function getOnlineReferenceName(resource: OnlineReferenceResource, symbol?: string): string {
@@ -142,6 +174,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const [onlineRepositoriesError, setOnlineRepositoriesError] = useState(false);
   const [selectedOnlineRepository, setSelectedOnlineRepository] = useState<OnlineReferenceRepository | null>(null);
   const [onlineLibrary, setOnlineLibrary] = useState<OnlineReferenceLibrary | null>(null);
+  const [selectedOnlineFolderPath, setSelectedOnlineFolderPath] = useState<string[]>([]);
   const [onlineLibraryFromCache, setOnlineLibraryFromCache] = useState(false);
   const [isLoadingOnlineLibrary, setIsLoadingOnlineLibrary] = useState(false);
   const [onlineLibraryError, setOnlineLibraryError] = useState(false);
@@ -231,6 +264,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
 
   const selectOnlineRepository = (repository: OnlineReferenceRepository) => {
     setSelectedOnlineRepository(repository);
+    setSelectedOnlineFolderPath([]);
     setSearch('');
     setDownloadError(false);
     void loadOnlineLibrary(repository);
@@ -243,6 +277,15 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     setOnlineLibraryError(false);
     setIsLoadingOnlineLibrary(false);
     setSearch('');
+  };
+
+  const handleOnlineBack = () => {
+    if (selectedOnlineFolderPath.length > 0) {
+      setSelectedOnlineFolderPath((path) => path.slice(0, -1));
+      setSearch('');
+      return;
+    }
+    returnToOnlineRepositories();
   };
 
   const installOnlineResource = async (
@@ -540,6 +583,21 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     (resource.category ?? '').toLowerCase().includes(search.toLowerCase()) ||
     resource.type.toLowerCase().includes(search.toLowerCase()),
   );
+  const currentOnlineFolder = onlineLibrary
+    ? findOnlineFolder(onlineLibrary.folders, selectedOnlineFolderPath)
+    : undefined;
+  const onlineFoldersToShow = search
+    ? []
+    : currentOnlineFolder?.folders ?? onlineLibrary?.folders ?? [];
+  const onlineResourceIdsToShow = search
+    ? onlineResourcesFiltered.map((resource) => resource.id)
+    : currentOnlineFolder?.resourceIds ?? onlineLibrary?.resourceIds ?? [];
+  const onlineResourcesToShow = search
+    ? onlineResourcesFiltered
+    : onlineResourceIdsToShow.flatMap((id) => {
+      const resource = onlineLibrary?.resources.find((item) => item.id === id);
+      return resource ? [resource] : [];
+    });
   const onlineListContent = !selectedOnlineRepository ? (
     <>
       {onlineRepositoriesFromCache && (
@@ -604,13 +662,29 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
               {t('REFERENCE_PANEL.onlineDownloadError')}
             </div>
           )}
-          {onlineResourcesFiltered.length === 0 ? (
+          {onlineResourcesToShow.length === 0 && onlineFoldersToShow.length === 0 ? (
             <div className="ref-panel__empty">
               {search ? t('REFERENCE_PANEL.noResults') : t('REFERENCE_PANEL.onlineNoResources')}
             </div>
           ) : (
             <div className="ref-online__resources" role="list">
-              {onlineResourcesFiltered.map((resource) => {
+              {onlineFoldersToShow.map((folder) => (
+                <div key={folder.id} role="listitem">
+                  <button
+                    type="button"
+                    className="ref-online__folder"
+                    onClick={() => setSelectedOnlineFolderPath((path) => [...path, folder.id])}
+                  >
+                    <Folder size={16} aria-hidden="true" />
+                    <span className="ref-online__folder-name">{folder.name}</span>
+                    <span className="ref-online__folder-count">
+                      {countOnlineFolderResources(folder)}
+                    </span>
+                    <ChevronRight size={14} aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+              {onlineResourcesToShow.map((resource) => {
                 const path = getOnlineReferencePath(selectedOnlineRepository.id, resource.id);
                 const importedReference = activeReferences.find(
                   (reference) =>
@@ -812,13 +886,22 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                   <button
                     type="button"
                     className="ref-panel__back-btn"
-                    onClick={returnToOnlineRepositories}
-                    aria-label={t('REFERENCE_PANEL.onlineBack') as string}
+                    onClick={handleOnlineBack}
+                    aria-label={t(selectedOnlineFolderPath.length > 0
+                      ? 'REFERENCE_PANEL.onlineBackFolder'
+                      : 'REFERENCE_PANEL.onlineBack') as string}
                   >
                     <ArrowLeft size={14} />
                   </button>
                 )}
-                <span>{selectedOnlineRepository?.name ?? t('REFERENCE_PANEL.onlineLibraries')}</span>
+                <span>
+                  {selectedOnlineRepository
+                    ? [selectedOnlineRepository.name, ...getOnlineFolderTrail(
+                        onlineLibrary?.folders ?? [],
+                        selectedOnlineFolderPath,
+                      )].join(' / ')
+                    : t('REFERENCE_PANEL.onlineLibraries')}
+                </span>
               </div>
             )}
           </div>
