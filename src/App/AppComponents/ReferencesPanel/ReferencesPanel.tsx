@@ -2,7 +2,7 @@ import './ReferencesPanel.css';
 
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile } from '@tauri-apps/plugin-fs';
-import { motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowLeft, Check, ChevronRight, Code2, Download, FileText, Folder, Image, Pencil, Plus, RefreshCw, Search, Sigma, Trash2, Type } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -1065,19 +1065,32 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
           </div>
         ) : null}
 
-        {referenceView === 'local' && !isAdding && (editingReference ? [editingReference] : filtered).map((ref) => (
-          <div
-            key={ref.id ?? ref.name}
-            className={`ref-item${editingId === ref.id ? ' ref-item--editing' : ''}`}
-            onMouseEnter={() => setHoveredReferenceKey(ref.id ?? ref.name)}
-            onMouseLeave={() => setHoveredReferenceKey(null)}
-            onFocusCapture={() => setHoveredReferenceKey(ref.id ?? ref.name)}
-            onBlurCapture={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                setHoveredReferenceKey(null);
-              }
-            }}
-          >
+        <AnimatePresence initial={false}>
+          {referenceView === 'local' && !isAdding && (editingReference ? [editingReference] : filtered).map((ref) => (
+            <motion.div
+              key={ref.id ?? ref.name}
+              layout="position"
+              className={`ref-item${editingId === ref.id ? ' ref-item--editing' : ''}`}
+              style={{ overflow: 'hidden' }}
+              initial={false}
+              exit={{
+                opacity: 0,
+                height: 0,
+                paddingTop: 0,
+                paddingBottom: 0,
+              }}
+              transition={prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.2, ease: 'easeInOut' }}
+              onMouseEnter={() => setHoveredReferenceKey(ref.id ?? ref.name)}
+              onMouseLeave={() => setHoveredReferenceKey(null)}
+              onFocusCapture={() => setHoveredReferenceKey(ref.id ?? ref.name)}
+              onBlurCapture={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                  setHoveredReferenceKey(null);
+                }
+              }}
+            >
             {editingId === ref.id ? (
               /* ── Edit mode ── */
               <div className="ref-item__edit" role="group" aria-label={t('REFERENCE_PANEL.editing', { name: ref.name }) as string}>
@@ -1241,8 +1254,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                 </div>
               </div>
             )}
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
       </div>
 
