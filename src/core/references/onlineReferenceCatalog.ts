@@ -42,10 +42,11 @@ export interface OnlineReferenceLibrary {
 
 export interface DownloadedOnlineResource {
   id: string;
-  type: 'constant' | 'formula';
+  type: 'constant' | 'formula' | 'code';
   symbol?: string;
   value?: number | string;
   latex?: string;
+  code?: string;
   source_url?: string;
   license?: string;
 }
@@ -375,6 +376,14 @@ export async function downloadOnlineReferenceResource(
     .join('');
   if (hash !== resource.sha256.toLowerCase()) {
     throw new Error('Resource checksum does not match its catalog entry');
+  }
+
+  if (resource.type === 'code') {
+    return {
+      id: resource.id,
+      type: 'code',
+      code: new TextDecoder('utf-8', { fatal: true }).decode(bytes),
+    };
   }
 
   const payload = JSON.parse(new TextDecoder().decode(bytes)) as unknown;

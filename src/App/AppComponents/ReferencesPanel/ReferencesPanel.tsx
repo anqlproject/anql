@@ -76,6 +76,7 @@ function countOnlineFolderResources(folder: OnlineReferenceFolder): number {
 }
 
 function getOnlineReferenceName(resource: OnlineReferenceResource, symbol?: string): string {
+  if (resource.type === 'code') return resource.name;
   if (symbol && /^[A-Za-z_][A-Za-z0-9_]*$/.test(symbol)) return symbol;
   const resourceName = resource.id.split('.').pop() ?? resource.id;
   return resourceName.replace(/[^A-Za-z0-9_]/g, '_').toLowerCase() || 'reference';
@@ -330,8 +331,16 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
         source_url: payload.source_url ?? null,
         license: payload.license ?? null,
       };
-      const ref_type = resource.type === 'constant' ? 'text' : 'latex';
-      const value = resource.type === 'constant' ? String(payload.value) : payload.latex ?? '';
+      const ref_type = resource.type === 'constant'
+        ? 'text'
+        : resource.type === 'formula'
+          ? 'latex'
+          : 'code';
+      const value = resource.type === 'constant'
+        ? String(payload.value)
+        : resource.type === 'formula'
+          ? payload.latex ?? ''
+          : payload.code ?? '';
 
       if (existingReference?.id) {
         await editReference(existingReference.id, { ref_type, value, path, ...source });
@@ -698,7 +707,9 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                 );
                 const hasUpdate = Boolean(importedReference && !isInstalled);
                 const isDownloading = downloadingResourceId === resource.id;
-                const isSupported = resource.type === 'constant' || resource.type === 'formula';
+                const isSupported = resource.type === 'constant' ||
+                  resource.type === 'formula' ||
+                  resource.type === 'code';
                 return (
                   <div key={resource.id} className="ref-online__resource" role="listitem">
                     <div className="ref-online__resource-info">
