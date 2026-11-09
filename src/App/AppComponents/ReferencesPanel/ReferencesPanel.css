@@ -864,11 +864,6 @@
   border-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
 }
 
-.ref-panel__add-btn:hover svg {
-  transform: rotate(90deg);
-  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.65s;
-}
-
 .ref-panel__add-btn:active {
   background: color-mix(in srgb, var(--text-secondary) 18%, var(--surface-color));
 }
