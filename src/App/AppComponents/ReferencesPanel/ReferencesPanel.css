@@ -171,6 +171,11 @@
   flex-shrink: 0;
 }
 
+.ref-panel__search-wrap--online {
+  margin: 0 -12px;
+  padding: 6px 12px 10px;
+}
+
 .ref-panel__search-icon {
   position: absolute;
   left: 21px;

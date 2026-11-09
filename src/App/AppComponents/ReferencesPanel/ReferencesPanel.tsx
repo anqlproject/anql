@@ -856,6 +856,18 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                 </button>
               )}
             </div>
+            {referenceView === 'online' && !isAdding && !editingReference && (
+              <div className="ref-panel__search-wrap ref-panel__search-wrap--online">
+                <Search size={13} className="ref-panel__search-icon" />
+                <input
+                  ref={searchRef}
+                  className="ref-panel__search"
+                  placeholder={t('REFERENCE_PANEL.onlineSearchPlaceholder') as string}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+            )}
             {referenceView === 'local' ? (
               <div
                 className="ref-panel__view-tabs"
@@ -919,15 +931,13 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
         )}
       </div>
 
-      {!isAdding && !editingReference && (
+      {referenceView === 'local' && !isAdding && !editingReference && (
         <div className="ref-panel__search-wrap">
           <Search size={13} className="ref-panel__search-icon" />
           <input
             ref={searchRef}
             className="ref-panel__search"
-            placeholder={t(referenceView === 'online'
-              ? 'REFERENCE_PANEL.onlineSearchPlaceholder'
-              : 'REFERENCE_PANEL.searchPlaceholder') as string}
+            placeholder={t('REFERENCE_PANEL.searchPlaceholder') as string}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
