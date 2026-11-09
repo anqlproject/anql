@@ -6,6 +6,7 @@
  *
  */
 
+import './EquationComponent.css';
 
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
@@ -166,6 +167,8 @@ export default function EquationComponent({
     }
   }, [editor, nodeKey, onHide, showEditor, showEquationEditor, isEditable]);
 
+  const tooltipLabel = linkedReference ? `@${linkedReference.name}` : null;
+
   return (
     <>
       {showEquationEditor && isEditable ? (
@@ -177,15 +180,32 @@ export default function EquationComponent({
         />
       ) : (
         <ErrorBoundary onError={(e: unknown) => editor._onError(e as Error)} fallback={null}>
-          <KatexRenderer
-            equation={equationValue}
-            inline={inline}
-            onDoubleClick={() => {
-              if (isEditable) {
-                showEditor();
-              }
-            }}
-          />
+          {tooltipLabel ? (
+            <span
+              className={`equation-ref-wrapper${inline ? '' : ' equation-ref-wrapper--block'}`}
+            >
+              <span className="equation-ref-tooltip">{tooltipLabel}</span>
+              <KatexRenderer
+                equation={equationValue}
+                inline={inline}
+                onDoubleClick={() => {
+                  if (isEditable) {
+                    showEditor();
+                  }
+                }}
+              />
+            </span>
+          ) : (
+            <KatexRenderer
+              equation={equationValue}
+              inline={inline}
+              onDoubleClick={() => {
+                if (isEditable) {
+                  showEditor();
+                }
+              }}
+            />
+          )}
         </ErrorBoundary>
       )}
     </>
