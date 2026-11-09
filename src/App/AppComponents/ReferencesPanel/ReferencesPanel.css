@@ -647,9 +647,8 @@
 }
 
 .ref-item__input:focus {
-  border-color: var(--primary-color);
+  border-color: color-mix(in srgb, var(--text-secondary) 75%, transparent);
   background: transparent;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 14%, transparent);
 }
 
 .ref-item__group-field {
@@ -695,7 +694,7 @@
 }
 
 .ref-item__image-picker:hover:not(:disabled) {
-  border-color: var(--primary-color);
+  border-color: color-mix(in srgb, var(--text-secondary) 75%, transparent);
   color: var(--text-primary);
 }
 
@@ -718,7 +717,7 @@
 .ref-item__input--name {
   font-family: var(--font-mono);
   font-size: var(--ui-text-xs);
-  color: var(--primary-color);
+  color: color-mix(in srgb, var(--text-secondary) 75%, transparent);
 }
 
 .ref-item__type-tabs {
