@@ -141,7 +141,10 @@ function buildResourceFolders(resources: OnlineReferenceResource[]): OnlineRefer
 }
 
 function validateLibraryCatalog(value: unknown, repository: OnlineReferenceRepository): OnlineReferenceLibrary {
-  if (!isRecord(value) || !Array.isArray(value.resources)) {
+  if (
+    !isRecord(value) ||
+    (!Array.isArray(value.resources) && !Array.isArray(value.folders))
+  ) {
     throw new Error('Invalid library reference catalog');
   }
   if (isRecord(value.library) && typeof value.library.id === 'string' && value.library.id !== repository.id) {
@@ -150,7 +153,8 @@ function validateLibraryCatalog(value: unknown, repository: OnlineReferenceRepos
 
   const catalogUrl = new URL(repository.catalogUrl);
   const catalogPath = catalogUrl.pathname.split('/');
-  const resources = value.resources.map((entry) => {
+  const resourcesById = new Map<string, OnlineReferenceResource>();
+  const validateResource = (entry: unknown, category?: string): OnlineReferenceResource => {
     if (
       !isRecord(entry) ||
       typeof entry.id !== 'string' ||
@@ -164,6 +168,9 @@ function validateLibraryCatalog(value: unknown, repository: OnlineReferenceRepos
     ) {
       throw new Error('Invalid resource entry in library reference catalog');
     }
+    if (resourcesById.has(entry.id)) {
+      throw new Error(`Duplicate resource ID in library reference catalog: ${entry.id}`);
+    }
 
     const fileUrl = new URL(entry.fileUrl, repository.catalogUrl);
     if (
@@ -174,27 +181,71 @@ function validateLibraryCatalog(value: unknown, repository: OnlineReferenceRepos
       throw new Error(`Resource URL is outside the selected repository: ${entry.id}`);
     }
 
-    return {
+    const resource = {
       id: entry.id,
       name: entry.name,
       type: entry.type,
-      category: typeof entry.category === 'string' ? entry.category : undefined,
+      category: typeof entry.category === 'string' ? entry.category : category,
       description: typeof entry.description === 'string' ? entry.description : undefined,
       fileUrl: fileUrl.href,
       version: typeof entry.version === 'string' ? entry.version : undefined,
       size: entry.size as number,
       sha256: entry.sha256,
     };
-  });
+    resourcesById.set(resource.id, resource);
+    return resource;
+  };
 
+  const validateFolder = (entry: unknown, parentLabel: string): OnlineReferenceFolder => {
+    if (
+      !isRecord(entry) ||
+      typeof entry.id !== 'string' ||
+      !entry.id.trim() ||
+      typeof entry.name !== 'string' ||
+      !entry.name.trim()
+    ) {
+      throw new Error(`Invalid folder entry in ${parentLabel}`);
+    }
+    if (entry.folders !== undefined && !Array.isArray(entry.folders)) {
+      throw new Error(`Invalid subfolder list in folder ${entry.id}`);
+    }
+    if (entry.files !== undefined && !Array.isArray(entry.files)) {
+      throw new Error(`Invalid file list in folder ${entry.id}`);
+    }
+
+    const folderName = entry.name;
+    const files = Array.isArray(entry.files) ? entry.files : [];
+    const subfolders = Array.isArray(entry.folders) ? entry.folders : [];
+    return {
+      id: entry.id,
+      name: folderName,
+      resourceIds: files.map((file) => validateResource(file, folderName).id),
+      folders: subfolders.map((folder) => validateFolder(folder, `folder ${entry.id}`)),
+    };
+  };
+
+  const rawFolders = Array.isArray(value.folders) ? value.folders : undefined;
+  const hasNestedFolders = rawFolders !== undefined;
+  const folders = rawFolders?.map((folder) => validateFolder(folder, 'library reference catalog')) ?? [];
+  const flatResourceIds = Array.isArray(value.resources)
+    ? value.resources.map((resource) => validateResource(resource).id)
+    : [];
+  const rootFiles = Array.isArray(value.files)
+    ? value.files.map((file) => validateResource(file).id)
+    : [];
+  const resourceIds = [
+    ...(hasNestedFolders ? flatResourceIds : []),
+    ...rootFiles,
+  ];
+  const resources = [...resourcesById.values()];
   const library = isRecord(value.library) ? value.library : {};
   return {
     id: typeof library.id === 'string' ? library.id : repository.id,
     name: typeof library.name === 'string' ? library.name : repository.name,
     description: typeof library.description === 'string' ? library.description : repository.description,
     resources,
-    resourceIds: [],
-    folders: buildResourceFolders(resources),
+    resourceIds,
+    folders: hasNestedFolders ? folders : buildResourceFolders(resources),
   };
 }
 
