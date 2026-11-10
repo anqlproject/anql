@@ -116,6 +116,15 @@ function getIdentifierAtPoint(
     const wordRange = document.createRange();
     wordRange.setStart(node, rangeStart);
     wordRange.setEnd(node, rangeEnd);
+    const wordRect = wordRange.getBoundingClientRect();
+    if (
+      clientX < wordRect.left ||
+      clientX >= wordRect.right ||
+      clientY < wordRect.top ||
+      clientY >= wordRect.bottom
+    ) {
+      return null;
+    }
     return {
       word: fullIdentifier,
       range: wordRange,
