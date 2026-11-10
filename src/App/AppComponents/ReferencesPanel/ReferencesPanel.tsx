@@ -42,6 +42,20 @@ type RefType = ReferenceJson['ref_type'];
 const GROUP_PATH_PREFIX = 'groups/';
 const ONLINE_REFERENCE_PATH_PREFIX = 'online/';
 
+interface OnlineBrowserState {
+  referenceView: 'local' | 'online';
+  repositoryId: string | null;
+  folderPath: string[];
+  search: string;
+}
+
+let lastOnlineBrowserState: OnlineBrowserState = {
+  referenceView: 'local',
+  repositoryId: null,
+  folderPath: [],
+  search: '',
+};
+
 function getOnlineReferencePath(repositoryId: string, resourceId: string): string {
   return `${ONLINE_REFERENCE_PATH_PREFIX}${encodeURIComponent(repositoryId)}/${encodeURIComponent(resourceId)}`;
 }
@@ -58,6 +72,18 @@ function findOnlineFolder(
     currentFolders = currentFolder.folders;
   }
   return currentFolder;
+}
+
+function getValidOnlineFolderPath(folders: OnlineReferenceFolder[], path: string[]): string[] {
+  const validPath: string[] = [];
+  let currentFolders = folders;
+  for (const folderId of path) {
+    const folder = currentFolders.find((item) => item.id === folderId);
+    if (!folder) break;
+    validPath.push(folderId);
+    currentFolders = folder.folders;
+  }
+  return validPath;
 }
 
 function getOnlineFolderTrail(folders: OnlineReferenceFolder[], path: string[]): string[] {
@@ -153,6 +179,10 @@ interface ReferencesPanelProps {
 export default function ReferencesPanel({ panelRef, panelLeft, onClose, onRequestDelete }: ReferencesPanelProps) {
   const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
+  const [initialOnlineBrowserState] = useState(() => ({
+    ...lastOnlineBrowserState,
+    folderPath: [...lastOnlineBrowserState.folderPath],
+  }));
   const {
     references,
     isLoaded,
@@ -162,20 +192,21 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   } = useReferenceStore();
   const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
 
-  const [referenceView, setReferenceView] = useState<'local' | 'online'>('local');
+  const [referenceView, setReferenceView] = useState(initialOnlineBrowserState.referenceView);
   const [onlineRepositories, setOnlineRepositories] = useState<OnlineReferenceRepository[] | null>(null);
   const [onlineRepositoriesFromCache, setOnlineRepositoriesFromCache] = useState(false);
   const [isLoadingOnlineRepositories, setIsLoadingOnlineRepositories] = useState(false);
   const [onlineRepositoriesError, setOnlineRepositoriesError] = useState(false);
   const [selectedOnlineRepository, setSelectedOnlineRepository] = useState<OnlineReferenceRepository | null>(null);
+  const [onlineRepositoryId, setOnlineRepositoryId] = useState(initialOnlineBrowserState.repositoryId);
   const [onlineLibrary, setOnlineLibrary] = useState<OnlineReferenceLibrary | null>(null);
-  const [selectedOnlineFolderPath, setSelectedOnlineFolderPath] = useState<string[]>([]);
+  const [selectedOnlineFolderPath, setSelectedOnlineFolderPath] = useState(initialOnlineBrowserState.folderPath);
   const [onlineLibraryFromCache, setOnlineLibraryFromCache] = useState(false);
   const [isLoadingOnlineLibrary, setIsLoadingOnlineLibrary] = useState(false);
   const [onlineLibraryError, setOnlineLibraryError] = useState(false);
   const [downloadingResourceId, setDownloadingResourceId] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialOnlineBrowserState.search);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -218,6 +249,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   });
 
   const loadOnlineRepositories = async () => {
+    if (isLoadingOnlineRepositories) return;
     const requestId = ++onlineRepositoriesRequestId.current;
     setIsLoadingOnlineRepositories(true);
     setOnlineRepositoriesError(false);
@@ -262,7 +294,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
 
   const openOnlineView = () => {
     setReferenceView('online');
-    setSearch('');
     if (!onlineRepositories && !isLoadingOnlineRepositories) {
       void loadOnlineRepositories();
     }
@@ -270,6 +301,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
 
   const selectOnlineRepository = (repository: OnlineReferenceRepository) => {
     setSelectedOnlineRepository(repository);
+    setOnlineRepositoryId(repository.id);
     setSelectedOnlineFolderPath([]);
     setSearch('');
     setDownloadError(null);
@@ -279,6 +311,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const returnToOnlineRepositories = () => {
     onlineLibraryRequestId.current += 1;
     setSelectedOnlineRepository(null);
+    setOnlineRepositoryId(null);
     setOnlineLibrary(null);
     setOnlineLibraryError(false);
     setIsLoadingOnlineLibrary(false);
@@ -316,6 +349,46 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   useEffect(() => {
     if (!isLoaded) loadReferences();
   }, [isLoaded, loadReferences]);
+
+  useEffect(() => {
+    if (referenceView === 'online' && !onlineRepositories && !isLoadingOnlineRepositories) {
+      void loadOnlineRepositories();
+    }
+  }, [referenceView, onlineRepositories, isLoadingOnlineRepositories]);
+
+  useEffect(() => {
+    if (
+      referenceView !== 'online' ||
+      !onlineRepositoryId ||
+      !onlineRepositories ||
+      selectedOnlineRepository
+    ) return;
+    const repository = onlineRepositories.find((item) => item.id === onlineRepositoryId);
+    if (!repository) {
+      setOnlineRepositoryId(null);
+      setSelectedOnlineFolderPath([]);
+      return;
+    }
+    setSelectedOnlineRepository(repository);
+    void loadOnlineLibrary(repository);
+  }, [referenceView, onlineRepositoryId, onlineRepositories, selectedOnlineRepository]);
+
+  useEffect(() => {
+    if (!onlineLibrary || !selectedOnlineRepository) return;
+    const validPath = getValidOnlineFolderPath(onlineLibrary.folders, selectedOnlineFolderPath);
+    if (validPath.length !== selectedOnlineFolderPath.length) {
+      setSelectedOnlineFolderPath(validPath);
+    }
+  }, [onlineLibrary, selectedOnlineRepository, selectedOnlineFolderPath]);
+
+  useEffect(() => {
+    lastOnlineBrowserState = {
+      referenceView,
+      repositoryId: selectedOnlineRepository?.id ?? onlineRepositoryId,
+      folderPath: [...selectedOnlineFolderPath],
+      search,
+    };
+  }, [referenceView, selectedOnlineRepository, onlineRepositoryId, selectedOnlineFolderPath, search]);
 
   useEffect(() => {
     if (isAdding) newNameRef.current?.focus();
