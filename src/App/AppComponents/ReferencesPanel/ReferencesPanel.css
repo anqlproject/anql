@@ -458,6 +458,34 @@
   cursor: not-allowed;
 }
 
+.ref-online__delete {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface-color);
+  color: var(--text-disabled);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.ref-online__delete:hover,
+.ref-online__delete:focus-visible {
+  border-color: color-mix(in srgb, var(--destructive) 45%, var(--border-color));
+  background: var(--destructive-container);
+  color: var(--destructive);
+}
+
+.ref-online__delete:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
 .ref-online__notice,
 .ref-online__hint,
 .ref-online__error {

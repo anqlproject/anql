@@ -648,6 +648,20 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
                       : 'REFERENCE_PANEL.onlineUnsupported')}
               </span>
             </button>
+            {importedReference && (
+              <button
+                type="button"
+                className="ref-online__delete"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onRequestDelete(importedReference);
+                }}
+                aria-label={t('REFERENCE_PANEL.delete', { name: importedReference.name }) as string}
+                title={t('REFERENCE_PANEL.delete', { name: importedReference.name }) as string}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
           </div>
         );
       })}
