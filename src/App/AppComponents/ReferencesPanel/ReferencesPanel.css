@@ -307,7 +307,7 @@
   flex-direction: column;
   gap: 4px;
   width: 100%;
-  padding: 10px 16px;
+  padding: 7px 16px;
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
   background: transparent;
@@ -326,8 +326,8 @@
   align-items: center;
   gap: 9px;
   width: 100%;
-  min-height: 42px;
-  padding: 8px 12px;
+  min-height: 36px;
+  padding: 6px 12px;
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
   background: transparent;
@@ -385,7 +385,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 10px 9px 12px;
+  padding: 6px 10px 6px 12px;
   border-bottom: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
 }
 
@@ -393,7 +393,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -490,17 +490,17 @@
 
 /* ── Reference item ── */
 .ref-item {
-  padding: 2px 8px;
+  padding: 1px 8px;
 }
 
 .ref-item__row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 8px;
+  padding: 5px 8px;
   border-radius: 7px;
   transition: background 0.12s ease;
-  min-height: 38px;
+  min-height: 34px;
 }
 
 .ref-item__link[draggable='true'] {
