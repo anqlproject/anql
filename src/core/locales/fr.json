@@ -460,6 +460,7 @@
       "onlineDownloading": "Téléchargement…",
       "onlineUnsupported": "Non prise en charge",
       "onlineDownloadError": "Impossible de télécharger ou vérifier la ressource. Réessayez.",
+      "onlineDropSuccess": "{{name}} a été téléchargée et insérée.",
       "groups": "Groupes de références",
       "group": "Groupe",
       "ungrouped": "Sans groupe",

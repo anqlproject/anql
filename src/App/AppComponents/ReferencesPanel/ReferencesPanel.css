@@ -389,6 +389,14 @@
   border-bottom: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
 }
 
+.ref-online__resource[draggable='true'] {
+  cursor: grab;
+}
+
+.ref-online__resource[draggable='true']:active {
+  cursor: grabbing;
+}
+
 .ref-online__resource-info {
   display: flex;
   flex: 1;

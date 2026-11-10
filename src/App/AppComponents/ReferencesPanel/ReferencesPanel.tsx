@@ -15,8 +15,8 @@ import {
   ReferenceJson,
 } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
+import { installOnlineReferenceResource } from '@/core/references/installOnlineReference';
 import {
-  downloadOnlineReferenceResource,
   fetchOnlineReferenceLibrary,
   fetchOnlineReferenceRepositories,
   OnlineReferenceFolder,
@@ -25,6 +25,7 @@ import {
   OnlineReferenceResource,
 } from '@/core/references/onlineReferenceCatalog';
 import {
+  ONLINE_REFERENCE_DRAG_TYPE,
   REFERENCE_CODE_DRAG_TYPE,
   REFERENCE_DRAG_TYPE,
   REFERENCE_IMAGE_DRAG_TYPE,
@@ -74,13 +75,6 @@ function getOnlineFolderTrail(folders: OnlineReferenceFolder[], path: string[]):
 function countOnlineFolderResources(folder: OnlineReferenceFolder): number {
   return folder.resourceIds.length +
     folder.folders.reduce((count, child) => count + countOnlineFolderResources(child), 0);
-}
-
-function getOnlineReferenceName(resource: OnlineReferenceResource, symbol?: string): string {
-  if (resource.type === 'code') return resource.name;
-  if (symbol && /^[A-Za-z_][A-Za-z0-9_]*$/.test(symbol)) return symbol;
-  const resourceName = resource.id.split('.').pop() ?? resource.id;
-  return resourceName.replace(/[^A-Za-z0-9_]/g, '_').toLowerCase() || 'reference';
 }
 
 function getGroupName(path: string): string {
@@ -165,7 +159,6 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     loadReferences,
     addReference,
     editReference,
-    restoreReference,
   } = useReferenceStore();
   const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
 
@@ -305,70 +298,10 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     repository: OnlineReferenceRepository,
     resource: OnlineReferenceResource,
   ) => {
-    const path = getGroupPath(repository.name);
-    const legacyOnlinePath = getOnlineReferencePath(repository.id, resource.id);
-    const existingReference = references.find(
-      (reference) =>
-        (reference.source_repo_id === repository.id && reference.source_resource_id === resource.id) ||
-        normalizeReferencePath(
-          isReferenceInTrash(reference) ? reference.path.slice('trash/'.length) : reference.path,
-        ) === legacyOnlinePath,
-    );
-    if (existingReference?.id && isReferenceInTrash(existingReference)) {
-      try {
-        await restoreReference(existingReference.id);
-      } catch (error) {
-        logger.error('Failed to restore online reference resource', error as Error, {
-          referenceId: existingReference.id,
-        });
-        setDownloadError(error instanceof Error ? error.message : String(error));
-        return;
-      }
-    }
-    if (existingReference && (existingReference.source_version ?? undefined) === resource.version) {
-      if (existingReference.id && existingReference.path !== path) {
-        await editReference(existingReference.id, { path });
-      }
-      return;
-    }
-
     setDownloadingResourceId(`${repository.id}:${resource.id}`);
     setDownloadError(null);
     try {
-      const payload = await downloadOnlineReferenceResource(resource);
-      const source = {
-        source_repo_id: repository.id,
-        source_resource_id: resource.id,
-        source_version: resource.version ?? null,
-        source_url: payload.source_url ?? null,
-        license: payload.license ?? null,
-      };
-      const ref_type = resource.type === 'constant'
-        ? 'text'
-        : resource.type === 'formula'
-          ? 'latex'
-          : 'code';
-      const value = resource.type === 'constant'
-        ? String(payload.value)
-        : resource.type === 'formula'
-          ? payload.latex ?? ''
-          : payload.code ?? '';
-
-      if (existingReference?.id) {
-        await editReference(existingReference.id, { ref_type, value, path, ...source });
-      } else {
-        const baseName = getOnlineReferenceName(resource, payload.symbol);
-        let referenceName = baseName;
-        let suffix = 1;
-        while (references.some((reference) => reference.name.toLowerCase() === referenceName.toLowerCase())) {
-          referenceName = `${baseName}_${suffix++}`;
-        }
-
-        const reference = await addReference(referenceName, ref_type, value, path, source);
-        if (reference.path !== path) {
-          throw new Error('The downloaded resource name conflicts with an existing reference');
-        }
-      }
+      await installOnlineReferenceResource(repository, resource);
     } catch (error) {
       logger.error('Failed to install online reference resource', error as Error, {
         repositoryId: repository.id,
@@ -650,7 +583,32 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
           resource.type === 'formula' ||
           resource.type === 'code';
         return (
-          <div key={downloadKey} className="ref-online__resource" role="listitem">
+          <div
+            key={downloadKey}
+            className="ref-online__resource"
+            role="listitem"
+            draggable={isSupported && isLoaded}
+            onDragStart={(event) => {
+              if (!isSupported) {
+                event.preventDefault();
+                return;
+              }
+              event.dataTransfer.effectAllowed = 'copy';
+              event.dataTransfer.setData(
+                ONLINE_REFERENCE_DRAG_TYPE,
+                JSON.stringify({ repositoryId: repository.id, resourceId: resource.id }),
+              );
+              event.dataTransfer.setData(REFERENCE_DRAG_TYPE, `online:${repository.id}:${resource.id}`);
+              event.dataTransfer.setData(
+                resource.type === 'code'
+                  ? REFERENCE_CODE_DRAG_TYPE
+                  : resource.type === 'formula'
+                    ? REFERENCE_LATEX_DRAG_TYPE
+                    : REFERENCE_TEXT_DRAG_TYPE,
+                '1',
+              );
+            }}
+          >
             <div className="ref-online__resource-info">
               <span className="ref-online__title">{resource.name}</span>
               <span className="ref-online__meta">

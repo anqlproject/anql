@@ -357,6 +357,20 @@ export function fetchOnlineReferenceLibrary(
   );
 }
 
+export async function resolveOnlineReferenceResource(
+  repositoryId: string,
+  resourceId: string,
+): Promise<{ repository: OnlineReferenceRepository; resource: OnlineReferenceResource }> {
+  const { value: repositories } = await fetchOnlineReferenceRepositories();
+  const repository = repositories.find((item) => item.id === repositoryId);
+  if (!repository) throw new Error(`Unknown online reference repository: ${repositoryId}`);
+
+  const { value: library } = await fetchOnlineReferenceLibrary(repository);
+  const resource = library.resources.find((item) => item.id === resourceId);
+  if (!resource) throw new Error(`Unknown online reference resource: ${resourceId}`);
+  return { repository, resource };
+}
+
 export async function downloadOnlineReferenceResource(
   resource: OnlineReferenceResource,
 ): Promise<DownloadedOnlineResource> {

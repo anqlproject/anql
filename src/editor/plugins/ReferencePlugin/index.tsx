@@ -29,10 +29,15 @@ import {
 import { Code2, FileText, Image, Plus, Sigma, Type } from 'lucide-react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
+import { useGlobalToast } from '@/App/hooks/useGlobalToast';
 import { isReferenceInTrash, ReferenceJson } from '@/core/database/useReferenceDatabase';
 import { logger } from '@/core/logger';
+import { installOnlineReferenceResource } from '@/core/references/installOnlineReference';
+import { resolveOnlineReferenceResource } from '@/core/references/onlineReferenceCatalog';
 import {
+  ONLINE_REFERENCE_DRAG_TYPE,
   REFERENCE_CODE_DRAG_TYPE,
   REFERENCE_DRAG_TYPE,
   REFERENCE_IMAGE_DRAG_TYPE,
@@ -60,6 +65,7 @@ function hasReferenceDragData(event: DragEvent): boolean {
         REFERENCE_LATEX_DRAG_TYPE,
         REFERENCE_PDF_DRAG_TYPE,
         REFERENCE_TEXT_DRAG_TYPE,
+        ONLINE_REFERENCE_DRAG_TYPE,
       ].includes(type),
     ),
   );
@@ -117,6 +123,7 @@ function insertReferenceIntoTableCell(
   event: DragEvent,
   editor: LexicalEditor,
   reference: ReferenceJson,
+  dropRange?: Range | null,
 ): boolean | null {
   const target = event.target;
   if (!isHTMLElement(target)) return null;
@@ -132,7 +139,7 @@ function insertReferenceIntoTableCell(
   if (!tableKey || !rowId || !Number.isInteger(columnIndex)) return false;
 
   const input = target.closest<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
-  const range = getReferenceDropRange(event, editor);
+  const range = dropRange ?? getReferenceDropRange(event, editor);
   let insertionOffset = 0;
   const display = cell.querySelector<HTMLElement>('.table-cell-display');
   const currentText = input?.value ?? display?.textContent ?? cell.textContent ?? '';
@@ -178,6 +185,65 @@ function insertReferenceIntoTableCell(
   });
 
   return inserted;
+}
+
+function insertReferenceAtDropRange(
+  event: DragEvent,
+  editor: LexicalEditor,
+  reference: ReferenceJson,
+  range: Range,
+): boolean {
+  if (reference.ref_type === 'text') {
+    const tableCellDrop = insertReferenceIntoTableCell(event, editor, reference, range);
+    if (tableCellDrop !== null) return true;
+  }
+
+  const rangeSelection = $createRangeSelection();
+  rangeSelection.applyDOMRange(range);
+  $setSelection(rangeSelection);
+
+  if (reference.ref_type === 'latex') {
+    $insertNodes([$createEquationNode(reference.value, true, reference.id ?? undefined)]);
+  } else if (reference.ref_type === 'pdf') {
+    $insertNodes([$createPdfNode(reference.value, reference.name, reference.id ?? undefined)]);
+  } else if (reference.ref_type === 'image' || reference.ref_type === 'code') {
+    const parentBlock = rangeSelection.anchor.getNode().getTopLevelElementOrThrow();
+    const blockNode = reference.ref_type === 'image'
+      ? $createImageNode({
+          src: reference.value,
+          altText: reference.name,
+          maxWidth: 600,
+          referenceId: reference.id ?? undefined,
+        })
+      : $createCodeNode().append($createTextNode(reference.value));
+    if (reference.ref_type === 'code' && reference.id) {
+      $setState(blockNode, codeReferenceIdState, reference.id);
+      $setState(blockNode, codeReferenceValueVersionState, getReferenceValueVersion(reference.value));
+    }
+
+    if (
+      parentBlock.getType() === 'paragraph' &&
+      parentBlock.getTextContent().trim() === ''
+    ) {
+      parentBlock.replace(blockNode);
+    } else {
+      const blockElement = editor.getElementByKey(parentBlock.getKey());
+      const blockRect = blockElement?.getBoundingClientRect();
+      if (blockRect && event.clientY < blockRect.top) {
+        parentBlock.insertBefore(blockNode);
+      } else {
+        parentBlock.insertAfter(blockNode);
+      }
+    }
+
+    const nextParagraph = $createParagraphNode();
+    blockNode.insertAfter(nextParagraph);
+    nextParagraph.select();
+  } else {
+    $insertNodes([$createTextNode(reference.value || reference.name)]);
+  }
+
+  return true;
 }
 
 import {
@@ -261,6 +327,8 @@ function AnchorUpdater({
 
 export default function ReferencePlugin(): React.JSX.Element | null {
   const [editor] = useLexicalComposerContext();
+  const { t } = useTranslation();
+  const { showToast } = useGlobalToast();
   const [queryString, setQueryString] = useState<string | null>(null);
   const references = useReferenceStore((state) => state.references);
   const activeReferences = references.filter((reference) => !isReferenceInTrash(reference));
@@ -271,6 +339,10 @@ export default function ReferencePlugin(): React.JSX.Element | null {
   const dragScrollDirectionRef = useRef<-1 | 0 | 1>(0);
   const dragScrollIntervalRef = useRef<number | null>(null);
   const dropCaretRef = useRef<HTMLDivElement>(null);
+  const showToastRef = useRef(showToast);
+  const translateRef = useRef(t);
+  showToastRef.current = showToast;
+  translateRef.current = t;
 
   React.useEffect(() => {
     if (!isLoaded) {
@@ -404,66 +476,83 @@ export default function ReferencePlugin(): React.JSX.Element | null {
         event.preventDefault();
         stopDragAutoScroll();
         hideDropCaret();
+        const onlineDragData = event.dataTransfer?.getData(ONLINE_REFERENCE_DRAG_TYPE);
+        if (onlineDragData) {
+          let dragPayload: unknown;
+          try {
+            dragPayload = JSON.parse(onlineDragData);
+          } catch (error) {
+            logger.error('Invalid online reference drag data', error as Error);
+            showToastRef.current(
+              `${translateRef.current('REFERENCE_PANEL.onlineDownloadError')} Invalid drag data.`,
+              'error',
+            );
+            return true;
+          }
+          if (
+            typeof dragPayload !== 'object' ||
+            dragPayload === null ||
+            !('repositoryId' in dragPayload) ||
+            typeof dragPayload.repositoryId !== 'string' ||
+            !('resourceId' in dragPayload) ||
+            typeof dragPayload.resourceId !== 'string'
+          ) {
+            const error = new Error('Online reference drag data is missing repository or resource IDs');
+            logger.error('Invalid online reference drag data', error);
+            showToastRef.current(
+              `${translateRef.current('REFERENCE_PANEL.onlineDownloadError')} ${error.message}`,
+              'error',
+            );
+            return true;
+          }
+
+          const repositoryId = dragPayload.repositoryId;
+          const resourceId = dragPayload.resourceId;
+          const dropRange = getReferenceDropRange(event, editor)?.cloneRange();
+          if (!dropRange) return true;
+          void (async () => {
+            try {
+              const { repository, resource } = await resolveOnlineReferenceResource(
+                repositoryId,
+                resourceId,
+              );
+              const reference = await installOnlineReferenceResource(repository, resource);
+              let inserted = false;
+              editor.update(() => {
+                if (!dropRange.startContainer.isConnected) {
+                  throw new Error('The drop position is no longer available');
+                }
+                inserted = insertReferenceAtDropRange(event, editor, reference, dropRange);
+              });
+              if (!inserted) throw new Error('The resource could not be inserted at the drop position');
+              showToastRef.current(
+                translateRef.current('REFERENCE_PANEL.onlineDropSuccess', { name: reference.name }),
+                'success',
+              );
+            } catch (error) {
+              logger.error('Failed to install online reference from editor drop', error as Error, {
+                repositoryId,
+                resourceId,
+              });
+              const message = error instanceof Error ? error.message : String(error);
+              showToastRef.current(
+                `${translateRef.current('REFERENCE_PANEL.onlineDownloadError')} ${message}`,
+                'error',
+              );
+            }
+          })();
+          return true;
+        }
+
         const dragValue = event.dataTransfer?.getData(REFERENCE_DRAG_TYPE);
         const reference = references.find(
           (item) =>
             !isReferenceInTrash(item) &&
             (item.id === dragValue || `name:${item.name}` === dragValue),
         );
-        if (reference?.ref_type === 'text') {
-          const tableCellDrop = insertReferenceIntoTableCell(event, editor, reference);
-          if (tableCellDrop !== null) return true;
-        }
-
         const range = getReferenceDropRange(event, editor);
         if (!reference || !range) return true;
-
-        const rangeSelection = $createRangeSelection();
-        rangeSelection.applyDOMRange(range);
-        $setSelection(rangeSelection);
-
-        if (reference.ref_type === 'latex') {
-          $insertNodes([$createEquationNode(reference.value, true, reference.id ?? undefined)]);
-        } else if (reference.ref_type === 'pdf') {
-          $insertNodes([$createPdfNode(reference.value, reference.name, reference.id ?? undefined)]);
-        } else if (reference.ref_type === 'image' || reference.ref_type === 'code') {
-          const parentBlock = rangeSelection.anchor.getNode().getTopLevelElementOrThrow();
-          const blockNode = reference.ref_type === 'image'
-            ? $createImageNode({
-                src: reference.value,
-                altText: reference.name,
-                maxWidth: 600,
-                referenceId: reference.id ?? undefined,
-              })
-            : $createCodeNode().append($createTextNode(reference.value));
-          if (reference.ref_type === 'code' && reference.id) {
-            $setState(blockNode, codeReferenceIdState, reference.id);
-            $setState(blockNode, codeReferenceValueVersionState, getReferenceValueVersion(reference.value));
-          }
-
-          if (
-            parentBlock.getType() === 'paragraph' &&
-            parentBlock.getTextContent().trim() === ''
-          ) {
-            parentBlock.replace(blockNode);
-          } else {
-            const blockElement = editor.getElementByKey(parentBlock.getKey());
-            const blockRect = blockElement?.getBoundingClientRect();
-            if (blockRect && event.clientY < blockRect.top) {
-              parentBlock.insertBefore(blockNode);
-            } else {
-              parentBlock.insertAfter(blockNode);
-            }
-          }
-
-          const nextParagraph = $createParagraphNode();
-          blockNode.insertAfter(nextParagraph);
-          nextParagraph.select();
-        } else {
-          $insertNodes([$createTextNode(reference.value || reference.name)]);
-        }
-
-        return true;
+        return insertReferenceAtDropRange(event, editor, reference, range);
       },
       COMMAND_PRIORITY_HIGH,
     );

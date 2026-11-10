@@ -460,6 +460,7 @@
       "onlineDownloading": "Downloading…",
       "onlineUnsupported": "Unsupported",
       "onlineDownloadError": "The resource could not be downloaded or verified. Please try again.",
+      "onlineDropSuccess": "{{name}} was downloaded and inserted.",
       "groups": "Reference groups",
       "group": "Group",
       "ungrouped": "No group",
