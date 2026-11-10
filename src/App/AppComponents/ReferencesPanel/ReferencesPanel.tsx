@@ -181,7 +181,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
   const [isLoadingOnlineLibrary, setIsLoadingOnlineLibrary] = useState(false);
   const [onlineLibraryError, setOnlineLibraryError] = useState(false);
   const [downloadingResourceId, setDownloadingResourceId] = useState<string | null>(null);
-  const [downloadError, setDownloadError] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -279,7 +279,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     setSelectedOnlineRepository(repository);
     setSelectedOnlineFolderPath([]);
     setSearch('');
-    setDownloadError(false);
+    setDownloadError(null);
     void loadOnlineLibrary(repository);
   };
 
@@ -321,7 +321,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
         logger.error('Failed to restore online reference resource', error as Error, {
           referenceId: existingReference.id,
         });
-        setDownloadError(true);
+        setDownloadError(error instanceof Error ? error.message : String(error));
         return;
       }
     }
@@ -333,7 +333,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
     }
 
     setDownloadingResourceId(`${repository.id}:${resource.id}`);
-    setDownloadError(false);
+    setDownloadError(null);
     try {
       const payload = await downloadOnlineReferenceResource(resource);
       const source = {
@@ -374,7 +374,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
         repositoryId: repository.id,
         resourceId: resource.id,
       });
-      setDownloadError(true);
+      setDownloadError(error instanceof Error ? error.message : String(error));
     } finally {
       setDownloadingResourceId(null);
     }
@@ -794,7 +794,7 @@ export default function ReferencesPanel({ panelRef, panelLeft, onClose, onReques
           <div className="ref-online__hint">{t('REFERENCE_PANEL.onlineUsageHint')}</div>
           {downloadError && (
             <div className="ref-online__error" role="alert">
-              {t('REFERENCE_PANEL.onlineDownloadError')}
+              {t('REFERENCE_PANEL.onlineDownloadError')} {downloadError}
             </div>
           )}
           {onlineResourcesToShow.length === 0 && onlineFoldersToShow.length === 0 ? (
