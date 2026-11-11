@@ -135,7 +135,8 @@ export const useReferenceStore = create<ReferenceStore>((set, get) => ({
       name: updates.name ? updates.name.trim().replace(/\s+/g, '_') : existing.name,
       updated_at: Math.max(now(), existing.updated_at + 1),
     };
-    await updateReference(updated);
+    const persisted = await updateReference(updated);
+    if (!persisted) throw new Error(`Reference not found: ${id}`);
     set((state) => ({
       references: state.references
         .map((r) => (r.id === id ? updated : r))

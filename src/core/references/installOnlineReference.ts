@@ -12,6 +12,8 @@ import { useReferenceStore } from '@/core/references/useReferenceStore';
 
 const GROUP_PATH_PREFIX = 'groups/';
 const ONLINE_REFERENCE_PATH_PREFIX = 'online/';
+const pendingOnlineInstallations = new Map<string, Promise<ReferenceJson>>();
+const reservedReferenceNames = new Set<string>();
 
 function getGroupPath(groupName: string): string {
   const normalizedName = groupName.trim().replace(/[\\/]+/g, '_');
@@ -30,6 +32,25 @@ function getOnlineReferenceName(resource: OnlineReferenceResource, symbol?: stri
 }
 
 export async function installOnlineReferenceResource(
+  repository: OnlineReferenceRepository,
+  resource: OnlineReferenceResource,
+): Promise<ReferenceJson> {
+  const installationKey = `${repository.id}:${resource.id}`;
+  const pendingInstallation = pendingOnlineInstallations.get(installationKey);
+  if (pendingInstallation) return pendingInstallation;
+
+  const installation = installOnlineReferenceResourceOnce(repository, resource);
+  pendingOnlineInstallations.set(installationKey, installation);
+  try {
+    return await installation;
+  } finally {
+    if (pendingOnlineInstallations.get(installationKey) === installation) {
+      pendingOnlineInstallations.delete(installationKey);
+    }
+  }
+}
+
+async function installOnlineReferenceResourceOnce(
   repository: OnlineReferenceRepository,
   resource: OnlineReferenceResource,
 ): Promise<ReferenceJson> {
@@ -93,19 +114,32 @@ export async function installOnlineReferenceResource(
   const baseName = getOnlineReferenceName(resource, payload.symbol);
   let referenceName = baseName;
   let suffix = 1;
-  while (references.some((reference) => reference.name.toLowerCase() === referenceName.toLowerCase())) {
+  while (
+    references.some((reference) => reference.name.toLowerCase() === referenceName.toLowerCase()) ||
+    reservedReferenceNames.has(referenceName.toLowerCase())
+  ) {
     referenceName = `${baseName}_${suffix++}`;
   }
 
-  const reference = await useReferenceStore.getState().addReference(
-    referenceName,
-    ref_type,
-    value,
-    path,
-    source,
-  );
-  if (reference.path !== path) {
-    throw new Error('The downloaded resource name conflicts with an existing reference');
+  const reservedName = referenceName.toLowerCase();
+  reservedReferenceNames.add(reservedName);
+  try {
+    const reference = await useReferenceStore.getState().addReference(
+      referenceName,
+      ref_type,
+      value,
+      path,
+      source,
+    );
+    if (
+      reference.path !== path ||
+      reference.source_repo_id !== repository.id ||
+      reference.source_resource_id !== resource.id
+    ) {
+      throw new Error('The downloaded resource name conflicts with an existing reference');
+    }
+    return reference;
+  } finally {
+    reservedReferenceNames.delete(reservedName);
   }
-  return reference;
 }

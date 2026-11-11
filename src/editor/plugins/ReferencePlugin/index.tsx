@@ -510,6 +510,7 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           const resourceId = dragPayload.resourceId;
           const dropRange = getReferenceDropRange(event, editor)?.cloneRange();
           if (!dropRange) return true;
+          const dropEditorState = editor.getEditorState();
           void (async () => {
             try {
               const { repository, resource } = await resolveOnlineReferenceResource(
@@ -517,11 +518,14 @@ export default function ReferencePlugin(): React.JSX.Element | null {
                 resourceId,
               );
               const reference = await installOnlineReferenceResource(repository, resource);
+              if (
+                editor.getEditorState() !== dropEditorState ||
+                !dropRange.startContainer.isConnected
+              ) {
+                throw new Error('The document changed before the resource could be inserted; try dropping again');
+              }
               let inserted = false;
               editor.update(() => {
-                if (!dropRange.startContainer.isConnected) {
-                  throw new Error('The drop position is no longer available');
-                }
                 inserted = insertReferenceAtDropRange(event, editor, reference, dropRange);
               });
               if (!inserted) throw new Error('The resource could not be inserted at the drop position');
