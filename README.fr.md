@@ -86,9 +86,9 @@ ANQL est disponible sous forme d’application de bureau autonome pour **macOS, 
 
 | Plateforme | Format / architecture | Téléchargement direct |
 |---|---|---|
-| **macOS** | Apple Silicon (`.dmg`)<br>Intel (`.dmg`) | [**Télécharger pour macOS (Apple Silicon)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_aarch64.dmg)<br>[**Télécharger pour macOS (Intel)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_x64.dmg) |
-| **Windows** | Installateur 64 bits (`.exe`)<br>Windows MSI (`.msi`) | [**Télécharger pour Windows (.exe)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_x64-setup.exe)<br>[**Télécharger pour Windows (.msi)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.4.2_x64_en-US.msi) |
-| **Linux** | AppImage universel (`.AppImage`)<br>Debian / Ubuntu (`.deb`) | [**Télécharger pour Linux (.AppImage)**](https://github.com/anqlproject/anql/releases/latest/download/anql_0.4.2_amd64.AppImage)<br>[**Télécharger pour Linux (.deb)**](https://github.com/anqlproject/anql/releases/latest/download/anql_0.4.2_amd64.deb) |
+| **macOS** | Apple Silicon (`.dmg`)<br>Intel (`.dmg`) | [**Télécharger pour macOS (Apple Silicon)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.5.0_aarch64.dmg)<br>[**Télécharger pour macOS (Intel)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.5.0_x64.dmg) |
+| **Windows** | Installateur 64 bits (`.exe`)<br>Windows MSI (`.msi`) | [**Télécharger pour Windows (.exe)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.5.0_x64-setup.exe)<br>[**Télécharger pour Windows (.msi)**](https://github.com/anqlproject/anql/releases/latest/download/ANQL_0.5.0_x64_en-US.msi) |
+| **Linux** | AppImage universel (`.AppImage`)<br>Debian / Ubuntu (`.deb`) | [**Télécharger pour Linux (.AppImage)**](https://github.com/anqlproject/anql/releases/latest/download/anql_0.5.0_amd64.AppImage)<br>[**Télécharger pour Linux (.deb)**](https://github.com/anqlproject/anql/releases/latest/download/anql_0.5.0_amd64.deb) |
 
 Consultez tous les [fichiers disponibles sur la page des versions GitHub](https://github.com/anqlproject/anql/releases).
 
