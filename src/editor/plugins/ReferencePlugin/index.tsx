@@ -201,7 +201,15 @@ function insertReferenceAtDropRange(
   const rangeSelection = $createRangeSelection();
   rangeSelection.applyDOMRange(range);
   $setSelection(rangeSelection);
+  return insertReferenceAtSelection(event, editor, reference, rangeSelection);
+}
 
+function insertReferenceAtSelection(
+  event: DragEvent,
+  editor: LexicalEditor,
+  reference: ReferenceJson,
+  rangeSelection: ReturnType<typeof $createRangeSelection>,
+): boolean {
   if (reference.ref_type === 'latex') {
     $insertNodes([$createEquationNode(reference.value, true, reference.id ?? undefined)]);
   } else if (reference.ref_type === 'pdf') {
@@ -244,6 +252,78 @@ function insertReferenceAtDropRange(
   }
 
   return true;
+}
+
+type DropPoint = {
+  key: string;
+  offset: number;
+  type: 'element' | 'text';
+};
+
+type DropSelection = {
+  anchor: DropPoint;
+  focus: DropPoint;
+};
+
+function captureDropSelection(range: Range): DropSelection | null {
+  const selection = $createRangeSelection();
+  selection.applyDOMRange(range);
+  if (
+    !$getNodeByKey(selection.anchor.key) ||
+    !$getNodeByKey(selection.focus.key)
+  ) {
+    return null;
+  }
+  return {
+    anchor: {
+      key: selection.anchor.key,
+      offset: selection.anchor.offset,
+      type: selection.anchor.type,
+    },
+    focus: {
+      key: selection.focus.key,
+      offset: selection.focus.offset,
+      type: selection.focus.type,
+    },
+  };
+}
+
+function insertReferenceAtCapturedDrop(
+  event: DragEvent,
+  editor: LexicalEditor,
+  reference: ReferenceJson,
+  range: Range,
+  dropSelection: DropSelection,
+): boolean {
+  let inserted = false;
+  editor.update(() => {
+    if (reference.ref_type === 'text') {
+      const tableCellDrop = insertReferenceIntoTableCell(event, editor, reference, range);
+      if (tableCellDrop !== null) {
+        inserted = tableCellDrop;
+        return;
+      }
+    }
+
+    const anchorNode = $getNodeByKey(dropSelection.anchor.key);
+    const focusNode = $getNodeByKey(dropSelection.focus.key);
+    if (!anchorNode || !focusNode) return;
+
+    const selection = $createRangeSelection();
+    selection.anchor.set(
+      dropSelection.anchor.key,
+      dropSelection.anchor.offset,
+      dropSelection.anchor.type,
+    );
+    selection.focus.set(
+      dropSelection.focus.key,
+      dropSelection.focus.offset,
+      dropSelection.focus.type,
+    );
+    $setSelection(selection);
+    inserted = insertReferenceAtSelection(event, editor, reference, selection);
+  });
+  return inserted;
 }
 
 import {
@@ -510,7 +590,8 @@ export default function ReferencePlugin(): React.JSX.Element | null {
           const resourceId = dragPayload.resourceId;
           const dropRange = getReferenceDropRange(event, editor)?.cloneRange();
           if (!dropRange) return true;
-          const dropEditorState = editor.getEditorState();
+          const dropSelection = captureDropSelection(dropRange);
+          if (!dropSelection) return true;
           void (async () => {
             try {
               const { repository, resource } = await resolveOnlineReferenceResource(
@@ -518,16 +599,13 @@ export default function ReferencePlugin(): React.JSX.Element | null {
                 resourceId,
               );
               const reference = await installOnlineReferenceResource(repository, resource);
-              if (
-                editor.getEditorState() !== dropEditorState ||
-                !dropRange.startContainer.isConnected
-              ) {
-                throw new Error('The document changed before the resource could be inserted; try dropping again');
-              }
-              let inserted = false;
-              editor.update(() => {
-                inserted = insertReferenceAtDropRange(event, editor, reference, dropRange);
-              });
+              const inserted = insertReferenceAtCapturedDrop(
+                event,
+                editor,
+                reference,
+                dropRange,
+                dropSelection,
+              );
               if (!inserted) throw new Error('The resource could not be inserted at the drop position');
               showToastRef.current(
                 translateRef.current('REFERENCE_PANEL.onlineDropSuccess', { name: reference.name }),
