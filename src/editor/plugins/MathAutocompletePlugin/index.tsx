@@ -129,6 +129,18 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
   // Track typing state
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const rootElement = editor.getRootElement();
+      if (
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey ||
+        !rootElement ||
+        !(e.target instanceof Node) ||
+        !rootElement.contains(e.target)
+      ) {
+        return;
+      }
+
       // Only track typing if it's a character key (not special keys)
       if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
         setIsTyping(true);
@@ -146,11 +158,12 @@ export default function MathAutocompletePlugin(): React.JSX.Element | null {
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    editor.registerUpdateListener(() => {
+    const unregisterUpdateListener = editor.registerUpdateListener(() => {
       handleSelectionChange();
     });
 
     return () => {
+      unregisterUpdateListener();
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
