@@ -56,8 +56,7 @@ ANQL is for people who want to think clearly without being forced into a spreads
 - **Notion** is excellent for collaboration and shared databases.
 - **Jupyter Notebook** is excellent for code-driven computation.
 
-ANQL is built for the space before, or between, those tools.
-ANQL offers the freedom of simple notes, with more power available exactly when you need it.
+ANQL is built for the space before, or between, those tools: a place to write simple notes, organize your ideas, and work with your data, with more capabilities available when you need them.
 
 ---
 

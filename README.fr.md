@@ -56,7 +56,7 @@ ANQL s’adresse aux personnes qui veulent organiser leurs idées sans être con
 - **Notion** est excellent pour la collaboration et les bases de données partagées.
 - **Jupyter Notebook** est excellent pour les calculs basés sur du code.
 
-ANQL s’adresse à ce qui se trouve avant ou entre ces outils : la liberté de prendre de simples notes, avec davantage de possibilités lorsque vous en avez besoin.
+ANQL s’adresse à ce qui se trouve avant ou entre ces outils : un espace pour prendre de simples notes, organiser vos idées et travailler avec vos données, avec davantage de possibilités lorsque vous en avez besoin.
 
 ---
 
