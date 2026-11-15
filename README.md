@@ -67,7 +67,7 @@ ANQL is built for the space before, or between, those tools: a place to write si
 - **CSV Import & Export**: Easily import `.csv` files into structured tables, and export any table back to CSV with one click.
 - **Fast, local, and offline-first**: SQLite keeps your data fast, reliable, and available without an internet connection.
 - **Full-text search**: Instantly find any thought across all your documents.
-- **Reusable references**: Save text, code, formulas, images, or PDFs to reuse in any document with `@name` or drag and drop. Download ready-made collections online.
+- **Reusable references**: Save text, code, formulas, images, or PDFs to reuse in any document with `@name` or drag and drop. Explore the [ScienceReference](https://github.com/anqlproject/ScienceReference) and [CodeReference](https://github.com/anqlproject/CodeReference) collections on GitHub, and help the community expand them.
 - **Light, dark, or system appearance**: Choose a fixed light or dark mode, or follow your operating system's appearance setting.
 - **Import & Export**: Open and save documents as Markdown, or as the native `.anql` format — a ZIP archive containing the document JSON and all embedded assets.
 - **Tables, Math & Charts**: Combine structured data, calculations, and visualizations in one document.

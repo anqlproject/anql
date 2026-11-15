@@ -67,7 +67,7 @@ ANQL s’adresse à ce qui se trouve avant ou entre ces outils : un espace pour 
 - **Import et export CSV :** importer des fichiers `.csv` dans des tableaux structurés et exporter n’importe quel tableau en CSV en un clic.
 - **Rapide, local et hors ligne :** SQLite conserve vos données rapidement et de façon fiable, sans connexion Internet.
 - **Recherche en texte intégral :** retrouver instantanément une information dans tous vos documents.
-- **Références réutilisables :** enregistrez textes, code, formules, images ou PDF pour les réutiliser dans vos documents avec `@nom` ou par glisser-déposer. Téléchargez des collections prêtes à l’emploi.
+- **Références réutilisables :** enregistrez textes, code, formules, images ou PDF pour les réutiliser dans vos documents avec `@nom` ou par glisser-déposer. Découvrez les collections [ScienceReference](https://github.com/anqlproject/ScienceReference) et [CodeReference](https://github.com/anqlproject/CodeReference) sur GitHub et contribuez à les enrichir.
 - **Apparence claire, sombre ou système :** choisir un thème fixe ou suivre les réglages d’apparence du système d’exploitation.
 - **Import et export :** ouvrir et enregistrer des documents au format Markdown ou au format natif `.anql` — une archive ZIP contenant le JSON du document et tous ses fichiers intégrés.
 - **Tableaux, calculs et graphiques :** combiner des données structurées, des calculs et des visualisations dans un même document.
